@@ -1,0 +1,2422 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>PRX 3-Fase Rail — Kennistool</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,600;0,700;0,800;0,900;1,900&family=Caveat:wght@600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-900:#1E2A4A;
+    --navy-800:#26365E;
+    --navy-700:#2F4372;
+    --blue:#3E8EDE;
+    --blue-dark:#2C72BA;
+    --blue-light:#EAF3FC;
+    --orange:#EC6431;
+    --orange-dark:#D4531F;
+    --paper:#F3F7FC;
+    --white:#FFFFFF;
+    --ink:#1C2534;
+    --slate:#5A6B84;
+    --slate-light:#8FA0B8;
+    --red:#D6362B;
+    --red-light:#FBE7E5;
+    --amber:#B9791C;
+    --amber-light:#FBF0DC;
+    --green:#22935F;
+    --green-light:#E1F4EB;
+    --border:#DCE6F2;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Nunito Sans',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3,.disp{font-family:'Nunito Sans',sans-serif; font-weight:800; letter-spacing:0;}
+
+  /* ---------- HEADER ---------- */
+  header{
+    background:var(--white);
+    color:var(--ink);
+    padding:20px 28px 14px;
+    position:sticky; top:0; z-index:50;
+    border-top:5px solid var(--blue);
+    box-shadow:0 2px 20px rgba(30,42,74,.10);
+  }
+  .brandrow{display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  .brand{display:flex; align-items:baseline; gap:12px;}
+  .brand{flex-direction:column; gap:0 !important; align-items:flex-start !important;}
+  .brand .mark{font-family:'Nunito Sans',sans-serif; font-weight:900; font-style:italic; font-size:24px; letter-spacing:-.01em; color:var(--navy-900);}
+  .brand .mark span{color:var(--navy-900);}
+  .brand .sub{font-family:'Caveat',cursive; font-size:17px; color:var(--blue); letter-spacing:.01em; margin-top:-4px;}
+  .title-row{display:flex; align-items:center; gap:14px; margin-top:6px; flex-wrap:wrap;}
+  h1{font-size:24px; margin:0; font-weight:800; color:var(--navy-900);}
+  .badges{display:flex; gap:6px; flex-wrap:wrap;}
+  .badge{
+    border:1px solid var(--blue-light);
+    background:var(--blue-light);
+    color:var(--blue-dark); font-size:11px; padding:3px 10px; border-radius:999px;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.03em; font-weight:600;
+  }
+  .tagline{color:var(--slate); font-size:13.5px; margin-top:4px; max-width:640px; line-height:1.5;}
+
+  nav{
+    display:flex; gap:6px; margin-top:16px; overflow-x:auto; padding-bottom:4px;
+  }
+  nav button{
+    background:var(--paper); border:1.5px solid transparent; color:var(--blue-dark);
+    font-family:'Nunito Sans',sans-serif; font-weight:800; font-size:13px;
+    padding:9px 18px; cursor:pointer; white-space:nowrap;
+    border-radius:999px; transition:.15s;
+  }
+  nav button:hover{background:var(--blue-light);}
+  nav button.active{color:#fff; background:var(--blue); box-shadow:0 4px 12px rgba(62,142,222,.35);}
+
+  main{max-width:1180px; margin:0 auto; padding:32px 28px 100px;}
+  section{display:none; animation:fade .25s ease;}
+  section.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  .lede{font-size:15px; color:var(--slate); max-width:760px; line-height:1.65; margin-bottom:28px;}
+  h2.section-title{font-size:22px; margin:0 0 6px; color:var(--navy-900);}
+  .eyebrow{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--blue-dark); margin-bottom:6px; display:block; font-weight:600;}
+
+  .card{
+    background:var(--white); border:1px solid var(--border); border-radius:var(--radius);
+    padding:20px;
+  }
+  .grid{display:grid; gap:16px;}
+  .grid-2{grid-template-columns:1fr 1fr;}
+  .grid-3{grid-template-columns:repeat(3,1fr);}
+  .grid-4{grid-template-columns:repeat(4,1fr);}
+  @media(max-width:900px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+  /* ---------- OVERZICHT ---------- */
+  .hero-flex{display:flex; gap:28px; align-items:stretch; margin-bottom:30px; flex-wrap:wrap;}
+  .hero-card{flex:1.3; min-width:320px;}
+  .hero-spec{flex:1; min-width:260px;}
+  .spec-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0;}
+  .spec-list li{display:flex; justify-content:space-between; padding:11px 0; border-bottom:1px solid var(--border); font-size:13.5px;}
+  .spec-list li:last-child{border-bottom:none;}
+  .spec-list .k{color:var(--slate);}
+  .spec-list .v{font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--navy-900);}
+
+  .colorpills{display:flex; gap:8px; margin-top:14px;}
+  .pill{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--slate); font-weight:600;}
+  .dot{width:13px; height:13px; border-radius:50%; border:1.5px solid #C7CDD6; display:inline-block;}
+  .dot.wit{background:#fff;}
+  .dot.zwart{background:#1a1a1a;}
+  .dot.grijs{background:#9CA3AF;}
+
+  .length-table{width:100%; border-collapse:collapse; margin-top:14px; font-size:13px;}
+  .length-table th{text-align:left; color:var(--slate); font-weight:600; padding:8px 6px; border-bottom:1px solid var(--border); font-size:11px; text-transform:uppercase; letter-spacing:.05em;}
+  .length-table td{padding:8px 6px; border-bottom:1px solid var(--border); font-family:'JetBrains Mono',monospace;}
+
+  .flow-note{
+    display:flex; gap:10px; align-items:flex-start; background:var(--navy-900); color:#DCE4F0;
+    border-radius:var(--radius); padding:16px 18px; margin-top:22px; font-size:13.5px; line-height:1.6;
+  }
+  .flow-note b{color:#fff;}
+
+  /* ---------- AANSLUITING ---------- */
+  .wiring-tabs{display:flex; gap:10px; margin-bottom:18px;}
+  .wtab{
+    flex:1; text-align:left; background:var(--white); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px 16px; cursor:pointer; transition:.15s;
+  }
+  .wtab.active{border-color:var(--navy-900); box-shadow:0 0 0 1px var(--navy-900);}
+  .wtab .letter{
+    display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%;
+    background:var(--navy-900); color:#fff; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px; margin-bottom:8px;
+  }
+  .wtab h4{margin:0 0 3px; font-size:14px;}
+  .wtab p{margin:0; font-size:12px; color:var(--slate);}
+  .wiring-detail{display:none;}
+  .wiring-detail.active{display:grid; grid-template-columns:1.1fr .9fr; gap:24px;}
+  @media(max-width:900px){.wiring-detail.active{grid-template-columns:1fr;}}
+  .wiring-detail svg{width:100%; height:auto; background:var(--white); border-radius:var(--radius); border:1px solid var(--border);}
+
+  .polarity-wrap{display:grid; grid-template-columns:1fr 1fr; gap:26px; margin-top:8px;}
+  @media(max-width:900px){.polarity-wrap{grid-template-columns:1fr;}}
+
+  .pin-legend{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .pin-row{display:flex; align-items:center; gap:10px; font-size:13px;}
+  .pin-chip{width:30px; height:22px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:11px; color:#fff;}
+
+  /* ---------- ONDERDELEN ---------- */
+  .part-search{
+    display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;
+  }
+  .part-search input, .part-search select{
+    font-family:'Nunito Sans',sans-serif; font-size:13.5px; padding:10px 12px; border:1px solid var(--border); border-radius:8px; background:#fff;
+  }
+  .part-search input{flex:1; min-width:200px;}
+  .part-card{
+    background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:16px; display:flex; flex-direction:column; gap:8px; cursor:pointer;
+  }
+  .part-card:hover{border-color:var(--navy-700);}
+  .part-icon{height:70px; display:flex; align-items:center; justify-content:center;}
+  .part-icon svg{max-height:60px;}
+  .part-card h4{margin:0; font-size:13.5px;}
+  .part-card p{margin:0; font-size:12px; color:var(--slate); line-height:1.5;}
+  .part-tags{display:flex; gap:6px; flex-wrap:wrap; margin-top:2px;}
+  .tag{font-size:10.5px; padding:2px 7px; border-radius:5px; background:var(--paper); color:var(--slate); font-weight:600;}
+
+  /* modal */
+  .modal-bg{position:fixed; inset:0; background:rgba(11,24,48,.55); display:none; align-items:center; justify-content:center; z-index:100; padding:20px;}
+  .modal-bg.active{display:flex;}
+  .modal{background:#fff; border-radius:14px; max-width:640px; width:100%; max-height:85vh; overflow:auto; padding:26px;}
+  .modal h3{margin:2px 0 4px;}
+  .modal .close{float:right; cursor:pointer; font-size:20px; color:var(--slate); background:none; border:none;}
+  .art-table{width:100%; border-collapse:collapse; margin-top:14px; font-size:12.5px;}
+  .art-table th{text-align:left; color:var(--slate); padding:7px 6px; border-bottom:1px solid var(--border); font-size:10.5px; text-transform:uppercase;}
+  .art-table td{padding:7px 6px; border-bottom:1px solid var(--border);}
+  .art-table td.code{font-family:'JetBrains Mono',monospace; font-weight:600;}
+
+  /* ---------- MONTAGE ---------- */
+  .load-bar-wrap{margin-top:10px;}
+  .load-row{display:flex; align-items:center; gap:10px; margin-bottom:8px;}
+  .load-label{width:120px; font-size:12px; color:var(--slate); font-family:'JetBrains Mono',monospace;}
+  .load-track{flex:1; background:var(--paper); border-radius:6px; height:22px; position:relative; overflow:hidden;}
+  .load-fill{height:100%; background:linear-gradient(90deg,var(--navy-700),var(--navy-900)); display:flex; align-items:center; justify-content:flex-end; padding-right:8px; color:#fff; font-size:11px; font-weight:700; font-family:'JetBrains Mono',monospace;}
+
+  .drill-svg{width:100%; border:1px solid var(--border); border-radius:var(--radius); background:#fff;}
+
+  /* ---------- TROUBLESHOOTING ---------- */
+  .ts-item{border:1px solid var(--border); border-radius:var(--radius); background:#fff; margin-bottom:12px; overflow:hidden;}
+  .ts-head{
+    display:flex; align-items:center; gap:12px; padding:15px 18px; cursor:pointer; justify-content:space-between;
+  }
+  .ts-head-left{display:flex; align-items:center; gap:12px;}
+  .ts-sev{width:8px; height:8px; border-radius:50%; flex:none;}
+  .ts-sev.high{background:var(--red);}
+  .ts-sev.med{background:var(--amber);}
+  .ts-sev.low{background:var(--green);}
+  .ts-head h4{margin:0; font-size:14px;}
+  .ts-chevron{transition:.2s; color:var(--slate-light); font-size:14px;}
+  .ts-item.open .ts-chevron{transform:rotate(180deg);}
+  .ts-body{max-height:0; overflow:hidden; transition:max-height .25s ease; padding:0 18px;}
+  .ts-item.open .ts-body{max-height:600px; padding:0 18px 18px;}
+  .ts-body-inner{border-top:1px solid var(--border); padding-top:14px; font-size:13.5px; line-height:1.65; color:var(--ink);}
+  .ts-body-inner b{color:var(--navy-900);}
+  .ts-fix{
+    background:var(--green-light); border-left:3px solid var(--green); padding:10px 12px; border-radius:6px; margin-top:10px; font-size:13px;
+  }
+  .ts-warn{
+    background:var(--red-light); border-left:3px solid var(--red); padding:10px 12px; border-radius:6px; margin-top:10px; font-size:13px;
+  }
+  .ts-articles{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;}
+  .art-chip{font-family:'JetBrains Mono',monospace; font-size:11px; background:var(--navy-900); color:#fff; padding:3px 8px; border-radius:5px;}
+
+  footer{max-width:1180px; margin:0 auto; padding:0 28px 40px; color:var(--slate-light); font-size:11.5px;}
+
+  /* ---------- CONFIGURATOR ---------- */
+  .cfg-layout{display:grid; grid-template-columns:1fr 380px; gap:22px; align-items:start;}
+  @media(max-width:980px){.cfg-layout{grid-template-columns:1fr;}}
+  .cfg-panel{display:flex; flex-direction:column; gap:18px;}
+  .cfg-block{background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:18px;}
+  .cfg-block h4{margin:0 0 3px; font-size:14px;}
+  .cfg-block .hint{font-size:12px; color:var(--slate); margin:0 0 12px;}
+  .cfg-step-num{
+    display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%;
+    background:var(--navy-900); color:#fff; font-family:'JetBrains Mono',monospace; font-size:10.5px; font-weight:700; margin-right:8px;
+  }
+  .choice-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .choice-btn{
+    border:1.5px solid var(--border); background:#fff; border-radius:999px; padding:9px 16px; cursor:pointer;
+    font-family:'Nunito Sans',sans-serif; font-size:13px; font-weight:600; color:var(--ink); display:flex; align-items:center; gap:8px; transition:.12s;
+  }
+  .choice-btn:hover{border-color:var(--navy-700);}
+  .choice-btn.sel{border-color:var(--blue); background:var(--blue); color:#fff; box-shadow:0 4px 12px rgba(62,142,222,.30);}
+  .choice-btn .dot{width:12px; height:12px;}
+  .choice-btn.sel .dot{border-color:#fff;}
+
+  .add-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+  @media(max-width:600px){.add-grid{grid-template-columns:repeat(2,1fr);}}
+  .add-btn{
+    border:1.5px dashed var(--border); background:var(--paper); border-radius:8px; padding:10px 8px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:4px; font-size:11.5px; font-weight:600; color:var(--navy-800); transition:.12s; text-align:center;
+  }
+  .add-btn:hover{border-color:var(--navy-900); background:#fff;}
+  .add-btn svg{width:34px; height:24px;}
+
+  .stepper-row{display:flex; align-items:center; gap:12px;}
+  .stepper-btn{
+    width:32px; height:32px; border-radius:8px; border:1.5px solid var(--border); background:#fff; font-size:16px; cursor:pointer; font-weight:700; color:var(--navy-900);
+  }
+  .stepper-val{font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700; min-width:34px; text-align:center;}
+
+  .track-strip{
+    display:flex; align-items:center; gap:0; overflow-x:auto; padding:16px 4px; min-height:74px; background:var(--paper); border-radius:8px; border:1px solid var(--border);
+  }
+  .track-strip:empty::after{content:'Nog geen onderdelen — begin met een aansluitstuk hierboven.'; color:var(--slate-light); font-size:12.5px; padding:0 12px;}
+  .track-chip{
+    position:relative; flex:none; display:flex; flex-direction:column; align-items:center; gap:2px;
+    background:#fff; border:1px solid var(--border); border-radius:7px; padding:6px 10px 5px; margin-right:6px; min-width:54px;
+  }
+  .track-chip svg{width:32px; height:20px;}
+  .track-chip .lbl{font-size:9px; color:var(--slate); font-weight:700; text-transform:uppercase; letter-spacing:.02em;}
+  .track-chip .rm{
+    position:absolute; top:-7px; right:-7px; width:16px; height:16px; border-radius:50%; background:var(--red); color:#fff;
+    font-size:11px; line-height:16px; text-align:center; cursor:pointer; border:2px solid #fff;
+  }
+
+  .cfg-summary{
+    position:sticky; top:150px; color:#fff; border-radius:var(--radius); padding:20px; display:flex; flex-direction:column; gap:14px;
+    background:linear-gradient(150deg, #3E8EDE 0%, #2C72BA 100%);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='84'%3E%3Cpath d='M0 0 L42 0 L0 42 Z' fill='%23ffffff' fill-opacity='0.045'/%3E%3Cpath d='M84 84 L42 84 L84 42 Z' fill='%23ffffff' fill-opacity='0.045'/%3E%3C/svg%3E"), linear-gradient(150deg, #3E8EDE 0%, #2C72BA 100%);
+    box-shadow:0 10px 26px rgba(44,114,186,.30);
+  }
+  .cfg-summary h4{margin:0; font-size:14px; color:#fff;}
+  .cfg-summary .eyebrow{color:#8FA3C7;}
+  .cfg-metric-row{display:flex; justify-content:space-between; font-size:13px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.12);}
+  .cfg-metric-row .k{color:#AFC0DA;}
+  .cfg-metric-row .v{font-family:'JetBrains Mono',monospace; font-weight:700;}
+  .cfg-art-list{display:flex; flex-direction:column; gap:6px; max-height:260px; overflow-y:auto;}
+  .cfg-art-row{display:flex; justify-content:space-between; font-size:12px; background:rgba(255,255,255,.06); border-radius:6px; padding:7px 10px;}
+  .cfg-art-row .code{font-family:'JetBrains Mono',monospace; color:#fff; font-weight:700;}
+  .cfg-art-row .name{color:#C6D2E8; margin-right:8px;}
+  .cfg-art-row .qty{color:#8FA3C7; font-family:'JetBrains Mono',monospace;}
+  .cfg-warns{display:flex; flex-direction:column; gap:8px;}
+  .cfg-warn{background:rgba(214,54,43,.18); border-left:3px solid var(--red); padding:8px 10px; border-radius:6px; font-size:11.5px; line-height:1.5; color:#FFE3E0;}
+  .cfg-tip{background:rgba(255,255,255,.08); border-left:3px solid #8FA3C7; padding:8px 10px; border-radius:6px; font-size:11.5px; line-height:1.5; color:#DCE4F0;}
+  .cfg-actions{display:flex; gap:8px;}
+  .cfg-actions button{
+    flex:1; background:#fff; color:var(--blue-dark); border:none; border-radius:999px; padding:10px; font-weight:800; font-size:12.5px; cursor:pointer; font-family:'Nunito Sans',sans-serif;
+  }
+  .cfg-actions #c2Pdf{background:var(--orange); color:#fff; box-shadow:0 4px 12px rgba(236,100,49,.35);}
+  .cfg-actions #c2Pdf:hover{background:var(--orange-dark);}
+  #c2Next{background:var(--orange) !important; border-color:var(--orange) !important; box-shadow:0 4px 12px rgba(236,100,49,.35);}
+  #c2Next:hover{background:var(--orange-dark) !important; border-color:var(--orange-dark) !important;}
+  .cfg-actions button.ghost{background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,.3);}
+  .cfg-actions button:hover{opacity:.9;}
+
+  /* shape picker */
+  .shape-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+  @media(max-width:600px){.shape-grid{grid-template-columns:repeat(2,1fr);}}
+  .shape-card{
+    border:1.5px solid var(--border); background:#fff; border-radius:12px; padding:10px 6px 8px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:4px; transition:.12s;
+  }
+  .shape-card:hover{border-color:var(--navy-700);}
+  .shape-card.sel{border-color:var(--navy-900); box-shadow:0 0 0 1px var(--navy-900); background:var(--paper);}
+  .shape-card svg{width:44px; height:38px;}
+  .shape-card span{font-size:11px; font-weight:600; color:var(--ink);}
+
+  .grid-dims-row{display:flex; gap:18px; margin-bottom:14px; flex-wrap:wrap;}
+  .grid-dims-col{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--slate); font-weight:600;}
+
+  .cfg-diagram-wrap{margin-bottom:12px;}
+  #cfgDiagramSvg .seg-line{stroke:#B7C0CE; stroke-width:14; stroke-linecap:round; cursor:default;}
+  #cfgDiagramSvg .seg-line.pickable{cursor:pointer;}
+  #cfgDiagramSvg .seg-line.pickable:hover{stroke:#9FB0CE;}
+  #cfgDiagramSvg .seg-hit{stroke:transparent; stroke-width:26; fill:none;}
+  #cfgDiagramSvg .node-end{fill:#fff; stroke:#1E2A4A; stroke-width:2.5; cursor:default;}
+  #cfgDiagramSvg .node-end.pickable{cursor:pointer;}
+  #cfgDiagramSvg .node-end.pickable:hover{stroke:var(--red);}
+  #cfgDiagramSvg .node-corner{fill:#1E2A4A; cursor:pointer;}
+  #cfgDiagramSvg .node-t{fill:#1E2A4A; cursor:pointer;}
+  #cfgDiagramSvg .node-cross{fill:#1E2A4A;}
+  #cfgDiagramSvg .node-power{fill:var(--red); stroke:#fff; stroke-width:2;}
+  #cfgDiagramSvg .seg-len-label{font-family:'JetBrains Mono',monospace; font-size:11px; fill:var(--slate);}
+  #cfgDiagramSvg .node-tag{font-family:'Nunito Sans',sans-serif; font-size:9px; font-weight:700; fill:#fff;}
+  #cfgPickPowerBtn.active{background:var(--red); color:#fff; border-color:var(--red);}
+
+  .dims-list{display:flex; flex-direction:column; gap:8px;}
+  .dims-row{display:flex; align-items:center; justify-content:space-between; gap:10px; background:var(--paper); border-radius:7px; padding:8px 10px;}
+  .dims-row label{font-size:12.5px; color:var(--ink); font-weight:600;}
+  .dims-row .dims-input{display:flex; align-items:center; gap:6px;}
+  .dims-row input[type=number]{
+    width:64px; padding:6px 8px; border:1.5px solid var(--border); border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:13px; text-align:right;
+  }
+  .dims-row .unit{font-size:11.5px; color:var(--slate);}
+
+  /* ---------- CONFIGURATOR V2 ---------- */
+  .c2-steps{display:flex; gap:6px; margin-bottom:6px; flex-wrap:wrap;}
+  .c2-steps button{
+    display:flex; align-items:center; gap:8px; border:1.5px solid var(--border); background:#fff;
+    border-radius:999px; padding:8px 16px 8px 8px; font-family:'Nunito Sans',sans-serif; font-size:12.5px;
+    font-weight:700; color:var(--slate); cursor:pointer; transition:.12s;
+  }
+  .c2-steps button .c2-stepnum{
+    width:22px; height:22px; border-radius:50%; background:var(--paper); color:var(--slate);
+    display:inline-flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700;
+  }
+  .c2-steps button.done .c2-stepnum{background:var(--green); color:#fff;}
+  .c2-steps button.active{border-color:var(--blue); color:var(--blue-dark);}
+  .c2-steps button.active .c2-stepnum{background:var(--blue); color:#fff;}
+  .c2-stepmsg{min-height:20px; font-size:12px; color:var(--red); font-weight:600; margin-bottom:8px;}
+  .c2-pane{display:none;}
+  .c2-pane.active{display:block;}
+  .c2-navrow{display:flex; justify-content:space-between; margin-top:4px;}
+
+  .c2-toolbar{display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; align-items:center;}
+  .c2-toolbar button{
+    border:1.5px solid var(--border); background:#fff; border-radius:999px; padding:8px 14px;
+    font-family:'Nunito Sans',sans-serif; font-size:12.5px; font-weight:600; color:var(--ink); cursor:pointer;
+  }
+  .c2-toolbar button:disabled{opacity:.4; cursor:default;}
+  .c2-toolgap{flex:1;}
+  .c2-pickbtn.active{background:var(--red); color:#fff; border-color:var(--red);}
+
+  .c2-canvaswrap{position:relative;}
+  #c2Svg{width:100%; background:#F6FAFE; border:1px solid var(--border); border-radius:12px; display:block;}
+  #c2Svg .c2-seg{stroke:#B7C0CE; stroke-width:15; stroke-linecap:round;}
+  #c2Svg .c2-seg.c2-pickable{cursor:pointer;}
+  #c2Svg .c2-seg.c2-pickable:hover{stroke:#93A5C4;}
+  #c2Svg .c2-red{stroke:var(--red); stroke-width:2.6; stroke-linecap:round; fill:none;}
+  #c2Svg .c2-conf{stroke:var(--red); stroke-width:15; stroke-linecap:round; stroke-dasharray:7 8; opacity:.55;}
+  #c2Svg .c2-lenlab{cursor:pointer;}
+  #c2Svg .c2-lenlab rect{fill:#fff; stroke:var(--border); rx:5;}
+  #c2Svg .c2-lenlab:hover rect{stroke:var(--blue);}
+  #c2Svg .c2-lenlab text{font-family:'JetBrains Mono',monospace; font-size:12px; fill:var(--blue-dark); font-weight:600;}
+  #c2Svg .c2-plus circle{fill:#fff; stroke:var(--slate-light); stroke-width:1.5; stroke-dasharray:3 2;}
+  #c2Svg .c2-plus text{font-size:13px; fill:var(--slate); font-weight:700; font-family:'Nunito Sans',sans-serif;}
+  #c2Svg .c2-plus{cursor:pointer;}
+  #c2Svg .c2-plus:hover circle{stroke:var(--navy-900);}
+  #c2Svg .c2-plus:hover text{fill:var(--navy-900);}
+  #c2Svg .c2-del circle{fill:var(--red);}
+  #c2Svg .c2-del text{fill:#fff; font-size:11px; font-weight:700; font-family:'Nunito Sans',sans-serif;}
+  #c2Svg .c2-del{cursor:pointer;}
+  #c2Svg .c2-nodeend{fill:#fff; stroke:#1E2A4A; stroke-width:2.5;}
+  #c2Svg .c2-nodeend.c2-pickable{cursor:pointer;}
+  #c2Svg .c2-nodeend.c2-pickable:hover{stroke:var(--red); stroke-width:3.5;}
+  #c2Svg .c2-nodedark{fill:#1E2A4A;}
+  #c2Svg .c2-feed{fill:var(--red); stroke:#fff; stroke-width:2; cursor:pointer;}
+  #c2Svg .c2-tag{font-family:'Nunito Sans',sans-serif; font-size:10px; font-weight:700; fill:#3D4C63;}
+  #c2Svg .c2-tag.red{fill:var(--red);}
+  #c2Svg .c2-art{font-family:'JetBrains Mono',monospace; font-size:9px; fill:var(--slate-light); font-weight:600;}
+  #c2Svg .c2hl .c2-seg{stroke:#8FB0E8;}
+  #c2Svg g.c2hl circle, #c2Svg g.c2hl rect.c2-nodedark{filter:drop-shadow(0 0 4px #4A7BD0);}
+  #c2Svg .c2-empty{font-family:'Nunito Sans',sans-serif; font-size:14px; fill:var(--slate-light);}
+
+  .c2-float{
+    position:fixed; z-index:200; background:#fff; border:1.5px solid var(--navy-900); border-radius:8px;
+    padding:6px 8px; display:flex; align-items:center; gap:6px; box-shadow:0 6px 22px rgba(11,24,48,.22);
+  }
+  .c2-float input{width:70px; border:none; outline:none; font-family:'JetBrains Mono',monospace; font-size:14px; text-align:right;}
+  .c2-float span{font-size:11.5px; color:var(--slate);}
+  .c2-pop{flex-direction:row; padding:5px;}
+  .c2-pop button{
+    width:34px; height:34px; border:1.5px solid var(--border); background:#fff; border-radius:7px;
+    font-size:15px; cursor:pointer; color:var(--navy-900); font-weight:700;
+  }
+  .c2-pop button:hover{border-color:var(--navy-900); background:var(--paper);}
+
+  .c2-check{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink); font-weight:600; margin-bottom:12px; cursor:pointer;}
+  .c2-adapterrow{display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink); font-weight:600; margin-bottom:14px;}
+  .c2-raildetail{display:flex; flex-direction:column; gap:7px;}
+  .c2-railrow{background:var(--paper); border-radius:7px; padding:9px 12px; font-size:12.5px; line-height:1.55;}
+  .c2-railrow b{font-family:'JetBrains Mono',monospace;}
+  .c2-railrow .saw{color:var(--amber); font-weight:600;}
+  .cfg-art-row{cursor:default;}
+  .cfg-art-row.hoverable:hover{background:rgba(255,255,255,.14);}
+  .c2-verify{color:var(--amber);}
+
+
+  #c2Svg{touch-action:none;}
+  #c2Svg .c2-mnt{fill:#98A6BC;}
+  #c2Svg .c2-drag{cursor:grab;}
+  .c2-select, .c2-textinp{
+    border:1.5px solid var(--border); border-radius:8px; padding:7px 10px;
+    font-family:'Nunito Sans',sans-serif; font-size:12.5px; color:var(--ink); background:#fff;
+  }
+  .c2-textinp{min-width:220px;}
+
+  #c2Svg .c2-movable{cursor:move;}
+  .c2-sheets{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; align-items:center;}
+  .c2-sheettab{
+    display:inline-flex; align-items:center; gap:7px;
+    border:1.5px solid var(--border); background:#fff; border-radius:999px; padding:6px 12px;
+    font-family:'Nunito Sans',sans-serif; font-size:12px; font-weight:700; color:var(--slate); cursor:pointer;
+  }
+  .c2-sheettab.active{border-color:var(--blue); background:var(--blue-light); color:var(--blue-dark);}
+  .c2-sheettab .c2-shdel{color:var(--slate-light); font-weight:700; padding:0 2px;}
+  .c2-sheettab .c2-shdel:hover{color:var(--red);}
+  .c2-sheetadd{
+    border:1.5px dashed var(--border); background:#fff; border-radius:999px; padding:6px 12px;
+    font-family:'Nunito Sans',sans-serif; font-size:12px; font-weight:700; color:var(--blue-dark); cursor:pointer;
+  }
+  .c2-sheetadd:hover{border-color:var(--blue);}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brandrow">
+    <div class="brand">
+      <div class="mark">Distrilight<span style="color:var(--blue);">.</span></div>
+      <div class="sub">voor de installateur</div>
+    </div>
+    <div class="badges">
+      <span class="badge">IP20</span>
+      <span class="badge">230V / 400V</span>
+      <span class="badge">16A</span>
+      <span class="badge">3-fase</span>
+    </div>
+  </div>
+  <div class="title-row">
+    <h1>PRX 3-Fase Rail — Kennistool</h1>
+  </div>
+  <div class="tagline">Interne naslag voor binnendienst: aansluitschema's, polariteit, onderdelen, montage en troubleshooting bij vragen van installateurs.</div>
+
+  <nav id="tabnav">
+    <button class="active" data-tab="configurator">Railconfigurator</button>
+    <button data-tab="overzicht">Overzicht</button>
+    <button data-tab="aansluiting">Aansluiting &amp; polariteit</button>
+    <button data-tab="onderdelen">Onderdelen</button>
+    <button data-tab="montage">Montage &amp; draagvermogen</button>
+    <button data-tab="troubleshooting">Troubleshooting</button>
+    <button data-tab="zoeker">Artikelzoeker</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ===================== OVERZICHT ===================== -->
+<section id="overzicht">
+  <span class="eyebrow">Basis</span>
+  <h2 class="section-title">Wat is de PRX 3-fase rail</h2>
+  <p class="lede">Een railsysteem waarop meerdere spots op één rail kunnen worden aangesloten, met tot drie onafhankelijke stroomcircuits in dezelfde rail. Daardoor kun je bijvoorbeeld drie groepen spots apart schakelen of dimmen, zonder aparte bedrading. De rail is verkrijgbaar in wit, zwart en grijs en in vier lengtes, en is uit te breiden met bochten, T- en kruiskoppelstukken tot een compleet railplan.</p>
+
+  <div class="hero-flex">
+    <div class="hero-card card">
+      <span class="eyebrow">Doorsnede</span>
+      <div id="crossSectionMini"></div>
+      <p style="font-size:12.5px;color:var(--slate);margin-top:10px;">De rail heeft 4 stroombanen (L1, L2, L3, N) plus aarde. Eén kant van het profiel heeft een <b>polariteitsrib</b> — die zorgt dat een adapter of aansluitstuk maar op één manier past, zodat de fasevolgorde altijd klopt.</p>
+    </div>
+    <div class="hero-spec card">
+      <span class="eyebrow">Kerngegevens</span>
+      <ul class="spec-list">
+        <li><span class="k">Beschermingsgraad</span><span class="v">IP20 (binnen)</span></li>
+        <li><span class="k">Spanning</span><span class="v">230V / 400V AC</span></li>
+        <li><span class="k">Max. stroom</span><span class="v">16A</span></li>
+        <li><span class="k">Stroomgeleiderdoorsnede</span><span class="v">4,0 mm²</span></li>
+        <li><span class="k">Aantal circuits</span><span class="v">tot 3</span></li>
+        <li><span class="k">Doorsnede rail</span><span class="v">31,5 × 32,5 mm</span></li>
+      </ul>
+      <div class="colorpills">
+        <span class="pill"><span class="dot wit"></span>Wit</span>
+        <span class="pill"><span class="dot zwart"></span>Zwart</span>
+        <span class="pill"><span class="dot grijs"></span>Grijs</span>
+      </div>
+      <table class="length-table">
+        <tr><th>Lengte</th><th>Wit</th><th>Zwart</th><th>Grijs</th></tr>
+        <tr><td>1 m</td><td>2000766</td><td>2000759</td><td>2000742</td></tr>
+        <tr><td>2 m</td><td>2000797</td><td>2000780</td><td>2000773</td></tr>
+        <tr><td>3 m</td><td>2000827</td><td>2000810</td><td>2000803</td></tr>
+        <tr><td>4 m</td><td>2012899</td><td>2012882</td><td>2012875</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid grid-3">
+    <div class="card">
+      <span class="eyebrow">Stap 1</span>
+      <h4 style="margin:4px 0;">Voeding kiezen</h4>
+      <p style="font-size:13px;color:var(--slate);line-height:1.6;">Bepaal of de klant 1-fase of 3-fase voeding heeft, en hoeveel circuits nodig zijn. Zie tab <b>Aansluiting &amp; polariteit</b>.</p>
+    </div>
+    <div class="card">
+      <span class="eyebrow">Stap 2</span>
+      <h4 style="margin:4px 0;">Railplan samenstellen</h4>
+      <p style="font-size:13px;color:var(--slate);line-height:1.6;">Rail + koppelstukken (bocht, T, kruis) altijd combineren met behoud van polariteit. Zie tab <b>Onderdelen</b>.</p>
+    </div>
+    <div class="card">
+      <span class="eyebrow">Stap 3</span>
+      <h4 style="margin:4px 0;">Monteren &amp; belasten</h4>
+      <p style="font-size:13px;color:var(--slate);line-height:1.6;">Bevestigingsafstand en max. gewicht per punt controleren. Zie tab <b>Montage &amp; draagvermogen</b>.</p>
+    </div>
+  </div>
+
+  <div class="flow-note">
+    <div>💡</div>
+    <div><b>Vuistregel voor de binnendienst:</b> negen van de tien meldingen komen terug op één van drie dingen — verkeerde aansluitconfiguratie (A/B/C), polariteit niet aangehouden bij het koppelen van onderdelen, of een adapter zonder trekontlasting. Check dat eerst in het gesprek met de installateur.</div>
+  </div>
+</section>
+
+<!-- ===================== AANSLUITING & POLARITEIT ===================== -->
+<section id="aansluiting">
+  <span class="eyebrow">Aansluitschema</span>
+  <h2 class="section-title">Drie manieren om de rail te voeden</h2>
+  <p class="lede">De rail kan op drie manieren worden aangesloten, afhankelijk van de beschikbare netvoeding bij de klant. Dit is het eerste dat je met een installateur moet doorlopen — de rest van de installatie hangt hiervan af.</p>
+
+  <div class="wiring-tabs">
+    <div class="wtab active" data-w="A"><span class="letter">A</span><h4>1-fase, 3-circuit</h4><p>230V AC · 16A · 3,7 kVA</p></div>
+    <div class="wtab" data-w="B"><span class="letter">B</span><h4>3-fase, 3-circuit</h4><p>230/400V AC · 16A · 3×3,7 kVA</p></div>
+    <div class="wtab" data-w="C"><span class="letter">C</span><h4>3-fase, 3-phase</h4><p>230/400V AC · 16A · 1,1 kVA</p></div>
+  </div>
+
+  <div class="wiring-detail active" data-wd="A">
+    <div id="wiringA"></div>
+    <div class="card">
+      <h4 style="margin-top:0;">Wanneer gebruik je dit?</h4>
+      <p style="font-size:13.5px;color:var(--slate);line-height:1.7;">Bij een standaard 1-fase groep (L + N). De rail wordt gebruikt als <b>3 losse circuits</b> op dezelfde fase, bijvoorbeeld om drie groepen spots apart te schakelen of te dimmen — maar ze delen wél dezelfde fase.</p>
+      <div class="ts-warn">De optelsom van de drie circuits samen (N-geleider) mag <b>max. 16A</b> zijn. Bij veel spots op alle drie de circuits: bereken de totale stroom vóór installatie.</div>
+    </div>
+  </div>
+  <div class="wiring-detail" data-wd="B">
+    <div id="wiringB"></div>
+    <div class="card">
+      <h4 style="margin-top:0;">Wanneer gebruik je dit?</h4>
+      <p style="font-size:13.5px;color:var(--slate);line-height:1.7;">Bij een 3-fase aansluiting (L1, L2, L3 + N) waarbij je de rail als <b>3 onafhankelijke circuits</b> wilt gebruiken — elk circuit op zijn eigen fase. Meest flexibele optie voor grotere installaties met meerdere schakelgroepen.</p>
+      <div class="ts-warn">Elke fase mag <b>max. 16A</b> voeren. De gezamenlijke N-stroom (L1+L2+L3) is eveneens gemaximeerd op 16A — bewaak de balans tussen de drie circuits.</div>
+    </div>
+  </div>
+  <div class="wiring-detail" data-wd="C">
+    <div id="wiringC"></div>
+    <div class="card">
+      <h4 style="margin-top:0;">Wanneer gebruik je dit?</h4>
+      <p style="font-size:13.5px;color:var(--slate);line-height:1.7;">Bij een 3-fase aansluiting waarbij spots over de <b>drie fasen verdeeld</b> worden binnen wat op het rail als één doorlopend systeem oogt (3-phase adapters kiezen zelf hun fase). Handig om de belasting over L1/L2/L3 te spreiden i.p.v. te schakelen per circuit.</p>
+      <div class="ts-fix">Lager opgegeven vermogen (1,1 kVA) omdat elke fase hier afzonderlijk maar één adapterstroom draagt — niet drie circuits parallel.</div>
+    </div>
+  </div>
+
+  <div style="height:38px;"></div>
+
+  <span class="eyebrow">Polariteit</span>
+  <h2 class="section-title">Waarom de polariteitsrib zo belangrijk is</h2>
+  <p class="lede">Alle railonderdelen — aansluitstukken, bochten, T- en kruiskoppelstukken — bestaan in een <b>links (L)</b> en <b>rechts (R)</b> uitvoering. Die bepalen hoe L1, L2, L3 en N door de rail lopen. Koppel je een verkeerde combinatie, dan verschuift de fasevolgorde verderop in het traject.</p>
+
+  <div class="polarity-wrap">
+    <div class="card">
+      <span class="eyebrow">Doorsnede rail — pinout</span>
+      <div id="polaritySvg"></div>
+      <div class="pin-legend">
+        <div class="pin-row"><span class="pin-chip" style="background:#8B4A9C;">L1</span> Fase 1</div>
+        <div class="pin-row"><span class="pin-chip" style="background:#2C2C2C;">N</span> Nulgeleider</div>
+        <div class="pin-row"><span class="pin-chip" style="background:#C0392B;">L3</span> Fase 3</div>
+        <div class="pin-row"><span class="pin-chip" style="background:#2E7D32;">L2</span> Fase 2</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0;">Vuistregel bij het koppelen</h4>
+      <p style="font-size:13.5px;color:var(--slate);line-height:1.7;">Volg bij het samenstellen van een railplan steeds de <b>rode polariteitslijn</b>: die loopt door alle rechte stukken door en "spiegelt" bij elk L/R-onderdeel. Zolang je bij bochten en koppelstukken de juiste L- of R-variant kiest, blijft de polariteit — en dus de fasevolgorde voor aangesloten armaturen — overal gelijk.</p>
+      <div class="ts-fix"><b>Check ter plekke:</b> laat de installateur bij twijfel het aansluitstuk (R of L, gemarkeerd op het onderdeel) vergelijken met het polariteitsschema in deze tool of op het technische blad, vóórdat de rail wordt gemonteerd.</div>
+      <div class="ts-warn">Verkeerd gekoppelde polariteit is de meest voorkomende oorzaak van flikkerende of niet-werkende spots ná uitbreiding van een bestaand railplan.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ONDERDELEN ===================== -->
+<section id="onderdelen">
+  <span class="eyebrow">Assortiment</span>
+  <h2 class="section-title">Onderdelen &amp; hun functie</h2>
+  <p class="lede">Klik op een onderdeel voor artikelnummers per kleur en een korte uitleg — handig tijdens een telefoongesprek met een installateur.</p>
+
+  <div class="part-search">
+    <input id="partSearchInput" type="text" placeholder="Zoek op onderdeel, bv. 'koppelstuk' of 'trekontlasting'…">
+    <select id="partCatFilter">
+      <option value="">Alle categorieën</option>
+    </select>
+  </div>
+
+  <div id="partGrid" class="grid grid-4"></div>
+</section>
+
+<!-- ===================== MONTAGE ===================== -->
+<section id="montage">
+  <span class="eyebrow">Installatie</span>
+  <h2 class="section-title">Montagegaten &amp; draagvermogen</h2>
+  <p class="lede">De montagegaten zijn identiek voorgeboord voor de PRX en PRX DALI rail — qua bevestiging is er dus geen verschil tussen beide varianten.</p>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <h4 style="margin-top:0;">Voorgeboorde montagegaten</h4>
+      <div id="drillSvg"></div>
+      <table class="art-table">
+        <tr><th>Raillengte (L)</th><th>a (mm)</th><th>b (mm)</th><th>c (mm)</th><th>d (mm)</th></tr>
+        <tr><td>1000 mm</td><td>250</td><td>1000</td><td>—</td><td>—</td></tr>
+        <tr><td>2000 mm</td><td>250</td><td>1000</td><td>1000</td><td>1000</td></tr>
+        <tr><td>3000 mm</td><td>250</td><td>1000</td><td>1000</td><td>1000</td></tr>
+        <tr><td>4000 mm</td><td>250</td><td>1000</td><td>1500</td><td>1000</td></tr>
+      </table>
+      <p style="font-size:11.5px;color:var(--slate-light);margin-top:8px;">Schroefdiameter maximaal 4 mm. Aanbevolen bevestigingsafstand: <b>1000 mm</b>.</p>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0;">Draagvermogen per bevestigingspunt</h4>
+      <p style="font-size:12.5px;color:var(--slate);">Bij bevestigingsafstand 1000 mm:</p>
+      <div class="load-bar-wrap">
+        <div class="load-row"><span class="load-label">elk punt</span><div class="load-track"><div class="load-fill" style="width:100%;">max. 5 kg</div></div></div>
+      </div>
+      <p style="font-size:12.5px;color:var(--slate);margin-top:16px;">Bij bevestigingsafstand 2000 mm (tussenliggende punten elke 100–200 mm):</p>
+      <div class="load-bar-wrap">
+        <div class="load-row"><span class="load-label">tussenpunten</span><div class="load-track"><div class="load-fill" style="width:20%;">max. 1 kg</div></div></div>
+      </div>
+      <div class="ts-warn" style="margin-top:14px;">Bij grotere afstand tussen bevestigingspunten daalt het toegestane gewicht per punt fors — van 5 kg naar 1 kg. Reken bij zware armaturen (spots met transfo, projectoren) altijd het totaalgewicht over het hele traject uit.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TROUBLESHOOTING ===================== -->
+<section id="troubleshooting">
+  <span class="eyebrow">Storingen oplossen</span>
+  <h2 class="section-title">Troubleshooting met installateurs</h2>
+  <p class="lede">Klap een melding open voor waarschijnlijke oorzaak, oplossing en de artikelnummers die je erbij nodig hebt.</p>
+  <div id="tsList"></div>
+</section>
+
+<!-- ===================== ARTIKELZOEKER ===================== -->
+<section id="zoeker">
+  <span class="eyebrow">Naslag</span>
+  <h2 class="section-title">Artikelzoeker</h2>
+  <p class="lede">Volledig overzicht van alle artikelnummers uit deze productgroep. Zoek op naam, artikelnummer of kleur.</p>
+  <div class="part-search">
+    <input id="artSearchInput" type="text" placeholder="Zoek op naam, artikelnummer of kleur…">
+    <select id="artCatFilter"><option value="">Alle categorieën</option></select>
+  </div>
+  <table class="art-table" id="artFullTable">
+    <thead><tr><th>Artikelnr.</th><th>Naam</th><th>Categorie</th><th>Kleur</th></tr></thead>
+    <tbody id="artFullBody"></tbody>
+  </table>
+</section>
+
+<!-- ===================== CONFIGURATOR ===================== -->
+<section id="configurator">
+  <span class="eyebrow">Teken het traject</span>
+  <h2 class="section-title">Railconfigurator</h2>
+  <p class="lede">Teken alleen de gewenste railvorm en kies het stroomaansluitpunt. De tool bepaalt zelf alle koppelstukken, de polariteit (rode lijn, zoals in het polariteitsschema), de railverdeling in stukken van 1/2/3/4 meter en de complete artikellijst.</p>
+
+  <div class="c2-steps" id="c2Steps">
+    <button data-step="1"><span class="c2-stepnum">1</span>Kleur</button>
+    <button data-step="2"><span class="c2-stepnum">2</span>Voeding</button>
+    <button data-step="3"><span class="c2-stepnum">3</span>Vorm</button>
+    <button data-step="4"><span class="c2-stepnum">4</span>Tekening &amp; maten</button>
+    <button data-step="5"><span class="c2-stepnum">5</span>Stuklijst</button>
+  </div>
+  <div class="c2-stepmsg" id="c2StepMsg"></div>
+
+  <div class="cfg-layout">
+    <div class="cfg-panel">
+
+      <div class="cfg-block c2-pane" data-pane="1">
+        <h4>Kies kleur</h4>
+        <p class="hint">Geldt voor alle onderdelen in het traject.</p>
+        <div class="choice-row" id="c2ColorRow"></div>
+      </div>
+
+      <div class="cfg-block c2-pane" data-pane="2">
+        <h4>Kies voedingsconfiguratie</h4>
+        <p class="hint">Bepaalt de capaciteitswaarschuwingen. Zie tab "Aansluiting &amp; polariteit" voor uitleg per configuratie.</p>
+        <div class="choice-row" id="c2PowerRow"></div>
+      </div>
+
+      <div class="cfg-block c2-pane" data-pane="3">
+        <h4>Kies een vorm als startpunt</h4>
+        <p class="hint">Bovenaanzicht, zoals een plattegrond. Staat er al een tekening, dan wordt de gekozen vorm als <b>extra traject</b> toegevoegd (elk traject krijgt een eigen aansluitpunt). In stap 4 pas je maten aan en verbind je trajecten door uiteinden op elkaar te schuiven.</p>
+        <div class="shape-grid" id="c2ShapeGrid"></div>
+        <div class="grid-dims-row" id="c2GridRow" style="display:none;margin-top:14px;"></div>
+      </div>
+
+      <div class="cfg-block c2-pane" data-pane="4">
+        <h4>Tekening &amp; maten</h4>
+        <p class="hint">Klik op een <b>maat</b> om te typen of <b>sleep een wit uiteinde</b> (per meter) · <b>sleep een railstuk</b> om het hele figuur te verplaatsen · scroll of ＋/− om te zoomen, sleep de achtergrond om te schuiven · klik op <b>＋</b> om een segment toe te voegen · <b>✕</b> verwijdert een uiteinde · klik het <b>voedingspunt</b> om Links/Rechts of de lijnzijde te wisselen. De rode lijn is de polariteitslijn uit het schema.</p>
+        <div class="c2-sheets" id="c2Sheets"></div>
+        <div class="c2-toolbar">
+          <button id="c2Undo" title="Ongedaan maken">↶ Ongedaan</button>
+          <button id="c2Redo" title="Herstellen">↷ Herstel</button>
+          <button id="c2Reset">Opnieuw beginnen</button>
+          <button id="c2AddFig">＋ Nieuw figuur</button>
+          <button id="c2ZoomOut" title="Uitzoomen">−</button>
+          <button id="c2ZoomIn" title="Inzoomen">＋</button>
+          <button id="c2Center" title="Terug naar volledige weergave">Centreren</button>
+          <span class="c2-toolgap"></span>
+          <button id="c2PickBtn" class="c2-pickbtn">⚡ Kies het stroomaansluitpunt</button>
+        </div>
+        <div class="c2-canvaswrap" id="c2CanvasWrap">
+          <svg id="c2Svg" viewBox="0 0 900 560"></svg>
+        </div>
+        <p class="hint" style="margin:10px 0 0;">De getekende maten zijn de <b>raillengtes</b> (per 1, 2 of 3 meter; 4 m op aanvraag). Koppelstukken en aansluitpunt komen daar in werkelijkheid bovenop; rail kan desgewenst op maat gezaagd worden.</p>
+      </div>
+
+      <div class="cfg-block c2-pane" data-pane="5">
+        <h4>Stuklijst &amp; opties</h4>
+        <p class="hint">De volledige lijst staat rechts. Hieronder de railverdeling per segment en de opties.</p>
+        <label class="c2-check"><input type="checkbox" id="c2Use4m"> Gebruik ook 4 meter rail (alleen op aanvraag — bestelartikel)</label>
+        <div class="c2-adapterrow">
+          <span>Montagewijze:</span>
+          <select id="c2Mount" class="c2-select">
+            <option value="geen">&mdash; nog geen keuze &mdash;</option>
+            <option value="beugel">Montagebeugel (plafond)</option>
+            <option value="sys">Systeemplafondbeugel</option>
+            <option value="ophang3">Systeemplafondbeugel ophangset verstelbaar 3 m</option>
+            <option value="ophang6">Systeemplafondbeugel ophangset verstelbaar 6 m</option>
+            <option value="pendel">Pendelset 10-pack (plafondbus + staalkabel 3 m)</option>
+          </select>
+          <span class="hint" style="margin:0;">Montagepunten: <b id="c2MountCount">0</b> (om de meter, incl. uiteinden; knooppunten gedeeld)</span>
+        </div>
+        <div class="c2-adapterrow">
+          <span>Projectnaam (voor de PDF):</span>
+          <input type="text" id="c2Proj" class="c2-textinp" placeholder="bijv. Winkel Hoofdstraat 12">
+        </div>
+        <div class="c2-adapterrow">
+          <span>Adapters / spots op dit traject:</span>
+          <button class="stepper-btn" id="c2AdMinus">−</button>
+          <span class="stepper-val" id="c2AdVal">0</span>
+          <button class="stepper-btn" id="c2AdPlus">+</button>
+        </div>
+        <div id="c2RailDetail" class="c2-raildetail"></div>
+        <p class="hint" style="margin:10px 0 0;">De getekende maat is de raillengte. De werkelijke maat per segment (rail + koppelstukken) staat er in grijs bij, voor het inmeten op locatie.</p>
+      </div>
+
+      <div class="c2-navrow">
+        <button id="c2Prev" class="choice-btn">← Vorige</button>
+        <button id="c2Next" class="choice-btn sel">Volgende →</button>
+      </div>
+
+    </div>
+
+    <div class="cfg-summary">
+      <span class="eyebrow">Live overzicht</span>
+      <h4 id="c2Title">Nog geen vorm gekozen</h4>
+      <div>
+        <div class="cfg-metric-row"><span class="k">Totale lengte</span><span class="v" id="c2TotLen">0 cm</span></div>
+        <div class="cfg-metric-row"><span class="k">Segmenten</span><span class="v" id="c2TotSeg">0</span></div>
+        <div class="cfg-metric-row"><span class="k">Adapters / spots</span><span class="v" id="c2TotAd">0</span></div>
+      </div>
+      <div>
+        <span class="eyebrow">Materiaallijst</span>
+        <div class="cfg-art-list" id="c2ArtList"></div>
+      </div>
+      <div class="cfg-warns" id="c2Warns"></div>
+      <div class="cfg-actions">
+        <button id="c2Pdf">PDF voor installateur</button>
+        <button id="c2Copy">Kopieer lijst</button>
+        <button class="ghost" id="c2ResetAll">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="c2-float" id="c2Inp" style="display:none;"><input type="number" min="1" max="500" step="1"><span>m</span></div>
+  <div class="c2-float c2-pop" id="c2Pop" style="display:none;"></div>
+</section>
+
+
+
+
+
+
+
+
+
+
+</main>
+
+<footer>PRX 3-Fase Rail — Interne kennistool voor binnendienst, gebaseerd op de Pragmalux technische presenter (versie 24062026). Alleen de officiële technische gegevensbladen zijn bindend.</footer>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <button class="close" id="modalClose">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+/* =================== TAB NAVIGATION =================== */
+const tabBtns = document.querySelectorAll('#tabnav button');
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    tabBtns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('main > section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* =================== DATA: PARTS =================== */
+const COLORS = {wit:'#FFFFFF', zwart:'#1A1A1A', grijs:'#9CA3AF'};
+
+const parts = [
+{cat:'Rail', name:'Rail', desc:'Het basisprofiel: 4 stroombanen (L1,L2,L3,N) + aarde, verkrijgbaar in 1/2/3/4 meter.', codes:[
+  {code:'2000766',v:'1m Wit',color:'wit'},{code:'2000759',v:'1m Zwart',color:'zwart'},{code:'2000742',v:'1m Grijs',color:'grijs'},
+  {code:'2000797',v:'2m Wit',color:'wit'},{code:'2000780',v:'2m Zwart',color:'zwart'},{code:'2000773',v:'2m Grijs',color:'grijs'},
+  {code:'2000827',v:'3m Wit',color:'wit'},{code:'2000810',v:'3m Zwart',color:'zwart'},{code:'2000803',v:'3m Grijs',color:'grijs'},
+  {code:'2012899',v:'4m Wit',color:'wit'},{code:'2012882',v:'4m Zwart',color:'zwart'},{code:'2012875',v:'4m Grijs',color:'grijs'},
+]},
+{cat:'Aansluitstuk', name:'Aansluitstuk', desc:'Voedt de rail vanaf het net. Bepaalt de polariteitsrichting (Links/Rechts) van het volledige railplan.', codes:[
+  {code:'2000858',v:'Rechts Wit',color:'wit'},{code:'2000841',v:'Rechts Zwart',color:'zwart'},{code:'2000834',v:'Rechts Grijs',color:'grijs'},
+  {code:'2000889',v:'Links Wit',color:'wit'},{code:'2000872',v:'Links Zwart',color:'zwart'},{code:'2000865',v:'Links Grijs',color:'grijs'},
+]},
+{cat:'90° Bocht', name:'90° Bocht', desc:'Buiten- of binnenbocht om een hoek van 90° te maken. Beide behouden de polariteit als de juiste kant wordt gebruikt.', codes:[
+  {code:'2000940',v:'Binnen Wit',color:'wit'},{code:'2000933',v:'Binnen Zwart',color:'zwart'},{code:'2000926',v:'Binnen Grijs',color:'grijs'},
+  {code:'2000971',v:'Buiten Wit',color:'wit'},{code:'2000964',v:'Buiten Zwart',color:'zwart'},{code:'2000957',v:'Buiten Grijs',color:'grijs'},
+]},
+{cat:'Middenvoeding', name:'Middenvoeding', desc:'Voedt de rail vanuit het midden van een recht stuk, in plaats van vanaf het uiteinde.', codes:[
+  {code:'2001183',v:'Wit',color:'wit'},{code:'2001176',v:'Zwart',color:'zwart'},{code:'2001169',v:'Grijs',color:'grijs'},
+]},
+{cat:'Universal Adapter', name:'Adapter 70mm', desc:'Universele adapter voor het monteren van een spot/armatuur op de rail. Altijd combineren met trekontlasting art. 2001947.', codes:[
+  {code:'2001404',v:'Wit',color:'wit'},{code:'2001398',v:'Zwart',color:'zwart'},{code:'2001381',v:'Grijs',color:'grijs'},
+]},
+{cat:'Universal Multi-Adapter', name:'Multi-adapter 3-fase + 400V aftakking', desc:'Adapter met extra 400V aftakking voor zwaardere of aparte belasting op één punt.', codes:[
+  {code:'2001435',v:'Wit',color:'wit'},{code:'2001428',v:'Zwart',color:'zwart'},{code:'2001411',v:'Grijs',color:'grijs'},
+]},
+{cat:'Schuko Adapter', name:'Schuko Adapter', desc:'Zet een stroombaan van de rail om naar een gewoon (schuko) stopcontact.', codes:[
+  {code:'2001459',v:'Wit',color:'wit'},{code:'2001442',v:'Zwart',color:'zwart'},
+]},
+{cat:'T-Koppelstuk', name:'T-Koppelstuk', desc:'Vertakking in T-vorm. Er bestaan 4 varianten (Type 1/2 × Links/Rechts) — kies de variant die de polariteit van het schema volgt.', codes:[
+  {code:'2001008',v:'Rechts Type1 Wit',color:'wit'},{code:'2000995',v:'Rechts Type1 Zwart',color:'zwart'},{code:'2000988',v:'Rechts Type1 Grijs',color:'grijs'},
+  {code:'2001039',v:'Links Type2 Wit',color:'wit'},{code:'2001022',v:'Links Type2 Zwart',color:'zwart'},{code:'2001015',v:'Links Type2 Grijs',color:'grijs'},
+  {code:'2002432',v:'Rechts Type2 Wit',color:'wit'},{code:'2002425',v:'Rechts Type2 Zwart',color:'zwart'},{code:'2002418',v:'Rechts Type2 Grijs',color:'grijs'},
+  {code:'2002463',v:'Links Type1 Wit',color:'wit'},{code:'2002456',v:'Links Type1 Zwart',color:'zwart'},{code:'2002449',v:'Links Type1 Grijs',color:'grijs'},
+]},
+{cat:'Kruis Koppelstuk', name:'Kruis Koppelstuk', desc:'Vertakking naar vier richtingen tegelijk (kruising).', codes:[
+  {code:'2001060',v:'Wit',color:'wit'},{code:'2001053',v:'Zwart',color:'zwart'},{code:'2001046',v:'Grijs',color:'grijs'},
+]},
+{cat:'Flexibele Koppelstuk', name:'Flexibele Koppelstuk Lang', desc:'Flexibel verbindingsstuk voor niet-rechte overgangen of om oneffenheden op te vangen.', codes:[
+  {code:'2001152',v:'Wit',color:'wit'},{code:'2001145',v:'Zwart',color:'zwart'},{code:'2001138',v:'Grijs',color:'grijs'},
+]},
+{cat:'Verstelbare Hoek', name:'Verstelbare Hoek', desc:'Instelbare hoekverbinding voor niet-standaard hoeken (anders dan 90°).', codes:[
+  {code:'2001121',v:'Wit',color:'wit'},{code:'2001114',v:'Zwart',color:'zwart'},{code:'2001107',v:'Grijs',color:'grijs'},
+]},
+{cat:'Elektrisch Koppelstuk', name:'Elektrisch Koppelstuk', desc:'Verbindt twee railstukken elektrisch en mechanisch tot één doorlopend circuit.', codes:[
+  {code:'2001091',v:'Wit',color:'wit'},{code:'2001084',v:'Zwart',color:'zwart'},{code:'2001077',v:'Grijs',color:'grijs'},
+]},
+{cat:'Monopoint', name:'Monopoint voor 3-fase adapter', desc:'Enkelvoudig plafondpunt voor het monteren van één adapter/spot zonder volledige rail.', codes:[
+  {code:'2001503',v:'Wit',color:'wit'},{code:'2001497',v:'Zwart',color:'zwart'},{code:'2001480',v:'Grijs',color:'grijs'},
+]},
+{cat:'Eindkap', name:'Eindkap', desc:'Sluit het uiteinde van de rail netjes en veilig af.', codes:[
+  {code:'2000919',v:'Wit',color:'wit'},{code:'2000902',v:'Zwart',color:'zwart'},{code:'2000896',v:'Grijs',color:'grijs'},
+]},
+{cat:'Montagebeugel', name:'Plafond Montagebeugel', desc:'Bevestigt de rail direct tegen het plafond.', codes:[
+  {code:'2001329',v:'Wit',color:'wit'},{code:'2001312',v:'Zwart',color:'zwart'},{code:'2001305',v:'Grijs',color:'grijs'},
+]},
+{cat:'Verstevigingsplaat', name:'Verstevigingsplaat 182mm', desc:'Extra ondersteuning ter plaatse van een koppeling, voor stevigheid bij zwaardere belasting.', codes:[
+  {code:'2001350',v:'Wit',color:'wit'},{code:'2001343',v:'Zwart',color:'zwart'},{code:'2001336',v:'Grijs',color:'grijs'},
+]},
+{cat:'Afdekplaat', name:'Afdekplaat 2M', desc:'Dekt een stuk rail visueel af, bijvoorbeeld bij tijdelijk ongebruikte secties.', codes:[
+  {code:'2001206',v:'Wit',color:'wit'},{code:'2001190',v:'Zwart',color:'zwart'},
+]},
+{cat:'Trekontlasting', name:'Trekontlasting', desc:'Voorkomt dat een adapter loskomt of los kan trekken. Art. 2001947 is verplicht bij de 70mm Universal adapter.', codes:[
+  {code:'2001947',v:'Brug met 2 schroefjes',color:'grijs'},{code:'2001473',v:'Wit',color:'wit'},{code:'2001466',v:'Zwart',color:'zwart'},
+]},
+{cat:'Nippel Draaibaar', name:'Nippel draaibaar M10 + moer', desc:'Draaibare bevestigingsnippel voor pendel- of ophangmontage.', codes:[
+  {code:'2029507',v:'Aluminium',color:'grijs'},{code:'2029514',v:'Zwart',color:'zwart'},
+]},
+{cat:'Systeemplafond', name:'Ophangset verstelbaar (incl. kap)', desc:'Verstelbare ophanging voor systeemplafonds, 3 of 6 meter kabel.', codes:[
+  {code:'2001237',v:'3M Wit',color:'wit'},{code:'2001220',v:'3M Zwart',color:'zwart'},{code:'2001213',v:'3M Grijs',color:'grijs'},
+  {code:'2001268',v:'6M Wit',color:'wit'},{code:'2001251',v:'6M Zwart',color:'zwart'},{code:'2001244',v:'6M Grijs',color:'grijs'},
+]},
+{cat:'Systeemplafond', name:'Systeemplafond beugel', desc:'Bevestigingsbeugel specifiek voor systeemplafonds.', codes:[
+  {code:'2001299',v:'Wit',color:'wit'},{code:'2001282',v:'Zwart',color:'zwart'},{code:'2001275',v:'Grijs',color:'grijs'},
+]},
+{cat:'Pendelset', name:'Pendelset — 10 pack (plafondbus + staalkabel)', desc:'Set van 10 plafondbussen met staalkabel voor pendelmontage, div. lengtes en kleuren.', codes:[
+  {code:'2012974',v:'Bus Wit / kabel 3M Zilver',color:'wit'},{code:'2012950',v:'Bus Zilver / kabel 3M Zilver',color:'grijs'},
+  {code:'2012998',v:'Bus Zwart / kabel 3M Zilver',color:'zwart'},{code:'2013018',v:'Bus Zwart / kabel 3M Zwart',color:'zwart'},
+  {code:'2013025',v:'Bus Zwart / kabel 5M Zwart',color:'zwart'},{code:'2012981',v:'Bus Wit / kabel 6M Zilver',color:'wit'},
+  {code:'2012967',v:'Bus Zilver / kabel 6M Zilver',color:'grijs'},{code:'2013001',v:'Bus Zwart / kabel 6M Zilver',color:'zwart'},
+]},
+{cat:'Rail Beugel', name:'Rail beugel + snelspanner', desc:'Snelmontagebeugel met snelspanner voor eenvoudige bevestiging.', codes:[
+  {code:'2013056',v:'Zilver',color:'grijs'},{code:'2013032',v:'Zwart',color:'zwart'},{code:'2013049',v:'Wit',color:'wit'},
+]},
+{cat:'Gereedschap', name:'Buiggereedschap', desc:'Gereedschap om de rail zelf licht te buigen voor niet-standaard tracés.', codes:[{code:'2001374',v:'—',color:'grijs'}]},
+{cat:'Gereedschap', name:'Slot connection tool', desc:'Hulpgereedschap om koppelstukken en aansluitstukken correct te vergrendelen.', codes:[{code:'2001930',v:'—',color:'grijs'}]},
+];
+
+/* icon per category (simple line-art) */
+function iconFor(cat){
+  const stroke = '#1E2A4A';
+  const base = `stroke="${stroke}" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"`;
+  switch(cat){
+    case 'Rail': return `<svg viewBox="0 0 100 60"><rect x="10" y="24" width="80" height="12" rx="2" ${base}/><line x1="10" y1="30" x2="90" y2="30" stroke="${stroke}" stroke-width="1" opacity=".4"/></svg>`;
+    case 'Aansluitstuk': return `<svg viewBox="0 0 100 60"><rect x="15" y="24" width="55" height="12" rx="2" ${base}/><rect x="65" y="18" width="24" height="24" rx="3" ${base}/></svg>`;
+    case '90° Bocht': return `<svg viewBox="0 0 100 60"><path d="M15 46 L15 24 Q15 14 25 14 L75 14" ${base}/><rect x="9" y="46" width="12" height="1" opacity="0"/></svg>`;
+    case 'Middenvoeding': return `<svg viewBox="0 0 100 60"><rect x="10" y="24" width="80" height="12" rx="2" ${base}/><circle cx="50" cy="30" r="6" ${base}/></svg>`;
+    case 'Universal Adapter': return `<svg viewBox="0 0 100 60"><rect x="30" y="10" width="40" height="16" rx="2" ${base}/><path d="M40 26 L40 44 L60 44 L60 26" ${base}/></svg>`;
+    case 'Universal Multi-Adapter': return `<svg viewBox="0 0 100 60"><rect x="24" y="10" width="52" height="16" rx="2" ${base}/><path d="M35 26 L35 44 M65 26 L65 44" ${base}/></svg>`;
+    case 'Schuko Adapter': return `<svg viewBox="0 0 100 60"><circle cx="50" cy="30" r="18" ${base}/><circle cx="43" cy="26" r="2" fill="${stroke}"/><circle cx="57" cy="26" r="2" fill="${stroke}"/></svg>`;
+    case 'T-Koppelstuk': return `<svg viewBox="0 0 100 60"><line x1="15" y1="30" x2="85" y2="30" ${base}/><line x1="50" y1="30" x2="50" y2="50" ${base}/></svg>`;
+    case 'Kruis Koppelstuk': return `<svg viewBox="0 0 100 60"><line x1="15" y1="30" x2="85" y2="30" ${base}/><line x1="50" y1="10" x2="50" y2="50" ${base}/></svg>`;
+    case 'Flexibele Koppelstuk': return `<svg viewBox="0 0 100 60"><path d="M12 40 Q35 10 50 30 Q65 50 88 20" ${base}/></svg>`;
+    case 'Verstelbare Hoek': return `<svg viewBox="0 0 100 60"><line x1="15" y1="40" x2="50" y2="25" ${base}/><line x1="50" y1="25" x2="85" y2="40" ${base}/><path d="M40 30 A12 12 0 0 1 60 30" ${base} stroke-dasharray="2 3"/></svg>`;
+    case 'Elektrisch Koppelstuk': return `<svg viewBox="0 0 100 60"><rect x="10" y="24" width="35" height="12" rx="2" ${base}/><rect x="55" y="24" width="35" height="12" rx="2" ${base}/><line x1="45" y1="30" x2="55" y2="30" stroke="${stroke}" stroke-width="4"/></svg>`;
+    case 'Monopoint': return `<svg viewBox="0 0 100 60"><circle cx="50" cy="20" r="10" ${base}/><line x1="50" y1="30" x2="50" y2="48" ${base}/></svg>`;
+    case 'Eindkap': return `<svg viewBox="0 0 100 60"><rect x="15" y="24" width="55" height="12" rx="2" ${base}/><path d="M70 20 L82 30 L70 40 Z" ${base}/></svg>`;
+    case 'Montagebeugel': return `<svg viewBox="0 0 100 60"><path d="M25 15 L25 45 L75 45 L75 15" ${base}/><line x1="35" y1="30" x2="65" y2="30" ${base}/></svg>`;
+    case 'Verstevigingsplaat': return `<svg viewBox="0 0 100 60"><rect x="12" y="26" width="76" height="8" rx="2" ${base}/></svg>`;
+    case 'Afdekplaat': return `<svg viewBox="0 0 100 60"><rect x="12" y="24" width="76" height="12" rx="2" ${base}/><line x1="20" y1="30" x2="80" y2="30" stroke="${stroke}" stroke-dasharray="3 3"/></svg>`;
+    case 'Trekontlasting': return `<svg viewBox="0 0 100 60"><circle cx="35" cy="30" r="10" ${base}/><circle cx="65" cy="30" r="10" ${base}/><line x1="45" y1="30" x2="55" y2="30" ${base}/></svg>`;
+    case 'Nippel Draaibaar': return `<svg viewBox="0 0 100 60"><circle cx="50" cy="20" r="8" ${base}/><line x1="50" y1="28" x2="50" y2="48" ${base}/></svg>`;
+    case 'Systeemplafond': return `<svg viewBox="0 0 100 60"><line x1="50" y1="8" x2="50" y2="34" ${base}/><path d="M38 34 L62 34 L58 48 L42 48 Z" ${base}/></svg>`;
+    case 'Pendelset': return `<svg viewBox="0 0 100 60"><line x1="30" y1="8" x2="30" y2="40" ${base}/><line x1="70" y1="8" x2="70" y2="40" ${base}/><circle cx="30" cy="46" r="6" ${base}/><circle cx="70" cy="46" r="6" ${base}/></svg>`;
+    case 'Rail Beugel': return `<svg viewBox="0 0 100 60"><path d="M20 45 L20 20 L45 20" ${base}/><rect x="45" y="14" width="12" height="12" rx="2" ${base}/></svg>`;
+    default: return `<svg viewBox="0 0 100 60"><rect x="25" y="18" width="50" height="24" rx="4" ${base}/></svg>`;
+  }
+}
+
+/* render mini cross-section for overview */
+document.getElementById('crossSectionMini').innerHTML = `
+<svg viewBox="0 0 220 200" style="width:100%;max-width:260px;">
+  <rect x="20" y="20" width="180" height="160" rx="14" fill="#EDEFF3" stroke="#C7CDD6" stroke-width="2"/>
+  <rect x="15" y="90" width="16" height="20" fill="#D6362B"/>
+  <circle cx="70" cy="65" r="11" fill="#8B4A9C"/><text x="70" y="69" text-anchor="middle" font-size="11" fill="#fff" font-family="JetBrains Mono">L1</text>
+  <circle cx="150" cy="65" r="11" fill="#2E7D32"/><text x="150" y="69" text-anchor="middle" font-size="11" fill="#fff" font-family="JetBrains Mono">L2</text>
+  <circle cx="70" cy="135" r="11" fill="#2C2C2C"/><text x="70" y="139" text-anchor="middle" font-size="10" fill="#fff" font-family="JetBrains Mono">N</text>
+  <circle cx="150" cy="135" r="11" fill="#C0392B"/><text x="150" y="139" text-anchor="middle" font-size="11" fill="#fff" font-family="JetBrains Mono">L3</text>
+  <text x="16" y="86" font-size="9" fill="#D6362B" font-family="Nunito Sans" font-weight="700">rib</text>
+</svg>`;
+
+/* wiring diagrams A/B/C */
+function wiringSvg(letter){
+  const rows = letter==='A' ? [['L','L1'],['','L2'],['N','L3'],['','N']] :
+               letter==='B' ? [['L1','L1'],['L2','L2'],['L3','L3'],['N','N']] :
+               [['3L','L1'],['','L2'],['','L3'],['N','N']];
+  let y=40;
+  let rowsSvg = rows.map((r,i)=>{
+    const yy = 40+i*32;
+    return `<line x1="70" y1="${yy}" x2="180" y2="${yy}" stroke="#5B6B82" stroke-width="2"/>
+      <text x="60" y="${yy+4}" text-anchor="end" font-family="JetBrains Mono" font-size="12" fill="#15202E">${r[0]}</text>
+      <text x="190" y="${yy+4}" font-family="JetBrains Mono" font-size="12" fill="#D6362B" font-weight="700">${r[1]}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 340 220" xmlns="http://www.w3.org/2000/svg">
+    <text x="20" y="20" font-family="Nunito Sans" font-size="11" font-weight="700" fill="#5B6B82">SUPPLY</text>
+    <text x="240" y="20" font-family="Nunito Sans" font-size="11" font-weight="700" fill="#5B6B82">TRACK</text>
+    ${rowsSvg}
+    <rect x="220" y="28" width="90" height="${rows.length*32}" fill="none" stroke="#1E2A4A" stroke-width="2" rx="4"/>
+    <text x="30" y="195" font-family="Nunito Sans" font-size="10.5" fill="#8B98AB">Max. 16A per lijn</text>
+  </svg>`;
+}
+document.getElementById('wiringA').innerHTML = `<div class="card">${wiringSvg('A')}</div>`;
+document.getElementById('wiringB').innerHTML = `<div class="card">${wiringSvg('B')}</div>`;
+document.getElementById('wiringC').innerHTML = `<div class="card">${wiringSvg('C')}</div>`;
+
+/* wiring tab switch */
+document.querySelectorAll('.wtab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.wtab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.querySelectorAll('.wiring-detail').forEach(d=>d.classList.remove('active'));
+    document.querySelector(`.wiring-detail[data-wd="${t.dataset.w}"]`).classList.add('active');
+  });
+});
+
+/* polarity svg (full) */
+document.getElementById('polaritySvg').innerHTML = `
+<svg viewBox="0 0 260 220" style="width:100%;max-width:280px;">
+  <rect x="30" y="20" width="200" height="180" rx="16" fill="#EDEFF3" stroke="#C7CDD6" stroke-width="2"/>
+  <rect x="24" y="100" width="18" height="22" fill="#D6362B"/>
+  <text x="10" y="115" font-size="9" fill="#D6362B" font-family="Nunito Sans" font-weight="700" transform="rotate(-90 10,115)">RIB</text>
+  <circle cx="90" cy="75" r="14" fill="#8B4A9C"/><text x="90" y="80" text-anchor="middle" font-size="13" fill="#fff" font-family="JetBrains Mono" font-weight="700">L1</text>
+  <circle cx="170" cy="75" r="14" fill="#2E7D32"/><text x="170" y="80" text-anchor="middle" font-size="13" fill="#fff" font-family="JetBrains Mono" font-weight="700">L2</text>
+  <circle cx="90" cy="150" r="14" fill="#2C2C2C"/><text x="90" y="155" text-anchor="middle" font-size="12" fill="#fff" font-family="JetBrains Mono" font-weight="700">N</text>
+  <circle cx="170" cy="150" r="14" fill="#C0392B"/><text x="170" y="155" text-anchor="middle" font-size="13" fill="#fff" font-family="JetBrains Mono" font-weight="700">L3</text>
+  <text x="130" y="212" text-anchor="middle" font-size="11" fill="#5B6B82" font-family="Nunito Sans">31,5 × 32,5 mm</text>
+</svg>`;
+
+/* drill hole svg */
+document.getElementById('drillSvg').innerHTML = `
+<div class="drill-svg" style="padding:14px;">
+<svg viewBox="0 0 500 100" style="width:100%;">
+  <rect x="10" y="35" width="480" height="30" fill="#EDEFF3" stroke="#C7CDD6" stroke-width="1.5"/>
+  ${[35,150,250,350,465].map(x=>`<circle cx="${x}" cy="50" r="5" fill="#1E2A4A"/>`).join('')}
+  <line x1="10" y1="80" x2="35" y2="80" stroke="#5B6B82" stroke-width="1"/><text x="20" y="94" font-size="10" fill="#5B6B82" text-anchor="middle" font-family="JetBrains Mono">a</text>
+  <line x1="35" y1="80" x2="465" y2="80" stroke="#5B6B82" stroke-width="1"/><text x="250" y="94" font-size="10" fill="#5B6B82" text-anchor="middle" font-family="JetBrains Mono">b / c / d</text>
+</svg>
+</div>`;
+
+/* =================== PARTS GRID =================== */
+const cats = [...new Set(parts.map(p=>p.cat))];
+const catFilter = document.getElementById('partCatFilter');
+cats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; catFilter.appendChild(o); });
+
+function renderParts(){
+  const q = document.getElementById('partSearchInput').value.toLowerCase();
+  const cat = catFilter.value;
+  const grid = document.getElementById('partGrid');
+  grid.innerHTML='';
+  parts.filter(p=> (!cat || p.cat===cat) && (p.name.toLowerCase().includes(q) || p.cat.toLowerCase().includes(q)) )
+  .forEach(p=>{
+    const div = document.createElement('div');
+    div.className='part-card';
+    div.innerHTML = `<div class="part-icon">${iconFor(p.cat)}</div>
+      <h4>${p.name}</h4>
+      <p>${p.desc}</p>
+      <div class="part-tags"><span class="tag">${p.cat}</span><span class="tag">${p.codes.length} varianten</span></div>`;
+    div.addEventListener('click',()=>openPartModal(p));
+    grid.appendChild(div);
+  });
+}
+document.getElementById('partSearchInput').addEventListener('input', renderParts);
+catFilter.addEventListener('change', renderParts);
+renderParts();
+
+function openPartModal(p){
+  const rows = p.codes.map(c=>`<tr><td class="code">${c.code}</td><td>${c.v}</td><td><span class="dot ${c.color}" style="display:inline-block;vertical-align:middle;margin-right:6px;"></span>${c.color}</td></tr>`).join('');
+  document.getElementById('modalContent').innerHTML = `
+    <span class="eyebrow">${p.cat}</span>
+    <h3>${p.name}</h3>
+    <p style="color:var(--slate);font-size:13.5px;line-height:1.6;">${p.desc}</p>
+    <table class="art-table"><thead><tr><th>Artikelnr.</th><th>Variant</th><th>Kleur</th></tr></thead><tbody>${rows}</tbody></table>`;
+  document.getElementById('modalBg').classList.add('active');
+}
+document.getElementById('modalClose').addEventListener('click',()=>document.getElementById('modalBg').classList.remove('active'));
+document.getElementById('modalBg').addEventListener('click',e=>{ if(e.target.id==='modalBg') e.target.classList.remove('active'); });
+
+/* =================== TROUBLESHOOTING =================== */
+const tsData = [
+{sev:'high', q:'De spot(s) op de rail doen het helemaal niet', cause:'Meestal een verkeerde of onvolledige aansluiting op de voeding, of een doorgebrande zekering doordat het totale circuit boven 16A zit.',
+  steps:['Controleer welke aansluitconfiguratie is toegepast: 1-fase 3-circuit (A), 3-fase 3-circuit (B), of 3-fase 3-phase (C).','Meet of er spanning op L (of L1/L2/L3) en N staat op het aansluitstuk zelf.','Tel het totale vermogen van alle aangesloten spots op dat circuit op en vergelijk met de max. 16A / 3,7 kVA per circuit.'],
+  fix:'Verdeel spots over meerdere circuits als één circuit over de 16A gaat, of schakel over naar configuratie B/C voor meer capaciteit per fase.',
+  articles:['2000834','2000841','2000858']},
+{sev:'high', q:'Spots flikkeren of vallen willekeurig uit ná uitbreiding met een bocht of koppelstuk', cause:'Polariteit niet aangehouden: een verkeerde combinatie van Links/Rechts-onderdelen laat de fasevolgorde (L1/L2/L3/N) verschuiven op het punt van koppeling.',
+  steps:['Vraag de installateur welke bocht/T-/kruiskoppelstuk is gebruikt (Type 1/2, Links/Rechts).','Vergelijk met het polariteitsschema — de rode lijn moet ononderbroken doorlopen.','Controleer of het aansluitstuk aan het begin Rechts (R) of Links (L) is, dat bepaalt de rest van het traject.'],
+  fix:'Vervang het koppelstuk door de juiste L/R-variant zodat de polariteitslijn intact blijft.',
+  articles:['2001008','2001039','2002432','2002463']},
+{sev:'med', q:'De adapter (spot) komt los of valt uit de rail', cause:'De 70mm Universal adapter is gemonteerd zónder de verplichte trekontlasting.',
+  steps:['Vraag of art. 2001947 (trekontlasting brug met 2 schroefjes) is meegeleverd en gemonteerd.','Check of de 2 schroefjes van de trekontlasting goed zijn aangedraaid.'],
+  fix:'Bestel en monteer altijd art. 2001947 in combinatie met de 70mm Universal adapter (2001381 / 2001398 / 2001404).',
+  articles:['2001947','2001404','2001398','2001381']},
+{sev:'med', q:'De rail zakt of buigt door', cause:'Bevestigingspunten te ver uit elkaar voor het gewicht van de gemonteerde armaturen.',
+  steps:['Meet de afstand tussen de montagepunten.','Bepaal het totale gewicht van de gemonteerde spots op het betreffende traject.','Vergelijk met het draagvermogen: max. 5 kg per punt bij 1000 mm afstand, max. 1 kg per tussenpunt bij 2000 mm afstand.'],
+  fix:'Voeg extra montagebeugels toe of verklein de bevestigingsafstand naar de aanbevolen 1000 mm. Overweeg een verstevigingsplaat (2001336/2001343/2001350) bij koppelpunten.',
+  articles:['2001305','2001312','2001329','2001336']},
+{sev:'low', q:'Past de PRX DALI rail op dezelfde boorgaten als de reguliere PRX rail?', cause:'Geen storing — veelgestelde vraag van installateurs bij vervanging/uitbreiding.',
+  steps:['De montagegaten zijn identiek voorgeboord voor zowel PRX als PRX DALI.'],
+  fix:'Een bestaand montagepatroon (boorgaten) kan direct hergebruikt worden bij het combineren of vervangen van PRX en PRX DALI rail.',
+  articles:[]},
+{sev:'med', q:'Welke aansluitconfiguratie (A/B/C) moet ik adviseren?', cause:'Afhankelijk van het type netvoeding bij de klant en de gewenste schakelflexibiliteit.',
+  steps:['1-fase beschikbaar + 3 aparte schakelgroepen gewenst op dezelfde fase → configuratie A.','3-fase beschikbaar + 3 volledig onafhankelijke circuits (elk op eigen fase) gewenst → configuratie B.','3-fase beschikbaar + belasting verdelen over de fasen zonder aparte schakelgroepen → configuratie C.'],
+  fix:'Leg dit altijd als eerste vast met de installateur — de rest van de materiaallijst (adapters, koppelstukken) hangt hiervan af.',
+  articles:[]},
+{sev:'high', q:'De hoofdzekering van de groep slaat door', cause:'De N-geleider (bij configuratie A) of de som van L1+L2+L3 (bij configuratie B) zit boven de toegestane 16A.',
+  steps:['Inventariseer alle spots/adapters op het betreffende circuit en tel het vermogen op.','Controleer of de belasting gelijkmatig over de 3 circuits/fasen is verdeeld.'],
+  fix:'Herverdeel spots over de drie circuits of fasen, of splits de installatie over meerdere voedingspunten (bijv. met een middenvoeding, art. 2001169/2001176/2001183).',
+  articles:['2001169','2001176','2001183']},
+];
+
+function renderTs(){
+  const list = document.getElementById('tsList');
+  list.innerHTML = tsData.map((t,i)=>`
+    <div class="ts-item" data-i="${i}">
+      <div class="ts-head">
+        <div class="ts-head-left"><span class="ts-sev ${t.sev}"></span><h4>${t.q}</h4></div>
+        <span class="ts-chevron">▾</span>
+      </div>
+      <div class="ts-body"><div class="ts-body-inner">
+        <div><b>Waarschijnlijke oorzaak:</b> ${t.cause}</div>
+        ${t.steps.length? `<div style="margin-top:10px;"><b>Check dit:</b><ul style="margin:6px 0 0;padding-left:18px;">${t.steps.map(s=>`<li style="margin-bottom:4px;">${s}</li>`).join('')}</ul></div>`:''}
+        <div class="ts-fix"><b>Oplossing:</b> ${t.fix}</div>
+        ${t.articles.length? `<div class="ts-articles">${t.articles.map(a=>`<span class="art-chip">${a}</span>`).join('')}</div>`:''}
+      </div></div>
+    </div>`).join('');
+  list.querySelectorAll('.ts-head').forEach(h=>{
+    h.addEventListener('click',()=>{ h.parentElement.classList.toggle('open'); });
+  });
+}
+renderTs();
+
+/* =================== ARTIKELZOEKER (full table) =================== */
+let allArticles = [];
+parts.forEach(p=>{ p.codes.forEach(c=>{ allArticles.push({code:c.code, name:`${p.name} ${c.v!=='—'?c.v:''}`.trim(), cat:p.cat, color:c.color}); }); });
+
+const artCatFilter = document.getElementById('artCatFilter');
+[...new Set(allArticles.map(a=>a.cat))].forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; artCatFilter.appendChild(o); });
+
+function renderArtTable(){
+  const q = document.getElementById('artSearchInput').value.toLowerCase();
+  const cat = artCatFilter.value;
+  const body = document.getElementById('artFullBody');
+  body.innerHTML = allArticles.filter(a=> (!cat||a.cat===cat) && (a.code.includes(q)||a.name.toLowerCase().includes(q)||a.color.includes(q)) )
+    .map(a=>`<tr><td class="code">${a.code}</td><td>${a.name}</td><td>${a.cat}</td><td><span class="dot ${a.color}" style="display:inline-block;vertical-align:middle;margin-right:6px;"></span>${a.color}</td></tr>`).join('');
+}
+document.getElementById('artSearchInput').addEventListener('input', renderArtTable);
+artCatFilter.addEventListener('change', renderArtTable);
+renderArtTable();
+
+/* =================== RAILCONFIGURATOR =================== */
+/* Architectuur in lagen: tekening (cm-graaf) -> topologie -> polariteit -> stuklijst.
+   Kernprincipe: de gebruiker tekent alleen de vorm; alle onderdelen, varianten en
+   artikelnummers worden afgeleid. De rode lijn = polariteitslijn uit het schema. */
+(function(){
+
+const CODES = {
+  rail:      {wit:{1:'2000766',2:'2000797',3:'2000827',4:'2012899'}, zwart:{1:'2000759',2:'2000780',3:'2000810',4:'2012882'}, grijs:{1:'2000742',2:'2000773',3:'2000803',4:'2012875'}},
+  aansluit:  {wit:{R:'2000858',L:'2000889'}, zwart:{R:'2000841',L:'2000872'}, grijs:{R:'2000834',L:'2000865'}},
+  bocht:     {wit:{binnen:'2000940',buiten:'2000971'}, zwart:{binnen:'2000933',buiten:'2000964'}, grijs:{binnen:'2000926',buiten:'2000957'}},
+  /* Naamtoewijzing T-varianten geverifieerd 17-7-2026 via verificatievel. */
+  tkoppel:   {wit:{R1:'2001008',L2:'2001039',R2:'2002432',L1:'2002463'}, zwart:{R1:'2000995',L2:'2001022',R2:'2002425',L1:'2002456'}, grijs:{R1:'2000988',L2:'2001015',R2:'2002418',L1:'2002449'}},
+  kruis:     {wit:'2001060', zwart:'2001053', grijs:'2001046'},
+  midden:    {wit:'2001183', zwart:'2001176', grijs:'2001169'},
+  eindkap:   {wit:'2000919', zwart:'2000902', grijs:'2000896'},
+  elkoppel:  {wit:'2001091', zwart:'2001084', grijs:'2001077'},
+  adapter70: {wit:'2001404', zwart:'2001398', grijs:'2001381'},
+  trek:'2001947'
+};
+
+/* Inbouwmaat per aansluiting in mm: alleen het zichtbare deel telt,
+   het koppeldeel schuift in de rail. VOLLEDIG BEVESTIGD door productcheck:
+   aansluitstuk 66, bocht 66/arm, T-balk 100 totaal (50/zijde), T-steel 66,
+   kruis 50/arm, middenvoeding 100, elektrisch koppelstuk 0, eindkap 3. */
+const MM = { aansluit:66, eindkap:3, bochtArm:66, tBarArm:50, tStemArm:66, kruisArm:50, midden:100, elkoppel:0 };
+
+const SHAPES = {
+ 'rechte-lijn':{label:'Rechte lijn', pts:[[0,0],[300,0]], ln:[[0,1]]},
+ 'l-vorm':{label:'L vorm', pts:[[0,0],[0,200],[300,200]], ln:[[0,1],[1,2]]},
+ 't-vorm':{label:'T vorm', pts:[[0,0],[200,0],[400,0],[200,200]], ln:[[0,1],[1,2],[1,3]]},
+ 'u-vorm':{label:'U vorm', pts:[[0,0],[0,200],[300,200],[300,0]], ln:[[0,1],[1,2],[2,3]]},
+ 'h-vorm':{label:'H vorm', pts:[[0,0],[0,200],[0,400],[300,0],[300,200],[300,400]], ln:[[0,1],[1,2],[3,4],[4,5],[1,4]]},
+ 'rechthoek':{label:'Rechthoek', grid:[1,1]},
+ '8-vorm':{label:'8-vorm', grid:[2,1]},
+ '88-vorm':{label:'88-vorm', grid:[2,2]},
+ 'andere-vorm':{label:'Andere vorm', grid:'custom'},
+};
+
+let st = { step:1, color:'wit', powercfg:'A', shape:null, gRows:2, gCols:2,
+  nodes:[], edges:[], nid:0, eid:0, feeds:[], adapters:0, use4m:false, pick:false, mount:'geen', proj:'',
+  sheets:[{id:'s1',name:'Tekenvlak 1'}], sheet:'s1', sid:1 };
+let hist=[], hIdx=-1;
+let lastBOM=null;
+let frozenFit=null;   /* vaste schaal tijdens slepen */
+let dragCtx=null;      /* uiteinde slepen */
+let compDrag=null;     /* heel figuur slepen */
+let panCtx=null;       /* achtergrond pannen */
+let view={zoom:1, px:0, py:0};
+function pxScale(){ const r=$('c2Svg').getBoundingClientRect(); return (r&&r.width? r.width:900)/900; }
+
+const $=id=>document.getElementById(id);
+const CLRN = c => c.charAt(0).toUpperCase()+c.slice(1);
+function node(id){ return st.nodes.find(n=>n.id===id); }
+function edge(id){ return st.edges.find(e=>e.id===id); }
+function edgesAt(id){ return st.edges.filter(e=>e.a===id||e.b===id); }
+function other(e,nId){ return e.a===nId?e.b:e.a; }
+function eAxis(e){ return node(e.a).y===node(e.b).y?'h':'v'; }
+function eLen(e){ const A=node(e.a),B=node(e.b); return Math.abs(A.x-B.x)+Math.abs(A.y-B.y); }
+function armDir(nId,e){ const A=node(nId), B=node(other(e,nId)); return {x:Math.sign(B.x-A.x), y:Math.sign(B.y-A.y)}; }
+function dot(a,b){ return a.x*b.x+a.y*b.y; }
+function rotCCW(v){ return {x:v.y, y:-v.x}; }
+function nodeType(nId){ const es=edgesAt(nId);
+  if(es.length===1) return 'end';
+  if(es.length===2) return eAxis(es[0])===eAxis(es[1])?'straight':'corner';
+  if(es.length===3) return 't';
+  return 'cross'; /* 4 of meer */ }
+function tStem(nId){ const es=edgesAt(nId); const h=es.filter(e=>eAxis(e)==='h');
+  return h.length===1? h[0] : es.find(e=>eAxis(e)==='v'); }
+/* Trajecten: elke samenhangende deelgraaf is een eigen traject met eigen aansluitpunt */
+function compMap(){ const m={}; let c=0;
+  st.nodes.forEach(n=>{ if(m[n.id]!==undefined) return;
+    const q=[n.id]; m[n.id]=c;
+    while(q.length){ const x=q.shift(); edgesAt(x).forEach(e=>{ const y=other(e,x); if(m[y]===undefined){ m[y]=c; q.push(y);} }); }
+    c++; });
+  return {m, count:c};
+}
+function feedForNode(nId){ return st.feeds.find(f=>f.kind==='node'&&f.node===nId); }
+function feedForEdge(eId){ return st.feeds.find(f=>f.kind==='edge'&&f.edge===eId); }
+function feedComp(f, m){ return m[f.kind==='node' ? f.node : (edge(f.edge)||{a:null}).a]; }
+function nodeSheet(nId){ const n=node(nId); return n? n.s : null; }
+function sheetNodes(sh){ return st.nodes.filter(n=>n.s===sh); }
+function sheetEdges(sh){ return st.edges.filter(e=>nodeSheet(e.a)===sh); }
+
+/* ---------- geschiedenis ---------- */
+function snap(){ hist = hist.slice(0,hIdx+1);
+  hist.push(JSON.stringify({nodes:st.nodes,edges:st.edges,nid:st.nid,eid:st.eid,feeds:st.feeds,shape:st.shape,sheets:st.sheets,sheet:st.sheet,sid:st.sid}));
+  hIdx=hist.length-1; }
+function restore(i){ const s=JSON.parse(hist[i]);
+  st.nodes=s.nodes; st.edges=s.edges; st.nid=s.nid; st.eid=s.eid; st.feeds=s.feeds||[]; st.shape=s.shape;
+  st.sheets=s.sheets||[{id:'s1',name:'Tekenvlak 1'}]; st.sheet=s.sheet||st.sheets[0].id; st.sid=s.sid||st.sheets.length;
+  hIdx=i; st.pick=false; refresh(); }
+
+/* ---------- vorm bouwen ---------- */
+function gridPts(r,c){ const W=300,H=200; const pts=[],ln=[];
+ for(let i=0;i<=r;i++)for(let j=0;j<=c;j++) pts.push([j*W,i*H]);
+ const ix=(i,j)=>i*(c+1)+j;
+ for(let i=0;i<=r;i++)for(let j=0;j<c;j++) ln.push([ix(i,j),ix(i,j+1)]);
+ for(let j=0;j<=c;j++)for(let i=0;i<r;i++) ln.push([ix(i,j),ix(i+1,j)]);
+ return {pts,ln}; }
+
+function selectShape(id){
+  const def=SHAPES[id]; let pts, ln;
+  if(def.grid){ const rc = def.grid==='custom'? [st.gRows,st.gCols] : def.grid; const g=gridPts(rc[0],rc[1]); pts=g.pts; ln=g.ln; }
+  else { pts=def.pts; ln=def.ln; }
+  const sn=sheetNodes(st.sheet);
+  const adding = sn.length>0;
+  let dx=0, dy=0;
+  if(adding){
+    /* nieuw traject rechts van de bestaande tekening op dit tekenvlak, 2 m ertussen */
+    const maxX=Math.max.apply(null, sn.map(n=>n.x));
+    const minY=Math.min.apply(null, sn.map(n=>n.y));
+    dx = maxX - Math.min.apply(null, pts.map(p=>p[0])) + 200;
+    dy = minY - Math.min.apply(null, pts.map(p=>p[1]));
+  }
+  if(!st.shape){ st.shape=id; }
+  if(!st.nodes.length){ hist=[]; hIdx=-1; }
+  const base=st.nid;
+  pts.forEach(p=> st.nodes.push({id:'n'+(st.nid++), x:p[0]+dx, y:p[1]+dy, s:st.sheet}));
+  ln.forEach(l=> st.edges.push({id:'e'+(st.eid++), a:'n'+(base+l[0]), b:'n'+(base+l[1])}));
+  st.pick=false; snap();
+  st.step=4; refresh();
+}
+
+/* ---------- mutaties ---------- */
+function validateFeeds(){
+  st.feeds = st.feeds.filter(f=> f.kind==='node' ? (node(f.node)&&edgesAt(f.node).length===1) : !!edge(f.edge));
+  const {m}=compMap(); const seen={};
+  st.feeds = st.feeds.filter(f=>{ const c=feedComp(f,m); if(c===undefined||seen[c]) return false; seen[c]=true; return true; });
+}
+/* Samenvallende punten verbinden: uiteinde op knooppunt -> samenvoegen (bocht/T/kruis),
+   uiteinde op segment -> segment splitsen (T), kruisende segmenten -> kruispunt. */
+function mergeCoincident(){
+  /* 1) knoop op knoop */
+  for(let i=0;i<st.nodes.length;i++) for(let j=i+1;j<st.nodes.length;j++){
+    const a=st.nodes[i], b=st.nodes[j];
+    if(a.s===b.s && a.x===b.x && a.y===b.y){
+      st.edges.forEach(e=>{ if(e.a===b.id)e.a=a.id; if(e.b===b.id)e.b=a.id; });
+      st.edges = st.edges.filter(e=>e.a!==e.b);
+      const seen={};
+      st.edges = st.edges.filter(e=>{ const k=[e.a,e.b].sort().join('~'); if(seen[k])return false; seen[k]=true; return true; });
+      st.feeds.forEach(f=>{ if(f.kind==='node'&&f.node===b.id) f.node=a.id; });
+      st.nodes.splice(j,1);
+      validateFeeds(); return mergeCoincident();
+    }
+  }
+  /* 2) knoop midden op een segment */
+  for(const n of st.nodes) for(const e of st.edges){
+    if(e.a===n.id||e.b===n.id) continue;
+    const A=node(e.a),B=node(e.b);
+    if(A.s!==n.s) continue;
+    const onH = A.y===B.y && n.y===A.y && n.x>Math.min(A.x,B.x) && n.x<Math.max(A.x,B.x);
+    const onV = A.x===B.x && n.x===A.x && n.y>Math.min(A.y,B.y) && n.y<Math.max(A.y,B.y);
+    if(onH||onV){
+      st.edges = st.edges.filter(x=>x.id!==e.id);
+      st.edges.push({id:'e'+(st.eid++), a:e.a, b:n.id});
+      st.edges.push({id:'e'+(st.eid++), a:n.id, b:e.b});
+      st.feeds = st.feeds.filter(f=>!(f.kind==='edge'&&f.edge===e.id));
+      validateFeeds(); return mergeCoincident();
+    }
+  }
+  /* 3) kruisende segmenten zonder knooppunt -> kruispunt maken */
+  for(const h of st.edges){ const A=node(h.a),B=node(h.b);
+    if(A.y!==B.y) continue;
+    for(const v of st.edges){ const C=node(v.a),D=node(v.b);
+      if(C.x!==D.x) continue;
+      if(A.s!==C.s) continue;
+      const X=C.x, Y=A.y;
+      if(X>Math.min(A.x,B.x)&&X<Math.max(A.x,B.x)&&Y>Math.min(C.y,D.y)&&Y<Math.max(C.y,D.y)){
+        const m={id:'n'+(st.nid++), x:X, y:Y, s:A.s};
+        st.nodes.push(m);
+        st.edges = st.edges.filter(x=>x.id!==h.id&&x.id!==v.id);
+        st.edges.push({id:'e'+(st.eid++), a:h.a, b:m.id});
+        st.edges.push({id:'e'+(st.eid++), a:m.id, b:h.b});
+        st.edges.push({id:'e'+(st.eid++), a:v.a, b:m.id});
+        st.edges.push({id:'e'+(st.eid++), a:m.id, b:v.b});
+        st.feeds = st.feeds.filter(f=>!(f.kind==='edge'&&(f.edge===h.id||f.edge===v.id)));
+        validateFeeds(); return mergeCoincident();
+      }
+    }
+  }
+}
+function addSegFromNode(nId, dir){
+  const n=node(nId); const m={id:'n'+(st.nid++), x:n.x+dir.x*100, y:n.y+dir.y*100, s:n.s};
+  st.nodes.push(m); st.edges.push({id:'e'+(st.eid++), a:nId, b:m.id});
+  mergeCoincident(); normalizeAll(); validateFeeds(); snap(); refresh();
+}
+function addStub(eId, dir){
+  const e=edge(eId); const A=node(e.a), B=node(e.b);
+  if(eLen(e)<200) return; /* splitsing op hele meter vereist >= 1 m aan beide zijden */
+  const m={id:'n'+(st.nid++), x:Math.round((A.x+B.x)/2/100)*100, y:Math.round((A.y+B.y)/2/100)*100, s:A.s};
+  const s={id:'n'+(st.nid++), x:m.x+dir.x*100, y:m.y+dir.y*100, s:A.s};
+  st.nodes.push(m); st.nodes.push(s);
+  st.edges = st.edges.filter(x=>x.id!==eId);
+  st.edges.push({id:'e'+(st.eid++), a:e.a, b:m.id});
+  st.edges.push({id:'e'+(st.eid++), a:m.id, b:e.b});
+  st.edges.push({id:'e'+(st.eid++), a:m.id, b:s.id});
+  st.feeds = st.feeds.filter(f=>!(f.kind==='edge'&&f.edge===eId));
+  mergeCoincident(); normalizeAll(); validateFeeds(); snap(); refresh();
+}
+function normalizeNode(nId){
+  const es=edgesAt(nId);
+  if(es.length===0){ st.nodes=st.nodes.filter(n=>n.id!==nId); return; }
+  if(es.length===2 && eAxis(es[0])===eAxis(es[1])){
+    const a=other(es[0],nId), b=other(es[1],nId);
+    st.edges=st.edges.filter(x=>x.id!==es[0].id && x.id!==es[1].id);
+    const ne={id:'e'+(st.eid++), a, b};
+    st.edges.push(ne);
+    st.feeds.forEach(f=>{ if(f.kind==='edge'&&(f.edge===es[0].id||f.edge===es[1].id)) f.edge=ne.id; });
+    st.nodes=st.nodes.filter(n=>n.id!==nId);
+  }
+}
+/* Alle collineaire tussenpunten (graad 2, zelfde as) samensmelten tot een segment */
+function normalizeAll(){
+  let again=true;
+  while(again){ again=false;
+    for(const n of [...st.nodes]){
+      if(node(n.id) && edgesAt(n.id).length===2 && nodeType(n.id)==='straight'){ normalizeNode(n.id); again=true; }
+    }
+  }
+}
+function removeLeafEdge(eId){
+  if(st.edges.length<=1) return;
+  const e=edge(eId);
+  const leaf = edgesAt(e.a).length===1 ? e.a : e.b;
+  const keep = other(e,leaf);
+  st.feeds = st.feeds.filter(f=>!(f.kind==='node'&&f.node===leaf) && !(f.kind==='edge'&&f.edge===eId));
+  st.edges=st.edges.filter(x=>x.id!==eId);
+  st.nodes=st.nodes.filter(n=>n.id!==leaf);
+  normalizeNode(keep);
+  validateFeeds(); snap(); refresh();
+}
+function setLen(eId,newLen){
+  newLen=Math.max(100, Math.min(50000, Math.round(newLen/100)*100)); /* hele meters; 500 m = technische bovengrens (rendering), geen productlimiet */
+  const e=edge(eId); if(!e) return;
+  const cur=eLen(e); const d=newLen-cur; if(!d){ refresh(); return; }
+  const seen=new Set([e.b]); const q=[e.b];
+  while(q.length){ const x=q.shift(); edgesAt(x).forEach(o=>{ if(o.id===e.id)return; const y=other(o,x); if(!seen.has(y)){seen.add(y);q.push(y);} }); }
+  if(!seen.has(e.a)){
+    const dir=armDir(e.a,e);
+    seen.forEach(idn=>{ const n=node(idn); n.x+=dir.x*d; n.y+=dir.y*d; });
+  } else {
+    const A=node(e.a),B=node(e.b);
+    const comp=new Set([e.a]); const q2=[e.a];
+    while(q2.length){ const x=q2.shift(); edgesAt(x).forEach(o=>{ const y=other(o,x); if(!comp.has(y)){comp.add(y);q2.push(y);} }); }
+    if(eAxis(e)==='h'){ const x2=Math.max(A.x,B.x); st.nodes.forEach(n=>{ if(comp.has(n.id)&&n.x>=x2)n.x+=d; }); }
+    else { const y2=Math.max(A.y,B.y); st.nodes.forEach(n=>{ if(comp.has(n.id)&&n.y>=y2)n.y+=d; }); }
+  }
+  mergeCoincident(); normalizeAll(); validateFeeds(); snap(); refresh();
+}
+
+/* ---------- polariteitspropagatie ---------- */
+/* Elke edge krijgt een absolute lijnzijde-normaal (h: boven/onder, v: links/rechts).
+   Bocht: de lijn blijft aan dezelfde fysieke zijde (binnen of buiten de hoek).
+   T-stuk: de lijn loopt via de balk rechtdoor; de steelzijde is een vrije poort
+   (daarvoor bestaan de R/L-spiegelvarianten). Vrije poorten worden na de
+   hoofdpropagatie opgelost: afgedwongen door een lus, anders met een default.
+   Naamtoewijzing van T-varianten geverifieerd 17-7-2026 via verificatievel. */
+function rotCW(v){ return {x:-v.y, y:v.x}; }
+function propagate(){
+  const nor={}, conf=new Set(), vrf=new Set();
+  if(!st.feeds.length || !st.edges.length) return {nor, conf, vrf, fed:false};
+  const q=[];
+  function put(eId,nrm){
+    if(nor[eId]){ if(nor[eId].x!==nrm.x||nor[eId].y!==nrm.y) conf.add(eId); return; }
+    nor[eId]=nrm; q.push(eId);
+  }
+  function drain(){
+    while(q.length){
+      const eId=q.shift(); const e=edge(eId); const n=nor[eId];
+      [e.a,e.b].forEach(nId=>{
+        const t=nodeType(nId); const es=edgesAt(nId);
+        if(t==='end') return;
+        if(t==='straight'){ put(es.find(x=>x.id!==eId).id, n); return; }
+        if(t==='corner'){
+          const o=es.find(x=>x.id!==eId);
+          const d1=armDir(nId,e), d2=armDir(nId,o);
+          const s=Math.sign(dot(n,d2));
+          put(o.id, {x:s*d1.x, y:s*d1.y});
+          return;
+        }
+        if(t==='t'){
+          vrf.add(nId);
+          const stem=tStem(nId);
+          if(e.id!==stem.id){
+            const ob=es.filter(x=>x.id!==stem.id).find(x=>x.id!==eId);
+            put(ob.id, n); /* balk: rechtdoor, zelfde zijde */
+          }
+          /* steel resp. balk bij steel-voeding: vrije poort, later oplossen */
+          return;
+        }
+        /* kruis: per as rechtdoor; de andere as is een vrije poort */
+        vrf.add(nId);
+        const ax=eAxis(e);
+        es.forEach(o=>{ if(o.id!==eId && eAxis(o)===ax) put(o.id,n); });
+      });
+    }
+  }
+  st.feeds.forEach(f=>{
+    if(f.kind==='node'){
+      const es=edgesAt(f.node); if(!es.length) return;
+      const d=armDir(f.node, es[0]);
+      /* Rechts = lijn rechts gezien vanaf het aansluitstuk de rail in (schermcoord.) */
+      put(es[0].id, f.side==='R' ? {x:-d.y,y:d.x} : {x:d.y,y:-d.x});
+    } else {
+      const e=edge(f.edge); if(!e) return;
+      const base = eAxis(e)==='h' ? {x:0,y:-1} : {x:-1,y:0};
+      put(e.id, f.flip ? {x:-base.x,y:-base.y} : base);
+    }
+  });
+  drain();
+  /* Vrije poorten oplossen (lus dwingt af via drain; anders default) */
+  let progress=true;
+  while(progress){
+    progress=false;
+    st.nodes.forEach(nd=>{
+      const t=nodeType(nd.id);
+      if(t==='t'){
+        const stem=tStem(nd.id); const bars=edgesAt(nd.id).filter(x=>x.id!==stem.id);
+        const nb=nor[bars[0].id]||nor[bars[1].id]; const ns=nor[stem.id];
+        const dS=armDir(nd.id,stem);
+        if(nb && !ns){
+          /* vrije steelzijde: default-keuze (beide varianten zijn geldig product) */
+          put(stem.id, rotCCW(dS)); drain(); progress=true;
+        } else if(ns && !nb){
+          /* vrije balkzijde: default tegenover de steel (= Rechts-familie) */
+          bars.forEach(b=>put(b.id, {x:-dS.x, y:-dS.y})); drain(); progress=true;
+        }
+      } else if(t==='cross'){
+        const es=edgesAt(nd.id);
+        const h=es.filter(x=>eAxis(x)==='h'), v=es.filter(x=>eAxis(x)==='v');
+        const nh=nor[h[0].id]||nor[h[1].id], nv=nor[v[0].id]||nor[v[1].id];
+        if(nh && !nv){ const np=rotCCW(nh); v.forEach(x=>put(x.id,np)); drain(); progress=true; }
+        else if(nv && !nh){ const np=rotCW(nv); h.forEach(x=>put(x.id,np)); drain(); progress=true; }
+      }
+    });
+  }
+  return {nor,conf,vrf,fed:true};
+}
+
+/* ---------- variantafleiding per knooppunt ---------- */
+function nodeVariants(P){
+  const out={};
+  st.nodes.forEach(n=>{
+    const t=nodeType(n.id); const es=edgesAt(n.id);
+    if(t==='end'){
+      const fN=feedForNode(n.id);
+      if(fN)
+        out[n.id]={cls:'aansluit', label:'Aansluitstuk '+fN.side, art:CODES.aansluit[st.color][fN.side]};
+      else out[n.id]={cls:'eind', label:'Eindkap', art:CODES.eindkap[st.color]};
+      return;
+    }
+    if(t==='straight'){ out[n.id]={cls:'recht', label:'', art:null}; return; }
+    if(t==='corner'){
+      const n1=P.nor[es[0].id];
+      if(!n1){ out[n.id]={cls:'onb', label:'Bocht ?', art:null}; return; }
+      const d2=armDir(n.id,es[1]);
+      const v = Math.sign(dot(n1,d2))>0 ? 'binnen' : 'buiten';
+      out[n.id]={cls:'bocht', label:'Bocht '+(v==='binnen'?'Binnen':'Buiten'), art:CODES.bocht[st.color][v]};
+      return;
+    }
+    if(t==='t'){
+      const stem=tStem(n.id); const bars=es.filter(x=>x.id!==stem.id);
+      const nb=P.nor[bars[0].id], ns=P.nor[stem.id];
+      if(!nb||!ns){ out[n.id]={cls:'onb', label:'T ?', art:null}; return; }
+      const dS=armDir(n.id,stem);
+      /* Geverifieerd 17-7-2026 (verificatievel): R/L = balkzijde
+         (lijn tegenover steel = Rechts, aan steelzijde = Links);
+         Type = steelzijde (links = Type 1, rechts = Type 2). */
+      const side = Math.sign(dot(nb,dS))>0 ? 'L' : 'R';
+      const rr = rotCCW(dS);
+      const type = (ns.x===rr.x && ns.y===rr.y) ? '2' : '1';
+      out[n.id]={cls:'t', label:'T '+(side==='R'?'Rechts':'Links')+' Type '+type, art:CODES.tkoppel[st.color][side+type]};
+      return;
+    }
+    out[n.id]={cls:'kruis', label:'Kruis', art:CODES.kruis[st.color]};
+  });
+  return out;
+}
+
+/* ---------- railverdeling ---------- */
+function armMm(nId, e){
+  const t=nodeType(nId);
+  if(t==='end') return feedForNode(nId)? MM.aansluit : MM.eindkap;
+  if(t==='corner') return MM.bochtArm;
+  if(t==='t') return e.id===tStem(nId).id ? MM.tStemArm : MM.tBarArm;
+  if(t==='cross') return MM.kruisArm;
+  return 0;
+}
+function piecesTxt(pieces){
+  const cnt={}; pieces.forEach(p=>cnt[p]=(cnt[p]||0)+1);
+  return Object.keys(cnt).sort((a,b)=>b-a).map(p=> (cnt[p]>1? cnt[p]+'\u00d7 ':'')+p+' m').join(' + ');
+}
+function railFor(e){
+  /* Getekende maat = raillengte (hele meters). Koppelstukken komen daar
+     in werkelijkheid bovenop en tellen niet mee in de bestelling.
+     Prioriteit: 3 m -> 2 m -> 1 m; 4 m alleen als er expliciet om gevraagd wordt. */
+  const lenM = Math.round(eLen(e)/100);
+  const maxM = st.use4m ? 4 : 3;
+  const pieces=[]; let rem=lenM;
+  while(rem>0){ const p=Math.min(maxM, rem); pieces.push(p); rem-=p; }
+  /* werkelijke maat = rail + zichtbare inbouwmaten van de koppelstukken eromheen */
+  const extraMm = armMm(e.a,e) + armMm(e.b,e) + (feedForEdge(e.id)?MM.midden:0);
+  return {lenM, pieces, seams:pieces.length-1, extraMm};
+}
+
+/* ---------- montagepunten ---------- */
+/* Regel geverifieerd via montagepunten-vel: 1 punt op elke hele meter langs elk
+   segment, INCLUSIEF beide uiteinden; hoek-/T-/kruispunten tellen als gedeeld punt
+   (geen extra punt bovenop); naden en middenvoeding krijgen geen extra punt.
+   Advies-bevestigingsafstand: 1000 mm (uiteindelijk aan de installateur). */
+const MOUNTS = {
+  geen:    {label:'\u2014 nog geen keuze \u2014'},
+  beugel:  {label:'Montagebeugel (plafond)'},
+  sys:     {label:'Systeemplafondbeugel'},
+  ophang3: {label:'Systeemplafondbeugel ophangset verstelbaar 3 m'},
+  ophang6: {label:'Systeemplafondbeugel ophangset verstelbaar 6 m'},
+  pendel:  {label:'Pendelset 10-pack (10\u00d7 plafondbus + staalkabel 3 m)', per:10},
+};
+function computeMounts(sheetId){
+  const pts=[]; const seen={}; const key=p=>p.x+'_'+p.y+'_'+(sheetId||nodeSheet(p.id)||'');
+  (sheetId? sheetEdges(sheetId) : st.edges).forEach(e=>{
+    const A=node(e.a); const d=armDir(e.a,e); const L=Math.round(eLen(e)/100);
+    const shKey=A.s;
+    for(let i=0;i<=L;i++){ const p={x:A.x+d.x*i*100, y:A.y+d.y*i*100};
+      const k=p.x+'_'+p.y+'_'+shKey;
+      if(!seen[k]){ seen[k]=1; pts.push(p); } }
+  });
+  return {pts, count:pts.length};
+}
+
+/* ---------- stuklijst ---------- */
+function computeBOM(){
+  const P=propagate();
+  const V=nodeVariants(P);
+  const items={};
+  function add(code,name,qty,prov){ if(!code)return;
+    if(!items[code])items[code]={name,qty:0,prov:[]};
+    items[code].qty+=qty; if(prov)items[code].prov.push(prov); }
+  const railDetail=[]; const errs=[];
+  st.nodes.forEach(n=>{ const v=V[n.id];
+    if(v&&v.art) add(v.art, v.label+' '+CLRN(st.color), 1, 'n:'+n.id); });
+  st.feeds.filter(f=>f.kind==='edge').forEach(f=> add(CODES.midden[st.color],'Middenvoeding '+CLRN(st.color),1,'e:'+f.edge));
+  st.edges.forEach(e=>{
+    const r=railFor(e);
+    r.pieces.forEach(p=> add(CODES.rail[st.color][p], 'Rail '+p+'m '+CLRN(st.color), 1, 'e:'+e.id));
+    if(r.seams>0) add(CODES.elkoppel[st.color],'Elektrisch Koppelstuk '+CLRN(st.color),r.seams,'e:'+e.id);
+    railDetail.push({e, r});
+  });
+  if(st.adapters>0){
+    add(CODES.adapter70[st.color],'Adapter 70mm '+CLRN(st.color),st.adapters,null);
+    add(CODES.trek,'Trekontlasting brug (verplicht bij adapter)',st.adapters,null);
+  }
+  const mounts=computeMounts();
+  if(st.mount!=='geen' && mounts.count>0){
+    const md=MOUNTS[st.mount];
+    const qty = md.per ? Math.ceil(mounts.count/md.per) : mounts.count;
+    add('m-'+st.mount, md.label + (md.per? ' (voor '+mounts.count+' punten)':''), qty, null);
+  }
+  return {P,V,items,railDetail,errs,mounts};
+}
+
+/* ---------- canvas ---------- */
+function fit(){
+  const sn=sheetNodes(st.sheet); const src=sn.length?sn:st.nodes;
+  const xs=src.map(n=>n.x), ys=src.map(n=>n.y);
+  const minX=Math.min.apply(null,xs), maxX=Math.max.apply(null,xs);
+  const minY=Math.min.apply(null,ys), maxY=Math.max.apply(null,ys);
+  const W=900,H=560,M=90;
+  const base=Math.min((W-2*M)/Math.max(maxX-minX,1),(H-2*M)/Math.max(maxY-minY,1),1.4);
+  const sc=base*view.zoom;
+  const cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+  return {sc, ox:W/2+view.px - cx*sc, oy:H/2+view.py - cy*sc};
+}
+function zoomBy(factor, vx, vy){
+  const f=fit();
+  const nz=Math.max(0.4, Math.min(4, view.zoom*factor));
+  const real=nz/view.zoom; if(real===1) return;
+  view.zoom=nz;
+  if(vx!=null){
+    /* punt onder de cursor blijft op zijn plek */
+    const ox2 = vx - (vx-f.ox)*real, oy2 = vy - (vy-f.oy)*real;
+    const sn2=sheetNodes(st.sheet); const src2=sn2.length?sn2:st.nodes;
+    const xs=src2.map(n=>n.x), ys=src2.map(n=>n.y);
+    const cx=(Math.min.apply(null,xs)+Math.max.apply(null,xs))/2;
+    const cy=(Math.min.apply(null,ys)+Math.max.apply(null,ys))/2;
+    view.px = ox2 - 450 + cx*f.sc*real;
+    view.py = oy2 - 280 + cy*f.sc*real;
+  }
+  refresh();
+}
+function renderCanvas(B){
+  const svg=$('c2Svg');
+  if(!st.shape || !st.nodes.length){ svg.innerHTML='<text class="c2-empty" x="450" y="280" text-anchor="middle">Kies eerst een vorm in stap 3.</text>'; return; }
+  const f=frozenFit||fit(); const P=B.P, V=B.V;
+  const px=n=>({x:n.x*f.sc+f.ox, y:n.y*f.sc+f.oy});
+  const out=[];
+  const OFF=13, TRIM=16;
+  const shN=sheetNodes(st.sheet), shE=sheetEdges(st.sheet);
+  /* zwaartepunt per traject, om labels aan de buitenkant te plaatsen */
+  const cmR=compMap(); const cent={};
+  shN.forEach(n=>{ const c=cmR.m[n.id]; (cent[c]=cent[c]||{x:0,y:0,k:0}); cent[c].x+=n.x; cent[c].y+=n.y; cent[c].k++; });
+  Object.keys(cent).forEach(c=>{ cent[c].x/=cent[c].k; cent[c].y/=cent[c].k; });
+  const outDirY=n=>{ const c=cent[cmR.m[n.id]]; if(!c) return -1; return n.y>=c.y? 1 : -1; };
+  const outDirX=n=>{ const c=cent[cmR.m[n.id]]; if(!c) return 1; return n.x>=c.x? 1 : -1; };
+
+  if(!shN.length){
+    svg.innerHTML='<text class="c2-empty" x="450" y="280" text-anchor="middle">Leeg tekenvlak \u2014 kies een vorm (stap 3) of \uFF0B Nieuw figuur.</text>';
+    return;
+  }
+
+  shE.forEach(e=>{
+    const A=px(node(e.a)), Bp=px(node(e.b));
+    const pick = st.pick;
+    const isFeed = !!feedForEdge(e.id);
+    const conf = P.conf.has(e.id);
+    const g=[];
+    g.push('<line class="c2-seg'+(pick?' c2-pickable':' c2-movable')+'" data-pickedge="'+e.id+'" x1="'+A.x+'" y1="'+A.y+'" x2="'+Bp.x+'" y2="'+Bp.y+'"/>');
+    const n=P.nor[e.id];
+    if(n && !conf){
+      /* Doorlopende polariteitslijn zoals het schema: eindpunten sluiten aan
+         op de lijn van het aangrenzende onderdeel (hoekpunt = p + (n1+n2)*OFF). */
+      const term = (nId)=>{
+        const p=px(node(nId)); const t=nodeType(nId); let add={x:0,y:0};
+        if(t==='corner'){ const o=edgesAt(nId).find(x=>x.id!==e.id); const no=P.nor[o.id]; if(no) add=no; }
+        else if(t==='t'){ const stem=tStem(nId);
+          if(e.id===stem.id){ const bar=edgesAt(nId).find(x=>x.id!==stem.id); const nb=P.nor[bar.id]; if(nb) add=nb; } }
+        return {x:p.x+(n.x+add.x)*OFF, y:p.y+(n.y+add.y)*OFF};
+      };
+      const p1=term(e.a), p2=term(e.b);
+      g.push('<line class="c2-red" x1="'+p1.x+'" y1="'+p1.y+'" x2="'+p2.x+'" y2="'+p2.y+'"/>');
+    }
+    const mx=(A.x+Bp.x)/2, my=(A.y+Bp.y)/2;
+    const horiz = eAxis(e)==='h';
+    const lx = horiz? mx : mx+34, ly = horiz? my-26 : my;
+    const lab = (eLen(e)/100)+' m';
+    const w = lab.length*7.5+14;
+    if(!st.pick){
+      g.push('<g class="c2-lenlab" data-len="'+e.id+'" data-x="'+lx+'" data-y="'+ly+'"><rect x="'+(lx-w/2)+'" y="'+(ly-11)+'" width="'+w+'" height="21" rx="5"/><text x="'+lx+'" y="'+(ly+4)+'" text-anchor="middle">'+lab+'</text><title>Klik om de maat te wijzigen</title></g>');
+      if(eLen(e)>=200){
+      const sx = horiz? mx : mx-30, sy = horiz? my+28 : my;
+      g.push('<g class="c2-plus" data-pluse="'+e.id+'"><circle cx="'+sx+'" cy="'+sy+'" r="9"/><text x="'+sx+'" y="'+(sy+4.5)+'" text-anchor="middle">+</text><title>Aftakking toevoegen op dit segment</title></g>');
+      }
+    }
+    if(isFeed){
+      g.push('<rect class="c2-feed" data-feededge="'+e.id+'" x="'+(mx-11)+'" y="'+(my-8)+'" width="22" height="16" rx="4"><title>Middenvoeding — klik om de lijnzijde te wisselen</title></rect>');
+      const fA=node(e.a); const fdy=outDirY(fA), fdx=outDirX(fA);
+      if(horiz) g.push('<text class="c2-tag red" x="'+mx+'" y="'+(my+(fdy>0?42:-24))+'" text-anchor="middle">Middenvoeding</text>');
+      else g.push('<text class="c2-tag red" x="'+(mx+fdx*30)+'" y="'+(my+4)+'" text-anchor="'+(fdx>0?'start':'end')+'">Middenvoeding</text>');
+    }
+    out.push('<g id="c2el-e'+e.id+'">'+g.join('')+'</g>');
+  });
+
+  computeMounts(st.sheet).pts.forEach(mp=>{
+    const q={x:mp.x*f.sc+f.ox, y:mp.y*f.sc+f.oy};
+    out.push('<circle class="c2-mnt" cx="'+q.x+'" cy="'+q.y+'" r="2.6"/>');
+  });
+  shN.forEach(nd=>{
+    const p=px(nd); const t=nodeType(nd.id); const v=V[nd.id]||{};
+    const dy=outDirY(nd); const ly=p.y + (dy>0? 26 : -18); const titl='<title>'+(v.label||'')+(v.art?' \u00b7 '+v.art:'')+'</title>';
+    const g=[];
+    const fN = feedForNode(nd.id); const isFeedN = !!fN;
+    if(t==='end'){
+      if(isFeedN){
+        g.push('<circle class="c2-feed" data-feednode="'+nd.id+'" cx="'+p.x+'" cy="'+p.y+'" r="11"><title>Klik om Links/Rechts te wisselen</title></circle>');
+        g.push('<text class="c2-tag red" x="'+p.x+'" y="'+ly+'" text-anchor="middle">'+v.label+' \u26A1</text>');
+      } else {
+        g.push('<circle class="c2-nodeend'+(st.pick?' c2-pickable':' c2-drag')+'" data-picknode="'+nd.id+'"'+(st.pick?'':' data-dragend="'+nd.id+'"')+' cx="'+p.x+'" cy="'+p.y+'" r="9"><title>Sleep om de lengte per meter aan te passen</title></circle>');
+        if(!st.pick) g.push('<text class="c2-tag" x="'+p.x+'" y="'+ly+'" text-anchor="middle">'+v.label+'</text>');
+      }
+      if(!st.pick){
+        const e0=edgesAt(nd.id)[0]; const d=armDir(nd.id,e0);
+        const bx=p.x-d.x*30, by=p.y-d.y*30;
+        g.push('<g class="c2-plus" data-plusn="'+nd.id+'"><circle cx="'+bx+'" cy="'+by+'" r="9"/><text x="'+bx+'" y="'+(by+4.5)+'" text-anchor="middle">+</text><title>Segment toevoegen aan dit uiteinde</title></g>');
+        if(st.edges.length>1){
+          const dxr = (d.x===0)? 22 : 0, dyr = (d.x===0)? 0 : -22;
+          g.push('<g class="c2-del" data-del="'+e0.id+'"><circle cx="'+(bx+dxr)+'" cy="'+(by+dyr)+'" r="7.5"/><text x="'+(bx+dxr)+'" y="'+(by+dyr+3.6)+'" text-anchor="middle">\u00D7</text><title>Dit segment verwijderen</title></g>');
+        }
+      }
+    } else if(t==='corner'){
+      g.push('<rect class="c2-nodedark" x="'+(p.x-8)+'" y="'+(p.y-8)+'" width="16" height="16" transform="rotate(45 '+p.x+' '+p.y+')"/>');
+      if(!st.pick){
+        g.push('<text class="c2-tag" x="'+p.x+'" y="'+ly+'" text-anchor="middle">'+v.label+'</text>');
+      }
+    } else if(t==='t'||t==='cross'){
+      g.push('<rect class="c2-nodedark" x="'+(p.x-9)+'" y="'+(p.y-9)+'" width="18" height="18" rx="4"/>');
+      g.push('<text x="'+p.x+'" y="'+(p.y+3.8)+'" text-anchor="middle" font-family="Inter" font-size="9.5" font-weight="700" fill="#fff">'+(t==='t'?'T':'+')+'</text>');
+      if(!st.pick){
+        g.push('<text class="c2-tag" x="'+p.x+'" y="'+ly+'" text-anchor="middle">'+v.label+'</text>');
+      }
+    }
+    out.push('<g id="c2el-n'+nd.id+'">'+titl+g.join('')+'</g>');
+  });
+
+  if(B.P.conf.size || B.errs.length){
+    out.push('<g><rect x="566" y="12" width="322" height="46" rx="9" fill="#fff" stroke="#D6362B" stroke-width="1.5"/>'
+      +'<circle cx="590" cy="35" r="11" fill="#D6362B"/><text x="590" y="39.5" text-anchor="middle" fill="#fff" font-size="12" font-weight="700" font-family="Inter">\u2715</text>'
+      +'<text x="608" y="30" font-family="Inter" font-size="11.5" font-weight="700" fill="#D6362B">Niet compatibel</text>'
+      +'<text x="608" y="45" font-family="Inter" font-size="9.5" fill="#5B6B82">Pas het ontwerp aan of wissel de polariteitsrichting.</text></g>');
+  }
+  svg.innerHTML = out.join('');
+  bindCanvas(svg);
+}
+
+function svgToScreen(svg, x, y){
+  try{
+    const p=svg.createSVGPoint(); p.x=x; p.y=y;
+    return p.matrixTransform(svg.getScreenCTM());
+  }catch(_){
+    /* fallback: schaal viewBox naar clientrect */
+    const r=svg.getBoundingClientRect();
+    return {x:r.left + (x/900)*(r.width||900), y:r.top + (y/560)*(r.height||560)};
+  }
+}
+function c2DragMove(ev){
+  if(!dragCtx) return;
+  const c=dragCtx;
+  const dpx=((ev.clientX-c.sx)*c.d.x + (ev.clientY-c.sy)*c.d.y)/c.k;
+  let L=Math.round((c.startLen + dpx/c.f.sc)/100)*100;
+  L=Math.max(100, Math.min(50000, L));
+  const n=node(c.nId), O=node(c.oth);
+  if(!n||!O) return;
+  const nx=O.x+c.d.x*L, ny=O.y+c.d.y*L;
+  if(n.x!==nx||n.y!==ny){ n.x=nx; n.y=ny; c.moved=true; renderCanvas(computeBOM()); }
+}
+function c2DragUp(){
+  window.removeEventListener('pointermove', c2DragMove);
+  window.removeEventListener('pointerup', c2DragUp);
+  const moved=dragCtx&&dragCtx.moved;
+  dragCtx=null; frozenFit=null;
+  if(moved){ mergeCoincident(); normalizeAll(); validateFeeds(); snap(); }
+  refresh();
+}
+function c2CompMove(ev){
+  if(!compDrag) return;
+  const c=compDrag; const k=c.k*c.f.sc;
+  const dx=Math.round(((ev.clientX-c.sx)/k)/100)*100;
+  const dy=Math.round(((ev.clientY-c.sy)/k)/100)*100;
+  if(dx!==c.dx||dy!==c.dy){
+    c.dx=dx; c.dy=dy; c.moved=true;
+    c.orig.forEach(o=>{ const n=node(o.id); if(n){ n.x=o.x+dx; n.y=o.y+dy; } });
+    renderCanvas(computeBOM());
+  }
+}
+function c2CompUp(){
+  window.removeEventListener('pointermove', c2CompMove);
+  window.removeEventListener('pointerup', c2CompUp);
+  const moved=compDrag&&compDrag.moved;
+  compDrag=null; frozenFit=null;
+  if(moved){ mergeCoincident(); normalizeAll(); validateFeeds(); snap(); }
+  refresh();
+}
+function c2PanMove(ev){
+  if(!panCtx) return;
+  const k=panCtx.k;
+  view.px=panCtx.px0+(ev.clientX-panCtx.sx)/k;
+  view.py=panCtx.py0+(ev.clientY-panCtx.sy)/k;
+  renderCanvas(lastBOM||computeBOM());
+}
+function c2PanUp(){
+  window.removeEventListener('pointermove', c2PanMove);
+  window.removeEventListener('pointerup', c2PanUp);
+  panCtx=null;
+}
+function bindCanvas(svg){
+  svg.querySelectorAll('[data-len]').forEach(el=>{
+    el.addEventListener('click', ev=>{ ev.stopPropagation();
+      openLenInput(el.dataset.len, +el.dataset.x, +el.dataset.y); });
+  });
+  svg.querySelectorAll('[data-plusn]').forEach(el=>{
+    el.addEventListener('click', ev=>{ ev.stopPropagation();
+      const nId=el.dataset.plusn;
+      const used = edgesAt(nId).map(e=>{ const d=armDir(nId,e); return d.x+','+d.y; });
+      const dirs=[{x:1,y:0,s:'\u2192'},{x:-1,y:0,s:'\u2190'},{x:0,y:1,s:'\u2193'},{x:0,y:-1,s:'\u2191'}]
+        .filter(d=>!used.includes(d.x+','+d.y));
+      openDirPop(ev, dirs, d=>addSegFromNode(nId,d)); });
+  });
+  svg.querySelectorAll('[data-pluse]').forEach(el=>{
+    el.addEventListener('click', ev=>{ ev.stopPropagation();
+      const e=edge(el.dataset.pluse);
+      const dirs = eAxis(e)==='h' ? [{x:0,y:1,s:'\u2193'},{x:0,y:-1,s:'\u2191'}] : [{x:1,y:0,s:'\u2192'},{x:-1,y:0,s:'\u2190'}];
+      openDirPop(ev, dirs, d=>addStub(e.id,d)); });
+  });
+  svg.querySelectorAll('[data-del]').forEach(el=>{
+    el.addEventListener('click', ev=>{ ev.stopPropagation(); removeLeafEdge(el.dataset.del); });
+  });
+  if(!svg._c2viewBound){
+    svg._c2viewBound=true;
+    svg.addEventListener('wheel', ev=>{
+      if(!st.nodes.length) return;
+      ev.preventDefault();
+      const r=svg.getBoundingClientRect(); const k=pxScale();
+      const vx=(ev.clientX-(r?r.left:0))/k, vy=(ev.clientY-(r?r.top:0))/k;
+      zoomBy(ev.deltaY<0?1.18:1/1.18, vx, vy);
+    }, {passive:false});
+    svg.addEventListener('pointerdown', ev=>{
+      if(ev.target!==svg || st.pick || !st.nodes.length) return;
+      panCtx={sx:ev.clientX, sy:ev.clientY, px0:view.px, py0:view.py, k:pxScale()};
+      window.addEventListener('pointermove', c2PanMove);
+      window.addEventListener('pointerup', c2PanUp);
+    });
+  }
+  svg.querySelectorAll('.c2-seg').forEach(el=>{
+    el.addEventListener('pointerdown', ev=>{
+      if(st.pick) return;
+      ev.preventDefault(); ev.stopPropagation();
+      const eId=el.dataset.pickedge; const e0=edge(eId); if(!e0) return;
+      const {m}=compMap(); const c=m[e0.a];
+      const orig=st.nodes.filter(n=>m[n.id]===c).map(n=>({id:n.id,x:n.x,y:n.y}));
+      compDrag={orig, sx:ev.clientX, sy:ev.clientY, dx:0, dy:0, k:pxScale(), f:(frozenFit||fit()), moved:false};
+      frozenFit=compDrag.f;
+      window.addEventListener('pointermove', c2CompMove);
+      window.addEventListener('pointerup', c2CompUp);
+    });
+  });
+  svg.querySelectorAll('[data-dragend]').forEach(el=>{
+    el.addEventListener('pointerdown', ev=>{
+      if(st.pick) return;
+      ev.preventDefault(); ev.stopPropagation();
+      const nId=el.dataset.dragend; const e0=edgesAt(nId)[0]; if(!e0) return;
+      const oth=other(e0,nId); const O=node(oth);
+      dragCtx={nId, oth, d:armDir(oth,e0), f:(frozenFit||fit()), k:pxScale(), startLen:eLen(e0), sx:ev.clientX, sy:ev.clientY, moved:false};
+      frozenFit=dragCtx.f;
+      window.addEventListener('pointermove', c2DragMove);
+      window.addEventListener('pointerup', c2DragUp);
+    });
+  });
+  svg.querySelectorAll('[data-picknode]').forEach(el=>{
+    el.addEventListener('click', ev=>{ if(!st.pick) return; ev.stopPropagation();
+      const nId=el.dataset.picknode; const {m}=compMap(); const c=m[nId];
+      st.feeds = st.feeds.filter(f=>feedComp(f,m)!==c);
+      st.feeds.push({kind:'node', node:nId, side:'R'});
+      st.pick=false; snap(); refresh(); });
+  });
+  svg.querySelectorAll('[data-pickedge]').forEach(el=>{
+    el.addEventListener('click', ev=>{ if(!st.pick) return; ev.stopPropagation();
+      const eId=el.dataset.pickedge; const {m}=compMap(); const c=m[edge(eId).a];
+      st.feeds = st.feeds.filter(f=>feedComp(f,m)!==c);
+      st.feeds.push({kind:'edge', edge:eId, flip:false});
+      st.pick=false; snap(); refresh(); });
+  });
+  svg.querySelectorAll('[data-feednode]').forEach(el=>{
+    el.addEventListener('click', ev=>{ if(st.pick) return; ev.stopPropagation();
+      const f=feedForNode(el.dataset.feednode); if(f){ f.side = f.side==='R'?'L':'R'; snap(); refresh(); } });
+  });
+  svg.querySelectorAll('[data-feededge]').forEach(el=>{
+    el.addEventListener('click', ev=>{ if(st.pick) return; ev.stopPropagation();
+      const f=feedForEdge(el.dataset.feededge); if(f){ f.flip = !f.flip; snap(); refresh(); } });
+  });
+}
+
+/* ---------- zwevende invoer & popup ---------- */
+function openLenInput(eId, vx, vy){
+  closeFloats();
+  const svg=$('c2Svg'); const sp=svgToScreen(svg,vx,vy);
+  const box=$('c2Inp'); const inp=box.querySelector('input');
+  box.style.display='flex'; box.style.left=(sp.x-50)+'px'; box.style.top=(sp.y-18)+'px';
+  inp.value=eLen(edge(eId))/100;
+  inp.focus(); inp.select();
+  function commit(){ box.style.display='none'; inp.onkeydown=null; inp.onblur=null; setLen(eId, parseFloat(inp.value)*100); }
+  inp.onkeydown=ev=>{ if(ev.key==='Enter') commit(); if(ev.key==='Escape'){ box.style.display='none'; } };
+  inp.onblur=()=>{ if(box.style.display!=='none') commit(); };
+}
+function openDirPop(ev, dirs, cb){
+  closeFloats();
+  if(!dirs.length) return;
+  const pop=$('c2Pop');
+  pop.innerHTML = dirs.map((d,i)=>'<button data-i="'+i+'">'+d.s+'</button>').join('');
+  pop.style.display='flex'; pop.style.left=(ev.clientX-20)+'px'; pop.style.top=(ev.clientY+14)+'px';
+  pop.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', e2=>{ e2.stopPropagation(); pop.style.display='none'; cb(dirs[+b.dataset.i]); });
+  });
+}
+function closeFloats(){ $('c2Inp').style.display='none'; $('c2Pop').style.display='none'; }
+document.addEventListener('click', ()=>{ $('c2Pop').style.display='none'; });
+
+/* ---------- samenvatting, waarschuwingen, stuklijstdetail ---------- */
+function warnings(B){
+  const w=[];
+  if(!st.shape){ w.push({t:'tip', m:'Kies eerst een vorm (stap 3).'}); return w; }
+  const cm1=compMap(); const fed1=new Set(st.feeds.map(f=>feedComp(f,cm1.m)));
+  const miss1=cm1.count-fed1.size;
+  if(miss1>0) w.push({t:'warn', m: cm1.count===1
+    ? 'Nog geen stroomaansluitpunt gekozen. Zonder voedingspunt kan de polariteit — en dus de variantkeuze — niet bepaald worden.'
+    : miss1+' van de '+cm1.count+' trajecten heeft nog geen stroomaansluitpunt. Kies er per traject één via ⚡.'});
+  if(B.P.conf.size) w.push({t:'warn', m:'Polariteitsconflict (gestreept rood): de rode lijn kan in deze vorm niet ononderbroken doorlopen. Pas de vorm of het aansluitpunt aan.'});
+  B.errs.forEach(er=> w.push({t:'warn', m:er.msg}));
+  if(st.adapters>0) w.push({t:'tip', m:st.adapters+'\u00D7 trekontlasting (2001947) automatisch toegevoegd \u2014 verplicht bij elke 70mm Universal adapter.'});
+  if(st.adapters>=6){
+    const per={A:'circuit (zelfde fase; totaal max. 16A over de 3 circuits samen)', B:'fase (elk max. 16A)', C:'fase (adapters kiezen zelf hun fase)'}[st.powercfg];
+    w.push({t:'warn', m:st.adapters+' adapters op configuratie '+st.powercfg+': tel het totale vermogen op en verdeel \u2014 check per '+per+'.'});
+  }
+  const mB=(B&&B.mounts)||computeMounts();
+  if(st.mount==='geen' && mB.count>0) w.push({t:'tip', m:'Kies in stap 5 een montagewijze \u2014 deze tekening heeft '+mB.count+' montagepunten (om de meter, incl. uiteinden; hoeken en kruisingen gedeeld).'});
+  const tot=st.edges.reduce((s,e)=>s+eLen(e),0);
+  if(tot>=300) w.push({t:'tip', m:'Bij '+tot+' cm rail: houd de aanbevolen bevestigingsafstand van 1000 mm aan (zie tab "Montage & draagvermogen").'});
+  return w;
+}
+
+function renderSheetsBar(){
+  const bar=$('c2Sheets'); if(!bar) return;
+  bar.innerHTML = st.sheets.map(sh=>
+    '<button class="c2-sheettab'+(sh.id===st.sheet?' active':'')+'" data-sh="'+sh.id+'">'
+    +sh.name.replace(/</g,'&lt;')
+    +(st.sheets.length>1?'<span class="c2-shdel" data-shdel="'+sh.id+'">\u00d7</span>':'')
+    +'</button>').join('')
+    +'<button class="c2-sheetadd" id="c2SheetAdd">\uFF0B Tekenvlak</button>';
+  bar.querySelectorAll('[data-sh]').forEach(b=>{
+    b.addEventListener('click', ev=>{
+      if(ev.target.dataset && ev.target.dataset.shdel) return;
+      if(st.sheet!==b.dataset.sh){ st.sheet=b.dataset.sh; view={zoom:1,px:0,py:0}; st.pick=false; refresh(); }
+    });
+    b.addEventListener('dblclick', ev=>{
+      ev.preventDefault();
+      const sh=st.sheets.find(x=>x.id===b.dataset.sh); if(!sh) return;
+      const nm=window.prompt('Naam van dit tekenvlak (bijv. Begane grond, Etage 1):', sh.name);
+      if(nm && nm.trim()){ sh.name=nm.trim().slice(0,40); snap(); refresh(); }
+    });
+  });
+  bar.querySelectorAll('[data-shdel]').forEach(x=>{
+    x.addEventListener('click', ev=>{ ev.stopPropagation();
+      const id=x.dataset.shdel; if(st.sheets.length<=1) return;
+      const ids=new Set(sheetNodes(id).map(n=>n.id));
+      st.edges=st.edges.filter(e=>!ids.has(e.a));
+      st.nodes=st.nodes.filter(n=>n.s!==id);
+      st.sheets=st.sheets.filter(s=>s.id!==id);
+      if(st.sheet===id) st.sheet=st.sheets[0].id;
+      if(!st.nodes.length) st.shape=null;
+      validateFeeds(); view={zoom:1,px:0,py:0}; snap(); refresh();
+    });
+  });
+  const add=$('c2SheetAdd');
+  if(add) add.addEventListener('click', ()=>{
+    const id='s'+(++st.sid);
+    st.sheets.push({id, name:'Tekenvlak '+(st.sheets.length+1)});
+    st.sheet=id; view={zoom:1,px:0,py:0}; snap(); goStep(3);
+  });
+}
+function refresh(){
+  const B=computeBOM(); lastBOM=B;
+  renderSheetsBar();
+  /* stepper */
+  const cmS=compMap(); const fedS=new Set(st.feeds.map(f=>feedComp(f,cmS.m)));
+  const allFed = cmS.count>0 && fedS.size===cmS.count;
+  document.querySelectorAll('#c2Steps button').forEach(b=>{
+    const k=+b.dataset.step;
+    b.classList.toggle('active', k===st.step);
+    b.classList.toggle('done', (k===1)||(k===2)||(k===3&&!!st.shape)||(k===4&&allFed));
+  });
+  document.querySelectorAll('.c2-pane').forEach(p=> p.classList.toggle('active', +p.dataset.pane===st.step));
+  $('c2Prev').style.visibility = st.step>1 ? 'visible':'hidden';
+  $('c2Next').style.visibility = st.step<5 ? 'visible':'hidden';
+  /* controls state */
+  $('c2Undo').disabled = hIdx<=0;
+  $('c2Redo').disabled = hIdx>=hist.length-1;
+  $('c2PickBtn').classList.toggle('active', st.pick);
+  $('c2AdVal').textContent = st.adapters;
+  const mts=(lastBOM&&lastBOM.mounts)||computeMounts();
+  if($('c2MountCount')) $('c2MountCount').textContent = mts.count;
+  if($('c2Mount') && $('c2Mount').value!==st.mount) $('c2Mount').value=st.mount;
+  document.querySelectorAll('#c2GridRow .stepper-val')[0] && renderGridRow();
+  /* canvas */
+  if(st.step===4) renderCanvas(B);
+  /* summary */
+  const tot=st.edges.reduce((s,e)=>s+eLen(e),0);
+  const cmT=compMap();
+  const shTxt = st.sheets.length>1 ? ' \u00b7 '+st.sheets.length+' tekenvlakken' : '';
+  $('c2Title').textContent = cmT.count>1 ? 'Plattegrond \u00b7 '+cmT.count+' trajecten'+shTxt+' \u00b7 '+st.color
+    : (st.shape ? SHAPES[st.shape].label+' in '+st.color+shTxt : 'Nog geen vorm gekozen');
+  $('c2TotLen').textContent = (tot/100)+' m';
+  $('c2TotSeg').textContent = st.edges.length;
+  $('c2TotAd').textContent = st.adapters;
+  const codes=Object.keys(B.items);
+  $('c2ArtList').innerHTML = codes.length ? codes.map(c=>{
+    const it=B.items[c];
+    const codeTxt = c.indexOf('m-')===0 ? 'artikelnr volgt' : c;
+    return '<div class="cfg-art-row hoverable" data-prov="'+it.prov.join('|')+'"><span class="name">'+it.name+'</span><span><span class="code">'+codeTxt+'</span> <span class="qty">\u00D7'+it.qty+'</span></span></div>';
+  }).join('') : '<div class="cfg-art-row"><span class="name">Kies een vorm om de lijst te vullen\u2026</span></div>';
+  $('c2ArtList').querySelectorAll('[data-prov]').forEach(row=>{
+    const provs=row.dataset.prov.split('|').filter(Boolean);
+    row.addEventListener('mouseenter', ()=> provs.forEach(p=>{ const el=$('c2el-'+p.replace(':','')); if(el) el.classList.add('c2hl'); }));
+    row.addEventListener('mouseleave', ()=> provs.forEach(p=>{ const el=$('c2el-'+p.replace(':','')); if(el) el.classList.remove('c2hl'); }));
+  });
+  $('c2Warns').innerHTML = warnings(B).map(w=>'<div class="cfg-'+(w.t==='warn'?'warn':'tip')+'">'+w.m+'</div>').join('');
+  /* rail detail (stap 5) */
+  $('c2RailDetail').innerHTML = B.railDetail.length ? B.railDetail.map(d=>{
+    return '<div class="c2-railrow">Segment <b>'+d.r.lenM+' m</b> \u2192 bestel <b>'+piecesTxt(d.r.pieces)+'</b>'
+      +(d.r.seams>0 ? ' \u00B7 '+d.r.seams+'\u00D7 elektrisch koppelstuk' : '')
+      +' <span style="color:var(--slate-light)">\u00B7 werkelijke maat \u00B1'+((d.r.lenM*100)+d.r.extraMm/10).toFixed(1).replace('.',',')+' cm</span></div>';
+  }).join('') : '<div class="c2-railrow">Nog geen segmenten.</div>';
+}
+
+function renderGridRow(){
+  const row=$('c2GridRow');
+  if(st.shape!=='andere-vorm' && !(st.step===3)){ /* laat staan */ }
+  row.style.display = 'flex';
+  row.innerHTML =
+    '<div class="grid-dims-col">Rijen <button class="stepper-btn" id="c2RM">\u2212</button><span class="stepper-val" style="min-width:20px;">'+st.gRows+'</span><button class="stepper-btn" id="c2RP">+</button></div>'
+   +'<div class="grid-dims-col">Kolommen <button class="stepper-btn" id="c2CM">\u2212</button><span class="stepper-val" style="min-width:20px;">'+st.gCols+'</span><button class="stepper-btn" id="c2CP">+</button></div>'
+   +'<div class="grid-dims-col" style="color:var(--slate-light);font-weight:500;">geldt voor de eerstvolgende "Andere vorm"</div>';
+  $('c2RM').onclick=()=>{ st.gRows=Math.max(1,st.gRows-1); renderGridRow(); };
+  $('c2RP').onclick=()=>{ st.gRows=Math.min(4,st.gRows+1); renderGridRow(); };
+  $('c2CM').onclick=()=>{ st.gCols=Math.max(1,st.gCols-1); renderGridRow(); };
+  $('c2CP').onclick=()=>{ st.gCols=Math.min(4,st.gCols+1); renderGridRow(); };
+}
+
+/* ---------- PDF-rapport voor de installateur ---------- */
+/* Genereert zelfstandig een PDF-bestand (geen bibliotheken, geen pop-ups)
+   en downloadt dit direct. */
+function reportData(){
+  const B=computeBOM(); const M=B.mounts||computeMounts();
+  const {m}=compMap();
+  const comps={}; st.nodes.forEach(n=>{ (comps[m[n.id]]=comps[m[n.id]]||[]).push(n); });
+  const numOf={}; let nr=0; let trGlobal=0;
+  /* per tekenvlak (alleen vlakken met inhoud), trajecten links->rechts */
+  const sheets=[];
+  st.sheets.forEach(sh=>{
+    const shComps=Object.keys(comps).filter(c=>comps[c][0].s===sh.id)
+      .sort((a,b)=> Math.min.apply(null,comps[a].map(n=>n.x)) - Math.min.apply(null,comps[b].map(n=>n.x)));
+    if(!shComps.length) return;
+    const legend=[];
+    shComps.forEach(c=>{
+      trGlobal++;
+      comps[c].slice().sort((p,q)=>(p.y-q.y)||(p.x-q.x)).forEach(n=>{
+        const v=B.V[n.id];
+        if(v&&v.art){ nr++; numOf['n:'+n.id]=nr; legend.push({nr, tr:trGlobal, name:v.label+' '+CLRN(st.color), art:v.art}); }
+      });
+      st.feeds.filter(f=>f.kind==='edge' && m[edge(f.edge).a]===+c).forEach(f=>{
+        nr++; numOf['f:'+f.edge]=nr; legend.push({nr, tr:trGlobal, name:'Middenvoeding '+CLRN(st.color), art:CODES.midden[st.color]});
+      });
+    });
+    sheets.push({id:sh.id, name:sh.name, legend});
+  });
+  return {B,M,sheets,numOf,trCount:trGlobal};
+}
+function pdfTxt(s){
+  s=String(s).replace(/\u2014|\u2013/g,'-').replace(/\u00d7/g,'x').replace(/\u2192/g,'->')
+    .replace(/\u201c|\u201d/g,'"').replace(/\u26a1/g,'').replace(/\uff0b/g,'+').replace(/\u2212/g,'-');
+  let o='';
+  for(let i=0;i<s.length;i++){ let c=s.charCodeAt(i); if(c>255)c=63; const ch=String.fromCharCode(c);
+    o += (ch==='('||ch===')'||ch==='\\') ? '\\'+ch : ch; }
+  return o;
+}
+function buildPdf(){
+  /* Pragmalux-huisstijl: donker navy + puntjespatroon, condensed kapitalen,
+     navy tabelkoppen, navy voetbalk. */
+  const D=reportData();
+  const W=595,H=842,Mg=40,MB=64; const pages=[]; let ops=[]; let y=Mg; let pageNo=0;
+  const r2=v=>Math.round(v*100)/100;
+  const C={navy:'0.086 0.129 0.235', navy2:'0.137 0.192 0.325', grey:'0.357 0.404 0.494',
+    rail:'0.718 0.753 0.808', red:'0.839 0.212 0.169', shade:'0.929 0.937 0.953',
+    line:'0.796 0.816 0.855', mount:'0.596 0.651 0.737', lt:'0.725 0.769 0.855'};
+  const raw=s=>ops.push(s);
+  function text(x,yt,size,str,opt){ opt=opt||{};
+    const hz=opt.cond?84:100, tc=opt.tc||0;
+    const est=String(str).length*size*(opt.bold?0.56:0.5)*hz/100 + String(str).length*tc;
+    let xx=x; if(opt.align==='center')xx=x-est/2; else if(opt.align==='right')xx=x-est;
+    raw('BT /'+(opt.bold?'F2':'F1')+' '+size+' Tf '+hz+' Tz '+tc+' Tc '+(opt.color||'0 0 0')+' rg 1 0 0 1 '
+      +r2(xx)+' '+r2(H-yt-size*0.78)+' Tm ('+pdfTxt(str)+') Tj ET');
+  }
+  function line(x1,y1,x2,y2,lw,color,round){
+    raw((color||'0 0 0')+' RG '+lw+' w '+(round?'1 J ':'0 J ')+r2(x1)+' '+r2(H-y1)+' m '+r2(x2)+' '+r2(H-y2)+' l S');
+  }
+  function rect(x,yt,w,h,fill,stroke,lw){
+    let pre=''; if(fill)pre+=fill+' rg '; if(stroke)pre+=stroke+' RG '+(lw||0.8)+' w ';
+    raw(pre+r2(x)+' '+r2(H-yt-h)+' '+r2(w)+' '+r2(h)+' re '+(fill&&stroke?'B':(fill?'f':'S')));
+  }
+  function circle(cx,cyT,r,fill,stroke,lw){
+    const k=0.5523*r; const cy=H-cyT; let pre='';
+    if(fill)pre+=fill+' rg '; if(stroke)pre+=stroke+' RG '+(lw||1)+' w ';
+    const p=(a,b)=>r2(a)+' '+r2(b);
+    raw(pre+p(cx+r,cy)+' m '+p(cx+r,cy+k)+' '+p(cx+k,cy+r)+' '+p(cx,cy+r)+' c '
+      +p(cx-k,cy+r)+' '+p(cx-r,cy+k)+' '+p(cx-r,cy)+' c '
+      +p(cx-r,cy-k)+' '+p(cx-k,cy-r)+' '+p(cx,cy-r)+' c '
+      +p(cx+k,cy-r)+' '+p(cx+r,cy-k)+' '+p(cx+r,cy)+' c '+(fill&&stroke?'B':(fill?'f':'S')));
+  }
+  function poly(pts,fill){
+    raw(fill+' rg '+pts.map((p,i)=>r2(p[0])+' '+r2(H-p[1])+' '+(i?'l':'m')).join(' ')+' f');
+  }
+  function wrap(s,maxChars){
+    const words=String(s).split(' '); const lines=[]; let cur='';
+    words.forEach(wd=>{ if((cur+' '+wd).trim().length>maxChars){ lines.push(cur.trim()); cur=wd; } else cur+=' '+wd; });
+    if(cur.trim()) lines.push(cur.trim());
+    return lines;
+  }
+  function dots(x0,y0,w,h,step,color){
+    for(let dx=0;dx<w;dx+=step) for(let dy=0;dy<h;dy+=step) circle(x0+dx,y0+dy,0.9,color);
+  }
+  function logo(x,yt,scale,white){
+    const c = white? '1 1 1' : C.navy;
+    text(x,yt,17*scale,'PRAGMALUX',{bold:true,color:c});
+    line(x+1,yt+19*scale,x+96*scale,yt+19*scale,0.9*scale,c);
+    text(x+1,yt+21.5*scale,5.6*scale,'PROFESSIONAL LIGHTING',{color:white?C.lt:C.grey,tc:1.35*scale});
+  }
+  function stampFooter(){
+    pageNo++;
+    rect(0,H-24,W,24,C.navy);
+    text(Mg,H-19,7.5,'PRAGMALUX  \u00b7  PROFESSIONAL LIGHTING',{bold:true,color:'1 1 1',tc:0.4});
+    text(W-Mg,H-19,7.5,'PRX 3-Fase Rail  \u00b7  Installatieoverzicht  \u00b7  pagina '+pageNo,{color:C.lt,align:'right'});
+  }
+  function contHeader(){
+    text(Mg,y,13,'INSTALLATIEOVERZICHT',{bold:true,cond:true,color:C.navy});
+    logo(W-Mg-120,y-4,0.72,false);
+    y+=22; line(Mg,y,W-Mg,y,1.1,C.navy); y+=14;
+  }
+  function flush(){ stampFooter(); pages.push(ops.join('\n')); }
+  function beginPage(first){ ops=[]; y=Mg; if(!first) contHeader(); }
+  function need(h){ if(y+h>H-MB){ flush(); beginPage(false); } }
+  function h2(t){ need(30); y+=8; text(Mg,y,12.5,String(t).toUpperCase(),{bold:true,cond:true,color:C.navy}); y+=17; }
+  function para(t,size,color){
+    wrap(t, Math.floor((W-2*Mg)/((size||8.5)*0.48))).forEach(l=>{ need(12); text(Mg,y,size||8.5,l,{color:color||'0 0 0'}); y+=11.5; });
+    y+=3;
+  }
+
+  /* --- pagina 1: navy kopvlak met puntjespatroon --- */
+  beginPage(true);
+  rect(0,0,W,124,C.navy);
+  dots(W-215,12,190,100,13,C.navy2);
+  logo(Mg,18,1,true);
+  text(Mg,62,23,'INSTALLATIEOVERZICHT',{bold:true,cond:true,color:'1 1 1'});
+  text(Mg,90,10.5,'PRX 3-FASE RAIL'+(st.proj? '  \u00b7  '+st.proj.toUpperCase():''),{bold:true,cond:true,color:C.lt,tc:0.5});
+  text(Mg,105,8.5,'Kleur: '+CLRN(st.color)+'   \u00b7   Voedingsconfiguratie '+st.powercfg
+    +'   \u00b7   '+new Date().toLocaleDateString('nl-NL')+(D.trCount>1?'   \u00b7   '+D.trCount+' trajecten':'')
+    +(D.sheets.length>1?'   \u00b7   '+D.sheets.length+' tekenvlakken':''),{color:C.lt});
+  y=140;
+
+  function tableStart(cols){ const totW=cols.reduce((s,c)=>s+c.w,0);
+    need(20); let x=Mg; rect(Mg,y,totW,15,C.navy);
+    cols.forEach(c=>{ text(x+5,y+2.6,8.5,c.h,{bold:true,color:'1 1 1'}); x+=c.w; });
+    y+=15; return {cols,totW,i:0};
+  }
+  function tableRow(T,vals){
+    if(y+14>H-MB){ flush(); beginPage(false); let x=Mg; rect(Mg,y,T.totW,15,C.navy);
+      T.cols.forEach(c=>{ text(x+5,y+2.6,8.5,c.h,{bold:true,color:'1 1 1'}); x+=c.w; }); y+=15; }
+    if(T.i%2===0) rect(Mg,y,T.totW,13.5,C.shade);
+    let x=Mg;
+    T.cols.forEach((c,j)=>{ text(x+5,y+2.4,8.5,vals[j]); x+=c.w; });
+    line(Mg,y+13.5,Mg+T.totW,y+13.5,0.5,C.line);
+    T.i++; y+=13.5;
+  }
+
+  /* --- per tekenvlak: tekening + onderdelentabel --- */
+  const boxW=W-2*Mg;
+  function drawPlan(x0,y0,bw,bh,sheetId){
+    const sn=sheetNodes(sheetId), se=sheetEdges(sheetId);
+    if(!sn.length) return;
+    const xs=sn.map(n=>n.x), ys=sn.map(n=>n.y);
+    const minX=Math.min.apply(null,xs), maxX=Math.max.apply(null,xs);
+    const minY=Math.min.apply(null,ys), maxY=Math.max.apply(null,ys);
+    const pad=30;
+    const sc=Math.min((bw-2*pad)/Math.max(maxX-minX,1),(bh-2*pad)/Math.max(maxY-minY,1),0.5);
+    const ox=x0+(bw-(maxX-minX)*sc)/2 - minX*sc;
+    const oy=y0+(bh-(maxY-minY)*sc)/2 - minY*sc;
+    const P=n=>({x:ox+n.x*sc, y:oy+n.y*sc});
+    const cxAll=(minX+maxX)/2, cyAll=(minY+maxY)/2;
+    const OFF=6;
+    se.forEach(e=>{
+      const A=P(node(e.a)), Bp=P(node(e.b));
+      line(A.x,A.y,Bp.x,Bp.y,7,C.rail,true);
+    });
+    se.forEach(e=>{
+      const n=D.B.P.nor[e.id];
+      if(n && !D.B.P.conf.has(e.id)){
+        const term=(nId)=>{
+          const p=P(node(nId)); const t=nodeType(nId); let add={x:0,y:0};
+          if(t==='corner'){ const o=edgesAt(nId).find(x=>x.id!==e.id); const no=D.B.P.nor[o.id]; if(no) add=no; }
+          else if(t==='t'){ const stem=tStem(nId);
+            if(e.id===stem.id){ const bar=edgesAt(nId).find(x=>x.id!==stem.id); const nb=D.B.P.nor[bar.id]; if(nb) add=nb; } }
+          return {x:p.x+(n.x+add.x)*OFF, y:p.y+(n.y+add.y)*OFF};
+        };
+        const p1=term(e.a), p2=term(e.b);
+        line(p1.x,p1.y,p2.x,p2.y,1.3,C.red,true);
+      }
+      const A=P(node(e.a)), Bp=P(node(e.b));
+      const mx=(A.x+Bp.x)/2, my=(A.y+Bp.y)/2; const horiz=eAxis(e)==='h';
+      text(horiz?mx:mx+16, (horiz?my-16:my-4), 8, (eLen(e)/100)+' m', {bold:true,color:C.navy,align:horiz?'center':'left'});
+      const fE=feedForEdge(e.id);
+      if(fE){
+        rect(mx-8,my-5,16,10,C.red,'1 1 1',1);
+        const nm=D.numOf['f:'+e.id];
+        if(nm){ circle(mx+15,my-13,6,'1 1 1',C.navy,1); text(mx+15,my-17,6.5,String(nm),{bold:true,color:C.navy,align:'center'}); }
+      }
+    });
+    computeMounts(sheetId).pts.forEach(mp=>{
+      circle(ox+mp.x*sc, oy+mp.y*sc, 1.6, C.mount);
+    });
+    sn.forEach(nd=>{
+      const p=P(nd); const t=nodeType(nd.id);
+      if(t==='end'){
+        if(feedForNode(nd.id)) circle(p.x,p.y,5.5,C.red,'1 1 1',1.3);
+        else circle(p.x,p.y,4.5,'1 1 1',C.navy,1.5);
+      } else if(t==='corner'){
+        poly([[p.x,p.y-5.5],[p.x+5.5,p.y],[p.x,p.y+5.5],[p.x-5.5,p.y]],C.navy);
+      } else {
+        rect(p.x-5,p.y-5,10,10,C.navy);
+      }
+      const nm=D.numOf['n:'+nd.id];
+      if(nm){
+        const sx = nd.x>=cxAll? 1 : -1, sy = nd.y>=cyAll? 1 : -1;
+        circle(p.x+11*sx,p.y+11*sy,6,'1 1 1',C.navy,1);
+        text(p.x+11*sx,p.y+11*sy-4,6.5,String(nm),{bold:true,color:C.navy,align:'center'});
+      }
+    });
+  }
+
+  D.sheets.forEach((sh,si)=>{
+    if(si>0){ flush(); beginPage(false); }
+    if(D.sheets.length>1){ need(20); text(Mg,y,12.5,('TEKENVLAK: '+sh.name).toUpperCase(),{bold:true,cond:true,color:C.navy}); y+=18; }
+    const boxH = si===0 ? 280 : 320;
+    need(boxH+16);
+    rect(Mg,y,boxW,boxH,'1 1 1',C.line,1);
+    drawPlan(Mg,y,boxW,boxH,sh.id);
+    y+=boxH+8;
+    if(si===0) para('Maten zijn raillengtes; koppelstukken komen daar in werkelijkheid bovenop. Rood vlak = stroomaansluitpunt, rode lijn = polariteitslijn, grijze stippen = montagepunten, genummerde rondjes verwijzen naar de tabel.',8,C.grey);
+    h2('Onderdelen in de tekening'+(D.sheets.length>1?' \u2014 '+sh.name:''));
+    let TL=tableStart([{w:34,h:'Nr'},{w:52,h:'Traject'},{w:300,h:'Onderdeel'},{w:90,h:'Artikelcode'}]);
+    sh.legend.forEach(l=> tableRow(TL,[String(l.nr), String(l.tr), l.name, l.art]));
+  });
+
+
+  /* Bestelgegevens altijd op een nieuwe pagina */
+  flush(); beginPage(false);
+  h2('Bestelgegevens');
+  let T=tableStart([{w:90,h:'Artikelcode'},{w:330,h:'Omschrijving'},{w:56,h:'Aantal'}]);
+  Object.keys(D.B.items).forEach(c=>{
+    const it=D.B.items[c];
+    tableRow(T,[c.indexOf('m-')===0?'volgt':c, it.name, String(it.qty)]);
+  });
+
+  h2('Montage');
+  para('Montagepunten: '+D.M.count+' - om de meter langs de rail, inclusief uiteinden; hoeken, T- en kruispunten tellen als gedeeld punt (grijze stippen in de tekening). Advies-bevestigingsafstand 1000 mm; bij lichte belasting kan de installateur tussenpunten laten vervallen, maar uiteinden en knooppunten blijven altijd bevestigd.');
+  para(st.mount==='geen' ? 'Nog geen montagewijze gekozen.' : 'Gekozen montagewijze: '+MOUNTS[st.mount].label+'.');
+  if(st.adapters>0) para('Adapters/spots: '+st.adapters+' - trekontlasting (2001947) per adapter verplicht en in de bestellijst meegeteld.');
+  y+=4;
+  para('Pragmalux PRX 3-Fase Rail. Controleer bij het koppelen altijd de polariteitslijn: de rode rib moet overal doorlopen. Vragen? Neem contact op met de binnendienst.',7.5,C.grey);
+  flush();
+
+  /* --- PDF-bestand samenstellen --- */
+  const objs=[];
+  objs.push('<< /Type /Catalog /Pages 2 0 R >>');
+  const kids=pages.map((_,i)=>(6+i*2)+' 0 R').join(' ');
+  objs.push('<< /Type /Pages /Count '+pages.length+' /Kids ['+kids+'] >>');
+  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+  pages.forEach((pg,i)=>{
+    objs.push('<< /Length '+pg.length+' >>\nstream\n'+pg+'\nendstream');
+    objs.push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents '+(5+i*2)+' 0 R >>');
+  });
+  let out='%PDF-1.4\n'; const offs=[0];
+  objs.forEach((o,i)=>{ offs.push(out.length); out+=(i+1)+' 0 obj\n'+o+'\nendobj\n'; });
+  const xref=out.length;
+  out+='xref\n0 '+(objs.length+1)+'\n0000000000 65535 f \n';
+  for(let i=1;i<=objs.length;i++) out+=String(offs[i]).padStart(10,'0')+' 00000 n \n';
+  out+='trailer\n<< /Size '+(objs.length+1)+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';
+  const bytes=new Uint8Array(out.length);
+  for(let i=0;i<out.length;i++) bytes[i]=out.charCodeAt(i)&0xff;
+  return bytes;
+}
+if(typeof window!=='undefined') window.__c2BuildPdf=buildPdf;
+function exportPdf(){
+  const cmP=compMap(); const fedP=new Set(st.feeds.map(f=>feedComp(f,cmP.m)));
+  if(cmP.count===0 || fedP.size<cmP.count){
+    const msg = cmP.count===0 ? 'Teken eerst een figuur (stap 3) voordat de PDF gemaakt kan worden.'
+      : 'Kies eerst per traject een stroomaansluitpunt (\u26a1 in stap 4) \u2014 daarna kan de PDF gemaakt worden.';
+    $('c2StepMsg').textContent=msg; alert(msg); return;
+  }
+  const bytes=buildPdf();
+  const blob=new Blob([bytes],{type:'application/pdf'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  const nm=(st.proj||'installatieoverzicht').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'installatieoverzicht';
+  a.download=nm+'-prx-rail.pdf';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(_){ } }, 4000);
+}
+
+/* ---------- wizard ---------- */
+function goStep(k){
+  $('c2StepMsg').textContent='';
+  if(k>=4 && !st.shape){ $('c2StepMsg').textContent='Kies eerst een vorm (stap 3).'; st.step=3; refresh(); return; }
+  if(k===5){ const cm2=compMap(); const fed2=new Set(st.feeds.map(f=>feedComp(f,cm2.m)));
+    if(cm2.count===0 || fed2.size<cm2.count){ $('c2StepMsg').textContent='Kies eerst per traject een stroomaansluitpunt in de tekening (stap 4).'; st.step=4; refresh(); return; } }
+  st.step=k; st.pick=false; refresh();
+}
+
+/* ---------- init UI ---------- */
+function shapeIcon(id){
+  const s='stroke="#12213D" stroke-width="6" fill="none" stroke-linecap="round"';
+  switch(id){
+    case 'rechte-lijn': return '<svg viewBox="0 0 100 80"><line x1="15" y1="40" x2="85" y2="40" '+s+'/></svg>';
+    case 'l-vorm': return '<svg viewBox="0 0 100 80"><polyline points="30,15 30,55 80,55" '+s+'/></svg>';
+    case 't-vorm': return '<svg viewBox="0 0 100 80"><line x1="15" y1="20" x2="85" y2="20" '+s+'/><line x1="50" y1="20" x2="50" y2="65" '+s+'/></svg>';
+    case 'u-vorm': return '<svg viewBox="0 0 100 80"><polyline points="25,15 25,55 75,55 75,15" '+s+'/></svg>';
+    case 'h-vorm': return '<svg viewBox="0 0 100 80"><line x1="25" y1="12" x2="25" y2="68" '+s+'/><line x1="75" y1="12" x2="75" y2="68" '+s+'/><line x1="25" y1="40" x2="75" y2="40" '+s+'/></svg>';
+    case 'rechthoek': return '<svg viewBox="0 0 100 80"><rect x="20" y="15" width="60" height="50" '+s+'/></svg>';
+    case '8-vorm': return '<svg viewBox="0 0 100 80"><rect x="25" y="8" width="50" height="64" '+s+'/><line x1="25" y1="40" x2="75" y2="40" '+s+'/></svg>';
+    case '88-vorm': return '<svg viewBox="0 0 100 80"><rect x="18" y="10" width="64" height="60" '+s+'/><line x1="50" y1="10" x2="50" y2="70" '+s+'/><line x1="18" y1="40" x2="82" y2="40" '+s+'/></svg>';
+    default: return '<svg viewBox="0 0 100 80"><rect x="20" y="15" width="60" height="50" rx="6" '+s+' stroke-dasharray="6 6"/></svg>';
+  }
+}
+
+function init(){
+  /* kleur */
+  const cr=$('c2ColorRow');
+  ['wit','zwart','grijs'].forEach(c=>{
+    const b=document.createElement('button');
+    b.className='choice-btn'+(c===st.color?' sel':'');
+    b.innerHTML='<span class="dot '+c+'"></span>'+CLRN(c);
+    b.addEventListener('click',()=>{ st.color=c; cr.querySelectorAll('.choice-btn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); refresh(); });
+    cr.appendChild(b);
+  });
+  /* voeding */
+  const pr=$('c2PowerRow');
+  [{k:'A',l:'A \u00B7 1-fase, 3-circuit'},{k:'B',l:'B \u00B7 3-fase, 3-circuit'},{k:'C',l:'C \u00B7 3-fase, 3-phase'}].forEach(p=>{
+    const b=document.createElement('button');
+    b.className='choice-btn'+(p.k===st.powercfg?' sel':'');
+    b.textContent=p.l;
+    b.addEventListener('click',()=>{ st.powercfg=p.k; pr.querySelectorAll('.choice-btn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); refresh(); });
+    pr.appendChild(b);
+  });
+  /* vormen */
+  const sg=$('c2ShapeGrid');
+  Object.keys(SHAPES).forEach(id=>{
+    const card=document.createElement('div');
+    card.className='shape-card'; card.dataset.shape=id;
+    card.innerHTML=shapeIcon(id)+'<span>'+SHAPES[id].label+'</span>';
+    card.addEventListener('click',()=>{
+      sg.querySelectorAll('.shape-card').forEach(x=>x.classList.toggle('sel', x===card));
+      selectShape(id);
+    });
+    sg.appendChild(card);
+  });
+  renderGridRow();
+  /* stepper + nav */
+  document.querySelectorAll('#c2Steps button').forEach(b=> b.addEventListener('click', ()=>goStep(+b.dataset.step)));
+  $('c2Prev').addEventListener('click', ()=>goStep(Math.max(1,st.step-1)));
+  $('c2Next').addEventListener('click', ()=>goStep(Math.min(5,st.step+1)));
+  /* toolbar */
+  $('c2Undo').addEventListener('click', ()=>{ if(hIdx>0) restore(hIdx-1); });
+  $('c2Redo').addEventListener('click', ()=>{ if(hIdx<hist.length-1) restore(hIdx+1); });
+  $('c2Reset').addEventListener('click', ()=>{
+    const cur=st.sheet;
+    const ids=new Set(sheetNodes(cur).map(n=>n.id));
+    st.edges=st.edges.filter(e=>!ids.has(e.a));
+    st.nodes=st.nodes.filter(n=>n.s!==cur);
+    if(!st.nodes.length) st.shape=null;
+    st.pick=false; validateFeeds(); view={zoom:1,px:0,py:0}; snap(); st.step= st.nodes.length?4:3;
+    if(!st.nodes.length) $('c2ShapeGrid').querySelectorAll('.shape-card').forEach(x=>x.classList.remove('sel'));
+    refresh(); });
+  $('c2PickBtn').addEventListener('click', ()=>{ if(!st.shape) return; st.pick=!st.pick; refresh(); });
+  $('c2AddFig').addEventListener('click', ()=>goStep(3));
+  $('c2ZoomIn').addEventListener('click', ()=>zoomBy(1.25));
+  $('c2ZoomOut').addEventListener('click', ()=>zoomBy(1/1.25));
+  $('c2Center').addEventListener('click', ()=>{ view={zoom:1,px:0,py:0}; refresh(); });
+  /* stap 5 opties */
+  $('c2Use4m').addEventListener('change', e=>{ st.use4m=e.target.checked; refresh(); });
+  $('c2Mount').addEventListener('change', e=>{ st.mount=e.target.value; refresh(); });
+  $('c2Proj').addEventListener('input', e=>{ st.proj=e.target.value; });
+  $('c2AdPlus').addEventListener('click', ()=>{ st.adapters++; refresh(); });
+  $('c2AdMinus').addEventListener('click', ()=>{ st.adapters=Math.max(0,st.adapters-1); refresh(); });
+  /* acties */
+  $('c2ResetAll').addEventListener('click', ()=>{
+    st.shape=null; st.nodes=[]; st.edges=[]; st.feeds=[]; st.adapters=0; st.mount='geen'; st.pick=false; st.step=1;
+    st.sheets=[{id:'s1',name:'Tekenvlak 1'}]; st.sheet='s1'; st.sid=1; view={zoom:1,px:0,py:0};
+    hist=[]; hIdx=-1;
+    $('c2ShapeGrid').querySelectorAll('.shape-card').forEach(x=>x.classList.remove('sel'));
+    refresh();
+  });
+  $('c2Pdf').addEventListener('click', exportPdf);
+  $('c2Copy').addEventListener('click', ()=>{
+    const B=lastBOM||computeBOM();
+    const lines=['PRX 3-Fase Rail \u2014 materiaallijst ('+(st.shape?SHAPES[st.shape].label:'\u2014')+', '+st.color+', configuratie '+st.powercfg+')',''];
+    Object.keys(B.items).forEach(c=> lines.push((c.indexOf('m-')===0?'artikelnr volgt':c)+'  \u00D7'+B.items[c].qty+'  \u2014 '+B.items[c].name));
+    lines.push('');
+    B.railDetail.forEach(d=>{
+      lines.push('Segment '+d.r.lenM+' m: '+piecesTxt(d.r.pieces)+(d.r.seams>0?' + '+d.r.seams+'x elektrisch koppelstuk':''));
+    });
+    const txt=lines.join('\n');
+    navigator.clipboard.writeText(txt).then(()=>{
+      const btn=$('c2Copy'); const o=btn.textContent; btn.textContent='Gekopieerd \u2713';
+      setTimeout(()=>btn.textContent=o,1600);
+    }).catch(()=>alert(txt));
+  });
+  refresh();
+}
+init();
+
+})();
+
+</script>
+</body>
+</html>
