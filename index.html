@@ -389,6 +389,10 @@
   #c2Svg .c2-nodeend.c2-pickable{cursor:pointer;}
   #c2Svg .c2-nodeend.c2-pickable:hover{stroke:var(--red); stroke-width:3.5;}
   #c2Svg .c2-nodedark{fill:#1E2A4A;}
+  #c2Svg .c2-cornerbtn{cursor:pointer;}
+  #c2Svg .c2-cornerbtn:hover{fill:var(--blue);}
+  #c2Svg .c2-cornercustom{fill:var(--amber);}
+  #c2Svg .c2-cornercustom:hover{fill:var(--amber);}
   #c2Svg .c2-feed{fill:var(--red); stroke:#fff; stroke-width:2; cursor:pointer;}
   #c2Svg .c2-tag{font-family:'Nunito Sans',sans-serif; font-size:10px; font-weight:700; fill:#3D4C63;}
   #c2Svg .c2-tag.red{fill:var(--red);}
@@ -429,6 +433,11 @@
     font-family:'Nunito Sans',sans-serif; font-size:12.5px; color:var(--ink); background:#fff;
   }
   .c2-textinp{min-width:220px;}
+  .c2-prodlist{display:flex; flex-direction:column; gap:5px; max-height:300px; overflow-y:auto; padding:6px; margin-bottom:12px; border:1.5px solid var(--border); border-radius:8px;}
+  .c2-prodrow{display:flex; align-items:center; gap:8px; padding:4px 2px;}
+  .c2-prodrow .nm{flex:1; font-size:12.5px; color:var(--ink); font-weight:600;}
+  .c2-prodrow select.c2-select{padding:5px 8px; font-size:12px;}
+  .c2-qtyinp{width:48px; border:1.5px solid var(--border); border-radius:8px; padding:6px 4px; font-family:'JetBrains Mono',monospace; font-size:13px; text-align:center; color:var(--ink); background:#fff;}
 
   #c2Svg .c2-movable{cursor:move;}
   .c2-sheets{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; align-items:center;}
@@ -499,7 +508,7 @@
         <li><span class="k">Beschermingsgraad</span><span class="v">IP20 (binnen)</span></li>
         <li><span class="k">Spanning</span><span class="v">230V / 400V AC</span></li>
         <li><span class="k">Max. stroom</span><span class="v">16A</span></li>
-        <li><span class="k">Stroomgeleiderdoorsnede</span><span class="v">4,0 mm²</span></li>
+        <li><span class="k">Stroomgeleiderdoorsnede</span><span class="v">4,0 mm²</span></li>dit
         <li><span class="k">Aantal circuits</span><span class="v">tot 3</span></li>
         <li><span class="k">Doorsnede rail</span><span class="v">31,5 × 32,5 mm</span></li>
       </ul>
@@ -685,11 +694,12 @@
   <p class="lede">Teken alleen de gewenste railvorm en kies het stroomaansluitpunt. De tool bepaalt zelf alle koppelstukken, de polariteit (rode lijn, zoals in het polariteitsschema), de railverdeling in stukken van 1/2/3/4 meter en de complete artikellijst.</p>
 
   <div class="c2-steps" id="c2Steps">
-    <button data-step="1"><span class="c2-stepnum">1</span>Kleur</button>
-    <button data-step="2"><span class="c2-stepnum">2</span>Voeding</button>
-    <button data-step="3"><span class="c2-stepnum">3</span>Vorm</button>
-    <button data-step="4"><span class="c2-stepnum">4</span>Tekening &amp; maten</button>
-    <button data-step="5"><span class="c2-stepnum">5</span>Stuklijst</button>
+    <button data-step="1"><span class="c2-stepnum">1</span>DALI</button>
+    <button data-step="2"><span class="c2-stepnum">2</span>Kleur</button>
+    <button data-step="3"><span class="c2-stepnum">3</span>Voeding</button>
+    <button data-step="4"><span class="c2-stepnum">4</span>Vorm</button>
+    <button data-step="5"><span class="c2-stepnum">5</span>Tekening &amp; maten</button>
+    <button data-step="6"><span class="c2-stepnum">6</span>Stuklijst</button>
   </div>
   <div class="c2-stepmsg" id="c2StepMsg"></div>
 
@@ -697,27 +707,33 @@
     <div class="cfg-panel">
 
       <div class="cfg-block c2-pane" data-pane="1">
+        <h4>Standaard of DALI-dimbaar?</h4>
+        <p class="hint">Bepaalt welke artikelcodes in de stuklijst en PDF komen. Vorm, kleur, voeding en de rest van de logica blijven voor beide lijnen gelijk.</p>
+        <div class="choice-row" id="c2DaliRow"></div>
+      </div>
+
+      <div class="cfg-block c2-pane" data-pane="2">
         <h4>Kies kleur</h4>
         <p class="hint">Geldt voor alle onderdelen in het traject.</p>
         <div class="choice-row" id="c2ColorRow"></div>
       </div>
 
-      <div class="cfg-block c2-pane" data-pane="2">
+      <div class="cfg-block c2-pane" data-pane="3">
         <h4>Kies voedingsconfiguratie</h4>
         <p class="hint">Bepaalt de capaciteitswaarschuwingen. Zie tab "Aansluiting &amp; polariteit" voor uitleg per configuratie.</p>
         <div class="choice-row" id="c2PowerRow"></div>
       </div>
 
-      <div class="cfg-block c2-pane" data-pane="3">
+      <div class="cfg-block c2-pane" data-pane="4">
         <h4>Kies een vorm als startpunt</h4>
-        <p class="hint">Bovenaanzicht, zoals een plattegrond. Staat er al een tekening, dan wordt de gekozen vorm als <b>extra traject</b> toegevoegd (elk traject krijgt een eigen aansluitpunt). In stap 4 pas je maten aan en verbind je trajecten door uiteinden op elkaar te schuiven.</p>
+        <p class="hint">Bovenaanzicht, zoals een plattegrond. Staat er al een tekening, dan wordt de gekozen vorm als <b>extra traject</b> toegevoegd (elk traject krijgt een eigen aansluitpunt). In stap 5 pas je maten aan en verbind je trajecten door uiteinden op elkaar te schuiven.</p>
         <div class="shape-grid" id="c2ShapeGrid"></div>
         <div class="grid-dims-row" id="c2GridRow" style="display:none;margin-top:14px;"></div>
       </div>
 
-      <div class="cfg-block c2-pane" data-pane="4">
+      <div class="cfg-block c2-pane" data-pane="5">
         <h4>Tekening &amp; maten</h4>
-        <p class="hint">Klik op een <b>maat</b> om te typen of <b>sleep een wit uiteinde</b> (per meter) · <b>sleep een railstuk</b> om het hele figuur te verplaatsen · scroll of ＋/− om te zoomen, sleep de achtergrond om te schuiven · klik op <b>＋</b> om een segment toe te voegen · <b>✕</b> verwijdert een uiteinde · klik het <b>voedingspunt</b> om Links/Rechts of de lijnzijde te wisselen. De rode lijn is de polariteitslijn uit het schema.</p>
+        <p class="hint">Klik op een <b>maat</b> om te typen (ook met decimalen, bv. 7,2) of <b>sleep een wit uiteinde</b> (per meter) · <b>sleep een railstuk</b> om het hele figuur te verplaatsen · scroll of ＋/− om te zoomen, sleep de achtergrond om te schuiven · klik op <b>＋</b> om een segment toe te voegen · <b>✕</b> verwijdert een uiteinde · klik het <b>voedingspunt</b> om Links/Rechts of de lijnzijde te wisselen. De rode lijn is de polariteitslijn uit het schema.</p>
         <div class="c2-sheets" id="c2Sheets"></div>
         <div class="c2-toolbar">
           <button id="c2Undo" title="Ongedaan maken">↶ Ongedaan</button>
@@ -733,37 +749,34 @@
         <div class="c2-canvaswrap" id="c2CanvasWrap">
           <svg id="c2Svg" viewBox="0 0 900 560"></svg>
         </div>
-        <p class="hint" style="margin:10px 0 0;">De getekende maten zijn de <b>raillengtes</b> (per 1, 2 of 3 meter; 4 m op aanvraag). Koppelstukken en aansluitpunt komen daar in werkelijkheid bovenop; rail kan desgewenst op maat gezaagd worden.</p>
+        <p class="hint" style="margin:10px 0 0;">De getekende maat is de werkelijke raillengte — ook decimalen zijn mogelijk als de installateur op maat zaagt (bv. 7,2 m). Voor de bestelling wordt dit per segment naar boven afgerond op hele meters (1, 2 of 3 m; 4 m op aanvraag). Koppelstukken en aansluitpunt komen daar in werkelijkheid nog bovenop.</p>
       </div>
 
-      <div class="cfg-block c2-pane" data-pane="5">
+      <div class="cfg-block c2-pane" data-pane="6">
         <h4>Stuklijst &amp; opties</h4>
-        <p class="hint">De volledige lijst staat rechts. Hieronder de railverdeling per segment en de opties.</p>
-        <label class="c2-check"><input type="checkbox" id="c2Use4m"> Gebruik ook 4 meter rail (alleen op aanvraag — bestelartikel)</label>
+        <p class="hint"></p>
+        <label class="c2-check"><input type="checkbox" id="c2Use4m"> Gebruik ook 4 meter rail (alleen bij grote bestellingen - logistiek)</label>
         <div class="c2-adapterrow">
           <span>Montagewijze:</span>
           <select id="c2Mount" class="c2-select">
             <option value="geen">&mdash; nog geen keuze &mdash;</option>
-            <option value="beugel">Montagebeugel (plafond)</option>
+            <option value="beugel">Plafond Montagebeugel</option>
             <option value="sys">Systeemplafondbeugel</option>
-            <option value="ophang3">Systeemplafondbeugel ophangset verstelbaar 3 m</option>
-            <option value="ophang6">Systeemplafondbeugel ophangset verstelbaar 6 m</option>
-            <option value="pendel">Pendelset 10-pack (plafondbus + staalkabel 3 m)</option>
+            <option value="pendel">Pendelset (plafondbus + staalkabel)</option>
           </select>
-          <span class="hint" style="margin:0;">Montagepunten: <b id="c2MountCount">0</b> (om de meter, incl. uiteinden; knooppunten gedeeld)</span>
+          <span class="hint" style="margin:0;">Montagepunten: <b id="c2MountCount">0</b> </span>
         </div>
+        <div class="c2-adapterrow" id="c2MountSubRow" style="display:none;"></div>
         <div class="c2-adapterrow">
           <span>Projectnaam (voor de PDF):</span>
           <input type="text" id="c2Proj" class="c2-textinp" placeholder="bijv. Winkel Hoofdstraat 12">
         </div>
-        <div class="c2-adapterrow">
-          <span>Adapters / spots op dit traject:</span>
-          <button class="stepper-btn" id="c2AdMinus">−</button>
-          <span class="stepper-val" id="c2AdVal">0</span>
-          <button class="stepper-btn" id="c2AdPlus">+</button>
-        </div>
+        <p class="hint" style="margin:0 0 6px;">Armaturen — kies kleur en typ het aantal per type.</p>
+        <div class="c2-prodlist" id="c2ArmList"></div>
+        <p class="hint" style="margin:10px 0 6px;">Adapters &amp; overig — kies kleur en typ het aantal per product.</p>
+        <div class="c2-prodlist" id="c2OverigList"></div>
         <div id="c2RailDetail" class="c2-raildetail"></div>
-        <p class="hint" style="margin:10px 0 0;">De getekende maat is de raillengte. De werkelijke maat per segment (rail + koppelstukken) staat er in grijs bij, voor het inmeten op locatie.</p>
+        <p class="hint" style="margin:10px 0 0;">Achter elk segment staat wat er besteld wordt (naar boven afgerond op hele meters).</p>
       </div>
 
       <div class="c2-navrow">
@@ -779,7 +792,7 @@
       <div>
         <div class="cfg-metric-row"><span class="k">Totale lengte</span><span class="v" id="c2TotLen">0 cm</span></div>
         <div class="cfg-metric-row"><span class="k">Segmenten</span><span class="v" id="c2TotSeg">0</span></div>
-        <div class="cfg-metric-row"><span class="k">Adapters / spots</span><span class="v" id="c2TotAd">0</span></div>
+        <div class="cfg-metric-row"><span class="k">Armaturen</span><span class="v" id="c2TotArm">0</span></div>
       </div>
       <div>
         <span class="eyebrow">Materiaallijst</span>
@@ -794,7 +807,8 @@
     </div>
   </div>
 
-  <div class="c2-float" id="c2Inp" style="display:none;"><input type="number" min="1" max="500" step="1"><span>m</span></div>
+  <div class="c2-float" id="c2Inp" style="display:none;"><input type="text" inputmode="decimal" autocomplete="off"><span>m</span></div>
+  <div class="c2-float" id="c2AngleInp" style="display:none;"><input type="text" inputmode="decimal" autocomplete="off"><span>°</span></div>
   <div class="c2-float c2-pop" id="c2Pop" style="display:none;"></div>
 </section>
 
@@ -834,89 +848,89 @@ tabBtns.forEach(btn=>{
 const COLORS = {wit:'#FFFFFF', zwart:'#1A1A1A', grijs:'#9CA3AF'};
 
 const parts = [
-{cat:'Rail', name:'Rail', desc:'Het basisprofiel: 4 stroombanen (L1,L2,L3,N) + aarde, verkrijgbaar in 1/2/3/4 meter.', codes:[
+{cat:'Rail', name:'Rail', desc:'Het basisprofiel: 4 stroombanen (L1,L2,L3,N) + aarde, verkrijgbaar in 1/2/3/4 meter.', LCODES:[
   {code:'2000766',v:'1m Wit',color:'wit'},{code:'2000759',v:'1m Zwart',color:'zwart'},{code:'2000742',v:'1m Grijs',color:'grijs'},
   {code:'2000797',v:'2m Wit',color:'wit'},{code:'2000780',v:'2m Zwart',color:'zwart'},{code:'2000773',v:'2m Grijs',color:'grijs'},
   {code:'2000827',v:'3m Wit',color:'wit'},{code:'2000810',v:'3m Zwart',color:'zwart'},{code:'2000803',v:'3m Grijs',color:'grijs'},
   {code:'2012899',v:'4m Wit',color:'wit'},{code:'2012882',v:'4m Zwart',color:'zwart'},{code:'2012875',v:'4m Grijs',color:'grijs'},
 ]},
-{cat:'Aansluitstuk', name:'Aansluitstuk', desc:'Voedt de rail vanaf het net. Bepaalt de polariteitsrichting (Links/Rechts) van het volledige railplan.', codes:[
+{cat:'Aansluitstuk', name:'Aansluitstuk', desc:'Voedt de rail vanaf het net. Bepaalt de polariteitsrichting (Links/Rechts) van het volledige railplan.', LCODES:[
   {code:'2000858',v:'Rechts Wit',color:'wit'},{code:'2000841',v:'Rechts Zwart',color:'zwart'},{code:'2000834',v:'Rechts Grijs',color:'grijs'},
   {code:'2000889',v:'Links Wit',color:'wit'},{code:'2000872',v:'Links Zwart',color:'zwart'},{code:'2000865',v:'Links Grijs',color:'grijs'},
 ]},
-{cat:'90° Bocht', name:'90° Bocht', desc:'Buiten- of binnenbocht om een hoek van 90° te maken. Beide behouden de polariteit als de juiste kant wordt gebruikt.', codes:[
+{cat:'90° Bocht', name:'90° Bocht', desc:'Buiten- of binnenbocht om een hoek van 90° te maken. Beide behouden de polariteit als de juiste kant wordt gebruikt.', LCODES:[
   {code:'2000940',v:'Binnen Wit',color:'wit'},{code:'2000933',v:'Binnen Zwart',color:'zwart'},{code:'2000926',v:'Binnen Grijs',color:'grijs'},
   {code:'2000971',v:'Buiten Wit',color:'wit'},{code:'2000964',v:'Buiten Zwart',color:'zwart'},{code:'2000957',v:'Buiten Grijs',color:'grijs'},
 ]},
-{cat:'Middenvoeding', name:'Middenvoeding', desc:'Voedt de rail vanuit het midden van een recht stuk, in plaats van vanaf het uiteinde.', codes:[
+{cat:'Middenvoeding', name:'Middenvoeding', desc:'Voedt de rail vanuit het midden van een recht stuk, in plaats van vanaf het uiteinde.', LCODES:[
   {code:'2001183',v:'Wit',color:'wit'},{code:'2001176',v:'Zwart',color:'zwart'},{code:'2001169',v:'Grijs',color:'grijs'},
 ]},
-{cat:'Universal Adapter', name:'Adapter 70mm', desc:'Universele adapter voor het monteren van een spot/armatuur op de rail. Altijd combineren met trekontlasting art. 2001947.', codes:[
+{cat:'Universal Adapter', name:'Adapter 70mm', desc:'Universele adapter voor het monteren van een spot/armatuur op de rail. Altijd combineren met trekontlasting art. 2001947.', LCODES:[
   {code:'2001404',v:'Wit',color:'wit'},{code:'2001398',v:'Zwart',color:'zwart'},{code:'2001381',v:'Grijs',color:'grijs'},
 ]},
-{cat:'Universal Multi-Adapter', name:'Multi-adapter 3-fase + 400V aftakking', desc:'Adapter met extra 400V aftakking voor zwaardere of aparte belasting op één punt.', codes:[
+{cat:'Universal Multi-Adapter', name:'Multi-adapter 3-fase + 400V aftakking', desc:'Adapter met extra 400V aftakking voor zwaardere of aparte belasting op één punt.', LCODES:[
   {code:'2001435',v:'Wit',color:'wit'},{code:'2001428',v:'Zwart',color:'zwart'},{code:'2001411',v:'Grijs',color:'grijs'},
 ]},
-{cat:'Schuko Adapter', name:'Schuko Adapter', desc:'Zet een stroombaan van de rail om naar een gewoon (schuko) stopcontact.', codes:[
+{cat:'Schuko Adapter', name:'Schuko Adapter', desc:'Zet een stroombaan van de rail om naar een gewoon (schuko) stopcontact.', LCODES:[
   {code:'2001459',v:'Wit',color:'wit'},{code:'2001442',v:'Zwart',color:'zwart'},
 ]},
-{cat:'T-Koppelstuk', name:'T-Koppelstuk', desc:'Vertakking in T-vorm. Er bestaan 4 varianten (Type 1/2 × Links/Rechts) — kies de variant die de polariteit van het schema volgt.', codes:[
+{cat:'T-Koppelstuk', name:'T-Koppelstuk', desc:'Vertakking in T-vorm. Er bestaan 4 varianten (Type 1/2 × Links/Rechts) — kies de variant die de polariteit van het schema volgt.', LCODES:[
   {code:'2001008',v:'Rechts Type1 Wit',color:'wit'},{code:'2000995',v:'Rechts Type1 Zwart',color:'zwart'},{code:'2000988',v:'Rechts Type1 Grijs',color:'grijs'},
   {code:'2001039',v:'Links Type2 Wit',color:'wit'},{code:'2001022',v:'Links Type2 Zwart',color:'zwart'},{code:'2001015',v:'Links Type2 Grijs',color:'grijs'},
   {code:'2002432',v:'Rechts Type2 Wit',color:'wit'},{code:'2002425',v:'Rechts Type2 Zwart',color:'zwart'},{code:'2002418',v:'Rechts Type2 Grijs',color:'grijs'},
   {code:'2002463',v:'Links Type1 Wit',color:'wit'},{code:'2002456',v:'Links Type1 Zwart',color:'zwart'},{code:'2002449',v:'Links Type1 Grijs',color:'grijs'},
 ]},
-{cat:'Kruis Koppelstuk', name:'Kruis Koppelstuk', desc:'Vertakking naar vier richtingen tegelijk (kruising).', codes:[
+{cat:'Kruis Koppelstuk', name:'Kruis Koppelstuk', desc:'Vertakking naar vier richtingen tegelijk (kruising).', LCODES:[
   {code:'2001060',v:'Wit',color:'wit'},{code:'2001053',v:'Zwart',color:'zwart'},{code:'2001046',v:'Grijs',color:'grijs'},
 ]},
-{cat:'Flexibele Koppelstuk', name:'Flexibele Koppelstuk Lang', desc:'Flexibel verbindingsstuk voor niet-rechte overgangen of om oneffenheden op te vangen.', codes:[
+{cat:'Flexibele Koppelstuk', name:'Flexibele Koppelstuk Lang', desc:'Flexibel verbindingsstuk voor niet-rechte overgangen of om oneffenheden op te vangen.', LCODES:[
   {code:'2001152',v:'Wit',color:'wit'},{code:'2001145',v:'Zwart',color:'zwart'},{code:'2001138',v:'Grijs',color:'grijs'},
 ]},
-{cat:'Verstelbare Hoek', name:'Verstelbare Hoek', desc:'Instelbare hoekverbinding voor niet-standaard hoeken (anders dan 90°).', codes:[
+{cat:'Verstelbare Hoek', name:'Verstelbare Hoek', desc:'Instelbare hoekverbinding voor niet-standaard hoeken (anders dan 90°).', LCODES:[
   {code:'2001121',v:'Wit',color:'wit'},{code:'2001114',v:'Zwart',color:'zwart'},{code:'2001107',v:'Grijs',color:'grijs'},
 ]},
-{cat:'Elektrisch Koppelstuk', name:'Elektrisch Koppelstuk', desc:'Verbindt twee railstukken elektrisch en mechanisch tot één doorlopend circuit.', codes:[
+{cat:'Elektrisch Koppelstuk', name:'Elektrisch Koppelstuk', desc:'Verbindt twee railstukken elektrisch en mechanisch tot één doorlopend circuit.', LCODES:[
   {code:'2001091',v:'Wit',color:'wit'},{code:'2001084',v:'Zwart',color:'zwart'},{code:'2001077',v:'Grijs',color:'grijs'},
 ]},
-{cat:'Monopoint', name:'Monopoint voor 3-fase adapter', desc:'Enkelvoudig plafondpunt voor het monteren van één adapter/spot zonder volledige rail.', codes:[
+{cat:'Monopoint', name:'Monopoint voor 3-fase adapter', desc:'Enkelvoudig plafondpunt voor het monteren van één adapter/spot zonder volledige rail.', LCODES:[
   {code:'2001503',v:'Wit',color:'wit'},{code:'2001497',v:'Zwart',color:'zwart'},{code:'2001480',v:'Grijs',color:'grijs'},
 ]},
-{cat:'Eindkap', name:'Eindkap', desc:'Sluit het uiteinde van de rail netjes en veilig af.', codes:[
+{cat:'Eindkap', name:'Eindkap', desc:'Sluit het uiteinde van de rail netjes en veilig af.', LCODES:[
   {code:'2000919',v:'Wit',color:'wit'},{code:'2000902',v:'Zwart',color:'zwart'},{code:'2000896',v:'Grijs',color:'grijs'},
 ]},
-{cat:'Montagebeugel', name:'Plafond Montagebeugel', desc:'Bevestigt de rail direct tegen het plafond.', codes:[
+{cat:'Montagebeugel', name:'Plafond Montagebeugel', desc:'Bevestigt de rail direct tegen het plafond.', LCODES:[
   {code:'2001329',v:'Wit',color:'wit'},{code:'2001312',v:'Zwart',color:'zwart'},{code:'2001305',v:'Grijs',color:'grijs'},
 ]},
-{cat:'Verstevigingsplaat', name:'Verstevigingsplaat 182mm', desc:'Extra ondersteuning ter plaatse van een koppeling, voor stevigheid bij zwaardere belasting.', codes:[
+{cat:'Verstevigingsplaat', name:'Verstevigingsplaat 182mm', desc:'Extra ondersteuning ter plaatse van een koppeling, voor stevigheid bij zwaardere belasting.', LCODES:[
   {code:'2001350',v:'Wit',color:'wit'},{code:'2001343',v:'Zwart',color:'zwart'},{code:'2001336',v:'Grijs',color:'grijs'},
 ]},
-{cat:'Afdekplaat', name:'Afdekplaat 2M', desc:'Dekt een stuk rail visueel af, bijvoorbeeld bij tijdelijk ongebruikte secties.', codes:[
+{cat:'Afdekplaat', name:'Afdekplaat 2M', desc:'Dekt een stuk rail visueel af, bijvoorbeeld bij tijdelijk ongebruikte secties.', LCODES:[
   {code:'2001206',v:'Wit',color:'wit'},{code:'2001190',v:'Zwart',color:'zwart'},
 ]},
-{cat:'Trekontlasting', name:'Trekontlasting', desc:'Voorkomt dat een adapter loskomt of los kan trekken. Art. 2001947 is verplicht bij de 70mm Universal adapter.', codes:[
+{cat:'Trekontlasting', name:'Trekontlasting', desc:'Voorkomt dat een adapter loskomt of los kan trekken. Art. 2001947 is verplicht bij de 70mm Universal adapter.', LCODES:[
   {code:'2001947',v:'Brug met 2 schroefjes',color:'grijs'},{code:'2001473',v:'Wit',color:'wit'},{code:'2001466',v:'Zwart',color:'zwart'},
 ]},
-{cat:'Nippel Draaibaar', name:'Nippel draaibaar M10 + moer', desc:'Draaibare bevestigingsnippel voor pendel- of ophangmontage.', codes:[
+{cat:'Nippel Draaibaar', name:'Nippel draaibaar M10 + moer', desc:'Draaibare bevestigingsnippel voor pendel- of ophangmontage.', LCODES:[
   {code:'2029507',v:'Aluminium',color:'grijs'},{code:'2029514',v:'Zwart',color:'zwart'},
 ]},
-{cat:'Systeemplafond', name:'Ophangset verstelbaar (incl. kap)', desc:'Verstelbare ophanging voor systeemplafonds, 3 of 6 meter kabel.', codes:[
+{cat:'Systeemplafond', name:'Ophangset verstelbaar (incl. kap)', desc:'Verstelbare ophanging voor systeemplafonds, 3 of 6 meter kabel.', LCODES:[
   {code:'2001237',v:'3M Wit',color:'wit'},{code:'2001220',v:'3M Zwart',color:'zwart'},{code:'2001213',v:'3M Grijs',color:'grijs'},
   {code:'2001268',v:'6M Wit',color:'wit'},{code:'2001251',v:'6M Zwart',color:'zwart'},{code:'2001244',v:'6M Grijs',color:'grijs'},
 ]},
-{cat:'Systeemplafond', name:'Systeemplafond beugel', desc:'Bevestigingsbeugel specifiek voor systeemplafonds.', codes:[
+{cat:'Systeemplafond', name:'Systeemplafond beugel', desc:'Bevestigingsbeugel specifiek voor systeemplafonds.', LCODES:[
   {code:'2001299',v:'Wit',color:'wit'},{code:'2001282',v:'Zwart',color:'zwart'},{code:'2001275',v:'Grijs',color:'grijs'},
 ]},
-{cat:'Pendelset', name:'Pendelset — 10 pack (plafondbus + staalkabel)', desc:'Set van 10 plafondbussen met staalkabel voor pendelmontage, div. lengtes en kleuren.', codes:[
+{cat:'Pendelset', name:'Pendelset — 10 pack (plafondbus + staalkabel)', desc:'Set van 10 plafondbussen met staalkabel voor pendelmontage, div. lengtes en kleuren.', LCODES:[
   {code:'2012974',v:'Bus Wit / kabel 3M Zilver',color:'wit'},{code:'2012950',v:'Bus Zilver / kabel 3M Zilver',color:'grijs'},
   {code:'2012998',v:'Bus Zwart / kabel 3M Zilver',color:'zwart'},{code:'2013018',v:'Bus Zwart / kabel 3M Zwart',color:'zwart'},
   {code:'2013025',v:'Bus Zwart / kabel 5M Zwart',color:'zwart'},{code:'2012981',v:'Bus Wit / kabel 6M Zilver',color:'wit'},
   {code:'2012967',v:'Bus Zilver / kabel 6M Zilver',color:'grijs'},{code:'2013001',v:'Bus Zwart / kabel 6M Zilver',color:'zwart'},
 ]},
-{cat:'Rail Beugel', name:'Rail beugel + snelspanner', desc:'Snelmontagebeugel met snelspanner voor eenvoudige bevestiging.', codes:[
+{cat:'Rail Beugel', name:'Rail beugel + snelspanner', desc:'Snelmontagebeugel met snelspanner voor eenvoudige bevestiging.', LCODES:[
   {code:'2013056',v:'Zilver',color:'grijs'},{code:'2013032',v:'Zwart',color:'zwart'},{code:'2013049',v:'Wit',color:'wit'},
 ]},
-{cat:'Gereedschap', name:'Buiggereedschap', desc:'Gereedschap om de rail zelf licht te buigen voor niet-standaard tracés.', codes:[{code:'2001374',v:'—',color:'grijs'}]},
-{cat:'Gereedschap', name:'Slot connection tool', desc:'Hulpgereedschap om koppelstukken en aansluitstukken correct te vergrendelen.', codes:[{code:'2001930',v:'—',color:'grijs'}]},
+{cat:'Gereedschap', name:'Buiggereedschap', desc:'Gereedschap om de rail zelf licht te buigen voor niet-standaard tracés.', LCODES:[{code:'2001374',v:'—',color:'grijs'}]},
+{cat:'Gereedschap', name:'Slot connection tool', desc:'Hulpgereedschap om koppelstukken en aansluitstukken correct te vergrendelen.', LCODES:[{code:'2001930',v:'—',color:'grijs'}]},
 ];
 
 /* icon per category (simple line-art) */
@@ -1037,7 +1051,7 @@ function renderParts(){
     div.innerHTML = `<div class="part-icon">${iconFor(p.cat)}</div>
       <h4>${p.name}</h4>
       <p>${p.desc}</p>
-      <div class="part-tags"><span class="tag">${p.cat}</span><span class="tag">${p.codes.length} varianten</span></div>`;
+      <div class="part-tags"><span class="tag">${p.cat}</span><span class="tag">${p.LCODES.length} varianten</span></div>`;
     div.addEventListener('click',()=>openPartModal(p));
     grid.appendChild(div);
   });
@@ -1047,7 +1061,7 @@ catFilter.addEventListener('change', renderParts);
 renderParts();
 
 function openPartModal(p){
-  const rows = p.codes.map(c=>`<tr><td class="code">${c.code}</td><td>${c.v}</td><td><span class="dot ${c.color}" style="display:inline-block;vertical-align:middle;margin-right:6px;"></span>${c.color}</td></tr>`).join('');
+  const rows = p.LCODES.map(c=>`<tr><td class="code">${c.code}</td><td>${c.v}</td><td><span class="dot ${c.color}" style="display:inline-block;vertical-align:middle;margin-right:6px;"></span>${c.color}</td></tr>`).join('');
   document.getElementById('modalContent').innerHTML = `
     <span class="eyebrow">${p.cat}</span>
     <h3>${p.name}</h3>
@@ -1113,7 +1127,7 @@ renderTs();
 
 /* =================== ARTIKELZOEKER (full table) =================== */
 let allArticles = [];
-parts.forEach(p=>{ p.codes.forEach(c=>{ allArticles.push({code:c.code, name:`${p.name} ${c.v!=='—'?c.v:''}`.trim(), cat:p.cat, color:c.color}); }); });
+parts.forEach(p=>{ p.LCODES.forEach(c=>{ allArticles.push({code:c.code, name:`${p.name} ${c.v!=='—'?c.v:''}`.trim(), cat:p.cat, color:c.color}); }); });
 
 const artCatFilter = document.getElementById('artCatFilter');
 [...new Set(allArticles.map(a=>a.cat))].forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; artCatFilter.appendChild(o); });
@@ -1135,7 +1149,7 @@ renderArtTable();
    artikelnummers worden afgeleid. De rode lijn = polariteitslijn uit het schema. */
 (function(){
 
-const CODES = {
+const PCODES = {
   rail:      {wit:{1:'2000766',2:'2000797',3:'2000827',4:'2012899'}, zwart:{1:'2000759',2:'2000780',3:'2000810',4:'2012882'}, grijs:{1:'2000742',2:'2000773',3:'2000803',4:'2012875'}},
   aansluit:  {wit:{R:'2000858',L:'2000889'}, zwart:{R:'2000841',L:'2000872'}, grijs:{R:'2000834',L:'2000865'}},
   bocht:     {wit:{binnen:'2000940',buiten:'2000971'}, zwart:{binnen:'2000933',buiten:'2000964'}, grijs:{binnen:'2000926',buiten:'2000957'}},
@@ -1144,18 +1158,144 @@ const CODES = {
   kruis:     {wit:'2001060', zwart:'2001053', grijs:'2001046'},
   midden:    {wit:'2001183', zwart:'2001176', grijs:'2001169'},
   eindkap:   {wit:'2000919', zwart:'2000902', grijs:'2000896'},
-  elkoppel:  '2001084', /* altijd zwart: schuift volledig in de rail, kleur onzichtbaar */
+  elkoppel:  {wit:'2001091', zwart:'2001084', grijs:'2001077'},
   buigtool:  '2001374',
-  beugelsnel:'2013032',
+  /* Rail beugel + snelspanner: per stuk, volgt de railkleur (zie MOUNTS/pendel). */
+  beugelsnel:{wit:'2013049', zwart:'2013032', grijs:'2013056'},
   adapter70: {wit:'2001404', zwart:'2001398', grijs:'2001381'},
+  /* Verstelbare Hoek: bewust buiten de automatische afleiding gehouden totdat de
+     gebruiker een hoek expliciet aanpast (zie st.angles) — echte Pragmalux-codes,
+     al aanwezig in de Onderdelen-catalogus (parts). */
+  verstelbaar:{wit:'2001121', zwart:'2001114', grijs:'2001107'},
+  /* Montageopties, echte codes uit de Onderdelen-catalogus (parts). */
+  montagebeugel:{wit:'2001329', zwart:'2001312', grijs:'2001305'},
+  systeembeugel:{wit:'2001299', zwart:'2001282', grijs:'2001275'},
+  ophangset:{wit:{3:'2001237',6:'2001268'}, zwart:{3:'2001220',6:'2001251'}, grijs:{3:'2001213',6:'2001244'}},
+  pendel:{
+    wit:   {zilver:{3:'2012974',6:'2012981'}},
+    grijs: {zilver:{3:'2012950',6:'2012967'}},
+    zwart: {zilver:{3:'2012998',6:'2013001'}, zwart:{3:'2013018',5:'2013025'}},
+  },
   trek:'2001947'
 };
+
+const LCODES = {
+  rail:      {wit:{1:'KKT301158',2:'KKT301185',3:'KKT301115',4:'2012899'}, zwart:{1:'KKT301152',2:'KKT301179',3:'KKT30119',4:'2012882'}, grijs:{1:'KKT301144',2:'KKT301171',3:'KKT30111',4:'2012875'}},
+  aansluit:  {wit:{R:'KKT30129',L:'KKT301224'}, zwart:{R:'KKT30123',L:'KKT301219'}, grijs:{R:'KKT30122',L:'KKT301218'}},
+  bocht:     {wit:{binnen:'KKT301289',buiten:'KKT3012102'}, zwart:{binnen:'KKT301284',buiten:'KKT301297'}, grijs:{binnen:'KKT301283',buiten:'KKT301296'}},
+  /* Naamtoewijzing T-varianten geverifieerd 17-7-2026 via verificatievel. */
+  tkoppel:   {wit:{R1:'KKT3012115',L2:'KKT3012127',R2:'KKT3012149',L1:'KKT3012161'}, zwart:{R1:'KKT3012110',L2:'KKT3012123',R2:'KKT3012145',L1:'KKT3012157'}, grijs:{R1:'KKT3012109',L2:'KKT3012122',R2:'KKT3012144',L1:'KKT3012156'}},
+  kruis:     {wit:'KKT3012136', zwart:'KKT3012132', grijs:'KKT3012131'},
+  midden:    {wit:'KKT301238', zwart:'KKT301233', grijs:'KKT301232'},
+  eindkap:   {wit:'KKT3012172', zwart:'KKT3012166', grijs:'KKT3012165'},
+  elkoppel:  {wit:'KKT301253', zwart:'KKT301246', grijs:'KKT301245'},
+  buigtool:  'KKT30155',
+  beugelsnel:{wit:'01-C15-N1-9817', zwart:'01-C15-N1-9818', grijs:'01-C15-N1-9802'},
+  adapter70: {wit:'KKT30133', zwart:'KKT30132', grijs:'KKT30131'},
+  /* externe codes nog niet bekend, placeholders totdat de gebruiker deze invult */
+  verstelbaar:{wit:'VERSTHOEK-WIT-L', zwart:'VERSTHOEK-ZWART-L', grijs:'VERSTHOEK-GRIJS-L'},
+  montagebeugel:{wit:'MONTBEUGEL-WIT-L', zwart:'MONTBEUGEL-ZWART-L', grijs:'MONTBEUGEL-GRIJS-L'},
+  systeembeugel:{wit:'SYSBEUGEL-WIT-L', zwart:'SYSBEUGEL-ZWART-L', grijs:'SYSBEUGEL-GRIJS-L'},
+  ophangset:{wit:{3:'OPHANG-WIT-3-L',6:'OPHANG-WIT-6-L'}, zwart:{3:'OPHANG-ZWART-3-L',6:'OPHANG-ZWART-6-L'}, grijs:{3:'OPHANG-GRIJS-3-L',6:'OPHANG-GRIJS-6-L'}},
+  pendel:{
+    wit:   {zilver:{3:'PENDEL-WIT-ZILVER-3-L',6:'PENDEL-WIT-ZILVER-6-L'}},
+    grijs: {zilver:{3:'PENDEL-GRIJS-ZILVER-3-L',6:'PENDEL-GRIJS-ZILVER-6-L'}},
+    zwart: {zilver:{3:'PENDEL-ZWART-ZILVER-3-L',6:'PENDEL-ZWART-ZILVER-6-L'}, zwart:{3:'PENDEL-ZWART-ZWART-3-L',5:'PENDEL-ZWART-ZWART-5-L'}},
+  },
+  trek:'2001947'
+};
+
+/* DALI-lijn: zelfde onderdelen en logica als hierboven, alleen andere artikelcodes.
+   Placeholders ('DALI-' + bestaande code) totdat de echte DALI-codes handmatig
+   ingevuld worden — vervang per regel zodra bekend. */
+const PCODES_DALI = {
+  rail:      {wit:{1:'DALI-2000766',2:'DALI-2000797',3:'DALI-2000827',4:'DALI-2012899'}, zwart:{1:'DALI-2000759',2:'DALI-2000780',3:'DALI-2000810',4:'DALI-2012882'}, grijs:{1:'DALI-2000742',2:'DALI-2000773',3:'DALI-2000803',4:'DALI-2012875'}},
+  aansluit:  {wit:{R:'DALI-2000858',L:'DALI-2000889'}, zwart:{R:'DALI-2000841',L:'DALI-2000872'}, grijs:{R:'DALI-2000834',L:'DALI-2000865'}},
+  bocht:     {wit:{binnen:'DALI-2000940',buiten:'DALI-2000971'}, zwart:{binnen:'DALI-2000933',buiten:'DALI-2000964'}, grijs:{binnen:'DALI-2000926',buiten:'DALI-2000957'}},
+  tkoppel:   {wit:{R1:'DALI-2001008',L2:'DALI-2001039',R2:'DALI-2002432',L1:'DALI-2002463'}, zwart:{R1:'DALI-2000995',L2:'DALI-2001022',R2:'DALI-2002425',L1:'DALI-2002456'}, grijs:{R1:'DALI-2000988',L2:'DALI-2001015',R2:'DALI-2002418',L1:'DALI-2002449'}},
+  kruis:     {wit:'DALI-2001060', zwart:'DALI-2001053', grijs:'DALI-2001046'},
+  midden:    {wit:'DALI-2001183', zwart:'DALI-2001176', grijs:'DALI-2001169'},
+  eindkap:   {wit:'DALI-2000919', zwart:'DALI-2000902', grijs:'DALI-2000896'},
+  elkoppel:  {wit:'DALI-2001091', zwart:'DALI-2001084', grijs:'DALI-2001077'},
+  buigtool:  'DALI-2001374',
+  beugelsnel:{wit:'DALI-2013049', zwart:'DALI-2013032', grijs:'DALI-2013056'},
+  adapter70: {wit:'DALI-2001404', zwart:'DALI-2001398', grijs:'DALI-2001381'},
+  verstelbaar:{wit:'DALI-2001121', zwart:'DALI-2001114', grijs:'DALI-2001107'},
+  montagebeugel:{wit:'DALI-2001329', zwart:'DALI-2001312', grijs:'DALI-2001305'},
+  systeembeugel:{wit:'DALI-2001299', zwart:'DALI-2001282', grijs:'DALI-2001275'},
+  ophangset:{wit:{3:'DALI-2001237',6:'DALI-2001268'}, zwart:{3:'DALI-2001220',6:'DALI-2001251'}, grijs:{3:'DALI-2001213',6:'DALI-2001244'}},
+  pendel:{
+    wit:   {zilver:{3:'DALI-2012974',6:'DALI-2012981'}},
+    grijs: {zilver:{3:'DALI-2012950',6:'DALI-2012967'}},
+    zwart: {zilver:{3:'DALI-2012998',6:'DALI-2013001'}, zwart:{3:'DALI-2013018',5:'DALI-2013025'}},
+  },
+  trek:'DALI-2001947'
+};
+
+const LCODES_DALI = {
+  rail:      {wit:{1:'DALI-KKT301158',2:'DALI-KKT301185',3:'DALI-KKT301115',4:'DALI-2012899'}, zwart:{1:'DALI-KKT301152',2:'DALI-KKT301179',3:'DALI-KKT30119',4:'DALI-2012882'}, grijs:{1:'DALI-KKT301144',2:'DALI-KKT301171',3:'DALI-KKT30111',4:'DALI-2012875'}},
+  aansluit:  {wit:{R:'DALI-KKT30129',L:'DALI-KKT301224'}, zwart:{R:'DALI-KKT30123',L:'DALI-KKT301219'}, grijs:{R:'DALI-KKT30122',L:'DALI-KKT301218'}},
+  bocht:     {wit:{binnen:'DALI-KKT301289',buiten:'DALI-KKT3012102'}, zwart:{binnen:'DALI-KKT301284',buiten:'DALI-KKT301297'}, grijs:{binnen:'DALI-KKT301283',buiten:'DALI-KKT301296'}},
+  tkoppel:   {wit:{R1:'DALI-KKT3012115',L2:'DALI-KKT3012127',R2:'DALI-KKT3012149',L1:'DALI-KKT3012161'}, zwart:{R1:'DALI-KKT3012110',L2:'DALI-KKT3012123',R2:'DALI-KKT3012145',L1:'DALI-KKT3012157'}, grijs:{R1:'DALI-KKT3012109',L2:'DALI-KKT3012122',R2:'DALI-KKT3012144',L1:'DALI-KKT3012156'}},
+  kruis:     {wit:'DALI-KKT3012136', zwart:'DALI-KKT3012132', grijs:'DALI-KKT3012131'},
+  midden:    {wit:'DALI-KKT301238', zwart:'DALI-KKT301233', grijs:'DALI-KKT301232'},
+  eindkap:   {wit:'DALI-KKT3012172', zwart:'DALI-KKT3012166', grijs:'DALI-KKT3012165'},
+  elkoppel:  {wit:'DALI-KKT301253', zwart:'DALI-KKT301246', grijs:'DALI-KKT301245'},
+  buigtool:  'DALI-KKT30155',
+  beugelsnel:{wit:'DALI-01-C15-N1-9817', zwart:'DALI-01-C15-N1-9818', grijs:'DALI-01-C15-N1-9802'},
+  adapter70: {wit:'DALI-KKT30133', zwart:'DALI-KKT30132', grijs:'DALI-KKT30131'},
+  verstelbaar:{wit:'DALI-VERSTHOEK-WIT-L', zwart:'DALI-VERSTHOEK-ZWART-L', grijs:'DALI-VERSTHOEK-GRIJS-L'},
+  montagebeugel:{wit:'DALI-MONTBEUGEL-WIT-L', zwart:'DALI-MONTBEUGEL-ZWART-L', grijs:'DALI-MONTBEUGEL-GRIJS-L'},
+  systeembeugel:{wit:'DALI-SYSBEUGEL-WIT-L', zwart:'DALI-SYSBEUGEL-ZWART-L', grijs:'DALI-SYSBEUGEL-GRIJS-L'},
+  ophangset:{wit:{3:'DALI-OPHANG-WIT-3-L',6:'DALI-OPHANG-WIT-6-L'}, zwart:{3:'DALI-OPHANG-ZWART-3-L',6:'DALI-OPHANG-ZWART-6-L'}, grijs:{3:'DALI-OPHANG-GRIJS-3-L',6:'DALI-OPHANG-GRIJS-6-L'}},
+  pendel:{
+    wit:   {zilver:{3:'DALI-PENDEL-WIT-ZILVER-3-L',6:'DALI-PENDEL-WIT-ZILVER-6-L'}},
+    grijs: {zilver:{3:'DALI-PENDEL-GRIJS-ZILVER-3-L',6:'DALI-PENDEL-GRIJS-ZILVER-6-L'}},
+    zwart: {zilver:{3:'DALI-PENDEL-ZWART-ZILVER-3-L',6:'DALI-PENDEL-ZWART-ZILVER-6-L'}, zwart:{3:'DALI-PENDEL-ZWART-ZWART-3-L',5:'DALI-PENDEL-ZWART-ZWART-5-L'}},
+  },
+  trek:'DALI-2001947'
+};
+
+/* Actieve codetabel o.b.v. de DALI-keuze (stap 1); nodeVariants()/computeBOM()
+   lezen nooit rechtstreeks uit PCODES/LCODES, altijd via deze twee. */
+function activeP(){ return st.dali ? PCODES_DALI : PCODES; }
+function activeL(){ return st.dali ? LCODES_DALI : LCODES; }
 
 /* Inbouwmaat per aansluiting in mm: alleen het zichtbare deel telt,
    het koppeldeel schuift in de rail. VOLLEDIG BEVESTIGD door productcheck:
    aansluitstuk 66, bocht 66/arm, T-balk 100 totaal (50/zijde), T-steel 66,
    kruis 50/arm, middenvoeding 100, elektrisch koppelstuk 0, eindkap 3. */
 const MM = { aansluit:66, eindkap:3, bochtArm:66, tBarArm:50, tStemArm:66, kruisArm:50, midden:100, elkoppel:0 };
+
+/* Armaturen: 12 placeholders, later door de gebruiker te vervangen door de echte namen
+   en artikelcodes. Kleur wit/zwart/custom coating heeft elk een eigen code: p = intern
+   (scherm), l = extern (PDF) — zelfde intern/extern-scheiding als de rest van de stuklijst. */
+const ARMATUREN = [
+  {id:'arm01', name:'Armatuur 01 — naam volgt', codes:{wit:{p:'ARM01-WIT-P',l:'ARM01-WIT-L'}, zwart:{p:'ARM01-ZWART-P',l:'ARM01-ZWART-L'}, custom:{p:'ARM01-CUSTOM-P',l:'ARM01-CUSTOM-L'}}},
+  {id:'arm02', name:'Armatuur 02 — naam volgt', codes:{wit:{p:'ARM02-WIT-P',l:'ARM02-WIT-L'}, zwart:{p:'ARM02-ZWART-P',l:'ARM02-ZWART-L'}, custom:{p:'ARM02-CUSTOM-P',l:'ARM02-CUSTOM-L'}}},
+  {id:'arm03', name:'Armatuur 03 — naam volgt', codes:{wit:{p:'ARM03-WIT-P',l:'ARM03-WIT-L'}, zwart:{p:'ARM03-ZWART-P',l:'ARM03-ZWART-L'}, custom:{p:'ARM03-CUSTOM-P',l:'ARM03-CUSTOM-L'}}},
+  {id:'arm04', name:'Armatuur 04 — naam volgt', codes:{wit:{p:'ARM04-WIT-P',l:'ARM04-WIT-L'}, zwart:{p:'ARM04-ZWART-P',l:'ARM04-ZWART-L'}, custom:{p:'ARM04-CUSTOM-P',l:'ARM04-CUSTOM-L'}}},
+  {id:'arm05', name:'Armatuur 05 — naam volgt', codes:{wit:{p:'ARM05-WIT-P',l:'ARM05-WIT-L'}, zwart:{p:'ARM05-ZWART-P',l:'ARM05-ZWART-L'}, custom:{p:'ARM05-CUSTOM-P',l:'ARM05-CUSTOM-L'}}},
+  {id:'arm06', name:'Armatuur 06 — naam volgt', codes:{wit:{p:'ARM06-WIT-P',l:'ARM06-WIT-L'}, zwart:{p:'ARM06-ZWART-P',l:'ARM06-ZWART-L'}, custom:{p:'ARM06-CUSTOM-P',l:'ARM06-CUSTOM-L'}}},
+  {id:'arm07', name:'Armatuur 07 — naam volgt', codes:{wit:{p:'ARM07-WIT-P',l:'ARM07-WIT-L'}, zwart:{p:'ARM07-ZWART-P',l:'ARM07-ZWART-L'}, custom:{p:'ARM07-CUSTOM-P',l:'ARM07-CUSTOM-L'}}},
+  {id:'arm08', name:'Armatuur 08 — naam volgt', codes:{wit:{p:'ARM08-WIT-P',l:'ARM08-WIT-L'}, zwart:{p:'ARM08-ZWART-P',l:'ARM08-ZWART-L'}, custom:{p:'ARM08-CUSTOM-P',l:'ARM08-CUSTOM-L'}}},
+  {id:'arm09', name:'Armatuur 09 — naam volgt', codes:{wit:{p:'ARM09-WIT-P',l:'ARM09-WIT-L'}, zwart:{p:'ARM09-ZWART-P',l:'ARM09-ZWART-L'}, custom:{p:'ARM09-CUSTOM-P',l:'ARM09-CUSTOM-L'}}},
+  {id:'arm10', name:'Armatuur 10 — naam volgt', codes:{wit:{p:'ARM10-WIT-P',l:'ARM10-WIT-L'}, zwart:{p:'ARM10-ZWART-P',l:'ARM10-ZWART-L'}, custom:{p:'ARM10-CUSTOM-P',l:'ARM10-CUSTOM-L'}}},
+  {id:'arm11', name:'Armatuur 11 — naam volgt', codes:{wit:{p:'ARM11-WIT-P',l:'ARM11-WIT-L'}, zwart:{p:'ARM11-ZWART-P',l:'ARM11-ZWART-L'}, custom:{p:'ARM11-CUSTOM-P',l:'ARM11-CUSTOM-L'}}},
+  {id:'arm12', name:'Armatuur 12 — naam volgt', codes:{wit:{p:'ARM12-WIT-P',l:'ARM12-WIT-L'}, zwart:{p:'ARM12-ZWART-P',l:'ARM12-ZWART-L'}, custom:{p:'ARM12-CUSTOM-P',l:'ARM12-CUSTOM-L'}}},
+];
+/* Adapters & overig: 9 placeholders, wit/zwart/grijs, zelfde intern/extern-codescheiding. */
+const ADAPTERS_OVERIG = [
+  {id:'ao01', name:'Adapter/overig 01 — naam volgt', codes:{wit:{p:'AO01-WIT-P',l:'AO01-WIT-L'}, zwart:{p:'AO01-ZWART-P',l:'AO01-ZWART-L'}, grijs:{p:'AO01-GRIJS-P',l:'AO01-GRIJS-L'}}},
+  {id:'ao02', name:'Adapter/overig 02 — naam volgt', codes:{wit:{p:'AO02-WIT-P',l:'AO02-WIT-L'}, zwart:{p:'AO02-ZWART-P',l:'AO02-ZWART-L'}, grijs:{p:'AO02-GRIJS-P',l:'AO02-GRIJS-L'}}},
+  {id:'ao03', name:'Adapter/overig 03 — naam volgt', codes:{wit:{p:'AO03-WIT-P',l:'AO03-WIT-L'}, zwart:{p:'AO03-ZWART-P',l:'AO03-ZWART-L'}, grijs:{p:'AO03-GRIJS-P',l:'AO03-GRIJS-L'}}},
+  {id:'ao04', name:'Adapter/overig 04 — naam volgt', codes:{wit:{p:'AO04-WIT-P',l:'AO04-WIT-L'}, zwart:{p:'AO04-ZWART-P',l:'AO04-ZWART-L'}, grijs:{p:'AO04-GRIJS-P',l:'AO04-GRIJS-L'}}},
+  {id:'ao05', name:'Adapter/overig 05 — naam volgt', codes:{wit:{p:'AO05-WIT-P',l:'AO05-WIT-L'}, zwart:{p:'AO05-ZWART-P',l:'AO05-ZWART-L'}, grijs:{p:'AO05-GRIJS-P',l:'AO05-GRIJS-L'}}},
+  {id:'ao06', name:'Adapter/overig 06 — naam volgt', codes:{wit:{p:'AO06-WIT-P',l:'AO06-WIT-L'}, zwart:{p:'AO06-ZWART-P',l:'AO06-ZWART-L'}, grijs:{p:'AO06-GRIJS-P',l:'AO06-GRIJS-L'}}},
+  {id:'ao07', name:'Adapter/overig 07 — naam volgt', codes:{wit:{p:'AO07-WIT-P',l:'AO07-WIT-L'}, zwart:{p:'AO07-ZWART-P',l:'AO07-ZWART-L'}, grijs:{p:'AO07-GRIJS-P',l:'AO07-GRIJS-L'}}},
+  {id:'ao08', name:'Adapter/overig 08 — naam volgt', codes:{wit:{p:'AO08-WIT-P',l:'AO08-WIT-L'}, zwart:{p:'AO08-ZWART-P',l:'AO08-ZWART-L'}, grijs:{p:'AO08-GRIJS-P',l:'AO08-GRIJS-L'}}},
+  {id:'ao09', name:'Adapter/overig 09 — naam volgt', codes:{wit:{p:'AO09-WIT-P',l:'AO09-WIT-L'}, zwart:{p:'AO09-ZWART-P',l:'AO09-ZWART-L'}, grijs:{p:'AO09-GRIJS-P',l:'AO09-GRIJS-L'}}},
+];
 
 const SHAPES = {
  'rechte-lijn':{label:'Rechte lijn', pts:[[0,0],[300,0]], ln:[[0,1]]},
@@ -1169,8 +1309,12 @@ const SHAPES = {
  'andere-vorm':{label:'Andere vorm', grid:'custom'},
 };
 
-let st = { step:1, color:'wit', powercfg:'A', shape:null, gRows:2, gCols:2,
-  nodes:[], edges:[], nid:0, eid:0, feeds:[], adapters:0, use4m:false, pick:false, mount:'geen', proj:'',
+let st = { step:1, dali:false, color:'wit', powercfg:'A', shape:null, gRows:2, gCols:2,
+  nodes:[], edges:[], nid:0, eid:0, feeds:[], angles:{},
+  armaturen: ARMATUREN.reduce((o,a)=>{o[a.id]={color:'wit',qty:0};return o;},{}),
+  overig: ADAPTERS_OVERIG.reduce((o,a)=>{o[a.id]={color:'wit',qty:0};return o;},{}),
+  use4m:false, pick:false, mount:'geen', proj:'',
+  sysOphang:false, sysOphangLen:'3', pendelKabelkleur:'zilver', pendelKabelLen:'3',
   sheets:[{id:'s1',name:'Tekenvlak 1'}], sheet:'s1', sid:1 };
 let hist=[], hIdx=-1;
 let lastBOM=null;
@@ -1216,10 +1360,10 @@ function sheetEdges(sh){ return st.edges.filter(e=>nodeSheet(e.a)===sh); }
 
 /* ---------- geschiedenis ---------- */
 function snap(){ hist = hist.slice(0,hIdx+1);
-  hist.push(JSON.stringify({nodes:st.nodes,edges:st.edges,nid:st.nid,eid:st.eid,feeds:st.feeds,shape:st.shape,sheets:st.sheets,sheet:st.sheet,sid:st.sid}));
+  hist.push(JSON.stringify({nodes:st.nodes,edges:st.edges,nid:st.nid,eid:st.eid,feeds:st.feeds,angles:st.angles,shape:st.shape,sheets:st.sheets,sheet:st.sheet,sid:st.sid}));
   hIdx=hist.length-1; }
 function restore(i){ const s=JSON.parse(hist[i]);
-  st.nodes=s.nodes; st.edges=s.edges; st.nid=s.nid; st.eid=s.eid; st.feeds=s.feeds||[]; st.shape=s.shape;
+  st.nodes=s.nodes; st.edges=s.edges; st.nid=s.nid; st.eid=s.eid; st.feeds=s.feeds||[]; st.angles=s.angles||{}; st.shape=s.shape;
   st.sheets=s.sheets||[{id:'s1',name:'Tekenvlak 1'}]; st.sheet=s.sheet||st.sheets[0].id; st.sid=s.sid||st.sheets.length;
   hIdx=i; st.pick=false; refresh(); }
 
@@ -1251,7 +1395,7 @@ function selectShape(id){
   pts.forEach(p=> st.nodes.push({id:'n'+(st.nid++), x:p[0]+dx, y:p[1]+dy, s:st.sheet}));
   ln.forEach(l=> st.edges.push({id:'e'+(st.eid++), a:'n'+(base+l[0]), b:'n'+(base+l[1])}));
   st.pick=false; snap();
-  st.step=4; refresh();
+  st.step=5; refresh();
 }
 
 /* ---------- mutaties ---------- */
@@ -1259,6 +1403,7 @@ function validateFeeds(){
   st.feeds = st.feeds.filter(f=> f.kind==='node' ? (node(f.node)&&edgesAt(f.node).length===1) : !!edge(f.edge));
   const {m}=compMap(); const seen={};
   st.feeds = st.feeds.filter(f=>{ const c=feedComp(f,m); if(c===undefined||seen[c]) return false; seen[c]=true; return true; });
+  Object.keys(st.angles).forEach(nId=>{ if(!node(nId)) delete st.angles[nId]; });
 }
 /* Samenvallende punten verbinden: uiteinde op knooppunt -> samenvoegen (bocht/T/kruis),
    uiteinde op segment -> segment splitsen (T), kruisende segmenten -> kruispunt. */
@@ -1363,7 +1508,7 @@ function removeLeafEdge(eId){
   validateFeeds(); snap(); refresh();
 }
 function setLen(eId,newLen){
-  newLen=Math.max(100, Math.min(50000, Math.round(newLen/100)*100)); /* hele meters; 500 m = technische bovengrens (rendering), geen productlimiet */
+  newLen=Math.max(100, Math.min(50000, Math.round(newLen))); /* cm-precisie (installateur zaagt op maat); 500 m = technische bovengrens (rendering), geen productlimiet. Slepen met de muis (c2DragMove) rondt apart af op hele meters. */
   const e=edge(eId); if(!e) return;
   const cur=eLen(e); const d=newLen-cur; if(!d){ refresh(); return; }
   const seen=new Set([e.b]); const q=[e.b];
@@ -1478,23 +1623,28 @@ function nodeVariants(P){
     if(t==='end'){
       const fN=feedForNode(n.id);
       if(fN)
-        out[n.id]={cls:'aansluit', label:'Aansluitstuk '+fN.side, art:CODES.aansluit[st.color][fN.side]};
-      else out[n.id]={cls:'eind', label:'Eindkap', art:CODES.eindkap[st.color]};
+        out[n.id]={cls:'aansluit', label:'Aansluitstuk '+fN.side, art:activeP().aansluit[st.color][fN.side], artL:activeL().aansluit[st.color][fN.side]};
+      else out[n.id]={cls:'eind', label:'Eindkap', art:activeP().eindkap[st.color], artL:activeL().eindkap[st.color]};
       return;
     }
-    if(t==='straight'){ out[n.id]={cls:'recht', label:'', art:null}; return; }
+    if(t==='straight'){ out[n.id]={cls:'recht', label:'', art:null, artL:null}; return; }
     if(t==='corner'){
+      const ang=st.angles[n.id];
+      if(ang!=null && ang!==90){
+        out[n.id]={cls:'hoek', label:'Verstelbare Hoek '+mTxt(ang)+'°', art:activeP().verstelbaar[st.color], artL:activeL().verstelbaar[st.color]};
+        return;
+      }
       const n1=P.nor[es[0].id];
-      if(!n1){ out[n.id]={cls:'onb', label:'Bocht ?', art:null}; return; }
+      if(!n1){ out[n.id]={cls:'onb', label:'Bocht ?', art:null, artL:null}; return; }
       const d2=armDir(n.id,es[1]);
       const v = Math.sign(dot(n1,d2))>0 ? 'binnen' : 'buiten';
-      out[n.id]={cls:'bocht', label:'Bocht '+(v==='binnen'?'Binnen':'Buiten'), art:CODES.bocht[st.color][v]};
+      out[n.id]={cls:'bocht', label:'Bocht '+(v==='binnen'?'Binnen':'Buiten'), art:activeP().bocht[st.color][v], artL:activeL().bocht[st.color][v]};
       return;
     }
     if(t==='t'){
       const stem=tStem(n.id); const bars=es.filter(x=>x.id!==stem.id);
       const nb=P.nor[bars[0].id], ns=P.nor[stem.id];
-      if(!nb||!ns){ out[n.id]={cls:'onb', label:'T ?', art:null}; return; }
+      if(!nb||!ns){ out[n.id]={cls:'onb', label:'T ?', art:null, artL:null}; return; }
       const dS=armDir(n.id,stem);
       /* Geverifieerd 17-7-2026 (verificatievel): R/L = balkzijde
          (lijn tegenover steel = Rechts, aan steelzijde = Links);
@@ -1502,10 +1652,10 @@ function nodeVariants(P){
       const side = Math.sign(dot(nb,dS))>0 ? 'L' : 'R';
       const rr = rotCCW(dS);
       const type = (ns.x===rr.x && ns.y===rr.y) ? '2' : '1';
-      out[n.id]={cls:'t', label:'T '+(side==='R'?'Rechts':'Links')+' Type '+type, art:CODES.tkoppel[st.color][side+type]};
+      out[n.id]={cls:'t', label:'T '+(side==='R'?'Rechts':'Links')+' Type '+type, art:activeP().tkoppel[st.color][side+type], artL:activeL().tkoppel[st.color][side+type]};
       return;
     }
-    out[n.id]={cls:'kruis', label:'Kruis', art:CODES.kruis[st.color]};
+    out[n.id]={cls:'kruis', label:'Kruis', art:activeP().kruis[st.color], artL:activeL().kruis[st.color]};
   });
   return out;
 }
@@ -1523,17 +1673,20 @@ function piecesTxt(pieces){
   const cnt={}; pieces.forEach(p=>cnt[p]=(cnt[p]||0)+1);
   return Object.keys(cnt).sort((a,b)=>b-a).map(p=> (cnt[p]>1? cnt[p]+'\u00d7 ':'')+p+' m').join(' + ');
 }
+/* meterwaarde -> Nederlandse notatie (komma), afgerond op hele cm, zonder overbodige nullen */
+function mTxt(v){ return (Math.round(v*100)/100).toString().replace('.',','); }
 function railFor(e){
-  /* Getekende maat = raillengte (hele meters). Koppelstukken komen daar
-     in werkelijkheid bovenop en tellen niet mee in de bestelling.
-     Prioriteit: 3 m -> 2 m -> 1 m; 4 m alleen als er expliciet om gevraagd wordt. */
-  const lenM = Math.round(eLen(e)/100);
+  /* Getekende maat = werkelijke raillengte, ook met decimalen (installateur zaagt op maat).
+     Voor de bestelling wordt dit per segment naar boven afgerond op hele meters \u2014 rail is
+     alleen in hele meters leverbaar. Prioriteit: 3 m -> 2 m -> 1 m; 4 m alleen op aanvraag. */
+  const drawnM = eLen(e)/100;
+  const orderM = Math.ceil(drawnM);
   const maxM = st.use4m ? 4 : 3;
-  const pieces=[]; let rem=lenM;
+  const pieces=[]; let rem=orderM;
   while(rem>0){ const p=Math.min(maxM, rem); pieces.push(p); rem-=p; }
-  /* werkelijke maat = rail + zichtbare inbouwmaten van de koppelstukken eromheen */
+  /* werkelijke maat = getekende raillengte + zichtbare inbouwmaten van de koppelstukken eromheen */
   const extraMm = armMm(e.a,e) + armMm(e.b,e) + (feedForEdge(e.id)?MM.midden:0);
-  return {lenM, pieces, seams:pieces.length-1, extraMm};
+  return {drawnM, orderM, pieces, seams:pieces.length-1, extraMm};
 }
 
 /* ---------- montagepunten ---------- */
@@ -1543,20 +1696,32 @@ function railFor(e){
    Advies-bevestigingsafstand: 1000 mm (uiteindelijk aan de installateur). */
 const MOUNTS = {
   geen:    {label:'\u2014 nog geen keuze \u2014'},
-  beugel:  {label:'Montagebeugel (plafond)'},
+  beugel:  {label:'Plafond Montagebeugel'},
   sys:     {label:'Systeemplafondbeugel'},
-  ophang3: {label:'Systeemplafondbeugel ophangset verstelbaar 3 m'},
-  ophang6: {label:'Systeemplafondbeugel ophangset verstelbaar 6 m'},
-  pendel:  {label:'Pendelset 10-pack (10\u00d7 plafondbus + staalkabel 3 m)', per:10},
+  pendel:  {label:'Pendelset (plafondbus + staalkabel)'},
 };
+/* Kabelkleur Zwart bestaat alleen i.c.m. een zwarte plafondbus (= railkleur); voor
+   wit/grijs is zilver de enige leverbare kabelkleur. */
+function pendelKabelkleur(){ return st.color==='zwart' ? st.pendelKabelkleur : 'zilver'; }
+/* Zorgt dat de montage-subkeuzes altijd een geldige combinatie voor de huidige
+   railkleur vormen \u2014 nodig omdat kleur/kabelkeuze onafhankelijk van elkaar wijzigen. */
+function normalizeMountState(){
+  if(st.color!=='zwart') st.pendelKabelkleur='zilver';
+  const validLen = st.pendelKabelkleur==='zwart' ? ['3','5'] : ['3','6'];
+  if(!validLen.includes(st.pendelKabelLen)) st.pendelKabelLen='3';
+  if(!['3','6'].includes(st.sysOphangLen)) st.sysOphangLen='3';
+}
 function computeMounts(sheetId){
   const pts=[]; const seen={}; const key=p=>p.x+'_'+p.y+'_'+(sheetId||nodeSheet(p.id)||'');
   (sheetId? sheetEdges(sheetId) : st.edges).forEach(e=>{
-    const A=node(e.a); const d=armDir(e.a,e); const L=Math.round(eLen(e)/100);
+    const A=node(e.a), Bn=node(e.b); const d=armDir(e.a,e); const realL=eLen(e)/100; const L=Math.floor(realL);
     const shKey=A.s;
     for(let i=0;i<=L;i++){ const p={x:A.x+d.x*i*100, y:A.y+d.y*i*100};
       const k=p.x+'_'+p.y+'_'+shKey;
       if(!seen[k]){ seen[k]=1; pts.push(p); } }
+    /* niet-heel-meter segment: uiteinde krijgt alsnog zijn eigen punt (regel: altijd
+       een punt op elk uiteinde) -- telt daardoor mee alsof naar boven is afgerond. */
+    if(L<realL){ const k=Bn.x+'_'+Bn.y+'_'+shKey; if(!seen[k]){ seen[k]=1; pts.push({x:Bn.x,y:Bn.y}); } }
   });
   return {pts, count:pts.length};
 }
@@ -1566,31 +1731,45 @@ function computeBOM(){
   const P=propagate();
   const V=nodeVariants(P);
   const items={};
-  function add(code,name,qty,prov){ if(!code)return;
-    if(!items[code])items[code]={name,qty:0,prov:[]};
-    items[code].qty+=qty; if(prov)items[code].prov.push(prov); }
+  /* items zijn gesleuteld op de interne (Pragmalux) code; codeL is de externe
+     distributiecode voor op de PDF. */
+  function add(codeP,codeL,name,qty,prov){ if(!codeP)return;
+    if(!items[codeP])items[codeP]={name,qty:0,prov:[],codeL};
+    items[codeP].qty+=qty; if(prov)items[codeP].prov.push(prov); }
   const railDetail=[]; const errs=[];
   st.nodes.forEach(n=>{ const v=V[n.id];
-    if(v&&v.art) add(v.art, v.label+' '+CLRN(st.color), 1, 'n:'+n.id); });
-  st.feeds.filter(f=>f.kind==='edge').forEach(f=> add(CODES.midden[st.color],'Middenvoeding '+CLRN(st.color),1,'e:'+f.edge));
+    if(v&&v.art) add(v.art, v.artL, v.label+' '+CLRN(st.color), 1, 'n:'+n.id); });
+  st.feeds.filter(f=>f.kind==='edge').forEach(f=> add(activeP().midden[st.color], activeL().midden[st.color], 'Middenvoeding '+CLRN(st.color),1,'e:'+f.edge));
   st.edges.forEach(e=>{
     const r=railFor(e);
-    r.pieces.forEach(p=> add(CODES.rail[st.color][p], 'Rail '+p+'m '+CLRN(st.color), 1, 'e:'+e.id));
-    if(r.seams>0) add(CODES.elkoppel,'PRX Elektrisch Koppelstuk Zwart',r.seams,'e:'+e.id);
+    r.pieces.forEach(p=> add(activeP().rail[st.color][p], activeL().rail[st.color][p], 'Rail '+p+'m '+CLRN(st.color), 1, 'e:'+e.id));
+    if(r.seams>0) add(activeP().elkoppel[st.color], activeL().elkoppel[st.color], 'Elektrisch Koppelstuk '+CLRN(st.color),r.seams,'e:'+e.id);
     railDetail.push({e, r});
   });
-  if(st.adapters>0){
-    add(CODES.adapter70[st.color],'Adapter 70mm '+CLRN(st.color),st.adapters,null);
-    add(CODES.trek,'Trekontlasting brug (verplicht bij adapter)',st.adapters,null);
-  }
-  if(railDetail.length) add(CODES.buigtool,'PRX 3-Fase Rail buiggereedschap',1,null);
+  ARMATUREN.forEach(a=>{ const s=st.armaturen[a.id]; if(!s||s.qty<=0) return;
+    const c=a.codes[s.color];
+    add(c.p, c.l, a.name+' '+(s.color==='custom'?'(custom coating)':CLRN(s.color)), s.qty, null); });
+  ADAPTERS_OVERIG.forEach(a=>{ const s=st.overig[a.id]; if(!s||s.qty<=0) return;
+    const c=a.codes[s.color];
+    add(c.p, c.l, a.name+' '+CLRN(s.color), s.qty, null); });
+  if(railDetail.length) add(activeP().buigtool, activeL().buigtool, 'PRX 3-Fase Rail buiggereedschap',1,null);
+  normalizeMountState();
   const mounts=computeMounts();
-  if(st.mount!=='geen' && mounts.count>0){
-    const md=MOUNTS[st.mount];
-    const qty = md.per ? Math.ceil(mounts.count/md.per) : mounts.count;
-    add('m-'+st.mount, md.label + (md.per? ' (voor '+mounts.count+' punten)':''), qty, null);
-    if(st.mount==='pendel')
-      add(CODES.beugelsnel,'PRX 3-Fase Rail beugel en snelspanner Zwart (excl. staalkabel)', mounts.count, null);
+  if(st.mount==='beugel' && mounts.count>0){
+    add(activeP().montagebeugel[st.color], activeL().montagebeugel[st.color], 'Plafond Montagebeugel '+CLRN(st.color), mounts.count, null);
+  }
+  if(st.mount==='sys' && mounts.count>0){
+    add(activeP().systeembeugel[st.color], activeL().systeembeugel[st.color], 'Systeemplafond beugel '+CLRN(st.color), mounts.count, null);
+    if(st.sysOphang){
+      const len=st.sysOphangLen;
+      add(activeP().ophangset[st.color][len], activeL().ophangset[st.color][len], 'Ophangset verstelbaar '+len+'m '+CLRN(st.color), mounts.count, null);
+    }
+  }
+  if(st.mount==='pendel' && mounts.count>0){
+    const kk=pendelKabelkleur(), len=st.pendelKabelLen, setQty=Math.ceil(mounts.count/10);
+    add(activeP().pendel[st.color][kk][len], activeL().pendel[st.color][kk][len],
+      'Pendelset 10-pack (bus '+CLRN(st.color)+' / kabel '+CLRN(kk)+' '+len+'m)'+' (voor '+mounts.count+' punten)', setQty, null);
+    add(activeP().beugelsnel[st.color], activeL().beugelsnel[st.color], 'PRX 3-Fase Rail beugel en snelspanner '+CLRN(st.color)+' (excl. staalkabel)', mounts.count, null);
   }
   return {P,V,items,railDetail,errs,mounts};
 }
@@ -1626,7 +1805,7 @@ function zoomBy(factor, vx, vy){
 }
 function renderCanvas(B){
   const svg=$('c2Svg');
-  if(!st.shape || !st.nodes.length){ svg.innerHTML='<text class="c2-empty" x="450" y="280" text-anchor="middle">Kies eerst een vorm in stap 3.</text>'; return; }
+  if(!st.shape || !st.nodes.length){ svg.innerHTML='<text class="c2-empty" x="450" y="280" text-anchor="middle">Kies eerst een vorm in stap 4.</text>'; return; }
   const f=frozenFit||fit(); const P=B.P, V=B.V;
   const px=n=>({x:n.x*f.sc+f.ox, y:n.y*f.sc+f.oy});
   const out=[];
@@ -1640,7 +1819,7 @@ function renderCanvas(B){
   const outDirX=n=>{ const c=cent[cmR.m[n.id]]; if(!c) return 1; return n.x>=c.x? 1 : -1; };
 
   if(!shN.length){
-    svg.innerHTML='<text class="c2-empty" x="450" y="280" text-anchor="middle">Leeg tekenvlak \u2014 kies een vorm (stap 3) of \uFF0B Nieuw figuur.</text>';
+    svg.innerHTML='<text class="c2-empty" x="450" y="280" text-anchor="middle">Leeg tekenvlak \u2014 kies een vorm (stap 4) of \uFF0B Nieuw figuur.</text>';
     return;
   }
 
@@ -1668,7 +1847,7 @@ function renderCanvas(B){
     const mx=(A.x+Bp.x)/2, my=(A.y+Bp.y)/2;
     const horiz = eAxis(e)==='h';
     const lx = horiz? mx : mx+34, ly = horiz? my-26 : my;
-    const lab = (eLen(e)/100)+' m';
+    const lab = mTxt(eLen(e)/100)+' m';
     const w = lab.length*7.5+14;
     if(!st.pick){
       g.push('<g class="c2-lenlab" data-len="'+e.id+'" data-x="'+lx+'" data-y="'+ly+'"><rect x="'+(lx-w/2)+'" y="'+(ly-11)+'" width="'+w+'" height="21" rx="5"/><text x="'+lx+'" y="'+(ly+4)+'" text-anchor="middle">'+lab+'</text><title>Klik om de maat te wijzigen</title></g>');
@@ -1713,7 +1892,10 @@ function renderCanvas(B){
         }
       }
     } else if(t==='corner'){
-      g.push('<rect class="c2-nodedark" x="'+(p.x-8)+'" y="'+(p.y-8)+'" width="16" height="16" transform="rotate(45 '+p.x+' '+p.y+')"/>');
+      const hasAngle = st.angles[nd.id]!=null && st.angles[nd.id]!==90;
+      const cornerAttrs = st.pick ? '' : ' data-cornerangle="'+nd.id+'" data-x="'+p.x+'" data-y="'+p.y+'" class="c2-nodedark c2-cornerbtn'+(hasAngle?' c2-cornercustom':'')+'"';
+      g.push('<rect'+(st.pick? ' class="c2-nodedark"':cornerAttrs)+' x="'+(p.x-8)+'" y="'+(p.y-8)+'" width="16" height="16" transform="rotate(45 '+p.x+' '+p.y+')">'
+        +(st.pick?'':'<title>Klik om de hoek in graden aan te passen</title>')+'</rect>');
       if(!st.pick){
         g.push('<text class="c2-tag" x="'+p.x+'" y="'+ly+'" text-anchor="middle">'+v.label+'</text>');
       }
@@ -1801,6 +1983,10 @@ function bindCanvas(svg){
   svg.querySelectorAll('[data-len]').forEach(el=>{
     el.addEventListener('click', ev=>{ ev.stopPropagation();
       openLenInput(el.dataset.len, +el.dataset.x, +el.dataset.y); });
+  });
+  svg.querySelectorAll('[data-cornerangle]').forEach(el=>{
+    el.addEventListener('click', ev=>{ ev.stopPropagation();
+      openAngleInput(el.dataset.cornerangle, +el.dataset.x, +el.dataset.y); });
   });
   svg.querySelectorAll('[data-plusn]').forEach(el=>{
     el.addEventListener('click', ev=>{ ev.stopPropagation();
@@ -1890,9 +2076,27 @@ function openLenInput(eId, vx, vy){
   const svg=$('c2Svg'); const sp=svgToScreen(svg,vx,vy);
   const box=$('c2Inp'); const inp=box.querySelector('input');
   box.style.display='flex'; box.style.left=(sp.x-50)+'px'; box.style.top=(sp.y-18)+'px';
-  inp.value=eLen(edge(eId))/100;
+  inp.value=mTxt(eLen(edge(eId))/100);
   inp.focus(); inp.select();
-  function commit(){ box.style.display='none'; inp.onkeydown=null; inp.onblur=null; setLen(eId, parseFloat(inp.value)*100); }
+  function commit(){ box.style.display='none'; inp.onkeydown=null; inp.onblur=null;
+    const v=parseFloat(String(inp.value).replace(',','.'));
+    if(!isNaN(v)) setLen(eId, v*100); }
+  inp.onkeydown=ev=>{ if(ev.key==='Enter') commit(); if(ev.key==='Escape'){ box.style.display='none'; } };
+  inp.onblur=()=>{ if(box.style.display!=='none') commit(); };
+}
+function openAngleInput(nId, vx, vy){
+  closeFloats();
+  const svg=$('c2Svg'); const sp=svgToScreen(svg,vx,vy);
+  const box=$('c2AngleInp'); const inp=box.querySelector('input');
+  box.style.display='flex'; box.style.left=(sp.x-50)+'px'; box.style.top=(sp.y-18)+'px';
+  inp.value=mTxt(st.angles[nId]!=null ? st.angles[nId] : 90);
+  inp.focus(); inp.select();
+  function commit(){ box.style.display='none'; inp.onkeydown=null; inp.onblur=null;
+    const before=st.angles[nId];
+    const v=parseFloat(String(inp.value).replace(',','.'));
+    if(isNaN(v) || Math.round(v)===90) delete st.angles[nId];
+    else st.angles[nId]=Math.max(1, Math.min(179, Math.round(v)));
+    if(st.angles[nId]!==before){ snap(); refresh(); } }
   inp.onkeydown=ev=>{ if(ev.key==='Enter') commit(); if(ev.key==='Escape'){ box.style.display='none'; } };
   inp.onblur=()=>{ if(box.style.display!=='none') commit(); };
 }
@@ -1906,13 +2110,13 @@ function openDirPop(ev, dirs, cb){
     b.addEventListener('click', e2=>{ e2.stopPropagation(); pop.style.display='none'; cb(dirs[+b.dataset.i]); });
   });
 }
-function closeFloats(){ $('c2Inp').style.display='none'; $('c2Pop').style.display='none'; }
+function closeFloats(){ $('c2Inp').style.display='none'; $('c2AngleInp').style.display='none'; $('c2Pop').style.display='none'; }
 document.addEventListener('click', ()=>{ $('c2Pop').style.display='none'; });
 
 /* ---------- samenvatting, waarschuwingen, stuklijstdetail ---------- */
 function warnings(B){
   const w=[];
-  if(!st.shape){ w.push({t:'tip', m:'Kies eerst een vorm (stap 3).'}); return w; }
+  if(!st.shape){ w.push({t:'tip', m:'Kies eerst een vorm (stap 4).'}); return w; }
   const cm1=compMap(); const fed1=new Set(st.feeds.map(f=>feedComp(f,cm1.m)));
   const miss1=cm1.count-fed1.size;
   if(miss1>0) w.push({t:'warn', m: cm1.count===1
@@ -1920,15 +2124,19 @@ function warnings(B){
     : miss1+' van de '+cm1.count+' trajecten heeft nog geen stroomaansluitpunt. Kies er per traject één via ⚡.'});
   if(B.P.conf.size) w.push({t:'warn', m:'Polariteitsconflict (gestreept rood): de rode lijn kan in deze vorm niet ononderbroken doorlopen. Pas de vorm of het aansluitpunt aan.'});
   B.errs.forEach(er=> w.push({t:'warn', m:er.msg}));
-  if(st.adapters>0) w.push({t:'tip', m:st.adapters+'\u00D7 trekontlasting (2001947) automatisch toegevoegd \u2014 verplicht bij elke 70mm Universal adapter.'});
-  if(st.adapters>=6){
+  const armTotal = Object.values(st.armaturen).reduce((s,x)=>s+(x.qty||0),0);
+  const overigTotal = Object.values(st.overig).reduce((s,x)=>s+(x.qty||0),0);
+  if(overigTotal>0) w.push({t:'tip', m:'De 70mm Universal Adapter moet altijd samen met trekontlasting art. 2001947 (PRX trekontlasting brug met 2 schroefjes) besteld worden \u2014 wordt niet automatisch toegevoegd.'});
+  if(armTotal>=6){
     const per={A:'circuit (zelfde fase; totaal max. 16A over de 3 circuits samen)', B:'fase (elk max. 16A)', C:'fase (adapters kiezen zelf hun fase)'}[st.powercfg];
-    w.push({t:'warn', m:st.adapters+' adapters op configuratie '+st.powercfg+': tel het totale vermogen op en verdeel \u2014 check per '+per+'.'});
+    w.push({t:'warn', m:armTotal+' armaturen op configuratie '+st.powercfg+': tel het totale vermogen op en verdeel \u2014 check per '+per+'.'});
   }
+  const angleCount = Object.keys(st.angles).filter(nId=>node(nId)).length;
+  if(angleCount>0) w.push({t:'tip', m:angleCount===1
+    ? 'E\u00e9n hoek is ingesteld als Verstelbare Hoek \u2014 dit is een ander koppelstuk dan een vaste Bocht. Controleer de exacte hoekinstelling op locatie.'
+    : angleCount+' hoeken zijn ingesteld als Verstelbare Hoek \u2014 dit zijn andere koppelstukken dan een vaste Bocht. Controleer de exacte hoekinstelling op locatie.'});
   const mB=(B&&B.mounts)||computeMounts();
-  if(st.mount==='geen' && mB.count>0) w.push({t:'tip', m:'Kies in stap 5 een montagewijze \u2014 deze tekening heeft '+mB.count+' montagepunten (om de meter, incl. uiteinden; hoeken en kruisingen gedeeld).'});
-  const tot=st.edges.reduce((s,e)=>s+eLen(e),0);
-  if(tot>=300) w.push({t:'tip', m:'Bij '+tot+' cm rail: houd de aanbevolen bevestigingsafstand van 1000 mm aan (zie tab "Montage & draagvermogen").'});
+  if(st.mount==='geen' && mB.count>0) w.push({t:'tip', m:'Kies in stap 6 een montagewijze \u2014 deze tekening heeft '+mB.count+' montagepunten (om de meter, incl. uiteinden; hoeken en kruisingen gedeeld).'});
   return w;
 }
 
@@ -1968,7 +2176,7 @@ function renderSheetsBar(){
   if(add) add.addEventListener('click', ()=>{
     const id='s'+(++st.sid);
     st.sheets.push({id, name:'Tekenvlak '+(st.sheets.length+1)});
-    st.sheet=id; view={zoom:1,px:0,py:0}; snap(); goStep(3);
+    st.sheet=id; view={zoom:1,px:0,py:0}; snap(); goStep(4);
   });
 }
 function refresh(){
@@ -1980,31 +2188,31 @@ function refresh(){
   document.querySelectorAll('#c2Steps button').forEach(b=>{
     const k=+b.dataset.step;
     b.classList.toggle('active', k===st.step);
-    b.classList.toggle('done', (k===1)||(k===2)||(k===3&&!!st.shape)||(k===4&&allFed));
+    b.classList.toggle('done', (k===1)||(k===2)||(k===3)||(k===4&&!!st.shape)||(k===5&&allFed));
   });
   document.querySelectorAll('.c2-pane').forEach(p=> p.classList.toggle('active', +p.dataset.pane===st.step));
   $('c2Prev').style.visibility = st.step>1 ? 'visible':'hidden';
-  $('c2Next').style.visibility = st.step<5 ? 'visible':'hidden';
+  $('c2Next').style.visibility = st.step<6 ? 'visible':'hidden';
   /* controls state */
   $('c2Undo').disabled = hIdx<=0;
   $('c2Redo').disabled = hIdx>=hist.length-1;
   $('c2PickBtn').classList.toggle('active', st.pick);
-  $('c2AdVal').textContent = st.adapters;
   const mts=(lastBOM&&lastBOM.mounts)||computeMounts();
   if($('c2MountCount')) $('c2MountCount').textContent = mts.count;
   if($('c2Mount') && $('c2Mount').value!==st.mount) $('c2Mount').value=st.mount;
+  renderMountOptions();
   document.querySelectorAll('#c2GridRow .stepper-val')[0] && renderGridRow();
   /* canvas */
-  if(st.step===4) renderCanvas(B);
+  if(st.step===5) renderCanvas(B);
   /* summary */
   const tot=st.edges.reduce((s,e)=>s+eLen(e),0);
   const cmT=compMap();
   const shTxt = st.sheets.length>1 ? ' \u00b7 '+st.sheets.length+' tekenvlakken' : '';
   $('c2Title').textContent = cmT.count>1 ? 'Plattegrond \u00b7 '+cmT.count+' trajecten'+shTxt+' \u00b7 '+st.color
     : (st.shape ? SHAPES[st.shape].label+' in '+st.color+shTxt : 'Nog geen vorm gekozen');
-  $('c2TotLen').textContent = (tot/100)+' m';
+  $('c2TotLen').textContent = mTxt(tot/100)+' m';
   $('c2TotSeg').textContent = st.edges.length;
-  $('c2TotAd').textContent = st.adapters;
+  $('c2TotArm').textContent = Object.values(st.armaturen).reduce((s,x)=>s+(x.qty||0),0);
   const codes=Object.keys(B.items);
   $('c2ArtList').innerHTML = codes.length ? codes.map(c=>{
     const it=B.items[c];
@@ -2017,17 +2225,16 @@ function refresh(){
     row.addEventListener('mouseleave', ()=> provs.forEach(p=>{ const el=$('c2el-'+p.replace(':','')); if(el) el.classList.remove('c2hl'); }));
   });
   $('c2Warns').innerHTML = warnings(B).map(w=>'<div class="cfg-'+(w.t==='warn'?'warn':'tip')+'">'+w.m+'</div>').join('');
-  /* rail detail (stap 5) */
+  /* rail detail (stap 6) */
   $('c2RailDetail').innerHTML = B.railDetail.length ? B.railDetail.map(d=>{
-    return '<div class="c2-railrow">Segment <b>'+d.r.lenM+' m</b> \u2192 bestel <b>'+piecesTxt(d.r.pieces)+'</b>'
-      +(d.r.seams>0 ? ' \u00B7 '+d.r.seams+'\u00D7 elektrisch koppelstuk' : '')
-      +' <span style="color:var(--slate-light)">\u00B7 werkelijke maat \u00B1'+((d.r.lenM*100)+d.r.extraMm/10).toFixed(1).replace('.',',')+' cm</span></div>';
+    return '<div class="c2-railrow">Segment <b>'+mTxt(d.r.drawnM)+' m</b> \u2192 bestel <b>'+piecesTxt(d.r.pieces)+'</b>'
+      +(d.r.seams>0 ? ' \u00B7 '+d.r.seams+'\u00D7 elektrisch koppelstuk' : '')+'</div>';
   }).join('') : '<div class="c2-railrow">Nog geen segmenten.</div>';
 }
 
 function renderGridRow(){
   const row=$('c2GridRow');
-  if(st.shape!=='andere-vorm' && !(st.step===3)){ /* laat staan */ }
+  if(st.shape!=='andere-vorm' && !(st.step===4)){ /* laat staan */ }
   row.style.display = 'flex';
   row.innerHTML =
     '<div class="grid-dims-col">Rijen <button class="stepper-btn" id="c2RM">\u2212</button><span class="stepper-val" style="min-width:20px;">'+st.gRows+'</span><button class="stepper-btn" id="c2RP">+</button></div>'
@@ -2058,10 +2265,10 @@ function reportData(){
       trGlobal++;
       comps[c].slice().sort((p,q)=>(p.y-q.y)||(p.x-q.x)).forEach(n=>{
         const v=B.V[n.id];
-        if(v&&v.art){ nr++; numOf['n:'+n.id]=nr; legend.push({nr, tr:trGlobal, name:v.label+' '+CLRN(st.color), art:v.art}); }
+        if(v&&v.art){ nr++; numOf['n:'+n.id]=nr; legend.push({nr, tr:trGlobal, name:v.label+' '+CLRN(st.color), art:v.artL}); }
       });
       st.feeds.filter(f=>f.kind==='edge' && m[edge(f.edge).a]===+c).forEach(f=>{
-        nr++; numOf['f:'+f.edge]=nr; legend.push({nr, tr:trGlobal, name:'Middenvoeding '+CLRN(st.color), art:CODES.midden[st.color]});
+        nr++; numOf['f:'+f.edge]=nr; legend.push({nr, tr:trGlobal, name:'Middenvoeding '+CLRN(st.color), art:activeL().midden[st.color]});
       });
     });
     sheets.push({id:sh.id, name:sh.name, legend});
@@ -2208,7 +2415,7 @@ function buildPdf(){
       }
       const A=P(node(e.a)), Bp=P(node(e.b));
       const mx=(A.x+Bp.x)/2, my=(A.y+Bp.y)/2; const horiz=eAxis(e)==='h';
-      text(horiz?mx:mx+16, (horiz?my-16:my-4), 8, (eLen(e)/100)+' m', {bold:true,color:C.navy,align:horiz?'center':'left'});
+      text(horiz?mx:mx+16, (horiz?my-16:my-4), 8, mTxt(eLen(e)/100)+' m', {bold:true,color:C.navy,align:horiz?'center':'left'});
       const fE=feedForEdge(e.id);
       if(fE){
         rect(mx-8,my-5,16,10,C.red,'1 1 1',1);
@@ -2259,13 +2466,19 @@ function buildPdf(){
   let T=tableStart([{w:90,h:'Artikelcode'},{w:330,h:'Omschrijving'},{w:56,h:'Aantal'}]);
   Object.keys(D.B.items).forEach(c=>{
     const it=D.B.items[c];
-    tableRow(T,[c.indexOf('m-')===0?'volgt':c, it.name, String(it.qty)]);
+    tableRow(T,[c.indexOf('m-')===0?'volgt':it.codeL, it.name, String(it.qty)]);
   });
 
   h2('Montage');
   para('Montagepunten: '+D.M.count+' - om de meter langs de rail, inclusief uiteinden; hoeken, T- en kruispunten tellen als gedeeld punt (grijze stippen in de tekening). Advies-bevestigingsafstand 1000 mm; bij lichte belasting kan de installateur tussenpunten laten vervallen, maar uiteinden en knooppunten blijven altijd bevestigd.');
-  para(st.mount==='geen' ? 'Nog geen montagewijze gekozen.' : 'Gekozen montagewijze: '+MOUNTS[st.mount].label+'.');
-  if(st.adapters>0) para('Adapters/spots: '+st.adapters+' - trekontlasting (2001947) per adapter verplicht en in de bestellijst meegeteld.');
+  let mountDetail='';
+  if(st.mount==='sys' && st.sysOphang) mountDetail=' + ophangset verstelbaar '+st.sysOphangLen+' m';
+  if(st.mount==='pendel') mountDetail=' (bus '+CLRN(st.color)+' / kabel '+CLRN(pendelKabelkleur())+' '+st.pendelKabelLen+' m)';
+  para(st.mount==='geen' ? 'Nog geen montagewijze gekozen.' : 'Gekozen montagewijze: '+MOUNTS[st.mount].label+mountDetail+'.');
+  const armTotalPdf = Object.values(st.armaturen).reduce((s,x)=>s+(x.qty||0),0);
+  const overigTotalPdf = Object.values(st.overig).reduce((s,x)=>s+(x.qty||0),0);
+  if(armTotalPdf>0) para('Armaturen: '+armTotalPdf+' stuks (zie stuklijst hierboven voor kleur/aantal per type).');
+  if(overigTotalPdf>0) para('Let op: de 70mm Universal Adapter moet altijd samen met trekontlasting art. 2001947 (PRX trekontlasting brug met 2 schroefjes) besteld worden — wordt niet automatisch toegevoegd.');
   y+=4;
   para('Pragmalux PRX 3-Fase Rail. Controleer bij het koppelen altijd de polariteitslijn: de rode rib moet overal doorlopen. Vragen? Neem contact op met de binnendienst.',7.5,C.grey);
   flush();
@@ -2295,8 +2508,8 @@ if(typeof window!=='undefined') window.__c2BuildPdf=buildPdf;
 function exportPdf(){
   const cmP=compMap(); const fedP=new Set(st.feeds.map(f=>feedComp(f,cmP.m)));
   if(cmP.count===0 || fedP.size<cmP.count){
-    const msg = cmP.count===0 ? 'Teken eerst een figuur (stap 3) voordat de PDF gemaakt kan worden.'
-      : 'Kies eerst per traject een stroomaansluitpunt (\u26a1 in stap 4) \u2014 daarna kan de PDF gemaakt worden.';
+    const msg = cmP.count===0 ? 'Teken eerst een figuur (stap 4) voordat de PDF gemaakt kan worden.'
+      : 'Kies eerst per traject een stroomaansluitpunt (\u26a1 in stap 5) \u2014 daarna kan de PDF gemaakt worden.';
     $('c2StepMsg').textContent=msg; alert(msg); return;
   }
   const bytes=buildPdf();
@@ -2312,9 +2525,9 @@ function exportPdf(){
 /* ---------- wizard ---------- */
 function goStep(k){
   $('c2StepMsg').textContent='';
-  if(k>=4 && !st.shape){ $('c2StepMsg').textContent='Kies eerst een vorm (stap 3).'; st.step=3; refresh(); return; }
-  if(k===5){ const cm2=compMap(); const fed2=new Set(st.feeds.map(f=>feedComp(f,cm2.m)));
-    if(cm2.count===0 || fed2.size<cm2.count){ $('c2StepMsg').textContent='Kies eerst per traject een stroomaansluitpunt in de tekening (stap 4).'; st.step=4; refresh(); return; } }
+  if(k>=5 && !st.shape){ $('c2StepMsg').textContent='Kies eerst een vorm (stap 4).'; st.step=4; refresh(); return; }
+  if(k===6){ const cm2=compMap(); const fed2=new Set(st.feeds.map(f=>feedComp(f,cm2.m)));
+    if(cm2.count===0 || fed2.size<cm2.count){ $('c2StepMsg').textContent='Kies eerst per traject een stroomaansluitpunt in de tekening (stap 5).'; st.step=5; refresh(); return; } }
   st.step=k; st.pick=false; refresh();
 }
 
@@ -2334,7 +2547,72 @@ function shapeIcon(id){
   }
 }
 
+/* bouwt een productlijst (armaturen / adapters & overig) eenmalig op; rijen updaten
+   st rechtstreeks via hun eigen listeners, refresh() herbouwt deze lijst niet opnieuw
+   (anders verliest een getypt aantal steeds de focus). */
+function buildProdList(container, list, stateMap, colorOptions){
+  container.innerHTML='';
+  list.forEach(item=>{
+    const row=document.createElement('div'); row.className='c2-prodrow';
+    const nm=document.createElement('span'); nm.className='nm'; nm.textContent=item.name;
+    const sel=document.createElement('select'); sel.className='c2-select';
+    colorOptions.forEach(c=>{ const o=document.createElement('option'); o.value=c.k; o.textContent=c.l; sel.appendChild(o); });
+    sel.value=stateMap[item.id].color;
+    sel.addEventListener('change', ()=>{ stateMap[item.id].color=sel.value; refresh(); });
+    const qty=document.createElement('input'); qty.type='text'; qty.inputMode='numeric'; qty.className='c2-qtyinp';
+    qty.value=String(stateMap[item.id].qty);
+    function commitQty(){ const v=Math.max(0, parseInt(qty.value)||0); stateMap[item.id].qty=v; qty.value=String(v); refresh(); }
+    qty.addEventListener('change', commitQty);
+    qty.addEventListener('keydown', e=>{ if(e.key==='Enter') qty.blur(); });
+    row.appendChild(nm); row.appendChild(sel); row.appendChild(qty);
+    container.appendChild(row);
+  });
+}
+
+/* bouwt de montage-subkeuzes (kabelkleur/-lengte bij pendel, ophangset bij systeemplafond)
+   opnieuw op bij elke refresh() — alleen selects/een checkbox, dus geen focusrisico. */
+function renderMountOptions(){
+  normalizeMountState();
+  const row=$('c2MountSubRow');
+  if(st.mount==='pendel'){
+    row.style.display='flex';
+    row.innerHTML='<span>Kabelkleur:</span><select id="c2PendelKk" class="c2-select"></select>'
+      +'<span>Kabellengte:</span><select id="c2PendelLen" class="c2-select"></select>';
+    const kk=pendelKabelkleur();
+    const kkSel=$('c2PendelKk');
+    const kkOpts = st.color==='zwart' ? [{k:'zilver',l:'Zilver'},{k:'zwart',l:'Zwart'}] : [{k:'zilver',l:'Zilver'}];
+    kkOpts.forEach(o=>{ const el=document.createElement('option'); el.value=o.k; el.textContent=o.l; kkSel.appendChild(el); });
+    kkSel.value=kk;
+    kkSel.addEventListener('change', ()=>{ st.pendelKabelkleur=kkSel.value; refresh(); });
+    const lenSel=$('c2PendelLen');
+    (kk==='zwart' ? ['3','5'] : ['3','6']).forEach(v=>{ const el=document.createElement('option'); el.value=v; el.textContent=v+' m'; lenSel.appendChild(el); });
+    lenSel.value=st.pendelKabelLen;
+    lenSel.addEventListener('change', ()=>{ st.pendelKabelLen=lenSel.value; refresh(); });
+  } else if(st.mount==='sys'){
+    row.style.display='flex';
+    row.innerHTML='<label class="c2-check" style="margin:0;"><input type="checkbox" id="c2SysOphangChk"> Ophangset verstelbaar toevoegen</label>'
+      +'<select id="c2SysOphangLenSel" class="c2-select"'+(st.sysOphang?'':' style="display:none;"')+'></select>';
+    const chk=$('c2SysOphangChk'); chk.checked=st.sysOphang;
+    chk.addEventListener('change', ()=>{ st.sysOphang=chk.checked; refresh(); });
+    const lenSel=$('c2SysOphangLenSel');
+    ['3','6'].forEach(v=>{ const el=document.createElement('option'); el.value=v; el.textContent=v+' m'; lenSel.appendChild(el); });
+    lenSel.value=st.sysOphangLen;
+    lenSel.addEventListener('change', ()=>{ st.sysOphangLen=lenSel.value; refresh(); });
+  } else {
+    row.style.display='none'; row.innerHTML='';
+  }
+}
+
 function init(){
+  /* dali */
+  const dr=$('c2DaliRow');
+  [{k:false,l:'Standaard (niet-DALI)'},{k:true,l:'DALI-dimbaar'}].forEach(o=>{
+    const b=document.createElement('button');
+    b.className='choice-btn'+(o.k===st.dali?' sel':'');
+    b.textContent=o.l;
+    b.addEventListener('click',()=>{ st.dali=o.k; dr.querySelectorAll('.choice-btn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); refresh(); });
+    dr.appendChild(b);
+  });
   /* kleur */
   const cr=$('c2ColorRow');
   ['wit','zwart','grijs'].forEach(c=>{
@@ -2369,7 +2647,7 @@ function init(){
   /* stepper + nav */
   document.querySelectorAll('#c2Steps button').forEach(b=> b.addEventListener('click', ()=>goStep(+b.dataset.step)));
   $('c2Prev').addEventListener('click', ()=>goStep(Math.max(1,st.step-1)));
-  $('c2Next').addEventListener('click', ()=>goStep(Math.min(5,st.step+1)));
+  $('c2Next').addEventListener('click', ()=>goStep(Math.min(6,st.step+1)));
   /* toolbar */
   $('c2Undo').addEventListener('click', ()=>{ if(hIdx>0) restore(hIdx-1); });
   $('c2Redo').addEventListener('click', ()=>{ if(hIdx<hist.length-1) restore(hIdx+1); });
@@ -2379,23 +2657,28 @@ function init(){
     st.edges=st.edges.filter(e=>!ids.has(e.a));
     st.nodes=st.nodes.filter(n=>n.s!==cur);
     if(!st.nodes.length) st.shape=null;
-    st.pick=false; validateFeeds(); view={zoom:1,px:0,py:0}; snap(); st.step= st.nodes.length?4:3;
+    st.pick=false; validateFeeds(); view={zoom:1,px:0,py:0}; snap(); st.step= st.nodes.length?5:4;
     if(!st.nodes.length) $('c2ShapeGrid').querySelectorAll('.shape-card').forEach(x=>x.classList.remove('sel'));
     refresh(); });
   $('c2PickBtn').addEventListener('click', ()=>{ if(!st.shape) return; st.pick=!st.pick; refresh(); });
-  $('c2AddFig').addEventListener('click', ()=>goStep(3));
+  $('c2AddFig').addEventListener('click', ()=>goStep(4));
   $('c2ZoomIn').addEventListener('click', ()=>zoomBy(1.25));
   $('c2ZoomOut').addEventListener('click', ()=>zoomBy(1/1.25));
   $('c2Center').addEventListener('click', ()=>{ view={zoom:1,px:0,py:0}; refresh(); });
-  /* stap 5 opties */
+  /* stap 6 opties */
   $('c2Use4m').addEventListener('change', e=>{ st.use4m=e.target.checked; refresh(); });
   $('c2Mount').addEventListener('change', e=>{ st.mount=e.target.value; refresh(); });
   $('c2Proj').addEventListener('input', e=>{ st.proj=e.target.value; });
-  $('c2AdPlus').addEventListener('click', ()=>{ st.adapters++; refresh(); });
-  $('c2AdMinus').addEventListener('click', ()=>{ st.adapters=Math.max(0,st.adapters-1); refresh(); });
+  buildProdList($('c2ArmList'), ARMATUREN, st.armaturen, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'custom',l:'Custom coating'}]);
+  buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
   /* acties */
   $('c2ResetAll').addEventListener('click', ()=>{
-    st.shape=null; st.nodes=[]; st.edges=[]; st.feeds=[]; st.adapters=0; st.mount='geen'; st.pick=false; st.step=1;
+    st.shape=null; st.nodes=[]; st.edges=[]; st.feeds=[]; st.angles={}; st.mount='geen'; st.pick=false; st.step=1;
+    st.sysOphang=false; st.sysOphangLen='3'; st.pendelKabelkleur='zilver'; st.pendelKabelLen='3';
+    st.armaturen=ARMATUREN.reduce((o,a)=>{o[a.id]={color:'wit',qty:0};return o;},{});
+    st.overig=ADAPTERS_OVERIG.reduce((o,a)=>{o[a.id]={color:'wit',qty:0};return o;},{});
+    buildProdList($('c2ArmList'), ARMATUREN, st.armaturen, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'custom',l:'Custom coating'}]);
+    buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
     st.sheets=[{id:'s1',name:'Tekenvlak 1'}]; st.sheet='s1'; st.sid=1; view={zoom:1,px:0,py:0};
     hist=[]; hIdx=-1;
     $('c2ShapeGrid').querySelectorAll('.shape-card').forEach(x=>x.classList.remove('sel'));
@@ -2408,7 +2691,7 @@ function init(){
     Object.keys(B.items).forEach(c=> lines.push((c.indexOf('m-')===0?'artikelnr volgt':c)+'  \u00D7'+B.items[c].qty+'  \u2014 '+B.items[c].name));
     lines.push('');
     B.railDetail.forEach(d=>{
-      lines.push('Segment '+d.r.lenM+' m: '+piecesTxt(d.r.pieces)+(d.r.seams>0?' + '+d.r.seams+'x elektrisch koppelstuk':''));
+      lines.push('Segment '+mTxt(d.r.drawnM)+' m: '+piecesTxt(d.r.pieces)+(d.r.seams>0?' + '+d.r.seams+'x elektrisch koppelstuk':''));
     });
     const txt=lines.join('\n');
     navigator.clipboard.writeText(txt).then(()=>{
