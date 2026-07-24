@@ -438,6 +438,10 @@
   .c2-prodrow .nm{flex:1; font-size:12.5px; color:var(--ink); font-weight:600;}
   .c2-prodrow select.c2-select{padding:5px 8px; font-size:12px;}
   .c2-qtyinp{width:48px; border:1.5px solid var(--border); border-radius:8px; padding:6px 4px; font-family:'JetBrains Mono',monospace; font-size:13px; text-align:center; color:var(--ink); background:#fff;}
+  .c2-armrow{display:flex; align-items:center; gap:8px; padding:6px 2px; flex-wrap:wrap;}
+  .c2-armrow .nm{font-size:12.5px; color:var(--ink); font-weight:600; min-width:78px;}
+  .c2-armrow input.c2-textinp{flex:1 1 130px; min-width:100px; padding:5px 8px; font-size:12px;}
+  .c2-armrow select.c2-select{padding:5px 8px; font-size:12px;}
 
   #c2Svg .c2-movable{cursor:move;}
   .c2-sheets{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; align-items:center;}
@@ -771,7 +775,7 @@
           <span>Projectnaam (voor de PDF):</span>
           <input type="text" id="c2Proj" class="c2-textinp" placeholder="bijv. Winkel Hoofdstraat 12">
         </div>
-        <p class="hint" style="margin:0 0 6px;">Armaturen — kies kleur en typ het aantal per type.</p>
+        <p class="hint" style="margin:0 0 6px;">Armaturen — vul de volledige naam en artikelcode in, kies kleur en typ het aantal per type. Bij DALI-dimbaar worden alleen de DALI-geschikte armaturen getoond en geldt een aparte artikelcode.</p>
         <div class="c2-prodlist" id="c2ArmList"></div>
         <p class="hint" style="margin:10px 0 6px;">Adapters &amp; overig — kies kleur en typ het aantal per product.</p>
         <div class="c2-prodlist" id="c2OverigList"></div>
@@ -913,7 +917,7 @@ const parts = [
 {cat:'Nippel Draaibaar', name:'Nippel draaibaar M10 + moer', desc:'Draaibare bevestigingsnippel voor pendel- of ophangmontage.', LCODES:[
   {code:'2029507',v:'Aluminium',color:'grijs'},{code:'2029514',v:'Zwart',color:'zwart'},
 ]},
-{cat:'Systeemplafond', name:'Ophangset verstelbaar (incl. kap)', desc:'Verstelbare ophanging voor systeemplafonds, 3 of 6 meter kabel.', LCODES:[
+{cat:'Systeemplafond', name:'ophangsetsysteempl verstelbaar (incl. kap)', desc:'Verstelbare ophanging voor systeemplafonds, 3 of 6 meter kabel.', LCODES:[
   {code:'2001237',v:'3M Wit',color:'wit'},{code:'2001220',v:'3M Zwart',color:'zwart'},{code:'2001213',v:'3M Grijs',color:'grijs'},
   {code:'2001268',v:'6M Wit',color:'wit'},{code:'2001251',v:'6M Zwart',color:'zwart'},{code:'2001244',v:'6M Grijs',color:'grijs'},
 ]},
@@ -1170,17 +1174,17 @@ const PCODES = {
   /* Montageopties, echte codes uit de Onderdelen-catalogus (parts). */
   montagebeugel:{wit:'2001329', zwart:'2001312', grijs:'2001305'},
   systeembeugel:{wit:'2001299', zwart:'2001282', grijs:'2001275'},
-  ophangset:{wit:{3:'2001237',6:'2001268'}, zwart:{3:'2001220',6:'2001251'}, grijs:{3:'2001213',6:'2001244'}},
+  ophangsetsysteempl:{wit:{3:'2001237',6:'2001268'}, zwart:{3:'2001220',6:'2001251'}, grijs:{3:'2001213', 5:'1098906', 6:'2001244'}},
   pendel:{
     wit:   {zilver:{3:'2012974',6:'2012981'}},
     grijs: {zilver:{3:'2012950',6:'2012967'}},
-    zwart: {zilver:{3:'2012998',6:'2013001'}, zwart:{3:'2013018',5:'2013025'}},
+    zwart: {zilver:{3:'2012998',6:'2013001', 8:'2012851'}, zwart:{3:'2013018',5:'2013025'}},
   },
   trek:'2001947'
 };
 
 const LCODES = {
-  rail:      {wit:{1:'KKT301158',2:'KKT301185',3:'KKT301115',4:'2012899'}, zwart:{1:'KKT301152',2:'KKT301179',3:'KKT30119',4:'2012882'}, grijs:{1:'KKT301144',2:'KKT301171',3:'KKT30111',4:'2012875'}},
+  rail:      {wit:{1:'KKT301158',2:'KKT301185',3:'KKT301115',4:'KKT301136'}, zwart:{1:'KKT301152',2:'KKT301179',3:'KKT30119',4:'KKT301131'}, grijs:{1:'KKT301144',2:'KKT301171',3:'KKT30111',4:'KKT301124'}},
   aansluit:  {wit:{R:'KKT30129',L:'KKT301224'}, zwart:{R:'KKT30123',L:'KKT301219'}, grijs:{R:'KKT30122',L:'KKT301218'}},
   bocht:     {wit:{binnen:'KKT301289',buiten:'KKT3012102'}, zwart:{binnen:'KKT301284',buiten:'KKT301297'}, grijs:{binnen:'KKT301283',buiten:'KKT301296'}},
   /* Naamtoewijzing T-varianten geverifieerd 17-7-2026 via verificatievel. */
@@ -1191,69 +1195,66 @@ const LCODES = {
   elkoppel:  {wit:'KKT301253', zwart:'KKT301246', grijs:'KKT301245'},
   buigtool:  'KKT30155',
   beugelsnel:{wit:'01-C15-N1-9817', zwart:'01-C15-N1-9818', grijs:'01-C15-N1-9802'},
-  adapter70: {wit:'KKT30133', zwart:'KKT30132', grijs:'KKT30131'},
+  //adapter70: {wit:'KKT30133', zwart:'KKT30132', grijs:'KKT30131'},
   /* externe codes nog niet bekend, placeholders totdat de gebruiker deze invult */
-  verstelbaar:{wit:'VERSTHOEK-WIT-L', zwart:'VERSTHOEK-ZWART-L', grijs:'VERSTHOEK-GRIJS-L'},
-  montagebeugel:{wit:'MONTBEUGEL-WIT-L', zwart:'MONTBEUGEL-ZWART-L', grijs:'MONTBEUGEL-GRIJS-L'},
-  systeembeugel:{wit:'SYSBEUGEL-WIT-L', zwart:'SYSBEUGEL-ZWART-L', grijs:'SYSBEUGEL-GRIJS-L'},
-  ophangset:{wit:{3:'OPHANG-WIT-3-L',6:'OPHANG-WIT-6-L'}, zwart:{3:'OPHANG-ZWART-3-L',6:'OPHANG-ZWART-6-L'}, grijs:{3:'OPHANG-GRIJS-3-L',6:'OPHANG-GRIJS-6-L'}},
+  verstelbaar:{wit:'KKT301276', zwart:'KKT301272', grijs:'KKT301271'},
+  montagebeugel:{wit:'KKT301414', zwart:'KKT301411', grijs:'KKT30143'},
+  systeembeugel:{wit:'KKT3014159', zwart:'KKT3014158', grijs:'KKT3014157'},
+  ophangsetsysteempl:{wit:{3:'KKT315501',6:'KKT315515'}, zwart:{3:'KKT315500',6:'KKT315514'}, grijs:{3:'KKT315499', 5:'KKT315511', 6:'KKT315526'}},
   pendel:{
-    wit:   {zilver:{3:'PENDEL-WIT-ZILVER-3-L',6:'PENDEL-WIT-ZILVER-6-L'}},
-    grijs: {zilver:{3:'PENDEL-GRIJS-ZILVER-3-L',6:'PENDEL-GRIJS-ZILVER-6-L'}},
-    zwart: {zilver:{3:'PENDEL-ZWART-ZILVER-3-L',6:'PENDEL-ZWART-ZILVER-6-L'}, zwart:{3:'PENDEL-ZWART-ZWART-3-L',5:'PENDEL-ZWART-ZWART-5-L'}},
+    wit:   {zilver:{3:'10pack(03-M101-01-0117+04-M101-03-0117+02-15-03000-K2OT-05) Ø1,5mm  Ø5mmball',6:'10pack(03-M101-01-0117+04-M101-03-0117+02-15-06200-K2OT-05) Ø1,5mm  Ø5mmball'}},
+    grijs: {zilver:{3:'10pack(03-M101-01-0102+04-M101-03-0102+02-15-03000-K2OT-05) Ø1,5mm  Ø5mmball',6:'10pack(03-M101-01-0102+04-M101-03-0102+02-15-06200-K2OT-05) Ø1,5mm  Ø5mmball'}},
+    zwart: {zilver:{3:'10pack(03-M101-01-0118+04-M101-03-0118+02-15-03000-K2OT-05) Ø1,5mm  Ø5mmball',6:'10pack(03-M101-01-0118+04-M101-03-0118+02-15-06200-K2OT-05) Ø1,5mm  Ø5mmball', 8:'10pack(03-M101-01-0118+04-M101-03-0118+02-15-08000-K2OT-05) Ø1,5mm  Ø5mmball'}, zwart:{3:'10packPREMIUMALLBLACK03-M101-01-0118+04-M101-01-0118+02-15-03000-K2OT-18',5:'10packPREMIUMALLBLACK03-M101-01-0117+04-M101-01-0117+02-15-05000-K2OT-18'}},
   },
   trek:'2001947'
 };
 
-/* DALI-lijn: zelfde onderdelen en logica als hierboven, alleen andere artikelcodes.
-   Placeholders ('DALI-' + bestaande code) totdat de echte DALI-codes handmatig
-   ingevuld worden — vervang per regel zodra bekend. */
 const PCODES_DALI = {
-  rail:      {wit:{1:'DALI-2000766',2:'DALI-2000797',3:'DALI-2000827',4:'DALI-2012899'}, zwart:{1:'DALI-2000759',2:'DALI-2000780',3:'DALI-2000810',4:'DALI-2012882'}, grijs:{1:'DALI-2000742',2:'DALI-2000773',3:'DALI-2000803',4:'DALI-2012875'}},
-  aansluit:  {wit:{R:'DALI-2000858',L:'DALI-2000889'}, zwart:{R:'DALI-2000841',L:'DALI-2000872'}, grijs:{R:'DALI-2000834',L:'DALI-2000865'}},
-  bocht:     {wit:{binnen:'DALI-2000940',buiten:'DALI-2000971'}, zwart:{binnen:'DALI-2000933',buiten:'DALI-2000964'}, grijs:{binnen:'DALI-2000926',buiten:'DALI-2000957'}},
-  tkoppel:   {wit:{R1:'DALI-2001008',L2:'DALI-2001039',R2:'DALI-2002432',L1:'DALI-2002463'}, zwart:{R1:'DALI-2000995',L2:'DALI-2001022',R2:'DALI-2002425',L1:'DALI-2002456'}, grijs:{R1:'DALI-2000988',L2:'DALI-2001015',R2:'DALI-2002418',L1:'DALI-2002449'}},
-  kruis:     {wit:'DALI-2001060', zwart:'DALI-2001053', grijs:'DALI-2001046'},
-  midden:    {wit:'DALI-2001183', zwart:'DALI-2001176', grijs:'DALI-2001169'},
-  eindkap:   {wit:'DALI-2000919', zwart:'DALI-2000902', grijs:'DALI-2000896'},
-  elkoppel:  {wit:'DALI-2001091', zwart:'DALI-2001084', grijs:'DALI-2001077'},
-  buigtool:  'DALI-2001374',
-  beugelsnel:{wit:'DALI-2013049', zwart:'DALI-2013032', grijs:'DALI-2013056'},
-  adapter70: {wit:'DALI-2001404', zwart:'DALI-2001398', grijs:'DALI-2001381'},
-  verstelbaar:{wit:'DALI-2001121', zwart:'DALI-2001114', grijs:'DALI-2001107'},
-  montagebeugel:{wit:'DALI-2001329', zwart:'DALI-2001312', grijs:'DALI-2001305'},
-  systeembeugel:{wit:'DALI-2001299', zwart:'DALI-2001282', grijs:'DALI-2001275'},
-  ophangset:{wit:{3:'DALI-2001237',6:'DALI-2001268'}, zwart:{3:'DALI-2001220',6:'DALI-2001251'}, grijs:{3:'DALI-2001213',6:'DALI-2001244'}},
+  rail:      {wit:{1:'2001534',2:'2001565',3:'2001596',4:'2012929'}, zwart:{1:'2001527',2:'2001558',3:'2001589',4:'2012912'}, grijs:{1:'2001510',2:'2001541',3:'2001572',4:'2012905'}},
+  aansluit:  {wit:{R:'2001626',L:'2001657'}, zwart:{R:'2001619',L:'2001640'}, grijs:{R:'2001602',L:'2001633'}},
+  bocht:     {wit:{binnen:'2001688',buiten:'2001718'}, zwart:{binnen:'2001671',buiten:'2001701'}, grijs:{binnen:'2001664',buiten:'2001695'}},
+  tkoppel:   {wit:{R1:'2001749',L2:'2001770',R2:'2002494',L1:'2002524'}, zwart:{R1:'2001732',L2:'2001763',R2:'2002487',L1:'2002517'}, grijs:{R1:'2001725',L2:'2001756',R2:'2002470',L1:'2002500'}},
+  kruis:     {wit:'2001800', zwart:'2001794', grijs:'2001787'},
+  midden:    {wit:'2001893', zwart:'2001886', grijs:'2001879'},
+  eindkap:   {wit:'2000919', zwart:'2000902', grijs:'2000896'},
+  elkoppel:  {wit:'2001831', zwart:'2001824', grijs:'2001817'},
+  buigtool:  '2001374',
+  beugelsnel:{wit:'2013049', zwart:'2013032', grijs:'2013056'},
+  adapter103: {wit:'2001923', zwart:'2001916', grijs:'2001909'},
+  verstelbaar:{wit:'NB', zwart:'NB', grijs:'NB'},
+  montagebeugel:{wit:'2001329', zwart:'2001312', grijs:'2001305'},
+  systeembeugel:{wit:'2001299', zwart:'2001282', grijs:'2001275'},
+  ophangsetsysteempl:{wit:{3:'2001237',6:'2001268'}, zwart:{3:'2001220',6:'2001251'}, grijs:{3:'2001213', 5:'1098906', 6:'2001244'}},
   pendel:{
-    wit:   {zilver:{3:'DALI-2012974',6:'DALI-2012981'}},
-    grijs: {zilver:{3:'DALI-2012950',6:'DALI-2012967'}},
-    zwart: {zilver:{3:'DALI-2012998',6:'DALI-2013001'}, zwart:{3:'DALI-2013018',5:'DALI-2013025'}},
+    wit:   {zilver:{3:'2012974',6:'2012981'}},
+    grijs: {zilver:{3:'2012950',6:'2012967'}},
+    zwart: {zilver:{3:'2012998',6:'2013001', 8:'2012851'}, zwart:{3:'2013018',5:'2013025'}},
   },
-  trek:'DALI-2001947'
+  trek:'2001947'
 };
 
 const LCODES_DALI = {
-  rail:      {wit:{1:'DALI-KKT301158',2:'DALI-KKT301185',3:'DALI-KKT301115',4:'DALI-2012899'}, zwart:{1:'DALI-KKT301152',2:'DALI-KKT301179',3:'DALI-KKT30119',4:'DALI-2012882'}, grijs:{1:'DALI-KKT301144',2:'DALI-KKT301171',3:'DALI-KKT30111',4:'DALI-2012875'}},
-  aansluit:  {wit:{R:'DALI-KKT30129',L:'DALI-KKT301224'}, zwart:{R:'DALI-KKT30123',L:'DALI-KKT301219'}, grijs:{R:'DALI-KKT30122',L:'DALI-KKT301218'}},
-  bocht:     {wit:{binnen:'DALI-KKT301289',buiten:'DALI-KKT3012102'}, zwart:{binnen:'DALI-KKT301284',buiten:'DALI-KKT301297'}, grijs:{binnen:'DALI-KKT301283',buiten:'DALI-KKT301296'}},
-  tkoppel:   {wit:{R1:'DALI-KKT3012115',L2:'DALI-KKT3012127',R2:'DALI-KKT3012149',L1:'DALI-KKT3012161'}, zwart:{R1:'DALI-KKT3012110',L2:'DALI-KKT3012123',R2:'DALI-KKT3012145',L1:'DALI-KKT3012157'}, grijs:{R1:'DALI-KKT3012109',L2:'DALI-KKT3012122',R2:'DALI-KKT3012144',L1:'DALI-KKT3012156'}},
-  kruis:     {wit:'DALI-KKT3012136', zwart:'DALI-KKT3012132', grijs:'DALI-KKT3012131'},
-  midden:    {wit:'DALI-KKT301238', zwart:'DALI-KKT301233', grijs:'DALI-KKT301232'},
-  eindkap:   {wit:'DALI-KKT3012172', zwart:'DALI-KKT3012166', grijs:'DALI-KKT3012165'},
-  elkoppel:  {wit:'DALI-KKT301253', zwart:'DALI-KKT301246', grijs:'DALI-KKT301245'},
-  buigtool:  'DALI-KKT30155',
-  beugelsnel:{wit:'DALI-01-C15-N1-9817', zwart:'DALI-01-C15-N1-9818', grijs:'DALI-01-C15-N1-9802'},
-  adapter70: {wit:'DALI-KKT30133', zwart:'DALI-KKT30132', grijs:'DALI-KKT30131'},
-  verstelbaar:{wit:'DALI-VERSTHOEK-WIT-L', zwart:'DALI-VERSTHOEK-ZWART-L', grijs:'DALI-VERSTHOEK-GRIJS-L'},
-  montagebeugel:{wit:'DALI-MONTBEUGEL-WIT-L', zwart:'DALI-MONTBEUGEL-ZWART-L', grijs:'DALI-MONTBEUGEL-GRIJS-L'},
-  systeembeugel:{wit:'DALI-SYSBEUGEL-WIT-L', zwart:'DALI-SYSBEUGEL-ZWART-L', grijs:'DALI-SYSBEUGEL-GRIJS-L'},
-  ophangset:{wit:{3:'DALI-OPHANG-WIT-3-L',6:'DALI-OPHANG-WIT-6-L'}, zwart:{3:'DALI-OPHANG-ZWART-3-L',6:'DALI-OPHANG-ZWART-6-L'}, grijs:{3:'DALI-OPHANG-GRIJS-3-L',6:'DALI-OPHANG-GRIJS-6-L'}},
+  rail:      {wit:{1:'KKT30513',2:'KKT30523',3:'KKT30533',4:'KKT30543'}, zwart:{1:'KKT30512',2:'KKT30522',3:'KKT30532',4:'KKT30542'}, grijs:{1:'KKT30511',2:'KKT30521',3:'KKT30531',4:'KKT30541'}},
+  aansluit:  {wit:{R:'KKT305113',L:'KKT305123'}, zwart:{R:'KKT305112',L:'KKT305122'}, grijs:{R:'KKT305111',L:'KKT305121'}},
+  bocht:     {wit:{binnen:'KKT3053432',buiten:'KKT3053532'}, zwart:{binnen:'KKT3053422',buiten:'KKT3053522'}, grijs:{binnen:'KKT3053412',buiten:'KKT3053512'}},
+  tkoppel:   {wit:{R1:'KKT3053632',L2:'KKT3053732',R2:'KKT3053932',L1:'KKT3054032'}, zwart:{R1:'KKT3053622',L2:'KKT3053722',R2:'KKT3053922',L1:'KKT3054022'}, grijs:{R1:'KKT3053612',L2:'KKT3053712',R2:'KKT3053912',L1:'KKT3054012'}},
+  kruis:     {wit:'KKT3053832', zwart:'KKT3053822', grijs:'KKT3053812'},
+  midden:    {wit:'KKT3051432', zwart:'KKT3051422', grijs:'KKT3051412'},
+  eindkap:   {wit:'KKT3012172', zwart:'KKT3012166', grijs:'KKT3012165'},
+  elkoppel:  {wit:'KKT304213', zwart:'KKT304212', grijs:'KKT304211'},
+  buigtool:  'KKT30155',
+ beugelsnel:{wit:'01-C15-N1-9817', zwart:'01-C15-N1-9818', grijs:'01-C15-N1-9802'},
+  adapter103: {wit:'KKT30693', zwart:'KKT30692', grijs:'KKT30691'},
+  verstelbaar:{wit:'KKT301276', zwart:'KKT301272', grijs:'KKT301271'},
+  montagebeugel:{wit:'KKT301414', zwart:'KKT301411', grijs:'KKT30143'},
+  systeembeugel:{wit:'KKT3014159', zwart:'KKT3014158', grijs:'KKT3014157'},
+  ophangsetsysteempl:{wit:{3:'KKT315501',6:'KKT315515'}, zwart:{3:'KKT315500',6:'KKT315514'}, grijs:{3:'KKT315499', 5:'KKT315511', 6:'KKT315526'}},
   pendel:{
-    wit:   {zilver:{3:'DALI-PENDEL-WIT-ZILVER-3-L',6:'DALI-PENDEL-WIT-ZILVER-6-L'}},
-    grijs: {zilver:{3:'DALI-PENDEL-GRIJS-ZILVER-3-L',6:'DALI-PENDEL-GRIJS-ZILVER-6-L'}},
-    zwart: {zilver:{3:'DALI-PENDEL-ZWART-ZILVER-3-L',6:'DALI-PENDEL-ZWART-ZILVER-6-L'}, zwart:{3:'DALI-PENDEL-ZWART-ZWART-3-L',5:'DALI-PENDEL-ZWART-ZWART-5-L'}},
+    wit:   {zilver:{3:'10pack(03-M101-01-0117+04-M101-03-0117+02-15-03000-K2OT-05) Ø1,5mm  Ø5mmball',6:'10pack(03-M101-01-0117+04-M101-03-0117+02-15-06200-K2OT-05) Ø1,5mm  Ø5mmball'}},
+    grijs: {zilver:{3:'10pack(03-M101-01-0102+04-M101-03-0102+02-15-03000-K2OT-05) Ø1,5mm  Ø5mmball',6:'10pack(03-M101-01-0102+04-M101-03-0102+02-15-06200-K2OT-05) Ø1,5mm  Ø5mmball'}},
+    zwart: {zilver:{3:'10pack(03-M101-01-0118+04-M101-03-0118+02-15-03000-K2OT-05) Ø1,5mm  Ø5mmball',6:'10pack(03-M101-01-0118+04-M101-03-0118+02-15-06200-K2OT-05) Ø1,5mm  Ø5mmball', 8:'10pack(03-M101-01-0118+04-M101-03-0118+02-15-08000-K2OT-05) Ø1,5mm  Ø5mmball'}, zwart:{3:'10packPREMIUMALLBLACK03-M101-01-0118+04-M101-01-0118+02-15-03000-K2OT-18',5:'10packPREMIUMALLBLACK03-M101-01-0117+04-M101-01-0117+02-15-05000-K2OT-18'}},
   },
-  trek:'DALI-2001947'
+  trek:'2001947'
 };
 
 /* Actieve codetabel o.b.v. de DALI-keuze (stap 1); nodeVariants()/computeBOM()
@@ -1267,34 +1268,35 @@ function activeL(){ return st.dali ? LCODES_DALI : LCODES; }
    kruis 50/arm, middenvoeding 100, elektrisch koppelstuk 0, eindkap 3. */
 const MM = { aansluit:66, eindkap:3, bochtArm:66, tBarArm:50, tStemArm:66, kruisArm:50, midden:100, elkoppel:0 };
 
-/* Armaturen: 12 placeholders, later door de gebruiker te vervangen door de echte namen
-   en artikelcodes. Kleur wit/zwart/custom coating heeft elk een eigen code: p = intern
-   (scherm), l = extern (PDF) — zelfde intern/extern-scheiding als de rest van de stuklijst. */
+/* Armaturen: 12 vaste slots voor de normale 3-fase rail; 5 daarvan (arm01-arm05)
+   bestaan ook als DALI-dimbare versie — zichtbaar/gefilterd via visibleArmaturen().
+   Naam en artikelcode worden niet meer hardcoded bijgehouden: de gebruiker vult ze
+   zelf in via de UI (buildArmList) en ze worden opgeslagen in st.armaturen[id].
+   DALI-geschikte armaturen houden 2 losse codes aan (code = standaard, codeDali =
+   DALI-dimbaar) onder dezelfde naam, zodat wisselen tussen Standaard/DALI niets
+   overschrijft. */
 const ARMATUREN = [
-  {id:'arm01', name:'Armatuur 01 — naam volgt', codes:{wit:{p:'ARM01-WIT-P',l:'ARM01-WIT-L'}, zwart:{p:'ARM01-ZWART-P',l:'ARM01-ZWART-L'}, custom:{p:'ARM01-CUSTOM-P',l:'ARM01-CUSTOM-L'}}},
-  {id:'arm02', name:'Armatuur 02 — naam volgt', codes:{wit:{p:'ARM02-WIT-P',l:'ARM02-WIT-L'}, zwart:{p:'ARM02-ZWART-P',l:'ARM02-ZWART-L'}, custom:{p:'ARM02-CUSTOM-P',l:'ARM02-CUSTOM-L'}}},
-  {id:'arm03', name:'Armatuur 03 — naam volgt', codes:{wit:{p:'ARM03-WIT-P',l:'ARM03-WIT-L'}, zwart:{p:'ARM03-ZWART-P',l:'ARM03-ZWART-L'}, custom:{p:'ARM03-CUSTOM-P',l:'ARM03-CUSTOM-L'}}},
-  {id:'arm04', name:'Armatuur 04 — naam volgt', codes:{wit:{p:'ARM04-WIT-P',l:'ARM04-WIT-L'}, zwart:{p:'ARM04-ZWART-P',l:'ARM04-ZWART-L'}, custom:{p:'ARM04-CUSTOM-P',l:'ARM04-CUSTOM-L'}}},
-  {id:'arm05', name:'Armatuur 05 — naam volgt', codes:{wit:{p:'ARM05-WIT-P',l:'ARM05-WIT-L'}, zwart:{p:'ARM05-ZWART-P',l:'ARM05-ZWART-L'}, custom:{p:'ARM05-CUSTOM-P',l:'ARM05-CUSTOM-L'}}},
-  {id:'arm06', name:'Armatuur 06 — naam volgt', codes:{wit:{p:'ARM06-WIT-P',l:'ARM06-WIT-L'}, zwart:{p:'ARM06-ZWART-P',l:'ARM06-ZWART-L'}, custom:{p:'ARM06-CUSTOM-P',l:'ARM06-CUSTOM-L'}}},
-  {id:'arm07', name:'Armatuur 07 — naam volgt', codes:{wit:{p:'ARM07-WIT-P',l:'ARM07-WIT-L'}, zwart:{p:'ARM07-ZWART-P',l:'ARM07-ZWART-L'}, custom:{p:'ARM07-CUSTOM-P',l:'ARM07-CUSTOM-L'}}},
-  {id:'arm08', name:'Armatuur 08 — naam volgt', codes:{wit:{p:'ARM08-WIT-P',l:'ARM08-WIT-L'}, zwart:{p:'ARM08-ZWART-P',l:'ARM08-ZWART-L'}, custom:{p:'ARM08-CUSTOM-P',l:'ARM08-CUSTOM-L'}}},
-  {id:'arm09', name:'Armatuur 09 — naam volgt', codes:{wit:{p:'ARM09-WIT-P',l:'ARM09-WIT-L'}, zwart:{p:'ARM09-ZWART-P',l:'ARM09-ZWART-L'}, custom:{p:'ARM09-CUSTOM-P',l:'ARM09-CUSTOM-L'}}},
-  {id:'arm10', name:'Armatuur 10 — naam volgt', codes:{wit:{p:'ARM10-WIT-P',l:'ARM10-WIT-L'}, zwart:{p:'ARM10-ZWART-P',l:'ARM10-ZWART-L'}, custom:{p:'ARM10-CUSTOM-P',l:'ARM10-CUSTOM-L'}}},
-  {id:'arm11', name:'Armatuur 11 — naam volgt', codes:{wit:{p:'ARM11-WIT-P',l:'ARM11-WIT-L'}, zwart:{p:'ARM11-ZWART-P',l:'ARM11-ZWART-L'}, custom:{p:'ARM11-CUSTOM-P',l:'ARM11-CUSTOM-L'}}},
-  {id:'arm12', name:'Armatuur 12 — naam volgt', codes:{wit:{p:'ARM12-WIT-P',l:'ARM12-WIT-L'}, zwart:{p:'ARM12-ZWART-P',l:'ARM12-ZWART-L'}, custom:{p:'ARM12-CUSTOM-P',l:'ARM12-CUSTOM-L'}}},
+  {id:'arm01', dali:true}, {id:'arm02', dali:true}, {id:'arm03', dali:true},
+  {id:'arm04', dali:true}, {id:'arm05', dali:true},
+  {id:'arm06', dali:false}, {id:'arm07', dali:false}, {id:'arm08', dali:false},
+  {id:'arm09', dali:false}, {id:'arm10', dali:false}, {id:'arm11', dali:false}, {id:'arm12', dali:false},
 ];
+function armLabel(a){ return 'Armatuur '+a.id.replace('arm',''); }
+function visibleArmaturen(){ return st.dali ? ARMATUREN.filter(a=>a.dali) : ARMATUREN; }
 /* Adapters & overig: 9 placeholders, wit/zwart/grijs, zelfde intern/extern-codescheiding. */
 const ADAPTERS_OVERIG = [
-  {id:'ao01', name:'Adapter/overig 01 — naam volgt', codes:{wit:{p:'AO01-WIT-P',l:'AO01-WIT-L'}, zwart:{p:'AO01-ZWART-P',l:'AO01-ZWART-L'}, grijs:{p:'AO01-GRIJS-P',l:'AO01-GRIJS-L'}}},
-  {id:'ao02', name:'Adapter/overig 02 — naam volgt', codes:{wit:{p:'AO02-WIT-P',l:'AO02-WIT-L'}, zwart:{p:'AO02-ZWART-P',l:'AO02-ZWART-L'}, grijs:{p:'AO02-GRIJS-P',l:'AO02-GRIJS-L'}}},
-  {id:'ao03', name:'Adapter/overig 03 — naam volgt', codes:{wit:{p:'AO03-WIT-P',l:'AO03-WIT-L'}, zwart:{p:'AO03-ZWART-P',l:'AO03-ZWART-L'}, grijs:{p:'AO03-GRIJS-P',l:'AO03-GRIJS-L'}}},
-  {id:'ao04', name:'Adapter/overig 04 — naam volgt', codes:{wit:{p:'AO04-WIT-P',l:'AO04-WIT-L'}, zwart:{p:'AO04-ZWART-P',l:'AO04-ZWART-L'}, grijs:{p:'AO04-GRIJS-P',l:'AO04-GRIJS-L'}}},
-  {id:'ao05', name:'Adapter/overig 05 — naam volgt', codes:{wit:{p:'AO05-WIT-P',l:'AO05-WIT-L'}, zwart:{p:'AO05-ZWART-P',l:'AO05-ZWART-L'}, grijs:{p:'AO05-GRIJS-P',l:'AO05-GRIJS-L'}}},
-  {id:'ao06', name:'Adapter/overig 06 — naam volgt', codes:{wit:{p:'AO06-WIT-P',l:'AO06-WIT-L'}, zwart:{p:'AO06-ZWART-P',l:'AO06-ZWART-L'}, grijs:{p:'AO06-GRIJS-P',l:'AO06-GRIJS-L'}}},
-  {id:'ao07', name:'Adapter/overig 07 — naam volgt', codes:{wit:{p:'AO07-WIT-P',l:'AO07-WIT-L'}, zwart:{p:'AO07-ZWART-P',l:'AO07-ZWART-L'}, grijs:{p:'AO07-GRIJS-P',l:'AO07-GRIJS-L'}}},
-  {id:'ao08', name:'Adapter/overig 08 — naam volgt', codes:{wit:{p:'AO08-WIT-P',l:'AO08-WIT-L'}, zwart:{p:'AO08-ZWART-P',l:'AO08-ZWART-L'}, grijs:{p:'AO08-GRIJS-P',l:'AO08-GRIJS-L'}}},
-  {id:'ao09', name:'Adapter/overig 09 — naam volgt', codes:{wit:{p:'AO09-WIT-P',l:'AO09-WIT-L'}, zwart:{p:'AO09-ZWART-P',l:'AO09-ZWART-L'}, grijs:{p:'AO09-GRIJS-P',l:'AO09-GRIJS-L'}}},
+  {id:'ao01', name:'ON/OFF Rail Adapter GA-69 70mm', codes:{wit:{p:'2001404',l:'KKT30133'}, zwart:{p:'2001398',l:'KKT30132'}, grijs:{p:'2001381',l:'KKT30131'}}},
+  {id:'ao02', name:'multi-adapter 3-fase + 400V aftakking', codes:{wit:{p:'2001435',l:'KKT301348'}, zwart:{p:'2001428',l:'KKT301346'}, grijs:{p:'2001411',l:'KKT3013461'}}},
+  {id:'ao03', name:'Schuko adapter (stopcontact 230V)', codes:{wit:{p:'2001459',l:'KKT3013100'}, zwart:{p:'2001442',l:'KKT3013120'}}},
+  {id:'ao04', name:'Monopoint voor 3-fase adaptor', codes:{wit:{p:'2001503',l:'KKT301322'}, zwart:{p:'2001497',l:'KKT301319'}, grijs:{p:'2001480',l:'KKT301318'}}},
+  {id:'ao05', name:'Verstevigingsplaat 182mm', codes:{wit:{p:'2001350',l:'KKT301435'}, zwart:{p:'2001343',l:'KKT3014139'}, grijs:{p:'2001336',l:'KKT301429'}}},
+  {id:'ao06', name:'Afdekplaat 2M', codes:{wit:{p:'2001206',l:'KKT30153'}, zwart:{p:'2001190',l:'KKT301522'}}},
+  {id:'ao07', name:'DALI Rail Adapter 103mm', codes:{wit:{p:'2001923',l:'KKT30693'}, zwart:{p:'2001916',l:'KKT30692'}, grijs:{p:'2001909',l:'KKT30691'}}},
+  {id:'ao08', name:'Strain relief: GA69, GAC69, GB67', codes:{wit:{p:'2001947',l:'2001947'}, zwart:{p:'2001947',l:'2001947'}}},
+  {id:'ao09', name:'Slot connection tool: GA69, GAC69', codes:{wit:{p:'2001930',l:'2001930'}, zwart:{p:'2001930',l:'2001930'}}},
+  {id:'ao10', name:'trekontlasting', codes:{wit:{p:'2001473',l:'2001473'}, zwart:{p:'2001466',l:'2001466'}}},
+  {id:'ao11', name:'nippel draaibaar M10 hoogte 12mm gat 7,4mm', codes:{alu:{p:'2012936',l:'KKT301617'}, zwart:{p:'2012943',l:'KKT301615'}}},
+  {id:'ao12', name:'adapter moer M10', codes:{alu:{p:'2013285',l:'KKT301632'}}},
 ];
 
 const SHAPES = {
@@ -1311,7 +1313,7 @@ const SHAPES = {
 
 let st = { step:1, dali:false, color:'wit', powercfg:'A', shape:null, gRows:2, gCols:2,
   nodes:[], edges:[], nid:0, eid:0, feeds:[], angles:{},
-  armaturen: ARMATUREN.reduce((o,a)=>{o[a.id]={color:'wit',qty:0};return o;},{}),
+  armaturen: ARMATUREN.reduce((o,a)=>{o[a.id]={color:'wit',qty:0,name:'',code:'',codeDali:''};return o;},{}),
   overig: ADAPTERS_OVERIG.reduce((o,a)=>{o[a.id]={color:'wit',qty:0};return o;},{}),
   use4m:false, pick:false, mount:'geen', proj:'',
   sysOphang:false, sysOphangLen:'3', pendelKabelkleur:'zilver', pendelKabelLen:'3',
@@ -1746,9 +1748,11 @@ function computeBOM(){
     if(r.seams>0) add(activeP().elkoppel[st.color], activeL().elkoppel[st.color], 'Elektrisch Koppelstuk '+CLRN(st.color),r.seams,'e:'+e.id);
     railDetail.push({e, r});
   });
-  ARMATUREN.forEach(a=>{ const s=st.armaturen[a.id]; if(!s||s.qty<=0) return;
-    const c=a.codes[s.color];
-    add(c.p, c.l, a.name+' '+(s.color==='custom'?'(custom coating)':CLRN(s.color)), s.qty, null); });
+  visibleArmaturen().forEach(a=>{ const s=st.armaturen[a.id]; if(!s||s.qty<=0) return;
+    const rawCode = st.dali ? s.codeDali : s.code;
+    const code = (rawCode&&rawCode.trim()) ? rawCode.trim() : ('m-arm-'+a.id+(st.dali?'-dali':''));
+    const label = (s.name&&s.name.trim()) ? s.name.trim() : armLabel(a);
+    add(code, code, label+' '+(s.color==='custom'?'(custom coating)':CLRN(s.color)), s.qty, null); });
   ADAPTERS_OVERIG.forEach(a=>{ const s=st.overig[a.id]; if(!s||s.qty<=0) return;
     const c=a.codes[s.color];
     add(c.p, c.l, a.name+' '+CLRN(s.color), s.qty, null); });
@@ -1762,7 +1766,7 @@ function computeBOM(){
     add(activeP().systeembeugel[st.color], activeL().systeembeugel[st.color], 'Systeemplafond beugel '+CLRN(st.color), mounts.count, null);
     if(st.sysOphang){
       const len=st.sysOphangLen;
-      add(activeP().ophangset[st.color][len], activeL().ophangset[st.color][len], 'Ophangset verstelbaar '+len+'m '+CLRN(st.color), mounts.count, null);
+      add(activeP().ophangsetsysteempl[st.color][len], activeL().ophangsetsysteempl[st.color][len], 'ophangsetsysteempl verstelbaar '+len+'m '+CLRN(st.color), mounts.count, null);
     }
   }
   if(st.mount==='pendel' && mounts.count>0){
@@ -2124,7 +2128,7 @@ function warnings(B){
     : miss1+' van de '+cm1.count+' trajecten heeft nog geen stroomaansluitpunt. Kies er per traject één via ⚡.'});
   if(B.P.conf.size) w.push({t:'warn', m:'Polariteitsconflict (gestreept rood): de rode lijn kan in deze vorm niet ononderbroken doorlopen. Pas de vorm of het aansluitpunt aan.'});
   B.errs.forEach(er=> w.push({t:'warn', m:er.msg}));
-  const armTotal = Object.values(st.armaturen).reduce((s,x)=>s+(x.qty||0),0);
+  const armTotal = visibleArmaturen().reduce((s,a)=>s+(st.armaturen[a.id].qty||0),0);
   const overigTotal = Object.values(st.overig).reduce((s,x)=>s+(x.qty||0),0);
   if(overigTotal>0) w.push({t:'tip', m:'De 70mm Universal Adapter moet altijd samen met trekontlasting art. 2001947 (PRX trekontlasting brug met 2 schroefjes) besteld worden \u2014 wordt niet automatisch toegevoegd.'});
   if(armTotal>=6){
@@ -2212,7 +2216,7 @@ function refresh(){
     : (st.shape ? SHAPES[st.shape].label+' in '+st.color+shTxt : 'Nog geen vorm gekozen');
   $('c2TotLen').textContent = mTxt(tot/100)+' m';
   $('c2TotSeg').textContent = st.edges.length;
-  $('c2TotArm').textContent = Object.values(st.armaturen).reduce((s,x)=>s+(x.qty||0),0);
+  $('c2TotArm').textContent = visibleArmaturen().reduce((s,a)=>s+(st.armaturen[a.id].qty||0),0);
   const codes=Object.keys(B.items);
   $('c2ArtList').innerHTML = codes.length ? codes.map(c=>{
     const it=B.items[c];
@@ -2472,10 +2476,10 @@ function buildPdf(){
   h2('Montage');
   para('Montagepunten: '+D.M.count+' - om de meter langs de rail, inclusief uiteinden; hoeken, T- en kruispunten tellen als gedeeld punt (grijze stippen in de tekening). Advies-bevestigingsafstand 1000 mm; bij lichte belasting kan de installateur tussenpunten laten vervallen, maar uiteinden en knooppunten blijven altijd bevestigd.');
   let mountDetail='';
-  if(st.mount==='sys' && st.sysOphang) mountDetail=' + ophangset verstelbaar '+st.sysOphangLen+' m';
+  if(st.mount==='sys' && st.sysOphang) mountDetail=' + ophangsetsysteempl verstelbaar '+st.sysOphangLen+' m';
   if(st.mount==='pendel') mountDetail=' (bus '+CLRN(st.color)+' / kabel '+CLRN(pendelKabelkleur())+' '+st.pendelKabelLen+' m)';
   para(st.mount==='geen' ? 'Nog geen montagewijze gekozen.' : 'Gekozen montagewijze: '+MOUNTS[st.mount].label+mountDetail+'.');
-  const armTotalPdf = Object.values(st.armaturen).reduce((s,x)=>s+(x.qty||0),0);
+  const armTotalPdf = visibleArmaturen().reduce((s,a)=>s+(st.armaturen[a.id].qty||0),0);
   const overigTotalPdf = Object.values(st.overig).reduce((s,x)=>s+(x.qty||0),0);
   if(armTotalPdf>0) para('Armaturen: '+armTotalPdf+' stuks (zie stuklijst hierboven voor kleur/aantal per type).');
   if(overigTotalPdf>0) para('Let op: de 70mm Universal Adapter moet altijd samen met trekontlasting art. 2001947 (PRX trekontlasting brug met 2 schroefjes) besteld worden — wordt niet automatisch toegevoegd.');
@@ -2569,7 +2573,42 @@ function buildProdList(container, list, stateMap, colorOptions){
   });
 }
 
-/* bouwt de montage-subkeuzes (kabelkleur/-lengte bij pendel, ophangset bij systeemplafond)
+/* bouwt de armaturen-lijst (c2ArmList) opnieuw op: filtert op visibleArmaturen()
+   (alle 12 bij Standaard, alleen de 5 DALI-geschikte bij DALI-dimbaar) en toont per
+   rij een vast label (Armatuur NN) plus 2 door de gebruiker in te vullen tekstvelden
+   (volledige naam, artikelcode) i.p.v. hardcoded codes. Zelfde bouwstijl als
+   buildProdList (rebuild-on-call, commit op change/Enter) om focusverlies tijdens
+   typen te voorkomen. Wordt net als buildProdList niet vanuit refresh() aangeroepen,
+   maar expliciet na init/reset/DALI-toggle. */
+function buildArmList(){
+  const container=$('c2ArmList'); container.innerHTML='';
+  visibleArmaturen().forEach(a=>{
+    const s=st.armaturen[a.id];
+    const row=document.createElement('div'); row.className='c2-armrow';
+    const nm=document.createElement('span'); nm.className='nm'; nm.textContent=armLabel(a);
+    const nameInp=document.createElement('input'); nameInp.type='text'; nameInp.className='c2-textinp';
+    nameInp.placeholder='Volledige naam'; nameInp.value=s.name||'';
+    nameInp.addEventListener('change', ()=>{ s.name=nameInp.value; refresh(); });
+    const codeInp=document.createElement('input'); codeInp.type='text'; codeInp.className='c2-textinp';
+    codeInp.placeholder='Artikelcode'+(st.dali?' (DALI)':'');
+    codeInp.value = st.dali ? (s.codeDali||'') : (s.code||'');
+    codeInp.addEventListener('change', ()=>{ if(st.dali) s.codeDali=codeInp.value; else s.code=codeInp.value; refresh(); });
+    [nameInp,codeInp].forEach(inp=>inp.addEventListener('keydown', e=>{ if(e.key==='Enter') inp.blur(); }));
+    const sel=document.createElement('select'); sel.className='c2-select';
+    [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'custom',l:'Custom coating'}].forEach(c=>{ const o=document.createElement('option'); o.value=c.k; o.textContent=c.l; sel.appendChild(o); });
+    sel.value=s.color;
+    sel.addEventListener('change', ()=>{ s.color=sel.value; refresh(); });
+    const qty=document.createElement('input'); qty.type='text'; qty.inputMode='numeric'; qty.className='c2-qtyinp';
+    qty.value=String(s.qty);
+    function commitQty(){ const v=Math.max(0, parseInt(qty.value)||0); s.qty=v; qty.value=String(v); refresh(); }
+    qty.addEventListener('change', commitQty);
+    qty.addEventListener('keydown', e=>{ if(e.key==='Enter') qty.blur(); });
+    row.appendChild(nm); row.appendChild(nameInp); row.appendChild(codeInp); row.appendChild(sel); row.appendChild(qty);
+    container.appendChild(row);
+  });
+}
+
+/* bouwt de montage-subkeuzes (kabelkleur/-lengte bij pendel, ophangsetsysteempl bij systeemplafond)
    opnieuw op bij elke refresh() — alleen selects/een checkbox, dus geen focusrisico. */
 function renderMountOptions(){
   normalizeMountState();
@@ -2590,7 +2629,7 @@ function renderMountOptions(){
     lenSel.addEventListener('change', ()=>{ st.pendelKabelLen=lenSel.value; refresh(); });
   } else if(st.mount==='sys'){
     row.style.display='flex';
-    row.innerHTML='<label class="c2-check" style="margin:0;"><input type="checkbox" id="c2SysOphangChk"> Ophangset verstelbaar toevoegen</label>'
+    row.innerHTML='<label class="c2-check" style="margin:0;"><input type="checkbox" id="c2SysOphangChk"> ophangsetsysteempl verstelbaar toevoegen</label>'
       +'<select id="c2SysOphangLenSel" class="c2-select"'+(st.sysOphang?'':' style="display:none;"')+'></select>';
     const chk=$('c2SysOphangChk'); chk.checked=st.sysOphang;
     chk.addEventListener('change', ()=>{ st.sysOphang=chk.checked; refresh(); });
@@ -2610,7 +2649,7 @@ function init(){
     const b=document.createElement('button');
     b.className='choice-btn'+(o.k===st.dali?' sel':'');
     b.textContent=o.l;
-    b.addEventListener('click',()=>{ st.dali=o.k; dr.querySelectorAll('.choice-btn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); refresh(); });
+    b.addEventListener('click',()=>{ st.dali=o.k; dr.querySelectorAll('.choice-btn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); buildArmList(); refresh(); });
     dr.appendChild(b);
   });
   /* kleur */
@@ -2669,15 +2708,15 @@ function init(){
   $('c2Use4m').addEventListener('change', e=>{ st.use4m=e.target.checked; refresh(); });
   $('c2Mount').addEventListener('change', e=>{ st.mount=e.target.value; refresh(); });
   $('c2Proj').addEventListener('input', e=>{ st.proj=e.target.value; });
-  buildProdList($('c2ArmList'), ARMATUREN, st.armaturen, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'custom',l:'Custom coating'}]);
+  buildArmList();
   buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
   /* acties */
   $('c2ResetAll').addEventListener('click', ()=>{
     st.shape=null; st.nodes=[]; st.edges=[]; st.feeds=[]; st.angles={}; st.mount='geen'; st.pick=false; st.step=1;
     st.sysOphang=false; st.sysOphangLen='3'; st.pendelKabelkleur='zilver'; st.pendelKabelLen='3';
-    st.armaturen=ARMATUREN.reduce((o,a)=>{o[a.id]={color:'wit',qty:0};return o;},{});
+    st.armaturen=ARMATUREN.reduce((o,a)=>{o[a.id]={color:'wit',qty:0,name:'',code:'',codeDali:''};return o;},{});
     st.overig=ADAPTERS_OVERIG.reduce((o,a)=>{o[a.id]={color:'wit',qty:0};return o;},{});
-    buildProdList($('c2ArmList'), ARMATUREN, st.armaturen, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'custom',l:'Custom coating'}]);
+    buildArmList();
     buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
     st.sheets=[{id:'s1',name:'Tekenvlak 1'}]; st.sheet='s1'; st.sid=1; view={zoom:1,px:0,py:0};
     hist=[]; hIdx=-1;
