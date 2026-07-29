@@ -2829,8 +2829,8 @@ async function buildPdf(presenterPages, totaalPaginas){
       poly([[0,99],[378,99],[378-34,226],[0,226]], C.hoofdDiep);
 
       /* logovlak rechtsonder, doorlopend tot de paginarand */
-      poly([[361,716],[W,716],[W,786],[361+34,786]], C.hoofd);
-      const lh=30;
+      poly([[361+34,716],[W,716],[W,786],[361,786]], C.hoofd);
+      const lh=70;
       logo(W-logoBreedte(lh)-30, 716+(70-lh)/2, lh, true);
     }
 
