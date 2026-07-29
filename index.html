@@ -2461,7 +2461,12 @@ function pdfTxt(s){
     o += (ch==='('||ch===')'||ch==='\\') ? '\\'+ch : ch; }
   return o;
 }
-function buildPdf(){
+/* presenterPages: {id: aantal pagina's} van de presenters die straks tussengevoegd
+   worden, en totaalPaginas: de omvang van het eindresultaat. Beide alleen nodig om de
+   paginanummering te laten kloppen - zonder die gegevens telt de voetregel gewoon de
+   eigen pagina's, wat handig is voor de telronde in assembleFinalPdf(). */
+function buildPdf(presenterPages, totaalPaginas){
+  presenterPages = presenterPages || {};
   /* Pragmalux-huisstijl: donker navy + puntjespatroon, condensed kapitalen,
      navy tabelkoppen, navy voetbalk. */
   const D=reportData();
@@ -2515,11 +2520,17 @@ function buildPdf(){
   /* Kop- en voetregel volgen de sectie: het armaturenboek achteraan is een eigen
      hoofdstuk en moet niet "Installatieoverzicht" blijven heten. */
   let sectie='Installatieoverzicht';
+  /* De presenters worden er pas bij het samenvoegen tussen geschoven, dus telt de
+     eigen paginateller niet vanzelf goed door. extra = het aantal presenter-pagina's
+     dat v\u00f3\u00f3r de huidige pagina komt te staan; die wordt bij de secties hieronder
+     opgehoogd zodra er een presenter tussen is gekomen. */
+  let extra = 0;
   function stampFooter(){
     pageNo++;
     rect(0,H-24,W,24,C.navy);
     text(Mg,H-19,7.5,'PRAGMALUX  \u00b7  PROFESSIONAL LIGHTING',{bold:true,color:'1 1 1',tc:0.4});
-    text(W-Mg,H-19,7.5,'PRX 3-Fase Rail  \u00b7  '+sectie+'  \u00b7  pagina '+pageNo,{color:C.lt,align:'right'});
+    text(W-Mg,H-19,7.5,'PRX 3-Fase Rail  \u00b7  '+sectie+'  \u00b7  pagina '+(pageNo+extra)
+      +(totaalPaginas? ' van '+totaalPaginas : ''),{color:C.lt,align:'right'});
   }
   function contHeader(){
     text(Mg,y,13,sectie.toUpperCase(),{bold:true,cond:true,color:C.navy});
@@ -2575,6 +2586,7 @@ function buildPdf(){
   });
   flush();
   const bgPageCount = pages.length; /* checkpoint: hier komt bij het samenvoegen de 3-Fase Rail presenter tussen */
+  extra += presenterPages.rail || 0;
   beginPage(false);
 
   /* --- Montage: direct na de (extern in te voegen) rail-presenter --- */
@@ -2732,6 +2744,7 @@ function buildPdf(){
         : 'De presenter van de '+b.g.naam+' is nog niet in de tool geladen en ontbreekt daarom in dit boek.',
         8, presenterAanwezig(b.g.id)?C.grey:C.red);
       flush();
+      extra += presenterPages[b.g.id] || 0; /* de presenter van dit tabblad komt hierna */
       bookGroups.push(b.g.id);
     });
   }
@@ -2755,7 +2768,7 @@ function buildPdf(){
   out+='trailer\n<< /Size '+(objs.length+1)+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';
   const bytes=new Uint8Array(out.length);
   for(let i=0;i<out.length;i++) bytes[i]=out.charCodeAt(i)&0xff;
-  return {bytes, bgPageCount, bookStart, bookIndexEnd, bookGroups};
+  return {bytes, bgPageCount, bookStart, bookIndexEnd, bookGroups, ownPageCount:pages.length};
 }
 if(typeof window!=='undefined') window.__c2BuildPdf=buildPdf;
 
@@ -2768,7 +2781,32 @@ if(typeof window!=='undefined') window.__c2BuildPdf=buildPdf;
      Bestelgegevens  ->  rail-presenter  ->  Montage + tekenvlakken
      ->  Armaturenboek-index  ->  per type: tabbladpagina + presenter */
 async function assembleFinalPdf(){
-  const {bytes, bgPageCount, bookStart, bookIndexEnd, bookGroups} = buildPdf();
+  /* De presenters gaan eerst open, nog voordat de eigen pagina's gemaakt worden: pas
+     als hun aantal pagina's bekend is, kan de voetregel het juiste paginanummer
+     tonen. Ze blijven daarna in geheugen zodat ze niet twee keer geparsed worden. */
+  const boek = armaturenboek();
+  const presDocs = {};        /* id -> PDFDocument, of null als hij ontbreekt */
+  const presenterPages = {};  /* id -> aantal pagina's, 0 als hij ontbreekt */
+  for(const id of ['rail'].concat(boek.map(b=>b.g.id))){
+    presDocs[id]=null; presenterPages[id]=0;
+    const b64 = await presenterData(id);
+    if(!b64){ console.warn('Presenter "'+id+'" is nog niet toegevoegd (presenters/'+id+'.js of presenters-data.js) \u2014 sectie overgeslagen.'); continue; }
+    try{
+      const bin=atob(b64); const arr=new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+      const d = await PDFLib.PDFDocument.load(arr, {ignoreEncryption:true});
+      presDocs[id]=d; presenterPages[id]=d.getPageCount();
+    }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); }
+  }
+
+  /* Twee doorgangen: de eerste alleen om te tellen hoeveel eigen pagina's het worden,
+     de tweede om ze te maken met "pagina X van Y" erin. buildPdf leest alleen state en
+     heeft geen neveneffecten, dus twee keer draaien is veilig. */
+  const totaalPresenters = Object.keys(presenterPages).reduce((n,k)=>n+presenterPages[k],0);
+  const telling = buildPdf(presenterPages);
+  const totaal = telling.ownPageCount + totaalPresenters;
+
+  const {bytes, bgPageCount, bookStart, bookIndexEnd, bookGroups} = buildPdf(presenterPages, totaal);
   const ownDoc = await PDFLib.PDFDocument.load(bytes);
   const finalDoc = await PDFLib.PDFDocument.create();
 
@@ -2779,14 +2817,9 @@ async function assembleFinalPdf(){
     pgs.forEach(p=>finalDoc.addPage(p));
   };
   const appendPresenter = async(id)=>{
-    const b64 = await presenterData(id);
-    if(!b64){ console.warn('Presenter "'+id+'" is nog niet toegevoegd (presenters/'+id+'.js of presenters-data.js) \u2014 sectie overgeslagen.'); return; }
-    try{
-      const bin=atob(b64); const arr=new Uint8Array(bin.length);
-      for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
-      const presDoc = await PDFLib.PDFDocument.load(arr, {ignoreEncryption:true});
-      await copyRange(presDoc, 0, presDoc.getPageCount());
-    }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); }
+    const d = presDocs[id];
+    if(!d) return; /* ontbreekt; er is hierboven al voor gewaarschuwd */
+    await copyRange(d, 0, d.getPageCount());
   };
 
   await copyRange(ownDoc, 0, bgPageCount);            /* Bestelgegevens */
@@ -2801,7 +2834,11 @@ async function assembleFinalPdf(){
     }
   }
 
-  return finalDoc.save();
+  const eind = await finalDoc.save();
+  if(finalDoc.getPageCount()!==totaal){
+    console.warn('Paginanummering klopt niet: voorspeld '+totaal+', werkelijk '+finalDoc.getPageCount()+'.');
+  }
+  return eind;
 }
 
 async function exportPdf(){
