@@ -19,6 +19,7 @@
  *     Distrilight logo licht.png               uitgespaard, voor op een donker vlak
  *     Pragmalux logo donker.png                idem, voor het armaturendeel
  *     Pragmalux logo licht.png
+ *     ruitpatroonvoorblad.jpg                  bovenblok van het voorblad (optioneel)
  *
  * Ontbrekende bestanden worden overgeslagen; de tool valt dan terug op tekst in
  * plaats van een logo, of op een standaardlettertype.
@@ -42,14 +43,13 @@ const FONTS = {
 /* Beeldmateriaal voor het voorblad. Optioneel: ontbreken ze, dan tekent de PDF een
    eigen vlakverdeling in de huisstijlkleuren. */
 const BEELDEN = {
-  /* Volledig voorblad als een afbeelding: alles behalve de projectgegevens. Is dit
-     aanwezig, dan worden de twee losse beelden hieronder genegeerd. Dit is de
-     betrouwbaarste manier om het voorblad er precies zo uit te laten zien als het
-     ontwerp - exporteer de ontwerppagina zonder tekst als PNG op A4 (bij 150 dpi is
-     dat 1240x1754). */
+  /* Het bovenste blok van het voorblad: ruitpatroon met de fotostrook eronder, in
+     een afbeelding. Wordt over de volle paginabreedte geplaatst; de hoogte volgt uit
+     de verhouding van het beeld zelf, zodat er niets vervormt. */
+  omslagBoven:       'ruitpatroonvoorblad.jpg',
+  /* Volledig voorblad in een afbeelding (alles behalve de projectgegevens). Is dit
+     aanwezig, dan gaat het voor op omslagBoven. */
   omslagVolledig:    'omslag.png',
-  omslagAchtergrond: 'omslag-achtergrond.png',   /* alleen het bovenvlak */
-  omslagFoto:        'omslag-foto.png',          /* alleen de fotostrook */
 };
 const LOGOS = {
   dlDonker:  'Distrilight logo donker.png',   /* voor op wit */
@@ -60,6 +60,8 @@ const LOGOS = {
 
 const uit = [];
 const gemist = [];
+/* PNG en JPEG worden allebei ondersteund; index.html leidt het type af uit de eerste
+   bytes van het bestand, dus dat hoeft hier niet vastgelegd te worden. */
 function lees(bestand){
   const p = join(merk, bestand);
   if(!existsSync(p)){ gemist.push(bestand); return null; }

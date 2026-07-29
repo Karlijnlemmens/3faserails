@@ -2628,11 +2628,19 @@ async function buildPdf(presenterPages, totaalPaginas){
     try{ LOGO[sleutel]=await doc.embedPng(b64Bytes(merk.logos[sleutel])); }
     catch(err){ console.warn('Logo "'+sleutel+'" kon niet worden ingesloten:', err && err.message); }
   }
-  /* Beeld voor het voorblad; ontbreekt het, dan tekent omslag() een eigen vlak. */
+  /* Beeld voor het voorblad; ontbreekt het, dan tekent omslag() een eigen vlak.
+     Het type wordt uit de eerste bytes afgeleid, zodat zowel PNG als JPEG kan. */
+  async function sluitBeeldIn(bytes){
+    const isPng = bytes[0]===0x89 && bytes[1]===0x50 && bytes[2]===0x4E && bytes[3]===0x47;
+    const isJpg = bytes[0]===0xFF && bytes[1]===0xD8;
+    if(isPng) return doc.embedPng(bytes);
+    if(isJpg) return doc.embedJpg(bytes);
+    throw new Error('geen PNG of JPEG');
+  }
   const BEELD={};
-  for(const sleutel of ['omslagVolledig','omslagAchtergrond','omslagFoto']){
+  for(const sleutel of ['omslagVolledig','omslagBoven']){
     if(!merk.beelden[sleutel]) continue;
-    try{ BEELD[sleutel]=await doc.embedPng(b64Bytes(merk.beelden[sleutel])); }
+    try{ BEELD[sleutel]=await sluitBeeldIn(b64Bytes(merk.beelden[sleutel])); }
     catch(err){ console.warn('Omslagbeeld "'+sleutel+'" kon niet worden ingesloten:', err && err.message); }
   }
 
@@ -2796,12 +2804,14 @@ async function buildPdf(presenterPages, totaalPaginas){
     if(volledig){
       beeldVullend(BEELD.omslagVolledig, 0, 0, W, H);
     } else {
-      /* bovenvlak */
-      if(BEELD.omslagAchtergrond){
-        beeldVullend(BEELD.omslagAchtergrond, 0, 0, W, bovenH);
+      if(BEELD.omslagBoven){
+        /* Bovenblok (ruitpatroon + fotostrook) over de volle breedte. De hoogte volgt
+           uit het beeld zelf, zodat er niets uitgerekt wordt. */
+        const bh = W / (BEELD.omslagBoven.width / BEELD.omslagBoven.height);
+        pg.drawImage(BEELD.omslagBoven, {x:0, y:H-bh, width:W, height:bh});
       } else {
-        /* terugval: rustig driehoekpatroon in tinten die dicht bij elkaar liggen.
-           Bewust ingetogen - dit is een plaatsvervanger, geen ontwerp. */
+        /* terugval zonder beeld: rustig driehoekpatroon in tinten die dicht bij elkaar
+           liggen. Bewust ingetogen - dit is een plaatsvervanger, geen ontwerp. */
         rect(0,0,W,bovenH,C.hoofd);
         const tinten=[C.hoofd, meng(C.hoofd,C.wit,0.10), meng(C.hoofd,C.wit,0.18), meng(C.hoofd,C.zwart,0.10)];
         const stap=119;
@@ -2812,12 +2822,6 @@ async function buildPdf(presenterPages, totaalPaginas){
             poly([[rx+stap,ry],[rx+stap,ry+stap],[rx,ry+stap]], tinten[(rij*3+kol*2+1)%4]);
           }
         }
-      }
-
-      /* fotostrook */
-      if(BEELD.omslagFoto){
-        beeldVullend(BEELD.omslagFoto, 0, fotoY, W, fotoH);
-      } else {
         rect(0,fotoY,W,fotoH,meng(C.hoofd,C.wit,0.14));
       }
 
