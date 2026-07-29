@@ -15,9 +15,10 @@
  *     OpenSans-Bold.ttf                        nadruk en tabelkoppen
  *     SofiaSansExtraCondensed-ExtraBold.ttf    koppen
  *     SofiaSansExtraCondensed-Light.ttf        onderschriften
- *     logo-licht.png                           logo voor op donkere vlakken
- *     logo-donker.png                          logo voor op wit
- *     pragmalux-logo.png                       merklogo (optioneel)
+ *     Distrilight logo donker.png              voor op een witte ondergrond
+ *     Distrilight logo licht.png               uitgespaard, voor op een donker vlak
+ *     Pragmalux logo donker.png                idem, voor het armaturendeel
+ *     Pragmalux logo licht.png
  *
  * Ontbrekende bestanden worden overgeslagen; de tool valt dan terug op tekst in
  * plaats van een logo, of op een standaardlettertype.
@@ -36,10 +37,13 @@ const FONTS = {
   kopVet:    'SofiaSansExtraCondensed-ExtraBold.ttf',
   kopLicht:  'SofiaSansExtraCondensed-Light.ttf',
 };
+/* "licht" en "donker" slaan op de ONDERGROND waar het logo op komt:
+   dlLicht = uitgespaarde versie voor op een donker vlak. */
 const LOGOS = {
-  licht:     'logo-licht.png',
-  donker:    'logo-donker.png',
-  merk:      'pragmalux-logo.png',
+  dlDonker:  'Distrilight logo donker.png',   /* voor op wit */
+  dlLicht:   'Distrilight logo licht.png',    /* voor op donker */
+  pmDonker:  'Pragmalux logo donker.png',
+  pmLicht:   'Pragmalux logo licht.png',
 };
 
 const uit = [];
@@ -88,8 +92,7 @@ if(gemist.length) console.log('\nNog niet aanwezig: ' + gemist.join(', '));
 
 /* Huisstijlkleuren aflezen uit het logo, zodat ze niet met de hand overgenomen
    hoeven te worden. Alleen ter informatie - het invullen gebeurt in index.html. */
-const logoVoorKleur = ['logo-donker.png','logo-licht.png','pragmalux-logo.png']
-  .map(f=>join(merk,f)).find(p=>existsSync(p));
+const logoVoorKleur = Object.values(LOGOS).map(f=>join(merk,f)).find(p=>existsSync(p));
 if(logoVoorKleur){
   const afb = leesPng(readFileSync(logoVoorKleur));
   if(!afb){

@@ -2574,9 +2574,40 @@ async function buildPdf(presenterPages, totaalPaginas){
     } else { const p=v.trim().split(/\s+/).map(Number); r=p[0]; g=p[1]; b=p[2]; }
     return (kleurCache[v]=PDFLib.rgb(r,g,b));
   }
-  const C={navy:'#16213C', navy2:'#233153', grey:'#5B677E',
-    rail:'#B7C0CE', red:'#D6362B', shade:'#EDEFF3',
-    line:'#CBD0DA', mount:'#98A6BC', lt:'#B9C4DA', wit:'#FFFFFF'};
+  /* Twee huisstijlen in een document. Distrilight is de afzender en kleurt alles rond
+     de rail; het armaturenboek gaat over Pragmalux-producten en loopt door in
+     Pragmalux-presenters, dus dat deel draagt die huisstijl. Kleuren komen uit de
+     huisstijlhandboeken: Distrilight blauw #0F7ABE, Pragmalux blauw #1A253C. De
+     accentkleuren van Distrilight (oranje/groen/paars) blijven bewust ongebruikt -
+     die zijn bedoeld om spaarzaam iets uit te lichten, niet om vlakken mee te vullen. */
+  const THEMAS = {
+    distrilight: {naam:'Distrilight', hoofd:'#0F7ABE', hoofd2:'#3E95CB', lt:'#DCECF8', shade:'#EDF3F9', line:'#C7D9E7',
+                  logoLicht:'dlLicht', logoDonker:'dlDonker', logoRatio:993/445,
+                  kopHoogte:20, omslagHoogte:46},
+    pragmalux:   {naam:'Pragmalux', hoofd:'#1A253C', hoofd2:'#2A3855', lt:'#B9C4DA', shade:'#EDEFF3', line:'#CBD0DA',
+                  logoLicht:'pmLicht', logoDonker:'pmDonker', logoRatio:1418/269,
+                  kopHoogte:15, omslagHoogte:30},
+  };
+  /* Functionele kleuren staan los van de huisstijl: de rode voedingsstip en de
+     polariteitslijn zijn signaalkleuren in een technische tekening, geen merkkleur. */
+  const C={grey:'#5B677E', rail:'#B7C0CE', red:'#D6362B', mount:'#98A6BC',
+    wit:'#FFFFFF', zwart:'#000000',
+    hoofd:'', hoofd2:'', lt:'', shade:'', line:''};
+  let thema=null;
+  function zetThema(k){
+    thema=THEMAS[k];
+    C.hoofd=thema.hoofd; C.hoofd2=thema.hoofd2; C.lt=thema.lt; C.shade=thema.shade; C.line=thema.line;
+  }
+  zetThema('distrilight');
+
+  /* Logo's als afbeelding. Ontbreekt er een, dan valt logo() terug op de naam in
+     letters, zodat de PDF er altijd uitkomt. */
+  const LOGO={};
+  for(const sleutel of ['dlLicht','dlDonker','pmLicht','pmDonker']){
+    if(!merk.logos[sleutel]) continue;
+    try{ LOGO[sleutel]=await doc.embedPng(b64Bytes(merk.logos[sleutel])); }
+    catch(err){ console.warn('Logo "'+sleutel+'" kon niet worden ingesloten:', err && err.message); }
+  }
 
   /* cond = een kop. Met de huisstijl is dat een echt smal lettertype (Sofia Sans
      Extra Condensed); zonder valt het terug op Helvetica die kunstmatig versmald
@@ -2635,11 +2666,21 @@ async function buildPdf(presenterPages, totaalPaginas){
   function dots(x0,y0,w,h,step,color){
     for(let dx=0;dx<w;dx+=step) for(let dy=0;dy<h;dy+=step) circle(x0+dx,y0+dy,0.9,color);
   }
-  function logo(x,yt,scale,white){
-    const c = white? C.wit : C.navy;
-    text(x,yt,17*scale,'PRAGMALUX',{bold:true,color:c});
-    line(x+1,yt+19*scale,x+96*scale,yt+19*scale,0.9*scale,c);
-    text(x+1,yt+21.5*scale,5.6*scale,'PROFESSIONAL LIGHTING',{color:white?C.lt:C.grey,tc:1.35*scale});
+  /* Tekent het logo van de huidige huisstijl. Schalen gaat op HOOGTE, niet op breedte:
+     de twee logo's verschillen sterk van verhouding (Distrilight 2,2:1 met de payoff
+     eronder, Pragmalux 5,3:1), dus bij een vaste breedte zou het ene logo uit zijn
+     balk lopen. y is de bovenkant; opDonker kiest de uitgespaarde versie. */
+  function logoBreedte(hoogte){ return hoogte*thema.logoRatio; }
+  function logo(x,yt,hoogte,opDonker){
+    const img = LOGO[opDonker ? thema.logoLicht : thema.logoDonker];
+    const breedte = logoBreedte(hoogte);
+    if(img){
+      pg.drawImage(img, {x:x, y:H-yt-hoogte, width:breedte, height:hoogte});
+    } else {
+      /* terugval als het logobestand ontbreekt */
+      text(x,yt,hoogte*0.8,thema.naam,{bold:true,color:opDonker?C.wit:C.hoofd});
+    }
+    return breedte;
   }
   /* Kop- en voetregel volgen de sectie: het armaturenboek achteraan is een eigen
      hoofdstuk en moet niet "Installatieoverzicht" blijven heten. */
@@ -2651,15 +2692,17 @@ async function buildPdf(presenterPages, totaalPaginas){
   let extra = 0;
   function stampFooter(){
     pageNo++;
-    rect(0,H-24,W,24,C.navy);
-    text(Mg,H-19,7.5,'PRAGMALUX  \u00b7  PROFESSIONAL LIGHTING',{bold:true,color:'1 1 1',tc:0.4});
+    rect(0,H-24,W,24,C.hoofd);
+    /* merknaam als tekst: de balk is 24pt hoog, daar past geen leesbaar logo in */
+    text(Mg,H-19,7.5,thema.naam.toUpperCase(),{bold:true,cond:true,color:C.wit,tc:1.1});
     text(W-Mg,H-19,7.5,'PRX 3-Fase Rail  \u00b7  '+sectie+'  \u00b7  pagina '+(pageNo+extra)
       +(totaalPaginas? ' van '+totaalPaginas : ''),{color:C.lt,align:'right'});
   }
   function contHeader(){
-    text(Mg,y,13,sectie.toUpperCase(),{bold:true,cond:true,color:C.navy});
-    logo(W-Mg-120,y-4,0.72,false);
-    y+=22; line(Mg,y,W-Mg,y,1.1,C.navy); y+=14;
+    text(Mg,y,13,sectie.toUpperCase(),{bold:true,cond:true,color:C.hoofd});
+    /* onderlangs uitlijnen op de titel, want de twee logo's verschillen van hoogte */
+    const lh=thema.kopHoogte; logo(W-Mg-logoBreedte(lh), 58-lh, lh, false);
+    y+=22; line(Mg,y,W-Mg,y,1.1,C.hoofd); y+=14;
   }
   /* beginPage maakt de pagina meteen aan (pages telt dus de al begonnen pagina's mee);
      flush zet er alleen de voetregel op. De checkpoints verderop lezen pages.length
@@ -2667,32 +2710,32 @@ async function buildPdf(presenterPages, totaalPaginas){
   function flush(){ stampFooter(); }
   function beginPage(first){ pg=doc.addPage([W,H]); pages.push(pg); y=Mg; if(!first) contHeader(); }
   function need(h){ if(y+h>H-MB){ flush(); beginPage(false); } }
-  function h2(t){ need(30); y+=8; text(Mg,y,12.5,String(t).toUpperCase(),{bold:true,cond:true,color:C.navy}); y+=17; }
+  function h2(t){ need(30); y+=8; text(Mg,y,12.5,String(t).toUpperCase(),{bold:true,cond:true,color:C.hoofd}); y+=17; }
   function para(t,size,color){
     wrap(t, Math.floor((W-2*Mg)/((size||8.5)*0.48))).forEach(l=>{ need(12); text(Mg,y,size||8.5,l,{color:color||'0 0 0'}); y+=11.5; });
     y+=3;
   }
 
-  /* --- pagina 1: navy kopvlak met puntjespatroon --- */
+  /* --- pagina 1: gekleurd kopvlak met puntjespatroon --- */
   beginPage(true);
-  rect(0,0,W,124,C.navy);
-  dots(W-215,12,190,100,13,C.navy2);
-  logo(Mg,18,1,true);
-  text(Mg,62,23,'INSTALLATIEOVERZICHT',{bold:true,cond:true,color:'1 1 1'});
-  text(Mg,90,10.5,'PRX 3-FASE RAIL'+(st.proj? '  \u00b7  '+st.proj.toUpperCase():''),{bold:true,cond:true,color:C.lt,tc:0.5});
-  text(Mg,105,8.5,'Kleur: '+CLRN(st.color)+'   \u00b7   Voedingsconfiguratie '+st.powercfg
+  rect(0,0,W,124,C.hoofd);
+  dots(W-215,12,190,100,13,C.hoofd2);
+  logo(Mg,20,thema.omslagHoogte,true);
+  text(Mg,74,23,'INSTALLATIEOVERZICHT',{bold:true,cond:true,color:C.wit});
+  text(Mg,98,10.5,'PRX 3-FASE RAIL'+(st.proj? '  \u00b7  '+st.proj.toUpperCase():''),{bold:true,cond:true,color:C.lt,tc:0.5});
+  text(Mg,113,8.5,'Kleur: '+CLRN(st.color)+'   \u00b7   Voedingsconfiguratie '+st.powercfg
     +'   \u00b7   '+new Date().toLocaleDateString('nl-NL')+(D.trCount>1?'   \u00b7   '+D.trCount+' trajecten':'')
     +(D.sheets.length>1?'   \u00b7   '+D.sheets.length+' tekenvlakken':''),{color:C.lt});
   y=140;
 
   function tableStart(cols){ const totW=cols.reduce((s,c)=>s+c.w,0);
-    need(20); let x=Mg; rect(Mg,y,totW,15,C.navy);
-    cols.forEach(c=>{ text(x+5,y+2.6,8.5,c.h,{bold:true,color:'1 1 1'}); x+=c.w; });
+    need(20); let x=Mg; rect(Mg,y,totW,15,C.hoofd);
+    cols.forEach(c=>{ text(x+5,y+2.6,8.5,c.h,{bold:true,color:C.wit}); x+=c.w; });
     y+=15; return {cols,totW,i:0};
   }
   function tableRow(T,vals){
-    if(y+14>H-MB){ flush(); beginPage(false); let x=Mg; rect(Mg,y,T.totW,15,C.navy);
-      T.cols.forEach(c=>{ text(x+5,y+2.6,8.5,c.h,{bold:true,color:'1 1 1'}); x+=c.w; }); y+=15; }
+    if(y+14>H-MB){ flush(); beginPage(false); let x=Mg; rect(Mg,y,T.totW,15,C.hoofd);
+      T.cols.forEach(c=>{ text(x+5,y+2.6,8.5,c.h,{bold:true,color:C.wit}); x+=c.w; }); y+=15; }
     if(T.i%2===0) rect(Mg,y,T.totW,13.5,C.shade);
     let x=Mg;
     T.cols.forEach((c,j)=>{ text(x+5,y+2.4,8.5,vals[j]); x+=c.w; });
@@ -2765,12 +2808,12 @@ async function buildPdf(presenterPages, totaalPaginas){
       }
       const A=P(node(e.a)), Bp=P(node(e.b));
       const mx=(A.x+Bp.x)/2, my=(A.y+Bp.y)/2; const horiz=eAxis(e)==='h';
-      text(horiz?mx:mx+16, (horiz?my-16:my-4), 8, mTxt(eLen(e)/100)+' m', {bold:true,color:C.navy,align:horiz?'center':'left'});
+      text(horiz?mx:mx+16, (horiz?my-16:my-4), 8, mTxt(eLen(e)/100)+' m', {bold:true,color:C.hoofd,align:horiz?'center':'left'});
       const fE=feedForEdge(e.id);
       if(fE){
-        rect(mx-8,my-5,16,10,C.red,'1 1 1',1);
+        rect(mx-8,my-5,16,10,C.red,C.wit,1);
         const nm=D.numOf['f:'+e.id];
-        if(nm){ circle(mx+15,my-13,6,'1 1 1',C.navy,1); text(mx+15,my-17,6.5,String(nm),{bold:true,color:C.navy,align:'center'}); }
+        if(nm){ circle(mx+15,my-13,6,C.wit,C.hoofd,1); text(mx+15,my-17,6.5,String(nm),{bold:true,color:C.hoofd,align:'center'}); }
       }
     });
     computeMounts(sheetId).pts.forEach(mp=>{
@@ -2779,28 +2822,28 @@ async function buildPdf(presenterPages, totaalPaginas){
     sn.forEach(nd=>{
       const p=P(nd); const t=nodeType(nd.id);
       if(t==='end'){
-        if(feedForNode(nd.id)) circle(p.x,p.y,5.5,C.red,'1 1 1',1.3);
-        else circle(p.x,p.y,4.5,'1 1 1',C.navy,1.5);
+        if(feedForNode(nd.id)) circle(p.x,p.y,5.5,C.red,C.wit,1.3);
+        else circle(p.x,p.y,4.5,C.wit,C.hoofd,1.5);
       } else if(t==='corner'){
-        poly([[p.x,p.y-5.5],[p.x+5.5,p.y],[p.x,p.y+5.5],[p.x-5.5,p.y]],C.navy);
+        poly([[p.x,p.y-5.5],[p.x+5.5,p.y],[p.x,p.y+5.5],[p.x-5.5,p.y]],C.hoofd);
       } else {
-        rect(p.x-5,p.y-5,10,10,C.navy);
+        rect(p.x-5,p.y-5,10,10,C.hoofd);
       }
       const nm=D.numOf['n:'+nd.id];
       if(nm){
         const sx = nd.x>=cxAll? 1 : -1, sy = nd.y>=cyAll? 1 : -1;
-        circle(p.x+11*sx,p.y+11*sy,6,'1 1 1',C.navy,1);
-        text(p.x+11*sx,p.y+11*sy-4,6.5,String(nm),{bold:true,color:C.navy,align:'center'});
+        circle(p.x+11*sx,p.y+11*sy,6,C.wit,C.hoofd,1);
+        text(p.x+11*sx,p.y+11*sy-4,6.5,String(nm),{bold:true,color:C.hoofd,align:'center'});
       }
     });
   }
 
   D.sheets.forEach((sh,si)=>{
     if(si>0){ flush(); beginPage(false); }
-    if(D.sheets.length>1){ need(20); text(Mg,y,12.5,('TEKENVLAK: '+sh.name).toUpperCase(),{bold:true,cond:true,color:C.navy}); y+=18; }
+    if(D.sheets.length>1){ need(20); text(Mg,y,12.5,('TEKENVLAK: '+sh.name).toUpperCase(),{bold:true,cond:true,color:C.hoofd}); y+=18; }
     const boxH=320;
     need(boxH+16);
-    rect(Mg,y,boxW,boxH,'1 1 1',C.line,1);
+    rect(Mg,y,boxW,boxH,C.wit,C.line,1);
     drawPlan(Mg,y,boxW,boxH,sh.id);
     y+=boxH+8;
     if(si===0) para('Maten zijn raillengtes; koppelstukken komen daar in werkelijkheid bovenop. Rood vlak = stroomaansluitpunt, rode lijn = polariteitslijn, grijze stippen = montagepunten, genummerde rondjes verwijzen naar de tabel.',8,C.grey);
@@ -2826,14 +2869,17 @@ async function buildPdf(presenterPages, totaalPaginas){
   const armKlr=(r)=> r.s.color==='custom' ? 'Custom' : CLRN(r.s.color);
   if(boek.length){
     sectie='Armaturenboek';
+    /* Vanaf hier gaat het over Pragmalux-armaturen en volgen er Pragmalux-presenters,
+       dus schakelt het document over op die huisstijl. */
+    zetThema('pragmalux');
     const boekTotaal = boek.reduce((n,b)=>n+b.totaal,0);
     beginPage(true);
-    rect(0,0,W,124,C.navy);
-    dots(W-215,12,190,100,13,C.navy2);
-    logo(Mg,18,1,true);
-    text(Mg,62,23,'ARMATURENBOEK',{bold:true,cond:true,color:'1 1 1'});
-    text(Mg,90,10.5,'PRX 3-FASE RAIL'+(st.proj? '  ·  '+st.proj.toUpperCase():''),{bold:true,cond:true,color:C.lt,tc:0.5});
-    text(Mg,105,8.5,boek.length+(boek.length===1?' armatuurtype':' armatuurtypen')+'   ·   '
+    rect(0,0,W,124,C.hoofd);
+    dots(W-215,12,190,100,13,C.hoofd2);
+    logo(Mg,26,thema.omslagHoogte,true);
+    text(Mg,74,23,'ARMATURENBOEK',{bold:true,cond:true,color:C.wit});
+    text(Mg,98,10.5,'PRX 3-FASE RAIL'+(st.proj? '  ·  '+st.proj.toUpperCase():''),{bold:true,cond:true,color:C.lt,tc:0.5});
+    text(Mg,113,8.5,boek.length+(boek.length===1?' armatuurtype':' armatuurtypen')+'   ·   '
       +boekTotaal+(boekTotaal===1?' armatuur':' armaturen')+' in totaal',{color:C.lt});
     y=140;
     h2('Gekozen armaturen');
@@ -2856,10 +2902,10 @@ async function buildPdf(presenterPages, totaalPaginas){
     boek.forEach((b,bi)=>{
       beginPage(false);
       const bw=W-2*Mg;
-      rect(Mg,y,bw,96,C.navy);
-      dots(W-Mg-150,y+10,132,74,13,C.navy2);
+      rect(Mg,y,bw,96,C.hoofd);
+      dots(W-Mg-150,y+10,132,74,13,C.hoofd2);
       text(Mg+18,y+20,8.5,'TABBLAD '+(bi+1)+' VAN '+boek.length,{cond:true,color:C.lt,tc:1.1});
-      text(Mg+18,y+40,25,clip(b.g.naam.toUpperCase(),26),{bold:true,cond:true,color:'1 1 1'});
+      text(Mg+18,y+40,25,clip(b.g.naam.toUpperCase(),26),{bold:true,cond:true,color:C.wit});
       text(Mg+18,y+76,8.5,b.totaal+(b.totaal===1?' armatuur':' armaturen')+' in deze opdracht',{color:C.lt});
       y+=96+18;
       h2('Uitvoeringen in deze opdracht');
