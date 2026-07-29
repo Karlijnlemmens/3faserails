@@ -1,0 +1,3 @@
+# Werkmap voor tools/maak-presenters.mjs: de originele presenter-PDF's.
+# De tool leest presenters/<id>.js — die worden wel meegeleverd.
+presenters-bron/

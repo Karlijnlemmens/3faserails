@@ -14,8 +14,31 @@ There is no build system, package manager, or test suite. Everything — HTML, C
 
 - There is no linter, formatter, or test runner configured. Verify changes by opening `index.html` in a browser and exercising the relevant tab manually.
 - Everything is vanilla JS/CSS — no frameworks, no npm dependencies, no CDN scripts except Google Fonts. Keep it that way; don't introduce a build step or external libraries for a change that doesn't need one. **One deliberate exception:** `vendor/pdf-lib.min.js` (loaded via a local `<script src>`, not a CDN) is used solely to merge externally-supplied "presenter" PDFs into the generated installation-overview PDF at export time — see below. Don't remove it and don't add further dependencies without similarly strong justification.
-- The file is large (~2440 lines). Use the `<!-- ===== SECTION ===== -->` HTML comments and the `/* =================== NAME =================== */` JS comments to jump to the right area rather than reading linearly.
-- PDF export (`buildPdf`, in `index.html`) is still hand-rolled: it writes raw PDF operators/objects as strings (no library like jsPDF) and returns `{bytes, bgPageCount}` — `bgPageCount` marks where the "Bestelgegevens" section ends, i.e. the page-index checkpoint the rail presenter gets spliced in after. `pdfTxt()` transliterates Dutch/special characters and escapes PDF string syntax — extend that function if you add new characters to PDF output rather than assuming UTF-8 works. The actual merge with presenter PDFs happens in `assembleFinalPdf()` (async, uses `vendor/pdf-lib.min.js`), which `exportPdf()` calls instead of `buildPdf()` directly. Presenter binary data lives in the companion file `presenters-data.js` (`window.PRESENTER_DATA`, keyed by id — currently empty placeholders; see comments in that file for how to add a real presenter) and `PRESENTER_DEFS` in `index.html` controls which presenter is included when (`always:true` for the rail presenter; one entry per armatuurgroep otherwise, generated from `ARM_GROEPEN`). Armaturen presenters are per-group, not generic: each armatuur row has a free-text name/code (unchanged, manual) plus a separate "Zoek groep…" search field (`buildArmList()`) that's matched against `ARM_GROEPEN` via `matchArmGroep()` — only an exact (case-insensitive) match on a group's `naam` or one of its `zoektermen` counts as recognized. `exportPdf()` warns (but still proceeds) if a row has a qty but no recognized group.
+- The file is large (~2550 lines). Use the `<!-- ===== SECTION ===== -->` HTML comments and the `/* =================== NAME =================== */` JS comments to jump to the right area rather than reading linearly.
+- PDF export (`buildPdf`, in `index.html`) is still hand-rolled: it writes raw PDF operators/objects as strings (no library like jsPDF). `pdfTxt()` transliterates Dutch/special characters and escapes PDF string syntax — extend that function if you add new characters to PDF output rather than assuming UTF-8 works. The actual merge with presenter PDFs happens in `assembleFinalPdf()` (async, uses `vendor/pdf-lib.min.js`), which `exportPdf()` calls instead of `buildPdf()` directly. See "The exported PDF" below.
+
+## The exported PDF
+
+The installer PDF has two halves: the installation overview (drawing + order data, generated here) and the **armaturenboek** (externally-supplied "presenter" PDFs for the chosen fixtures, spliced in). Final page order:
+
+```
+Bestelgegevens → rail presenter → Montage + tekenvlakken
+→ Armaturenboek index → per type: tabbladpagina + that type's presenter
+```
+
+`buildPdf()` returns `{bytes, bgPageCount, bookStart, bookIndexEnd, bookGroups}`. Those are page-index checkpoints for `assembleFinalPdf()`, which does the splicing: `bgPageCount` = end of Bestelgegevens (rail presenter goes here), `bookStart` = first armaturenboek page, `bookIndexEnd` = end of the index, and `bookGroups` lists the group ids in book order — divider page `bookIndexEnd + i` is followed by presenter `bookGroups[i]`. If you add or reorder pages in `buildPdf`, keep these checkpoints in sync or the presenters land in the wrong place.
+
+### Fixture types and their presenters
+
+A presenter belongs to a fixture **type**, not a variant: colour, wattage, light colour and dim protocol all share one presenter, and rows of the same type merge into a single chapter (`armaturenboek()` groups them). Types are `ARM_GROEPEN`; each has one presenter keyed by its id (`ag01`…`ag12`, plus `rail`).
+
+`matchArmGroep()` recognises the type from the free-text fixture name by token matching: it strips noise (colours, wattages, article codes — `ARM_STOPWOORDEN` / `ARM_GETAL` / `ARM_CODE`), then scores each group's name and `zoektermen`, requiring the distinctive first word and refusing ambiguous ties. So "Punto 15W zwart 3000K" resolves to Punto. Words appearing in any group name are never stripped as noise (that's what keeps "GU10" alive). Each row also has a dropdown to override the detection explicitly, or set "Geen presenter"; `armGroepVan()` applies that precedence. `exportPdf()` warns (but still proceeds) about rows with a qty but no type, and about types whose presenter file is missing.
+
+### Adding presenter PDFs
+
+Presenters are large (~2 MB each), so they load **on demand at export time**, not at startup — `presenters/<id>.js` per presenter, listed in `window.PRESENTER_FILES` (`presenters-data.js`) so availability is known without downloading. `presenterData()` fetches via a dynamically injected `<script>` (works over `file://`, unlike `fetch`); `presenterAanwezig()` is the sync availability check. Inlining a blob directly in `window.PRESENTER_DATA` still works and takes precedence, but is loaded eagerly.
+
+Don't hand-encode these. Drop the PDFs in `presenters-bron/` named by group id or name (`ag01.pdf`, `Punto.pdf`, `rail.pdf`) and run `node tools/maak-presenters.mjs`, which regenerates `presenters/` and `presenters-data.js`. That script is a data-prep utility, not a build step — the app still runs by opening `index.html` directly. `presenters-bron/` is gitignored; the generated `presenters/*.js` is committed. Keep the `GROEPEN` table in that script in sync with `ARM_GROEPEN`.
 
 ## Structure of `index.html`
 
@@ -30,7 +53,7 @@ There is no build system, package manager, or test suite. Everything — HTML, C
 - `#zoeker` — full flat article-number lookup table
 - `#configurator` — the Railconfigurator (see below); default active tab
 
-**`<script>` (lines ~821–2441):** See below.
+**`<script>` (lines ~845–3085):** See below.
 
 ## The Railconfigurator (the core feature)
 
