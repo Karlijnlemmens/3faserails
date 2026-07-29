@@ -2562,12 +2562,16 @@ function buildPdf(){
     T.i++; y+=13.5;
   }
 
-  /* --- Bestelgegevens: eerste inhoudelijke sectie, direct onder het kopvlak --- */
+  /* --- Bestelgegevens: eerste inhoudelijke sectie, direct onder het kopvlak.
+         Hier staan de Pragmalux-artikelnummers (2000766-reeks): daarop wordt besteld
+         bij Distrilight. De KKT-codes horen juist bij de tekening verderop, waar de
+         installateur ze tijdens het installeren gebruikt - niet hier. --- */
   h2('Bestelgegevens');
-  let T=tableStart([{w:90,h:'Artikelcode'},{w:330,h:'Omschrijving'},{w:56,h:'Aantal'}]);
+  para('Bestellen bij Distrilight gaat op onderstaande artikelnummers.',8,C.grey);
+  let T=tableStart([{w:90,h:'Artikelnummer'},{w:330,h:'Omschrijving'},{w:56,h:'Aantal'}]);
   Object.keys(D.B.items).forEach(c=>{
     const it=D.B.items[c];
-    tableRow(T,[c.indexOf('m-')===0?'volgt':it.codeL, it.name, String(it.qty)]);
+    tableRow(T,[c.indexOf('m-')===0?'volgt':c, it.name, String(it.qty)]);
   });
   flush();
   const bgPageCount = pages.length; /* checkpoint: hier komt bij het samenvoegen de 3-Fase Rail presenter tussen */
@@ -2662,7 +2666,10 @@ function buildPdf(){
     y+=boxH+8;
     if(si===0) para('Maten zijn raillengtes; koppelstukken komen daar in werkelijkheid bovenop. Rood vlak = stroomaansluitpunt, rode lijn = polariteitslijn, grijze stippen = montagepunten, genummerde rondjes verwijzen naar de tabel.',8,C.grey);
     h2('Onderdelen in de tekening'+(D.sheets.length>1?' \u2014 '+sh.name:''));
-    let TL=tableStart([{w:34,h:'Nr'},{w:52,h:'Traject'},{w:300,h:'Onderdeel'},{w:90,h:'Artikelcode'}]);
+    /* Hier staat bewust de leveranciercode (KKT-reeks) en niet het bestelnummer:
+       dit is de code die de installateur op het onderdeel zelf terugvindt. Bestellen
+       gaat op de Pragmalux-nummers in Bestelgegevens. */
+    let TL=tableStart([{w:34,h:'Nr'},{w:52,h:'Traject'},{w:300,h:'Onderdeel'},{w:90,h:'Leveranciercode'}]);
     sh.legend.forEach(l=> tableRow(TL,[String(l.nr), String(l.tr), l.name, l.art]));
   });
   flush();
