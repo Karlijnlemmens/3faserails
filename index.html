@@ -442,9 +442,11 @@
   .c2-armrow .nm{font-size:12.5px; color:var(--ink); font-weight:600; min-width:78px;}
   .c2-armrow input.c2-textinp{flex:1 1 130px; min-width:100px; padding:5px 8px; font-size:12px;}
   .c2-armrow select.c2-select{padding:5px 8px; font-size:12px;}
+  .c2-armrow select.c2-groepsel{flex:0 1 150px; min-width:120px;}
   .c2-armrecog{font-size:11px; font-weight:700; white-space:nowrap; padding:3px 8px; border-radius:20px;}
   .c2-armrecog.ok{background:var(--green-light); color:var(--green);}
-  .c2-armrecog.miss{background:#F0F2F6; color:var(--slate-light);}
+  .c2-armrecog.miss{background:#FDECEC; color:#B0362B;}
+  .c2-armrecog.warn{background:#FFF4E0; color:#95651A;}
 
   #c2Svg .c2-movable{cursor:move;}
   .c2-sheets{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; align-items:center;}
@@ -1289,13 +1291,14 @@ const ARMATUREN = [
 function armLabel(a){ return 'Armatuur '+a.id.replace('arm',''); }
 function visibleArmaturen(){ return st.dali ? ARMATUREN.filter(a=>a.dali) : ARMATUREN; }
 
-/* Armatuurgroepen: los van de 12 armatuur-slots hierboven. Elke groep heeft een eigen
-   presenter-PDF (zie presenters-data.js, PRESENTER_DEFS). Naam/artikelcode van een
-   armatuur blijven vrije tekst (nameInp/codeInp in buildArmList) — dit is uitsluitend
-   voor het herkennen welke presenter erbij hoort, via een apart zoekveld per rij
-   (st.armaturen[id].groepZoek, zie buildArmList). Placeholder-namen tot de echte
-   groepnamen zijn aangeleverd — dan hier hernoemen (en evt. modelnummers toevoegen
-   als extra zoektermen). */
+/* Armatuurgroepen: los van de 12 armatuur-slots hierboven. Een groep is een armatuur-
+   TYPE en heeft precies een presenter-PDF (zie presenters-data.js, armaturenboek()).
+   Uitvoeringsdetails horen nadrukkelijk NIET bij de groep: wit/zwart/grijs, wattage,
+   lichtkleur en dimprotocol delen allemaal dezelfde presenter. Naam en artikelcode van
+   een armatuur blijven vrije tekst (nameInp/codeInp in buildArmList); de groep wordt
+   daaruit herkend met matchArmGroep() en kan per rij handmatig worden overschreven
+   (st.armaturen[id].groep, zie buildArmList).
+   zoektermen = extra schrijfwijzen/handelsnamen die naar dezelfde groep wijzen. */
 const ARM_GROEPEN = [
   {id:'ag01', naam:'Punto', zoektermen:[]},
   {id:'ag02', naam:'Piccolo', zoektermen:[]},
@@ -1305,16 +1308,137 @@ const ARM_GROEPEN = [
   {id:'ag06', naam:'Arda', zoektermen:[]},
   {id:'ag07', naam:'Orion', zoektermen:[]},
   {id:'ag08', naam:'Notra', zoektermen:[]},
-  {id:'ag09', naam:'Ario GU10', zoektermen:[]},
-  {id:'ag10', naam:'Lustra GU10', zoektermen:[]},
-  {id:'ag11', naam:'Fendi GU10', zoektermen:[]},
-  {id:'ag12', naam:'Altoflood', zoektermen:[]},
+  {id:'ag09', naam:'Ario GU10', zoektermen:['Ario']},
+  {id:'ag10', naam:'Lustra GU10', zoektermen:['Lustra']},
+  {id:'ag11', naam:'Fendi GU10', zoektermen:['Fendi']},
+  {id:'ag12', naam:'Altoflood', zoektermen:['Alto flood','Alto-flood']},
 ];
-const ARM_GROEP_INDEX = (()=>{ const m={};
-  ARM_GROEPEN.forEach(g=>{ [g.naam, ...g.zoektermen].forEach(t=>{ m[String(t).trim().toLowerCase()]=g; }); });
-  return m;
-})();
-function matchArmGroep(txt){ return ARM_GROEP_INDEX[String(txt||'').trim().toLowerCase()] || null; }
+
+/* --- herkennen van het armatuurtype uit vrije tekst ---------------------------
+   Een presenter hoort bij het type, niet bij de uitvoering. Kleur, wattage,
+   lichtkleur, dimprotocol en artikelcodes zeggen dus niets over welke presenter
+   erbij hoort en worden weggefilterd voordat er wordt vergeleken. "Punto",
+   "punto 15W zwart" en "PUNTO 3000K DALI 2001234" leiden allemaal naar Punto. */
+const ARM_STOPWOORDEN = new Set([
+  'wit','witte','white','zwart','zwarte','black','grijs','grijze','grey','gray',
+  'zilver','silver','aluminium','alu','goud','gold','brons','bronze',
+  'custom','coating','gecoat','mat','matte','glans','ral',
+  'dali','dimbaar','dimbare','dimmable','dim','onoff','on','off','push','triac',
+  'casambi','zigbee','switchdim','fase','driefase',
+  'led','lamp','armatuur','armaturen','spot','spots','spotje','opbouwspot','inbouwspot',
+  'track','rail','railspot','pragmalux','prx',
+  'ww','nw','cw','warmwit','neutraalwit','koelwit',
+  'stuks','stuk','type','serie','model','incl','excl','met','voor','de','het','een'
+]);
+/* getallen met of zonder eenheid: 15w, 3000k, 24v, 1200lm, 38, 38gr */
+const ARM_GETAL = /^\d+([.,]\d+)?(w|watt|k|lm|v|va|ma|mm|cm|m|gr|graden|deg)?$/;
+/* artikelcodes: 2000766, KKT301158 */
+const ARM_CODE = /^[a-z]{0,4}\d{5,}$/;
+
+function armTokens(txt){
+  return String(txt||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().split(/\s+/).filter(Boolean);
+}
+/* Alle woorden die in een groepsnaam of zoekterm voorkomen; die mogen nooit als ruis
+   worden weggegooid (anders sneuvelt bijv. "GU10" op de artikelcode-regel). */
+const ARM_GROEP_TOKENS = ARM_GROEPEN.map(g=>({
+  g, varianten: [g.naam].concat(g.zoektermen||[]).map(armTokens).filter(v=>v.length)
+}));
+const ARM_VOCAB = (()=>{ const s=new Set();
+  ARM_GROEP_TOKENS.forEach(x=>x.varianten.forEach(v=>v.forEach(t=>s.add(t)))); return s; })();
+
+function armZinvolleTokens(txt){
+  return armTokens(txt).filter(t=>
+    ARM_VOCAB.has(t) || !(ARM_STOPWOORDEN.has(t) || ARM_GETAL.test(t) || ARM_CODE.test(t)));
+}
+/* Herkent de groep in vrije tekst. Scoort per variant hoeveel van zijn woorden
+   voorkomen; het eerste woord (het onderscheidende deel) moet er altijd bij zitten,
+   anders zou "GU10" alleen al naar Ario/Lustra/Fendi tegelijk wijzen. Bij een
+   gelijke stand is de invoer dubbelzinnig en geven we niets terug. */
+function matchArmGroep(txt){
+  const toks = armZinvolleTokens(txt);
+  if(!toks.length) return null;
+  const heeft = new Set(toks);
+  let best=null, bestScore=0, gelijk=false;
+  ARM_GROEP_TOKENS.forEach(({g,varianten})=>{
+    let score=0;
+    varianten.forEach(v=>{
+      if(!heeft.has(v[0])) return;
+      const hits = v.filter(t=>heeft.has(t)).length;
+      const s = hits*100 + (hits===v.length?50:0) + v.join('').length;
+      if(s>score) score=s;
+    });
+    if(!score) return;
+    if(score>bestScore){ bestScore=score; best=g; gelijk=false; }
+    else if(score===bestScore && g!==best) gelijk=true;
+  });
+  return gelijk ? null : best;
+}
+/* De groep die bij een armatuurrij hoort: handmatige keuze wint van herkenning uit
+   de naam. '-' betekent bewust geen presenter. */
+function armGroepVan(s){
+  if(!s) return null;
+  if(s.groep==='-') return null;
+  if(s.groep) return ARM_GROEPEN.find(g=>g.id===s.groep) || null;
+  return matchArmGroep(s.name);
+}
+/* --- presenter-PDF's ophalen -------------------------------------------------
+   Presenters zijn groot (al gauw enkele MB per stuk) en de meeste sessies maken
+   helemaal geen PDF, dus worden ze pas bij het exporteren ingeladen. Twee bronnen:
+     1. presenters/<id>.js  - een bestand per presenter, hier op aanvraag ingeladen.
+                              Dit is wat tools/maak-presenters.mjs genereert.
+     2. presenters-data.js  - alles in een bestand, wordt bij het openen meegeladen.
+                              Blijft werken, maar vertraagt het opstarten.
+   PRESENTER_FILES (uit presenters-data.js) zegt welke id's als los bestand bestaan,
+   zodat we van tevoren weten of een presenter er is zonder hem al te downloaden. */
+function presenterAanwezig(id){
+  if(window.PRESENTER_DATA && window.PRESENTER_DATA[id]) return true;
+  return !!(window.PRESENTER_FILES && window.PRESENTER_FILES.indexOf(id)>=0);
+}
+const presenterLaad = {};
+function laadPresenterBestand(id){
+  if(!presenterLaad[id]){
+    presenterLaad[id] = new Promise(res=>{
+      const s=document.createElement('script');
+      s.src='presenters/'+id+'.js';
+      s.onload=()=>res(true);
+      s.onerror=()=>res(false);
+      document.head.appendChild(s);
+    });
+  }
+  return presenterLaad[id];
+}
+async function presenterData(id){
+  const direct = window.PRESENTER_DATA && window.PRESENTER_DATA[id];
+  if(direct) return direct;
+  if(!(window.PRESENTER_FILES && window.PRESENTER_FILES.indexOf(id)>=0)) return null;
+  await laadPresenterBestand(id);
+  return (window.PRESENTER_DATA && window.PRESENTER_DATA[id]) || null;
+}
+
+/* Het armaturenboek: per armatuurtype de bijbehorende rijen, in de volgorde waarin ze
+   in de stuklijst staan. Twee rijen van hetzelfde type (bijv. dezelfde armatuur in wit
+   en in zwart) delen een presenter en worden dus tot een hoofdstuk samengevoegd. */
+function armaturenboek(){
+  const boek=[], perGroep={};
+  visibleArmaturen().forEach(a=>{
+    const s=st.armaturen[a.id];
+    if(!s || (s.qty||0)<=0) return;
+    const g=armGroepVan(s);
+    if(!g) return;
+    let b=perGroep[g.id];
+    if(!b){ b=perGroep[g.id]={g, rijen:[], totaal:0}; boek.push(b); }
+    b.rijen.push({a,s}); b.totaal+=(s.qty||0);
+  });
+  return boek;
+}
+/* Armaturen met een aantal waarvan het type niet bekend is (en niet bewust op
+   'Geen presenter' staat) — die krijgen geen presenter in het boek. */
+function armaturenZonderGroep(){
+  return visibleArmaturen().filter(a=>{
+    const s=st.armaturen[a.id];
+    return (s.qty||0)>0 && s.groep!=='-' && !armGroepVan(s);
+  });
+}
 /* Adapters & overig: 9 placeholders, wit/zwart/grijs, zelfde intern/extern-codescheiding. */
 const ADAPTERS_OVERIG = [
   {id:'ao01', name:'ON/OFF Rail Adapter GA-69 70mm', codes:{wit:{p:'2001404',l:'KKT30133'}, zwart:{p:'2001398',l:'KKT30132'}, grijs:{p:'2001381',l:'KKT30131'}}},
@@ -1345,7 +1469,7 @@ const SHAPES = {
 
 let st = { step:1, dali:false, color:'wit', powercfg:'A', shape:null, gRows:2, gCols:2,
   nodes:[], edges:[], nid:0, eid:0, feeds:[], angles:{},
-  armaturen: ARMATUREN.reduce((o,a)=>{o[a.id]={color:'wit',qty:0,name:'',code:'',codeDali:'',groepZoek:''};return o;},{}),
+  armaturen: ARMATUREN.reduce((o,a)=>{o[a.id]={color:'wit',qty:0,name:'',code:'',codeDali:'',groep:''};return o;},{}),
   overig: ADAPTERS_OVERIG.reduce((o,a)=>{o[a.id]={color:'wit',qty:0};return o;},{}),
   use4m:false, pick:false, mount:'geen', proj:'',
   sysOphang:false, sysOphangLen:'3', pendelKabelkleur:'zilver', pendelKabelLen:'3',
@@ -2330,7 +2454,8 @@ function reportData(){
 }
 function pdfTxt(s){
   s=String(s).replace(/\u2014|\u2013/g,'-').replace(/\u00d7/g,'x').replace(/\u2192/g,'->')
-    .replace(/\u201c|\u201d/g,'"').replace(/\u26a1/g,'').replace(/\uff0b/g,'+').replace(/\u2212/g,'-');
+    .replace(/\u201c|\u201d/g,'"').replace(/\u2018|\u2019/g,"'")
+    .replace(/\u26a1/g,'').replace(/\uff0b/g,'+').replace(/\u2212/g,'-');
   let o='';
   for(let i=0;i<s.length;i++){ let c=s.charCodeAt(i); if(c>255)c=63; const ch=String.fromCharCode(c);
     o += (ch==='('||ch===')'||ch==='\\') ? '\\'+ch : ch; }
@@ -2387,14 +2512,17 @@ function buildPdf(){
     line(x+1,yt+19*scale,x+96*scale,yt+19*scale,0.9*scale,c);
     text(x+1,yt+21.5*scale,5.6*scale,'PROFESSIONAL LIGHTING',{color:white?C.lt:C.grey,tc:1.35*scale});
   }
+  /* Kop- en voetregel volgen de sectie: het armaturenboek achteraan is een eigen
+     hoofdstuk en moet niet "Installatieoverzicht" blijven heten. */
+  let sectie='Installatieoverzicht';
   function stampFooter(){
     pageNo++;
     rect(0,H-24,W,24,C.navy);
     text(Mg,H-19,7.5,'PRAGMALUX  \u00b7  PROFESSIONAL LIGHTING',{bold:true,color:'1 1 1',tc:0.4});
-    text(W-Mg,H-19,7.5,'PRX 3-Fase Rail  \u00b7  Installatieoverzicht  \u00b7  pagina '+pageNo,{color:C.lt,align:'right'});
+    text(W-Mg,H-19,7.5,'PRX 3-Fase Rail  \u00b7  '+sectie+'  \u00b7  pagina '+pageNo,{color:C.lt,align:'right'});
   }
   function contHeader(){
-    text(Mg,y,13,'INSTALLATIEOVERZICHT',{bold:true,cond:true,color:C.navy});
+    text(Mg,y,13,sectie.toUpperCase(),{bold:true,cond:true,color:C.navy});
     logo(W-Mg-120,y-4,0.72,false);
     y+=22; line(Mg,y,W-Mg,y,1.1,C.navy); y+=14;
   }
@@ -2539,6 +2667,68 @@ function buildPdf(){
   });
   flush();
 
+  /* --- Armaturenboek: een index en per armatuurtype een tabbladpagina. De echte
+         presenter-PDF's worden er in assembleFinalPdf achter geplakt; bookGroups
+         vertelt daar in welke volgorde en achter welke tabbladpagina. --- */
+  const boek = armaturenboek();
+  const bookStart = pages.length;
+  let bookIndexEnd = pages.length;
+  const bookGroups = [];
+  const clip=(s,n)=>{ s=String(s||''); return s.length>n ? s.slice(0,n-1)+'…' : s; };
+  const armOms=(r)=> (r.s.name&&r.s.name.trim()) ? r.s.name.trim() : armLabel(r.a);
+  const armCode=(r)=>{ const c = st.dali ? r.s.codeDali : r.s.code; return (c&&c.trim()) ? c.trim() : 'volgt'; };
+  const armKlr=(r)=> r.s.color==='custom' ? 'Custom' : CLRN(r.s.color);
+  if(boek.length){
+    sectie='Armaturenboek';
+    const boekTotaal = boek.reduce((n,b)=>n+b.totaal,0);
+    beginPage(true);
+    rect(0,0,W,124,C.navy);
+    dots(W-215,12,190,100,13,C.navy2);
+    logo(Mg,18,1,true);
+    text(Mg,62,23,'ARMATURENBOEK',{bold:true,cond:true,color:'1 1 1'});
+    text(Mg,90,10.5,'PRX 3-FASE RAIL'+(st.proj? '  ·  '+st.proj.toUpperCase():''),{bold:true,cond:true,color:C.lt,tc:0.5});
+    text(Mg,105,8.5,boek.length+(boek.length===1?' armatuurtype':' armatuurtypen')+'   ·   '
+      +boekTotaal+(boekTotaal===1?' armatuur':' armaturen')+' in totaal',{color:C.lt});
+    y=140;
+    h2('Gekozen armaturen');
+    para('Hierna volgt per armatuurtype een tabblad met daarachter de presenter met alle technische gegevens. '
+      +'Uitvoeringen van hetzelfde type - andere kleur, ander wattage, wel of niet dimbaar - delen een presenter '
+      +'en staan daarom samen onder een tabblad.');
+    let TB=tableStart([{w:30,h:'Tab'},{w:110,h:'Armatuurtype'},{w:150,h:'Omschrijving'},{w:76,h:'Artikelcode'},{w:58,h:'Kleur'},{w:52,h:'Aantal'}]);
+    boek.forEach((b,bi)=> b.rijen.forEach((r,ri)=>
+      tableRow(TB,[ ri===0?String(bi+1):'', ri===0?clip(b.g.naam,22):'',
+        clip(armOms(r),30), clip(armCode(r),14), clip(armKlr(r),10), String(r.s.qty) ])));
+    const ontbreekt = boek.filter(b=>!presenterAanwezig(b.g.id));
+    if(ontbreekt.length){
+      y+=8;
+      para('Let op: van '+ontbreekt.map(b=>b.g.naam).join(', ')+' is de presenter nog niet in de tool geladen. '
+        +'Het tabblad staat er wel, de productpagina’s ontbreken.',8,C.red);
+    }
+    flush();
+    bookIndexEnd = pages.length;
+
+    boek.forEach((b,bi)=>{
+      beginPage(false);
+      const bw=W-2*Mg;
+      rect(Mg,y,bw,96,C.navy);
+      dots(W-Mg-150,y+10,132,74,13,C.navy2);
+      text(Mg+18,y+20,8.5,'TABBLAD '+(bi+1)+' VAN '+boek.length,{cond:true,color:C.lt,tc:1.1});
+      text(Mg+18,y+40,25,clip(b.g.naam.toUpperCase(),26),{bold:true,cond:true,color:'1 1 1'});
+      text(Mg+18,y+76,8.5,b.totaal+(b.totaal===1?' armatuur':' armaturen')+' in deze opdracht',{color:C.lt});
+      y+=96+18;
+      h2('Uitvoeringen in deze opdracht');
+      let TT=tableStart([{w:200,h:'Omschrijving'},{w:110,h:'Artikelcode'},{w:96,h:'Kleur'},{w:70,h:'Aantal'}]);
+      b.rijen.forEach(r=> tableRow(TT,[clip(armOms(r),40), clip(armCode(r),20), armKlr(r), String(r.s.qty)]));
+      y+=8;
+      para(presenterAanwezig(b.g.id)
+        ? 'Hierna volgt de presenter van de '+b.g.naam+' met de volledige productinformatie.'
+        : 'De presenter van de '+b.g.naam+' is nog niet in de tool geladen en ontbreekt daarom in dit boek.',
+        8, presenterAanwezig(b.g.id)?C.grey:C.red);
+      flush();
+      bookGroups.push(b.g.id);
+    });
+  }
+
   /* --- PDF-bestand samenstellen --- */
   const objs=[];
   objs.push('<< /Type /Catalog /Pages 2 0 R >>');
@@ -2558,56 +2748,50 @@ function buildPdf(){
   out+='trailer\n<< /Size '+(objs.length+1)+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';
   const bytes=new Uint8Array(out.length);
   for(let i=0;i<out.length;i++) bytes[i]=out.charCodeAt(i)&0xff;
-  return {bytes, bgPageCount};
+  return {bytes, bgPageCount, bookStart, bookIndexEnd, bookGroups};
 }
 if(typeof window!=='undefined') window.__c2BuildPdf=buildPdf;
 
-/* Presenter-PDF's: welke presenter hoort bij welk moment, en wanneer moet hij worden meegenomen.
-   Binaire data staat los in presenters-data.js (window.PRESENTER_DATA) \u2014 hier alleen de logica. */
-const PRESENTER_DEFS = [
-  { id:'rail', label:'3-Fase Rail presenter', always:true },
-  ...ARM_GROEPEN.map(g=>({
-    id:g.id, label:g.naam,
-    test: ()=> visibleArmaturen().some(a=>{
-      const s=st.armaturen[a.id];
-      return (s.qty||0)>0 && matchArmGroep(s.groepZoek)===g;
-    })
-  }))
-];
+/* Presenter-PDF's: binaire data staat los in presenters-data.js (window.PRESENTER_DATA),
+   hier alleen de logica. De rail-presenter zit op een vaste plek (na Bestelgegevens);
+   de armatuur-presenters volgen achter hun eigen tabbladpagina in het armaturenboek,
+   in de volgorde die buildPdf in bookGroups teruggeeft.
 
+   De opbouw van de eindPDF:
+     Bestelgegevens  ->  rail-presenter  ->  Montage + tekenvlakken
+     ->  Armaturenboek-index  ->  per type: tabbladpagina + presenter */
 async function assembleFinalPdf(){
-  const {bytes, bgPageCount} = buildPdf();
+  const {bytes, bgPageCount, bookStart, bookIndexEnd, bookGroups} = buildPdf();
   const ownDoc = await PDFLib.PDFDocument.load(bytes);
   const finalDoc = await PDFLib.PDFDocument.create();
 
-  const copyAll = async(srcDoc)=>{
-    const idx = srcDoc.getPageIndices();
-    const pgs = await finalDoc.copyPages(srcDoc, idx);
-    pgs.forEach(p=>finalDoc.addPage(p));
-  };
   const copyRange = async(srcDoc, from, to)=>{
     const idx = srcDoc.getPageIndices().slice(from, to);
+    if(!idx.length) return;
     const pgs = await finalDoc.copyPages(srcDoc, idx);
     pgs.forEach(p=>finalDoc.addPage(p));
   };
   const appendPresenter = async(id)=>{
-    const b64 = window.PRESENTER_DATA && window.PRESENTER_DATA[id];
-    if(!b64){ console.warn('Presenter "'+id+'" is nog niet toegevoegd in presenters-data.js \u2014 sectie overgeslagen.'); return; }
+    const b64 = await presenterData(id);
+    if(!b64){ console.warn('Presenter "'+id+'" is nog niet toegevoegd (presenters/'+id+'.js of presenters-data.js) \u2014 sectie overgeslagen.'); return; }
     try{
       const bin=atob(b64); const arr=new Uint8Array(bin.length);
       for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
-      const presDoc = await PDFLib.PDFDocument.load(arr);
-      await copyAll(presDoc);
+      const presDoc = await PDFLib.PDFDocument.load(arr, {ignoreEncryption:true});
+      await copyRange(presDoc, 0, presDoc.getPageCount());
     }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); }
   };
 
   await copyRange(ownDoc, 0, bgPageCount);            /* Bestelgegevens */
   await appendPresenter('rail');                      /* altijd, indien aanwezig */
-  await copyRange(ownDoc, bgPageCount, ownDoc.getPageCount()); /* Montage + Tekenvlakken */
+  await copyRange(ownDoc, bgPageCount, bookStart);    /* Montage + tekenvlakken */
 
-  for(const def of PRESENTER_DEFS){
-    if(def.id==='rail') continue; /* al op vaste positie verwerkt */
-    if(def.always || (def.test && def.test())) await appendPresenter(def.id);
+  if(bookGroups.length){
+    await copyRange(ownDoc, bookStart, bookIndexEnd); /* Armaturenboek-index */
+    for(let i=0;i<bookGroups.length;i++){
+      await copyRange(ownDoc, bookIndexEnd+i, bookIndexEnd+i+1); /* tabbladpagina */
+      await appendPresenter(bookGroups[i]);                      /* de presenter zelf */
+    }
   }
 
   return finalDoc.save();
@@ -2620,15 +2804,22 @@ async function exportPdf(){
       : 'Kies eerst per traject een stroomaansluitpunt (\u26a1 in stap 5) \u2014 daarna kan de PDF gemaakt worden.';
     $('c2StepMsg').textContent=msg; alert(msg); return;
   }
-  const unmatched = visibleArmaturen().filter(a=>{
-    const s=st.armaturen[a.id];
-    return (s.qty||0)>0 && !matchArmGroep(s.groepZoek);
-  });
-  if(unmatched.length){
-    alert('Voor de volgende armaturen is geen presenter beschikbaar (groep niet herkend):\n'
-      + unmatched.map(a=> armLabel(a)+(st.armaturen[a.id].name? ' — '+st.armaturen[a.id].name:'')).join('\n')
-      + '\n\nDe PDF wordt wel gewoon gegenereerd, alleen zonder presenter voor deze armaturen.');
+  /* Waarschuwen over gaten in het armaturenboek, maar de PDF altijd gewoon maken. */
+  const meldingen=[];
+  const zonderGroep = armaturenZonderGroep();
+  if(zonderGroep.length){
+    meldingen.push('Van deze armaturen is het type niet herkend, dus komt er geen presenter in het armaturenboek:\n'
+      + zonderGroep.map(a=> '  • '+armLabel(a)+(st.armaturen[a.id].name? ' — '+st.armaturen[a.id].name:' (nog geen naam ingevuld)')).join('\n')
+      + '\nKies het armatuurtype in de keuzelijst naast de naam om dit op te lossen.');
   }
+  const zonderPresenter = armaturenboek().filter(b=>!presenterAanwezig(b.g.id));
+  if(zonderPresenter.length){
+    meldingen.push('Van deze armatuurtypen staat de presenter-PDF nog niet in de tool:\n'
+      + zonderPresenter.map(b=>'  • '+b.g.naam+'  (presenters/'+b.g.id+'.js)').join('\n')
+      + '\nHet tabblad komt wel in het boek, de productpagina’s ontbreken.\n'
+      + 'Toevoegen: zet de PDF in presenters-bron/ en draai "node tools/maak-presenters.mjs".');
+  }
+  if(meldingen.length) alert(meldingen.join('\n\n')+'\n\nDe PDF wordt verder gewoon gegenereerd.');
   let bytes;
   try{ bytes = await assembleFinalPdf(); }
   catch(err){ console.error(err); alert('De PDF kon niet worden gegenereerd: '+(err&&err.message?err.message:err)); return; }
@@ -2694,36 +2885,52 @@ function buildProdList(container, list, stateMap, colorOptions){
    (volledige naam, artikelcode) i.p.v. hardcoded codes. Zelfde bouwstijl als
    buildProdList (rebuild-on-call, commit op change/Enter) om focusverlies tijdens
    typen te voorkomen. Wordt net als buildProdList niet vanuit refresh() aangeroepen,
-   maar expliciet na init/reset/DALI-toggle. */
+   maar expliciet na init/reset/DALI-toggle.
+   Het armatuurtype (= welke presenter in het armaturenboek komt) wordt herkend uit de
+   ingevulde naam; de keuzelijst ernaast laat dat overschrijven, zodat een afwijkende
+   omschrijving nooit tot een ontbrekende presenter leidt. */
 function buildArmList(){
   const container=$('c2ArmList'); container.innerHTML='';
-  let dl=$('c2ArmGroepList');
-  if(!dl){ dl=document.createElement('datalist'); dl.id='c2ArmGroepList'; container.parentNode.appendChild(dl); }
-  dl.innerHTML = Object.keys(ARM_GROEP_INDEX).map(k=>'<option value="'+ARM_GROEP_INDEX[k].naam.replace(/"/g,'&quot;')+'">').join('');
   visibleArmaturen().forEach(a=>{
     const s=st.armaturen[a.id];
     const row=document.createElement('div'); row.className='c2-armrow';
     const nm=document.createElement('span'); nm.className='nm'; nm.textContent=armLabel(a);
-    const groepInp=document.createElement('input'); groepInp.type='text'; groepInp.className='c2-textinp';
-    groepInp.setAttribute('list','c2ArmGroepList'); groepInp.placeholder='Zoek groep…'; groepInp.value=s.groepZoek||'';
+    const nameInp=document.createElement('input'); nameInp.type='text'; nameInp.className='c2-textinp';
+    nameInp.placeholder='Volledige naam (bijv. Punto 15W)'; nameInp.value=s.name||'';
+    const groepSel=document.createElement('select'); groepSel.className='c2-select c2-groepsel';
+    const autoOpt=document.createElement('option'); autoOpt.value=''; groepSel.appendChild(autoOpt);
+    ARM_GROEPEN.forEach(g=>{ const o=document.createElement('option'); o.value=g.id; o.textContent=g.naam; groepSel.appendChild(o); });
+    const geenOpt=document.createElement('option'); geenOpt.value='-'; geenOpt.textContent='Geen presenter'; groepSel.appendChild(geenOpt);
+    groepSel.value=s.groep||'';
     const badge=document.createElement('span'); badge.className='c2-armrecog';
     function paintBadge(){
-      const g=matchArmGroep(groepInp.value);
-      if(!groepInp.value){ badge.textContent=''; badge.className='c2-armrecog'; }
-      else if(g){ badge.textContent='✓ '+g.naam; badge.className='c2-armrecog ok'; }
-      else { badge.textContent='Niet herkend'; badge.className='c2-armrecog miss'; }
+      const herkend = matchArmGroep(nameInp.value);
+      autoOpt.textContent = 'Automatisch'+(herkend? ' ('+herkend.naam+')':'');
+      const g = armGroepVan({groep:groepSel.value, name:nameInp.value});
+      if(g){
+        badge.textContent = (presenterAanwezig(g.id)?'✓ ':'⚠ ')+g.naam;
+        badge.className = 'c2-armrecog '+(presenterAanwezig(g.id)?'ok':'warn');
+        badge.title = presenterAanwezig(g.id)
+          ? 'Presenter '+g.naam+' wordt in het armaturenboek opgenomen.'
+          : 'Type herkend, maar de presenter-PDF van '+g.naam+' ontbreekt nog in presenters-data.js.';
+      } else if(groepSel.value==='-'){
+        badge.textContent='Geen presenter'; badge.className='c2-armrecog'; badge.title='Deze armatuur komt niet in het armaturenboek.';
+      } else if(!nameInp.value.trim()){
+        badge.textContent=''; badge.className='c2-armrecog'; badge.title='';
+      } else {
+        badge.textContent='Kies type'; badge.className='c2-armrecog miss';
+        badge.title='Type niet herkend uit de naam — kies het armatuurtype in de lijst ernaast.';
+      }
     }
     paintBadge();
-    groepInp.addEventListener('input', paintBadge);
-    groepInp.addEventListener('change', ()=>{ s.groepZoek=groepInp.value; refresh(); });
-    const nameInp=document.createElement('input'); nameInp.type='text'; nameInp.className='c2-textinp';
-    nameInp.placeholder='Volledige naam'; nameInp.value=s.name||'';
-    nameInp.addEventListener('change', ()=>{ s.name=nameInp.value; refresh(); });
+    nameInp.addEventListener('input', paintBadge);
+    nameInp.addEventListener('change', ()=>{ s.name=nameInp.value; paintBadge(); refresh(); });
+    groepSel.addEventListener('change', ()=>{ s.groep=groepSel.value; paintBadge(); refresh(); });
     const codeInp=document.createElement('input'); codeInp.type='text'; codeInp.className='c2-textinp';
     codeInp.placeholder='Artikelcode'+(st.dali?' (DALI)':'');
     codeInp.value = st.dali ? (s.codeDali||'') : (s.code||'');
     codeInp.addEventListener('change', ()=>{ if(st.dali) s.codeDali=codeInp.value; else s.code=codeInp.value; refresh(); });
-    [groepInp,nameInp,codeInp].forEach(inp=>inp.addEventListener('keydown', e=>{ if(e.key==='Enter') inp.blur(); }));
+    [nameInp,codeInp].forEach(inp=>inp.addEventListener('keydown', e=>{ if(e.key==='Enter') inp.blur(); }));
     const sel=document.createElement('select'); sel.className='c2-select';
     [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'custom',l:'Custom coating'}].forEach(c=>{ const o=document.createElement('option'); o.value=c.k; o.textContent=c.l; sel.appendChild(o); });
     sel.value=s.color;
@@ -2733,7 +2940,8 @@ function buildArmList(){
     function commitQty(){ const v=Math.max(0, parseInt(qty.value)||0); s.qty=v; qty.value=String(v); refresh(); }
     qty.addEventListener('change', commitQty);
     qty.addEventListener('keydown', e=>{ if(e.key==='Enter') qty.blur(); });
-    row.appendChild(nm); row.appendChild(groepInp); row.appendChild(badge); row.appendChild(nameInp); row.appendChild(codeInp); row.appendChild(sel); row.appendChild(qty);
+    row.appendChild(nm); row.appendChild(nameInp); row.appendChild(groepSel); row.appendChild(badge);
+    row.appendChild(codeInp); row.appendChild(sel); row.appendChild(qty);
     container.appendChild(row);
   });
 }
@@ -2844,7 +3052,7 @@ function init(){
   $('c2ResetAll').addEventListener('click', ()=>{
     st.shape=null; st.nodes=[]; st.edges=[]; st.feeds=[]; st.angles={}; st.mount='geen'; st.pick=false; st.step=1;
     st.sysOphang=false; st.sysOphangLen='3'; st.pendelKabelkleur='zilver'; st.pendelKabelLen='3';
-    st.armaturen=ARMATUREN.reduce((o,a)=>{o[a.id]={color:'wit',qty:0,name:'',code:'',codeDali:'',groepZoek:''};return o;},{});
+    st.armaturen=ARMATUREN.reduce((o,a)=>{o[a.id]={color:'wit',qty:0,name:'',code:'',codeDali:'',groep:''};return o;},{});
     st.overig=ADAPTERS_OVERIG.reduce((o,a)=>{o[a.id]={color:'wit',qty:0};return o;},{});
     buildArmList();
     buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
