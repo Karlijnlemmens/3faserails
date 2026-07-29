@@ -42,8 +42,14 @@ const FONTS = {
 /* Beeldmateriaal voor het voorblad. Optioneel: ontbreken ze, dan tekent de PDF een
    eigen vlakverdeling in de huisstijlkleuren. */
 const BEELDEN = {
-  omslagAchtergrond: 'omslag-achtergrond.png',   /* bovenvlak van het voorblad */
-  omslagFoto:        'omslag-foto.png',          /* fotostrook onder het bovenvlak */
+  /* Volledig voorblad als een afbeelding: alles behalve de projectgegevens. Is dit
+     aanwezig, dan worden de twee losse beelden hieronder genegeerd. Dit is de
+     betrouwbaarste manier om het voorblad er precies zo uit te laten zien als het
+     ontwerp - exporteer de ontwerppagina zonder tekst als PNG op A4 (bij 150 dpi is
+     dat 1240x1754). */
+  omslagVolledig:    'omslag.png',
+  omslagAchtergrond: 'omslag-achtergrond.png',   /* alleen het bovenvlak */
+  omslagFoto:        'omslag-foto.png',          /* alleen de fotostrook */
 };
 const LOGOS = {
   dlDonker:  'Distrilight logo donker.png',   /* voor op wit */

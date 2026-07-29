@@ -2630,7 +2630,7 @@ async function buildPdf(presenterPages, totaalPaginas){
   }
   /* Beeld voor het voorblad; ontbreekt het, dan tekent omslag() een eigen vlak. */
   const BEELD={};
-  for(const sleutel of ['omslagAchtergrond','omslagFoto']){
+  for(const sleutel of ['omslagVolledig','omslagAchtergrond','omslagFoto']){
     if(!merk.beelden[sleutel]) continue;
     try{ BEELD[sleutel]=await doc.embedPng(b64Bytes(merk.beelden[sleutel])); }
     catch(err){ console.warn('Omslagbeeld "'+sleutel+'" kon niet worden ingesloten:', err && err.message); }
@@ -2778,60 +2778,73 @@ async function buildPdf(presenterPages, totaalPaginas){
     const bw=img.width*s, bh=img.height*s;
     pg.drawImage(img, {x:x-(bw-w)/2, y:H-yt-h-(bh-h)/2, width:bw, height:bh});
   }
+  /* Twee kleuren mengen, voor subtiele tintverschillen in het terugvalpatroon. */
+  function meng(a,b,t){
+    const h=v=>[1,3,5].map(i=>parseInt(v.substr(i,2),16));
+    const A=h(a), B=h(b);
+    return '#'+[0,1,2].map(i=>Math.round(A[i]+(B[i]-A[i])*t).toString(16).padStart(2,'0')).join('').toUpperCase();
+  }
+  /* Maten komen uit de ontwerpschets, omgerekend naar A4-punten. */
   function omslag(){
     beginPage(true);
-    const bovenH=345, fotoY=345, fotoH=190;
+    const bovenH=357, fotoY=357, fotoH=210;
 
-    /* bovenvlak */
-    if(BEELD.omslagAchtergrond){
-      beeldVullend(BEELD.omslagAchtergrond, 0, 0, W, bovenH);
+    /* Is er een volledig voorblad aangeleverd, dan is dat het ontwerp en zetten we er
+       alleen de projectgegevens overheen. Dat is de betrouwbaarste weg naar precies
+       de huisstijl: geen namaak van patroon en fotostrook. */
+    const volledig = !!BEELD.omslagVolledig;
+    if(volledig){
+      beeldVullend(BEELD.omslagVolledig, 0, 0, W, H);
     } else {
-      /* terugval: driehoekpatroon in tinten van de huisstijlkleur */
-      rect(0,0,W,bovenH,C.hoofd);
-      const stap=74;
-      for(let rij=0, ry=0; ry<bovenH; rij++, ry+=stap){
-        for(let kol=0, rx=0; rx<W; kol++, rx+=stap){
-          /* vaste afwisseling, geen toeval: dezelfde invoer moet dezelfde PDF geven */
-          const licht=((rij*7+kol*5)%4)<2, tint=licht?C.hoofd2:C.hoofd;
-          poly([[rx,ry],[rx+stap,ry],[rx,ry+stap]], tint);
-          poly([[rx+stap,ry],[rx+stap,ry+stap],[rx,ry+stap]], licht?C.hoofd:C.hoofd2);
+      /* bovenvlak */
+      if(BEELD.omslagAchtergrond){
+        beeldVullend(BEELD.omslagAchtergrond, 0, 0, W, bovenH);
+      } else {
+        /* terugval: rustig driehoekpatroon in tinten die dicht bij elkaar liggen.
+           Bewust ingetogen - dit is een plaatsvervanger, geen ontwerp. */
+        rect(0,0,W,bovenH,C.hoofd);
+        const tinten=[C.hoofd, meng(C.hoofd,C.wit,0.10), meng(C.hoofd,C.wit,0.18), meng(C.hoofd,C.zwart,0.10)];
+        const stap=119;
+        for(let rij=0, ry=0; ry<bovenH; rij++, ry+=stap){
+          for(let kol=0, rx=0; rx<W; kol++, rx+=stap){
+            /* vaste afwisseling, geen toeval: dezelfde invoer moet dezelfde PDF geven */
+            poly([[rx,ry],[rx+stap,ry],[rx,ry+stap]], tinten[(rij*3+kol*2)%4]);
+            poly([[rx+stap,ry],[rx+stap,ry+stap],[rx,ry+stap]], tinten[(rij*3+kol*2+1)%4]);
+          }
         }
       }
+
+      /* fotostrook */
+      if(BEELD.omslagFoto){
+        beeldVullend(BEELD.omslagFoto, 0, fotoY, W, fotoH);
+      } else {
+        rect(0,fotoY,W,fotoH,meng(C.hoofd,C.wit,0.14));
+      }
+
+      /* schuine balk waar de projectnaam in komt */
+      poly([[0,99],[378,99],[378-34,226],[0,226]], C.hoofdDiep);
+
+      /* logovlak rechtsonder, doorlopend tot de paginarand */
+      poly([[361,716],[W,716],[W,786],[361+34,786]], C.hoofd);
+      const lh=30;
+      logo(W-logoBreedte(lh)-30, 716+(70-lh)/2, lh, true);
     }
 
-    /* schuine balk met de projectnaam */
-    const balkY=104, balkH=132, balkB=372, schuin=32;
-    poly([[0,balkY],[balkB,balkY],[balkB-schuin,balkY+balkH],[0,balkY+balkH]], C.hoofdDiep);
+    /* projectnaam in de balk - maximaal 3 regels, anders loopt hij eruit */
     const naam=(st.proj||'').trim() || 'Projectnaam';
-    const regels=wrapBreedte(naam, balkB-schuin-Mg-18, 19, {bold:true,cond:true}).slice(0,3);
-    let ty=balkY+22;
-    regels.forEach(r=>{ text(Mg,ty,19,r,{bold:true,cond:true,color:C.wit}); ty+=31; });
-
-    /* fotostrook */
-    if(BEELD.omslagFoto){
-      beeldVullend(BEELD.omslagFoto, 0, fotoY, W, fotoH);
-    } else {
-      rect(0,fotoY,W,fotoH,C.hoofd2);
-      dots(28,fotoY+20,W-56,fotoH-40,17,C.hoofd);
-      text(W/2,fotoY+fotoH/2-7,9,'PRX 3-FASE RAIL',{bold:true,cond:true,color:C.lt,align:'center',tc:1.4});
-    }
+    const regels=wrapBreedte(naam, 292, 17, {bold:true,cond:true}).slice(0,3);
+    let ty=128;
+    regels.forEach(r=>{ text(45,ty,17,r,{bold:true,cond:true,color:C.wit}); ty+=36; });
 
     /* projectgegevens linksonder */
-    const gY=700;
     const veld=(label,waarde,dy)=>{
       const b=meet(label+' ',8.5,{});
-      text(Mg,gY+dy,8.5,label,{color:C.zwart});
-      text(Mg+b,gY+dy,8.5,waarde||'—',{bold:true,color:C.zwart});
+      text(38,748+dy,8.5,label,{color:C.zwart});
+      text(38+b,748+dy,8.5,waarde||'-',{bold:true,color:C.zwart});
     };
     veld('Projectnummer:', (st.projNr||'').trim(), 0);
-    veld('Installateur:',  (st.installateur||'').trim(), 14);
-    veld('Datum:',         datumNL(st.datum), 28);
-
-    /* logo rechtsonder in een schuin vlak */
-    const lbH=68, lbY=672, lbR=W-Mg, lbB=210, lbSchuin=26;
-    poly([[lbR-lbB+lbSchuin,lbY],[lbR,lbY],[lbR,lbY+lbH],[lbR-lbB,lbY+lbH]], C.hoofd);
-    const lh=30, lw=logoBreedte(lh);
-    logo(lbR-lw-24, lbY+(lbH-lh)/2, lh, true);
+    veld('Installateur:',  (st.installateur||'').trim(), 14.5);
+    veld('Datum:',         datumNL(st.datum), 29);
 
     flush(true); /* geen voetbalk op het voorblad */
   }
