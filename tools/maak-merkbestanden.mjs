@@ -39,6 +39,12 @@ const FONTS = {
 };
 /* "licht" en "donker" slaan op de ONDERGROND waar het logo op komt:
    dlLicht = uitgespaarde versie voor op een donker vlak. */
+/* Beeldmateriaal voor het voorblad. Optioneel: ontbreken ze, dan tekent de PDF een
+   eigen vlakverdeling in de huisstijlkleuren. */
+const BEELDEN = {
+  omslagAchtergrond: 'omslag-achtergrond.png',   /* bovenvlak van het voorblad */
+  omslagFoto:        'omslag-foto.png',          /* fotostrook onder het bovenvlak */
+};
 const LOGOS = {
   dlDonker:  'Distrilight logo donker.png',   /* voor op wit */
   dlLicht:   'Distrilight logo licht.png',    /* voor op donker */
@@ -61,7 +67,7 @@ for(const [sleutel, bestand] of Object.entries(FONTS)){
   if(!r) continue;
   totaal += r.kb;
   regels.push(`  ${sleutel}: '${r.b64}',   /* ${bestand} */`);
-  uit.push(`lettertype ${sleutel.padEnd(9)} ${String(r.kb).padStart(4)} KB  <- ${bestand}`);
+  uit.push(`lettertype ${sleutel.padEnd(18)} ${String(r.kb).padStart(4)} KB  <- ${bestand}`);
 }
 const logoRegels = [];
 for(const [sleutel, bestand] of Object.entries(LOGOS)){
@@ -69,7 +75,15 @@ for(const [sleutel, bestand] of Object.entries(LOGOS)){
   if(!r) continue;
   totaal += r.kb;
   logoRegels.push(`  ${sleutel}: '${r.b64}',   /* ${bestand} */`);
-  uit.push(`logo       ${sleutel.padEnd(9)} ${String(r.kb).padStart(4)} KB  <- ${bestand}`);
+  uit.push(`logo       ${sleutel.padEnd(18)} ${String(r.kb).padStart(4)} KB  <- ${bestand}`);
+}
+const beeldRegels = [];
+for(const [sleutel, bestand] of Object.entries(BEELDEN)){
+  const r = lees(bestand);
+  if(!r) continue;
+  totaal += r.kb;
+  beeldRegels.push(`  ${sleutel}: '${r.b64}',   /* ${bestand} */`);
+  uit.push(`beeld      ${sleutel.padEnd(18)} ${String(r.kb).padStart(4)} KB  <- ${bestand}`);
 }
 
 writeFileSync(join(merk, 'merk-data.js'),
@@ -83,6 +97,9 @@ ${regels.join('\n')}
 };
 window.MERK_LOGOS = {
 ${logoRegels.join('\n')}
+};
+window.MERK_BEELDEN = {
+${beeldRegels.join('\n')}
 };
 `);
 

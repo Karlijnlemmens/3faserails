@@ -786,9 +786,18 @@
           <span class="hint" style="margin:0;">Montagepunten: <b id="c2MountCount">0</b> </span>
         </div>
         <div class="c2-adapterrow" id="c2MountSubRow" style="display:none;"></div>
+        <p class="hint" style="margin:10px 0 6px;">Projectgegevens — deze komen op het voorblad van de PDF.</p>
         <div class="c2-adapterrow">
-          <span>Projectnaam (voor de PDF):</span>
+          <span>Projectnaam:</span>
           <input type="text" id="c2Proj" class="c2-textinp" placeholder="bijv. Winkel Hoofdstraat 12">
+          <span>Projectnummer:</span>
+          <input type="text" id="c2ProjNr" class="c2-textinp" placeholder="P.12345">
+        </div>
+        <div class="c2-adapterrow">
+          <span>Installateur:</span>
+          <input type="text" id="c2Inst" class="c2-textinp" placeholder="naam van de installateur">
+          <span>Datum:</span>
+          <input type="date" id="c2Datum" class="c2-textinp">
         </div>
         <p class="hint" style="margin:0 0 6px;">Armaturen — vul de volledige naam en artikelcode in, kies kleur en typ het aantal per type. Bij DALI-dimbaar worden alleen de DALI-geschikte armaturen getoond en geldt een aparte artikelcode.</p>
         <div class="c2-prodlist" id="c2ArmList"></div>
@@ -1447,7 +1456,8 @@ function merkData(){
       const fk = window.fontkit;
       if(!fk) console.warn('fontkit kon niet worden geladen - de PDF gebruikt de standaardlettertypen.');
       if(!window.MERK_FONTS) console.warn('merk/merk-data.js kon niet worden geladen - de PDF gebruikt de standaardlettertypen.');
-      return {fontkit:fk||null, fonts:window.MERK_FONTS||{}, logos:window.MERK_LOGOS||{}};
+      return {fontkit:fk||null, fonts:window.MERK_FONTS||{}, logos:window.MERK_LOGOS||{},
+              beelden:window.MERK_BEELDEN||{}};
     })();
   }
   return merkGeladen;
@@ -1522,7 +1532,9 @@ let st = { step:1, dali:false, color:'wit', powercfg:'A', shape:null, gRows:2, g
   nodes:[], edges:[], nid:0, eid:0, feeds:[], angles:{},
   armaturen: ARMATUREN.reduce((o,a)=>{o[a.id]={color:'wit',qty:0,name:'',code:'',codeDali:'',groep:''};return o;},{}),
   overig: ADAPTERS_OVERIG.reduce((o,a)=>{o[a.id]={color:'wit',qty:0};return o;},{}),
-  use4m:false, pick:false, mount:'geen', proj:'',
+  use4m:false, pick:false, mount:'geen',
+  /* projectgegevens voor het voorblad */
+  proj:'', projNr:'', installateur:'', datum:'',
   sysOphang:false, sysOphangLen:'3', pendelKabelkleur:'zilver', pendelKabelLen:'3',
   sheets:[{id:'s1',name:'Tekenvlak 1'}], sheet:'s1', sid:1 };
 let hist=[], hIdx=-1;
@@ -2507,6 +2519,14 @@ function reportData(){
    WinAnsi, dus alles boven tekencode 255 wordt een vraagteken; voeg hier een regel
    toe in plaats van te hopen dat UTF-8 vanzelf goed gaat. Escapen hoeft niet meer:
    pdf-lib codeert de tekst zelf (zie tekst() in buildPdf). */
+/* jjjj-mm-dd (uit het datumveld) naar dd-mm-jjjj. Leeg of onbekend formaat levert
+   de datum van vandaag, zodat het voorblad nooit zonder datum de deur uit gaat. */
+function datumNL(s){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));
+  if(m) return m[3]+'-'+m[2]+'-'+m[1];
+  const d=new Date();
+  return String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
+}
 function pdfTxt(s){
   s=String(s).replace(/\u2014|\u2013/g,'-').replace(/\u00d7/g,'x').replace(/\u2192/g,'->')
     .replace(/\u201c|\u201d/g,'"').replace(/\u2018|\u2019/g,"'")
@@ -2581,10 +2601,10 @@ async function buildPdf(presenterPages, totaalPaginas){
      accentkleuren van Distrilight (oranje/groen/paars) blijven bewust ongebruikt -
      die zijn bedoeld om spaarzaam iets uit te lichten, niet om vlakken mee te vullen. */
   const THEMAS = {
-    distrilight: {naam:'Distrilight', hoofd:'#0F7ABE', hoofd2:'#3E95CB', lt:'#DCECF8', shade:'#EDF3F9', line:'#C7D9E7',
+    distrilight: {naam:'Distrilight', hoofd:'#0F7ABE', hoofd2:'#3E95CB', hoofdDiep:'#0A5A8C', lt:'#DCECF8', shade:'#EDF3F9', line:'#C7D9E7',
                   logoLicht:'dlLicht', logoDonker:'dlDonker', logoRatio:993/445,
                   kopHoogte:20, omslagHoogte:46},
-    pragmalux:   {naam:'Pragmalux', hoofd:'#1A253C', hoofd2:'#2A3855', lt:'#B9C4DA', shade:'#EDEFF3', line:'#CBD0DA',
+    pragmalux:   {naam:'Pragmalux', hoofd:'#1A253C', hoofd2:'#2A3855', hoofdDiep:'#101728', lt:'#B9C4DA', shade:'#EDEFF3', line:'#CBD0DA',
                   logoLicht:'pmLicht', logoDonker:'pmDonker', logoRatio:1418/269,
                   kopHoogte:15, omslagHoogte:30},
   };
@@ -2592,11 +2612,11 @@ async function buildPdf(presenterPages, totaalPaginas){
      polariteitslijn zijn signaalkleuren in een technische tekening, geen merkkleur. */
   const C={grey:'#5B677E', rail:'#B7C0CE', red:'#D6362B', mount:'#98A6BC',
     wit:'#FFFFFF', zwart:'#000000',
-    hoofd:'', hoofd2:'', lt:'', shade:'', line:''};
+    hoofd:'', hoofd2:'', hoofdDiep:'', lt:'', shade:'', line:''};
   let thema=null;
   function zetThema(k){
     thema=THEMAS[k];
-    C.hoofd=thema.hoofd; C.hoofd2=thema.hoofd2; C.lt=thema.lt; C.shade=thema.shade; C.line=thema.line;
+    C.hoofd=thema.hoofd; C.hoofd2=thema.hoofd2; C.hoofdDiep=thema.hoofdDiep; C.lt=thema.lt; C.shade=thema.shade; C.line=thema.line;
   }
   zetThema('distrilight');
 
@@ -2607,6 +2627,13 @@ async function buildPdf(presenterPages, totaalPaginas){
     if(!merk.logos[sleutel]) continue;
     try{ LOGO[sleutel]=await doc.embedPng(b64Bytes(merk.logos[sleutel])); }
     catch(err){ console.warn('Logo "'+sleutel+'" kon niet worden ingesloten:', err && err.message); }
+  }
+  /* Beeld voor het voorblad; ontbreekt het, dan tekent omslag() een eigen vlak. */
+  const BEELD={};
+  for(const sleutel of ['omslagAchtergrond','omslagFoto']){
+    if(!merk.beelden[sleutel]) continue;
+    try{ BEELD[sleutel]=await doc.embedPng(b64Bytes(merk.beelden[sleutel])); }
+    catch(err){ console.warn('Omslagbeeld "'+sleutel+'" kon niet worden ingesloten:', err && err.message); }
   }
 
   /* cond = een kop. Met de huisstijl is dat een echt smal lettertype (Sofia Sans
@@ -2641,9 +2668,13 @@ async function buildPdf(presenterPages, totaalPaginas){
       color:col(color||'#000000'), lineCap: round?PDFLib.LineCapStyle.Round:PDFLib.LineCapStyle.Butt});
   }
   function rect(x,yt,w,h,fill,stroke,lw){
+    /* Zonder vul- of lijnkleur tekent pdf-lib een ZWART vlak. Dat is bijna nooit de
+       bedoeling, dus dan liever niets tekenen. */
+    if(!fill && !stroke) return;
     const o={x:x, y:H-yt-h, width:w, height:h};
     if(fill) o.color=col(fill);
     if(stroke){ o.borderColor=col(stroke); o.borderWidth=lw||0.8; }
+    else o.borderWidth=0;
     pg.drawRectangle(o);
   }
   function circle(cx,cyT,r,fill,stroke,lw){
@@ -2656,6 +2687,25 @@ async function buildPdf(presenterPages, totaalPaginas){
     /* pdf-lib kent geen veelhoek; via een SVG-pad met absolute coordinaten. */
     const d='M '+pts.map(p=>p[0]+' '+p[1]).join(' L ')+' Z';
     pg.drawSvgPath(d,{x:0, y:H, color:col(fill), borderWidth:0});
+  }
+  /* Breedte van een stuk tekst zonder het te tekenen. */
+  function meet(str,size,opt){ opt=opt||{};
+    const s=pdfTxt(str), f=kiesFont(opt);
+    const hz=(opt.cond && !eigenKop) ? 84 : 100;
+    return f.widthOfTextAtSize(s,size)*hz/100 + s.length*(opt.tc||0);
+  }
+  /* Breekt af op echte breedte in plaats van op een geschat aantal tekens. Een woord
+     dat zelf al te breed is blijft staan - beter een regel die uitsteekt dan een
+     afgekapte projectnaam. */
+  function wrapBreedte(s,maxW,size,opt){
+    const woorden=String(s).split(/\s+/).filter(Boolean); const regels=[]; let cur='';
+    woorden.forEach(w=>{
+      const kandidaat = cur ? cur+' '+w : w;
+      if(cur && meet(kandidaat,size,opt)>maxW){ regels.push(cur); cur=w; }
+      else cur=kandidaat;
+    });
+    if(cur) regels.push(cur);
+    return regels;
   }
   function wrap(s,maxChars){
     const words=String(s).split(' '); const lines=[]; let cur='';
@@ -2707,7 +2757,9 @@ async function buildPdf(presenterPages, totaalPaginas){
   /* beginPage maakt de pagina meteen aan (pages telt dus de al begonnen pagina's mee);
      flush zet er alleen de voetregel op. De checkpoints verderop lezen pages.length
      direct na een flush, dus voor die telling maakt het geen verschil. */
-  function flush(){ stampFooter(); }
+  /* kaal = geen voetbalk (het voorblad); de pagina telt wel mee, anders zou de
+     nummering erna een pagina achterlopen. */
+  function flush(kaal){ if(kaal) pageNo++; else stampFooter(); }
   function beginPage(first){ pg=doc.addPage([W,H]); pages.push(pg); y=Mg; if(!first) contHeader(); }
   function need(h){ if(y+h>H-MB){ flush(); beginPage(false); } }
   function h2(t){ need(30); y+=8; text(Mg,y,12.5,String(t).toUpperCase(),{bold:true,cond:true,color:C.hoofd}); y+=17; }
@@ -2716,7 +2768,78 @@ async function buildPdf(presenterPages, totaalPaginas){
     y+=3;
   }
 
-  /* --- pagina 1: gekleurd kopvlak met puntjespatroon --- */
+  /* --- voorblad -----------------------------------------------------------------
+     Bovenvlak met de projectnaam in een schuine balk, daaronder een fotostrook, en
+     onderaan de projectgegevens met het logo. Achtergrond en foto komen uit merk/
+     als ze er zijn (omslag-achtergrond.png / omslag-foto.png); zo niet, dan wordt er
+     een vlak in de huisstijlkleuren getekend zodat het voorblad er altijd is. */
+  function beeldVullend(img, x, yt, w, h){
+    /* schaalt het beeld zo dat het het vlak vult en snijdt de rest weg */
+    const s=Math.max(w/img.width, h/img.height);
+    const bw=img.width*s, bh=img.height*s;
+    pg.drawImage(img, {x:x-(bw-w)/2, y:H-yt-h-(bh-h)/2, width:bw, height:bh});
+  }
+  function omslag(){
+    beginPage(true);
+    const bovenH=345, fotoY=345, fotoH=190;
+
+    /* bovenvlak */
+    if(BEELD.omslagAchtergrond){
+      beeldVullend(BEELD.omslagAchtergrond, 0, 0, W, bovenH);
+    } else {
+      /* terugval: driehoekpatroon in tinten van de huisstijlkleur */
+      rect(0,0,W,bovenH,C.hoofd);
+      const stap=74;
+      for(let rij=0, ry=0; ry<bovenH; rij++, ry+=stap){
+        for(let kol=0, rx=0; rx<W; kol++, rx+=stap){
+          /* vaste afwisseling, geen toeval: dezelfde invoer moet dezelfde PDF geven */
+          const licht=((rij*7+kol*5)%4)<2, tint=licht?C.hoofd2:C.hoofd;
+          poly([[rx,ry],[rx+stap,ry],[rx,ry+stap]], tint);
+          poly([[rx+stap,ry],[rx+stap,ry+stap],[rx,ry+stap]], licht?C.hoofd:C.hoofd2);
+        }
+      }
+    }
+
+    /* schuine balk met de projectnaam */
+    const balkY=104, balkH=132, balkB=372, schuin=32;
+    poly([[0,balkY],[balkB,balkY],[balkB-schuin,balkY+balkH],[0,balkY+balkH]], C.hoofdDiep);
+    const naam=(st.proj||'').trim() || 'Projectnaam';
+    const regels=wrapBreedte(naam, balkB-schuin-Mg-18, 19, {bold:true,cond:true}).slice(0,3);
+    let ty=balkY+22;
+    regels.forEach(r=>{ text(Mg,ty,19,r,{bold:true,cond:true,color:C.wit}); ty+=31; });
+
+    /* fotostrook */
+    if(BEELD.omslagFoto){
+      beeldVullend(BEELD.omslagFoto, 0, fotoY, W, fotoH);
+    } else {
+      rect(0,fotoY,W,fotoH,C.hoofd2);
+      dots(28,fotoY+20,W-56,fotoH-40,17,C.hoofd);
+      text(W/2,fotoY+fotoH/2-7,9,'PRX 3-FASE RAIL',{bold:true,cond:true,color:C.lt,align:'center',tc:1.4});
+    }
+
+    /* projectgegevens linksonder */
+    const gY=700;
+    const veld=(label,waarde,dy)=>{
+      const b=meet(label+' ',8.5,{});
+      text(Mg,gY+dy,8.5,label,{color:C.zwart});
+      text(Mg+b,gY+dy,8.5,waarde||'—',{bold:true,color:C.zwart});
+    };
+    veld('Projectnummer:', (st.projNr||'').trim(), 0);
+    veld('Installateur:',  (st.installateur||'').trim(), 14);
+    veld('Datum:',         datumNL(st.datum), 28);
+
+    /* logo rechtsonder in een schuin vlak */
+    const lbH=68, lbY=672, lbR=W-Mg, lbB=210, lbSchuin=26;
+    poly([[lbR-lbB+lbSchuin,lbY],[lbR,lbY],[lbR,lbY+lbH],[lbR-lbB,lbY+lbH]], C.hoofd);
+    const lh=30, lw=logoBreedte(lh);
+    logo(lbR-lw-24, lbY+(lbH-lh)/2, lh, true);
+
+    flush(true); /* geen voetbalk op het voorblad */
+  }
+  omslag();
+
+  /* --- pagina 2: gekleurd kopvlak met puntjespatroon. beginPage(true) = geen
+         vervolg-kopregel, want deze pagina heeft zijn eigen kopvlak. --- */
   beginPage(true);
   rect(0,0,W,124,C.hoofd);
   dots(W-215,12,190,100,13,C.hoofd2);
@@ -3287,6 +3410,14 @@ function init(){
   $('c2Use4m').addEventListener('change', e=>{ st.use4m=e.target.checked; refresh(); });
   $('c2Mount').addEventListener('change', e=>{ st.mount=e.target.value; refresh(); });
   $('c2Proj').addEventListener('input', e=>{ st.proj=e.target.value; });
+  $('c2ProjNr').addEventListener('input', e=>{ st.projNr=e.target.value; });
+  $('c2Inst').addEventListener('input', e=>{ st.installateur=e.target.value; });
+  $('c2Datum').addEventListener('input', e=>{ st.datum=e.target.value; });
+  /* datum standaard op vandaag, zodat het voorblad nooit leeg blijft */
+  (function(){ const d=new Date();
+    st.datum = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    $('c2Datum').value = st.datum;
+  })();
   buildArmList();
   buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
   /* acties */
@@ -3298,6 +3429,12 @@ function init(){
     buildArmList();
     buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
     st.sheets=[{id:'s1',name:'Tekenvlak 1'}]; st.sheet='s1'; st.sid=1; view={zoom:1,px:0,py:0};
+    /* projectgegevens van het voorblad; de datum gaat terug naar vandaag */
+    st.proj=''; st.projNr=''; st.installateur='';
+    $('c2Proj').value=''; $('c2ProjNr').value=''; $('c2Inst').value='';
+    (function(){ const d=new Date();
+      st.datum = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      $('c2Datum').value = st.datum; })();
     hist=[]; hIdx=-1;
     $('c2ShapeGrid').querySelectorAll('.shape-card').forEach(x=>x.classList.remove('sel'));
     refresh();
