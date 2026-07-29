@@ -442,6 +442,16 @@
   .c2-armrow .nm{font-size:12.5px; color:var(--ink); font-weight:600; min-width:78px;}
   .c2-armrow input.c2-textinp{flex:1 1 130px; min-width:100px; padding:5px 8px; font-size:12px;}
   .c2-armrow select.c2-select{padding:5px 8px; font-size:12px;}
+  /* voorbeeldvenster voor de PDF */
+  .pdfprev-bg{position:fixed; inset:0; background:rgba(11,24,48,.66); display:none; align-items:center; justify-content:center; z-index:120; padding:18px;}
+  .pdfprev-bg.active{display:flex;}
+  .pdfprev{background:#fff; border-radius:14px; width:min(1100px,100%); height:min(94vh,100%); display:flex; flex-direction:column; overflow:hidden;}
+  .pdfprev-bar{display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--line); flex-wrap:wrap;}
+  .pdfprev-bar b{font-size:14px; color:var(--navy-900);}
+  .pdfprev-bar .hint{margin:0; flex:1 1 auto;}
+  .pdfprev iframe{flex:1 1 auto; width:100%; border:0; background:var(--shade,#EDEFF3);}
+  @media (max-width:640px){ .pdfprev-bar .hint{display:none;} }
+
   .c2-armrow select.c2-groepsel{flex:0 1 150px; min-width:120px;}
   .c2-armrecog{font-size:11px; font-weight:700; white-space:nowrap; padding:3px 8px; border-radius:20px;}
   .c2-armrecog.ok{background:var(--green-light); color:var(--green);}
@@ -810,6 +820,7 @@
       <div class="cfg-warns" id="c2Warns"></div>
       <div class="cfg-actions">
         <button id="c2Pdf">PDF voor installateur</button>
+        <button id="c2Preview">Voorbeeld bekijken</button>
         <button id="c2Copy">Kopieer lijst</button>
         <button class="ghost" id="c2ResetAll">Reset</button>
       </div>
@@ -819,6 +830,19 @@
   <div class="c2-float" id="c2Inp" style="display:none;"><input type="text" inputmode="decimal" autocomplete="off"><span>m</span></div>
   <div class="c2-float" id="c2AngleInp" style="display:none;"><input type="text" inputmode="decimal" autocomplete="off"><span>°</span></div>
   <div class="c2-float c2-pop" id="c2Pop" style="display:none;"></div>
+
+  <!-- Voorbeeldvenster voor de PDF: vult vrijwel het scherm, met de PDF in een iframe. -->
+  <div class="pdfprev-bg" id="pdfPreviewBg">
+    <div class="pdfprev">
+      <div class="pdfprev-bar">
+        <b>Voorbeeld &mdash; PDF voor installateur</b>
+        <span class="hint">Zo ziet de installateur het document.</span>
+        <button id="pdfPreviewDl">Downloaden</button>
+        <button class="ghost" id="pdfPreviewClose">Sluiten</button>
+      </div>
+      <iframe id="pdfPreviewFrame" title="Voorbeeld van de PDF"></iframe>
+    </div>
+  </div>
 </section>
 
 
@@ -2452,55 +2476,98 @@ function reportData(){
   });
   return {B,M,sheets,numOf,trCount:trGlobal};
 }
+/* Zet tekens om die de PDF-fonts niet kennen. De standaardfonts werken met
+   WinAnsi, dus alles boven tekencode 255 wordt een vraagteken; voeg hier een regel
+   toe in plaats van te hopen dat UTF-8 vanzelf goed gaat. Escapen hoeft niet meer:
+   pdf-lib codeert de tekst zelf (zie tekst() in buildPdf). */
 function pdfTxt(s){
   s=String(s).replace(/\u2014|\u2013/g,'-').replace(/\u00d7/g,'x').replace(/\u2192/g,'->')
     .replace(/\u201c|\u201d/g,'"').replace(/\u2018|\u2019/g,"'")
     .replace(/\u26a1/g,'').replace(/\uff0b/g,'+').replace(/\u2212/g,'-');
   let o='';
-  for(let i=0;i<s.length;i++){ let c=s.charCodeAt(i); if(c>255)c=63; const ch=String.fromCharCode(c);
-    o += (ch==='('||ch===')'||ch==='\\') ? '\\'+ch : ch; }
+  for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); o += String.fromCharCode(c>255?63:c); }
   return o;
 }
 /* presenterPages: {id: aantal pagina's} van de presenters die straks tussengevoegd
    worden, en totaalPaginas: de omvang van het eindresultaat. Beide alleen nodig om de
    paginanummering te laten kloppen - zonder die gegevens telt de voetregel gewoon de
    eigen pagina's, wat handig is voor de telronde in assembleFinalPdf(). */
-function buildPdf(presenterPages, totaalPaginas){
+async function buildPdf(presenterPages, totaalPaginas){
   presenterPages = presenterPages || {};
-  /* Pragmalux-huisstijl: donker navy + puntjespatroon, condensed kapitalen,
-     navy tabelkoppen, navy voetbalk. */
+  /* Huisstijl: donker navy + puntjespatroon, condensed kapitalen, navy tabelkoppen,
+     navy voetbalk.
+
+     De pagina's worden met pdf-lib getekend (niet meer met de hand geschreven PDF-
+     operatoren), zodat er logo's als afbeelding in kunnen en de tekstbreedtes uit de
+     echte lettermaten komen in plaats van uit een schatting. Alle opmaak hieronder
+     loopt via de hulpfuncties text/line/rect/circle/poly/dots; die houden hun oude
+     signatuur en rekenen met y vanaf de BOVENkant van de pagina - pdf-lib rekent
+     vanaf onder, dat wordt hier omgezet. */
   const D=reportData();
-  const W=595,H=842,Mg=40,MB=64; const pages=[]; let ops=[]; let y=Mg; let pageNo=0;
-  const r2=v=>Math.round(v*100)/100;
-  const C={navy:'0.086 0.129 0.235', navy2:'0.137 0.192 0.325', grey:'0.357 0.404 0.494',
-    rail:'0.718 0.753 0.808', red:'0.839 0.212 0.169', shade:'0.929 0.937 0.953',
-    line:'0.796 0.816 0.855', mount:'0.596 0.651 0.737', lt:'0.725 0.769 0.855'};
-  const raw=s=>ops.push(s);
+  const W=595,H=842,Mg=40,MB=64; const pages=[]; let y=Mg; let pageNo=0;
+  const doc = await PDFLib.PDFDocument.create();
+  const FONT = {
+    reg:  await doc.embedFont(PDFLib.StandardFonts.Helvetica),
+    bold: await doc.embedFont(PDFLib.StandardFonts.HelveticaBold),
+  };
+  let pg = null; /* de pagina waarop nu getekend wordt */
+
+  /* Kleuren mogen als '#RRGGBB' of als 'r g b' (0-1) worden opgegeven; het tweede
+     formaat komt uit de oude code en blijft werken. */
+  const kleurCache = {};
+  function col(v){
+    if(kleurCache[v]) return kleurCache[v];
+    let r,g,b;
+    if(v.charAt(0)==='#'){
+      const h=v.slice(1);
+      r=parseInt(h.substr(0,2),16)/255; g=parseInt(h.substr(2,2),16)/255; b=parseInt(h.substr(4,2),16)/255;
+    } else { const p=v.trim().split(/\s+/).map(Number); r=p[0]; g=p[1]; b=p[2]; }
+    return (kleurCache[v]=PDFLib.rgb(r,g,b));
+  }
+  const C={navy:'#16213C', navy2:'#233153', grey:'#5B677E',
+    rail:'#B7C0CE', red:'#D6362B', shade:'#EDEFF3',
+    line:'#CBD0DA', mount:'#98A6BC', lt:'#B9C4DA', wit:'#FFFFFF'};
+
   function text(x,yt,size,str,opt){ opt=opt||{};
+    const s=pdfTxt(str);
+    const f=opt.bold?FONT.bold:FONT.reg;
     const hz=opt.cond?84:100, tc=opt.tc||0;
-    const est=String(str).length*size*(opt.bold?0.56:0.5)*hz/100 + String(str).length*tc;
-    let xx=x; if(opt.align==='center')xx=x-est/2; else if(opt.align==='right')xx=x-est;
-    raw('BT /'+(opt.bold?'F2':'F1')+' '+size+' Tf '+hz+' Tz '+tc+' Tc '+(opt.color||'0 0 0')+' rg 1 0 0 1 '
-      +r2(xx)+' '+r2(H-yt-size*0.78)+' Tm ('+pdfTxt(str)+') Tj ET');
+    /* echte breedte incl. horizontale schaling en letterspatiering */
+    const w=f.widthOfTextAtSize(s,size)*hz/100 + s.length*tc;
+    let xx=x; if(opt.align==='center')xx=x-w/2; else if(opt.align==='right')xx=x-w;
+    pg.setFont(f);
+    const key=pg.getFont()[1];
+    const c=col(opt.color||'#000000');
+    pg.pushOperators(
+      PDFLib.pushGraphicsState(), PDFLib.beginText(),
+      PDFLib.setFontAndSize(key,size),
+      PDFLib.setCharacterSqueeze(hz), PDFLib.setCharacterSpacing(tc),
+      PDFLib.setFillingRgbColor(c.red,c.green,c.blue),
+      PDFLib.setTextMatrix(1,0,0,1,xx,H-yt-size*0.78),
+      PDFLib.showText(f.encodeText(s)),
+      PDFLib.endText(), PDFLib.popGraphicsState());
+    return w;
   }
   function line(x1,y1,x2,y2,lw,color,round){
-    raw((color||'0 0 0')+' RG '+lw+' w '+(round?'1 J ':'0 J ')+r2(x1)+' '+r2(H-y1)+' m '+r2(x2)+' '+r2(H-y2)+' l S');
+    pg.drawLine({start:{x:x1,y:H-y1}, end:{x:x2,y:H-y2}, thickness:lw,
+      color:col(color||'#000000'), lineCap: round?PDFLib.LineCapStyle.Round:PDFLib.LineCapStyle.Butt});
   }
   function rect(x,yt,w,h,fill,stroke,lw){
-    let pre=''; if(fill)pre+=fill+' rg '; if(stroke)pre+=stroke+' RG '+(lw||0.8)+' w ';
-    raw(pre+r2(x)+' '+r2(H-yt-h)+' '+r2(w)+' '+r2(h)+' re '+(fill&&stroke?'B':(fill?'f':'S')));
+    const o={x:x, y:H-yt-h, width:w, height:h};
+    if(fill) o.color=col(fill);
+    if(stroke){ o.borderColor=col(stroke); o.borderWidth=lw||0.8; }
+    pg.drawRectangle(o);
   }
   function circle(cx,cyT,r,fill,stroke,lw){
-    const k=0.5523*r; const cy=H-cyT; let pre='';
-    if(fill)pre+=fill+' rg '; if(stroke)pre+=stroke+' RG '+(lw||1)+' w ';
-    const p=(a,b)=>r2(a)+' '+r2(b);
-    raw(pre+p(cx+r,cy)+' m '+p(cx+r,cy+k)+' '+p(cx+k,cy+r)+' '+p(cx,cy+r)+' c '
-      +p(cx-k,cy+r)+' '+p(cx-r,cy+k)+' '+p(cx-r,cy)+' c '
-      +p(cx-r,cy-k)+' '+p(cx-k,cy-r)+' '+p(cx,cy-r)+' c '
-      +p(cx+k,cy-r)+' '+p(cx+r,cy-k)+' '+p(cx+r,cy)+' c '+(fill&&stroke?'B':(fill?'f':'S')));
+    const o={x:cx, y:H-cyT, size:r};
+    if(fill) o.color=col(fill);
+    if(stroke){ o.borderColor=col(stroke); o.borderWidth=lw||1; }
+    pg.drawCircle(o);
   }
   function poly(pts,fill){
-    raw(fill+' rg '+pts.map((p,i)=>r2(p[0])+' '+r2(H-p[1])+' '+(i?'l':'m')).join(' ')+' f');
+    /* pdf-lib kent geen veelhoek; via een SVG-pad met absolute coordinaten. */
+    const d='M '+pts.map(p=>p[0]+' '+p[1]).join(' L ')+' Z';
+    pg.drawSvgPath(d,{x:0, y:H, color:col(fill), borderWidth:0});
   }
   function wrap(s,maxChars){
     const words=String(s).split(' '); const lines=[]; let cur='';
@@ -2512,7 +2579,7 @@ function buildPdf(presenterPages, totaalPaginas){
     for(let dx=0;dx<w;dx+=step) for(let dy=0;dy<h;dy+=step) circle(x0+dx,y0+dy,0.9,color);
   }
   function logo(x,yt,scale,white){
-    const c = white? '1 1 1' : C.navy;
+    const c = white? C.wit : C.navy;
     text(x,yt,17*scale,'PRAGMALUX',{bold:true,color:c});
     line(x+1,yt+19*scale,x+96*scale,yt+19*scale,0.9*scale,c);
     text(x+1,yt+21.5*scale,5.6*scale,'PROFESSIONAL LIGHTING',{color:white?C.lt:C.grey,tc:1.35*scale});
@@ -2537,8 +2604,11 @@ function buildPdf(presenterPages, totaalPaginas){
     logo(W-Mg-120,y-4,0.72,false);
     y+=22; line(Mg,y,W-Mg,y,1.1,C.navy); y+=14;
   }
-  function flush(){ stampFooter(); pages.push(ops.join('\n')); }
-  function beginPage(first){ ops=[]; y=Mg; if(!first) contHeader(); }
+  /* beginPage maakt de pagina meteen aan (pages telt dus de al begonnen pagina's mee);
+     flush zet er alleen de voetregel op. De checkpoints verderop lezen pages.length
+     direct na een flush, dus voor die telling maakt het geen verschil. */
+  function flush(){ stampFooter(); }
+  function beginPage(first){ pg=doc.addPage([W,H]); pages.push(pg); y=Mg; if(!first) contHeader(); }
   function need(h){ if(y+h>H-MB){ flush(); beginPage(false); } }
   function h2(t){ need(30); y+=8; text(Mg,y,12.5,String(t).toUpperCase(),{bold:true,cond:true,color:C.navy}); y+=17; }
   function para(t,size,color){
@@ -2749,25 +2819,7 @@ function buildPdf(presenterPages, totaalPaginas){
     });
   }
 
-  /* --- PDF-bestand samenstellen --- */
-  const objs=[];
-  objs.push('<< /Type /Catalog /Pages 2 0 R >>');
-  const kids=pages.map((_,i)=>(6+i*2)+' 0 R').join(' ');
-  objs.push('<< /Type /Pages /Count '+pages.length+' /Kids ['+kids+'] >>');
-  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
-  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
-  pages.forEach((pg,i)=>{
-    objs.push('<< /Length '+pg.length+' >>\nstream\n'+pg+'\nendstream');
-    objs.push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents '+(5+i*2)+' 0 R >>');
-  });
-  let out='%PDF-1.4\n'; const offs=[0];
-  objs.forEach((o,i)=>{ offs.push(out.length); out+=(i+1)+' 0 obj\n'+o+'\nendobj\n'; });
-  const xref=out.length;
-  out+='xref\n0 '+(objs.length+1)+'\n0000000000 65535 f \n';
-  for(let i=1;i<=objs.length;i++) out+=String(offs[i]).padStart(10,'0')+' 00000 n \n';
-  out+='trailer\n<< /Size '+(objs.length+1)+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF';
-  const bytes=new Uint8Array(out.length);
-  for(let i=0;i<out.length;i++) bytes[i]=out.charCodeAt(i)&0xff;
+  const bytes = await doc.save();
   return {bytes, bgPageCount, bookStart, bookIndexEnd, bookGroups, ownPageCount:pages.length};
 }
 if(typeof window!=='undefined') window.__c2BuildPdf=buildPdf;
@@ -2803,10 +2855,10 @@ async function assembleFinalPdf(){
      de tweede om ze te maken met "pagina X van Y" erin. buildPdf leest alleen state en
      heeft geen neveneffecten, dus twee keer draaien is veilig. */
   const totaalPresenters = Object.keys(presenterPages).reduce((n,k)=>n+presenterPages[k],0);
-  const telling = buildPdf(presenterPages);
+  const telling = await buildPdf(presenterPages);
   const totaal = telling.ownPageCount + totaalPresenters;
 
-  const {bytes, bgPageCount, bookStart, bookIndexEnd, bookGroups} = buildPdf(presenterPages, totaal);
+  const {bytes, bgPageCount, bookStart, bookIndexEnd, bookGroups} = await buildPdf(presenterPages, totaal);
   const ownDoc = await PDFLib.PDFDocument.load(bytes);
   const finalDoc = await PDFLib.PDFDocument.create();
 
@@ -2841,12 +2893,21 @@ async function assembleFinalPdf(){
   return eind;
 }
 
-async function exportPdf(){
+/* Bestandsnaam op basis van de projectnaam. */
+function pdfBestandsnaam(){
+  const nm=(st.proj||'installatieoverzicht').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'installatieoverzicht';
+  return nm+'-prx-rail.pdf';
+}
+
+/* Gedeelde weg voor downloaden en voorbeeld bekijken: controleert of de tekening
+   compleet is, waarschuwt over gaten in het armaturenboek en levert de bytes.
+   Geeft null terug als er niets te maken valt. */
+async function maakPdfBytes(){
   const cmP=compMap(); const fedP=new Set(st.feeds.map(f=>feedComp(f,cmP.m)));
   if(cmP.count===0 || fedP.size<cmP.count){
     const msg = cmP.count===0 ? 'Teken eerst een figuur (stap 4) voordat de PDF gemaakt kan worden.'
       : 'Kies eerst per traject een stroomaansluitpunt (\u26a1 in stap 5) \u2014 daarna kan de PDF gemaakt worden.';
-    $('c2StepMsg').textContent=msg; alert(msg); return;
+    $('c2StepMsg').textContent=msg; alert(msg); return null;
   }
   /* Waarschuwen over gaten in het armaturenboek, maar de PDF altijd gewoon maken. */
   const meldingen=[];
@@ -2864,16 +2925,49 @@ async function exportPdf(){
       + 'Toevoegen: zet de PDF in presenters-bron/ en draai "node tools/maak-presenters.mjs".');
   }
   if(meldingen.length) alert(meldingen.join('\n\n')+'\n\nDe PDF wordt verder gewoon gegenereerd.');
-  let bytes;
-  try{ bytes = await assembleFinalPdf(); }
-  catch(err){ console.error(err); alert('De PDF kon niet worden gegenereerd: '+(err&&err.message?err.message:err)); return; }
-  const blob=new Blob([bytes],{type:'application/pdf'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  const nm=(st.proj||'installatieoverzicht').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'installatieoverzicht';
-  a.download=nm+'-prx-rail.pdf';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(_){ } }, 4000);
+  try{ return await assembleFinalPdf(); }
+  catch(err){ console.error(err); alert('De PDF kon niet worden gegenereerd: '+(err&&err.message?err.message:err)); return null; }
+}
+
+/* Knop even op slot terwijl de PDF gemaakt wordt: bij een boek met presenters duurt
+   dat merkbaar, en twee keer klikken zou twee exports starten. */
+async function metBezigKnop(id, fn){
+  const knop=$(id); const oud=knop.textContent;
+  knop.disabled=true; knop.textContent='Bezig…';
+  try{ return await fn(); }
+  finally{ knop.disabled=false; knop.textContent=oud; }
+}
+
+async function exportPdf(){
+  return metBezigKnop('c2Pdf', async()=>{
+    const bytes = await maakPdfBytes();
+    if(!bytes) return;
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    a.download=pdfBestandsnaam();
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(_){ } }, 4000);
+  });
+}
+
+/* Voorbeeld: dezelfde PDF, maar in een venster over de tool heen in plaats van als
+   download - scheelt bij het afstemmen van de opmaak een berg bestanden in Downloads.
+   De blob-URL blijft leven tot het venster dicht gaat. */
+let pdfVoorbeeldUrl=null;
+function sluitVoorbeeld(){
+  $('pdfPreviewBg').classList.remove('active');
+  $('pdfPreviewFrame').removeAttribute('src');
+  if(pdfVoorbeeldUrl){ try{ URL.revokeObjectURL(pdfVoorbeeldUrl); }catch(_){ } pdfVoorbeeldUrl=null; }
+}
+async function previewPdf(){
+  return metBezigKnop('c2Preview', async()=>{
+    const bytes = await maakPdfBytes();
+    if(!bytes) return;
+    if(pdfVoorbeeldUrl){ try{ URL.revokeObjectURL(pdfVoorbeeldUrl); }catch(_){ } }
+    pdfVoorbeeldUrl = URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    $('pdfPreviewFrame').src = pdfVoorbeeldUrl;
+    $('pdfPreviewBg').classList.add('active');
+  });
 }
 
 /* ---------- wizard ---------- */
@@ -3106,6 +3200,11 @@ function init(){
     refresh();
   });
   $('c2Pdf').addEventListener('click', exportPdf);
+  $('c2Preview').addEventListener('click', previewPdf);
+  $('pdfPreviewClose').addEventListener('click', sluitVoorbeeld);
+  $('pdfPreviewDl').addEventListener('click', exportPdf);
+  $('pdfPreviewBg').addEventListener('click', e=>{ if(e.target.id==='pdfPreviewBg') sluitVoorbeeld(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape' && $('pdfPreviewBg').classList.contains('active')) sluitVoorbeeld(); });
   $('c2Copy').addEventListener('click', ()=>{
     const B=lastBOM||computeBOM();
     const lines=['PRX 3-Fase Rail \u2014 materiaallijst ('+(st.shape?SHAPES[st.shape].label:'\u2014')+', '+st.color+', configuratie '+st.powercfg+')',''];

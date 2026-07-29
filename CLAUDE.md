@@ -15,7 +15,7 @@ There is no build system, package manager, or test suite. Everything — HTML, C
 - There is no linter, formatter, or test runner configured. Verify changes by opening `index.html` in a browser and exercising the relevant tab manually.
 - Everything is vanilla JS/CSS — no frameworks, no npm dependencies, no CDN scripts except Google Fonts. Keep it that way; don't introduce a build step or external libraries for a change that doesn't need one. **One deliberate exception:** `vendor/pdf-lib.min.js` (loaded via a local `<script src>`, not a CDN) is used solely to merge externally-supplied "presenter" PDFs into the generated installation-overview PDF at export time — see below. Don't remove it and don't add further dependencies without similarly strong justification.
 - The file is large (~2550 lines). Use the `<!-- ===== SECTION ===== -->` HTML comments and the `/* =================== NAME =================== */` JS comments to jump to the right area rather than reading linearly.
-- PDF export (`buildPdf`, in `index.html`) is still hand-rolled: it writes raw PDF operators/objects as strings (no library like jsPDF). `pdfTxt()` transliterates Dutch/special characters and escapes PDF string syntax — extend that function if you add new characters to PDF output rather than assuming UTF-8 works. The actual merge with presenter PDFs happens in `assembleFinalPdf()` (async, uses `vendor/pdf-lib.min.js`), which `exportPdf()` calls instead of `buildPdf()` directly. See "The exported PDF" below.
+- PDF export (`buildPdf`, in `index.html`) draws its pages with `vendor/pdf-lib.min.js` — it used to write raw PDF operators by hand; that's gone. `buildPdf` is `async` and returns real pdf-lib bytes. `pdfTxt()` only transliterates Dutch/special characters now (pdf-lib handles escaping/encoding); extend it if you add new characters rather than assuming UTF-8 works. See "The exported PDF" below.
 
 ## The exported PDF
 
@@ -26,7 +26,19 @@ Bestelgegevens → rail presenter → Montage + tekenvlakken
 → Armaturenboek index → per type: tabbladpagina + that type's presenter
 ```
 
-`buildPdf()` returns `{bytes, bgPageCount, bookStart, bookIndexEnd, bookGroups}`. Those are page-index checkpoints for `assembleFinalPdf()`, which does the splicing: `bgPageCount` = end of Bestelgegevens (rail presenter goes here), `bookStart` = first armaturenboek page, `bookIndexEnd` = end of the index, and `bookGroups` lists the group ids in book order — divider page `bookIndexEnd + i` is followed by presenter `bookGroups[i]`. If you add or reorder pages in `buildPdf`, keep these checkpoints in sync or the presenters land in the wrong place.
+`buildPdf()` returns `{bytes, bgPageCount, bookStart, bookIndexEnd, bookGroups, ownPageCount}`. Those are page-index checkpoints for `assembleFinalPdf()`, which does the splicing: `bgPageCount` = end of Bestelgegevens (rail presenter goes here), `bookStart` = first armaturenboek page, `bookIndexEnd` = end of the index, and `bookGroups` lists the group ids in book order — divider page `bookIndexEnd + i` is followed by presenter `bookGroups[i]`. If you add or reorder pages in `buildPdf`, keep these checkpoints in sync or the presenters land in the wrong place.
+
+`assembleFinalPdf()` loads every needed presenter **first**, because the footer's page number has to account for pages that get spliced in later: it passes `presenterPages` (`{id: pageCount}`) into `buildPdf`, which keeps a running `extra` offset, bumped at each splice point. It then runs `buildPdf` **twice** — once to count, once to render with `"pagina X van Y"` — which is safe because `buildPdf` only reads state. A mismatch between predicted and actual page count logs a console warning. The loaded presenter documents are reused for the merge, not parsed twice.
+
+### Drawing layer
+
+All page content goes through `text/line/rect/circle/poly/dots` inside `buildPdf`. They take **y from the top** of the page and convert to pdf-lib's bottom-left origin internally — keep that convention if you add primitives. `text()` uses real font metrics (`widthOfTextAtSize`) for centre/right alignment, and `pushOperators` for character squeeze (condensed caps) and letter spacing, which pdf-lib's `drawText` doesn't expose. Colours accept `'#RRGGBB'` or legacy `'r g b'` (0–1) strings via `col()`.
+
+Only the 14 standard PDF fonts are available; embedding a brand font needs `@pdf-lib/fontkit` vendored alongside pdf-lib. Raster logos (PNG/JPEG) work today via `doc.embedPng` / `embedJpg` — no extra dependency.
+
+### Preview
+
+`maakPdfBytes()` is the shared path (validation → warnings → bytes) behind both `exportPdf()` (downloads) and `previewPdf()` (shows the PDF in an in-page overlay, `#pdfPreviewBg`, via a blob URL in an iframe). `sluitVoorbeeld()` revokes that URL — don't drop it, the blobs are multi-MB.
 
 ### Fixture types and their presenters
 
