@@ -29,7 +29,7 @@ const GROEPEN = [
   ['rail', '3-Fase Rail'],
   ['ag01', 'Punto'], ['ag02', 'Piccolo'], ['ag03', 'Dio'], ['ag04', 'Alto'],
   ['ag05', 'Skyline'], ['ag06', 'Arda'], ['ag07', 'Orion'], ['ag08', 'Notra'],
-  ['ag09', 'Ario GU10'], ['ag10', 'Lustra GU10'], ['ag11', 'Fendi GU10'], ['ag12', 'Altoflood'],
+  ['ag09', 'Ario'], ['ag10', 'Lustra'], ['ag11', 'Fendi'], ['ag12', 'Altoflood'],
 ];
 const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
 const opNaam = new Map();
