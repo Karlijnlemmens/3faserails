@@ -2695,8 +2695,7 @@ async function buildPdf(presenterPages, totaalPaginas){
     rect(0,H-24,W,24,C.hoofd);
     /* merknaam als tekst: de balk is 24pt hoog, daar past geen leesbaar logo in */
     text(Mg,H-19,7.5,thema.naam.toUpperCase(),{bold:true,cond:true,color:C.wit,tc:1.1});
-    text(W-Mg,H-19,7.5,'PRX 3-Fase Rail  \u00b7  '+sectie+'  \u00b7  pagina '+(pageNo+extra)
-      +(totaalPaginas? ' van '+totaalPaginas : ''),{color:C.lt,align:'right'});
+    text(W-Mg,H-19,7.5,'PRX 3-Fase Rail  \u00b7  '+sectie+'  \u00b7  '+(pageNo+extra),{color:C.lt,align:'right'});
   }
   function contHeader(){
     text(Mg,y,13,sectie.toUpperCase(),{bold:true,cond:true,color:C.hoofd});
@@ -2733,14 +2732,31 @@ async function buildPdf(presenterPages, totaalPaginas){
     cols.forEach(c=>{ text(x+5,y+2.6,8.5,c.h,{bold:true,color:C.wit}); x+=c.w; });
     y+=15; return {cols,totW,i:0};
   }
+  /* Woordgewijs afbreken op echte tekstbreedte, zodat een lange omschrijving nooit
+     de volgende kolom in loopt maar naar een extra regel binnen dezelfde cel gaat. */
+  function wrapCell(str,w){
+    const words=String(str==null?'':str).split(' ');
+    const lines=[]; let cur='';
+    words.forEach(wd=>{
+      const test=cur?cur+' '+wd:wd;
+      if(FONT.reg.widthOfTextAtSize(test,8.5)>w && cur){ lines.push(cur); cur=wd; }
+      else cur=test;
+    });
+    lines.push(cur);
+    return lines;
+  }
   function tableRow(T,vals){
-    if(y+14>H-MB){ flush(); beginPage(false); let x=Mg; rect(Mg,y,T.totW,15,C.hoofd);
+    const lineH=11;
+    const cellLines=T.cols.map((c,j)=>wrapCell(vals[j],c.w-10));
+    const nLines=Math.max.apply(null,cellLines.map(l=>l.length));
+    const rowH=13.5+(nLines-1)*lineH;
+    if(y+rowH>H-MB){ flush(); beginPage(false); let x=Mg; rect(Mg,y,T.totW,15,C.hoofd);
       T.cols.forEach(c=>{ text(x+5,y+2.6,8.5,c.h,{bold:true,color:C.wit}); x+=c.w; }); y+=15; }
-    if(T.i%2===0) rect(Mg,y,T.totW,13.5,C.shade);
+    if(T.i%2===0) rect(Mg,y,T.totW,rowH,C.shade);
     let x=Mg;
-    T.cols.forEach((c,j)=>{ text(x+5,y+2.4,8.5,vals[j]); x+=c.w; });
-    line(Mg,y+13.5,Mg+T.totW,y+13.5,0.5,C.line);
-    T.i++; y+=13.5;
+    T.cols.forEach((c,j)=>{ cellLines[j].forEach((ln,li)=>text(x+5,y+2.4+li*lineH,8.5,ln)); x+=c.w; });
+    line(Mg,y+rowH,Mg+T.totW,y+rowH,0.5,C.line);
+    T.i++; y+=rowH;
   }
 
   /* --- Bestelgegevens: eerste inhoudelijke sectie, direct onder het kopvlak.
@@ -2955,8 +2971,8 @@ async function assembleFinalPdf(){
   }
 
   /* Twee doorgangen: de eerste alleen om te tellen hoeveel eigen pagina's het worden,
-     de tweede om ze te maken met "pagina X van Y" erin. buildPdf leest alleen state en
-     heeft geen neveneffecten, dus twee keer draaien is veilig. */
+     de tweede om ze daadwerkelijk te maken. buildPdf leest alleen state en heeft geen
+     neveneffecten, dus twee keer draaien is veilig. */
   const totaalPresenters = Object.keys(presenterPages).reduce((n,k)=>n+presenterPages[k],0);
   const telling = await buildPdf(presenterPages);
   const totaal = telling.ownPageCount + totaalPresenters;
