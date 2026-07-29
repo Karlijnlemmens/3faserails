@@ -25,6 +25,7 @@
 import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { lees as leesPng, kleuren as pngKleuren } from './lees-png.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const merk = join(root, 'merk');
@@ -84,3 +85,24 @@ ${logoRegels.join('\n')}
 console.log('merk/merk-data.js geschreven (' + totaal + ' KB aan bronbestanden):');
 uit.forEach(r=>console.log('  ' + r));
 if(gemist.length) console.log('\nNog niet aanwezig: ' + gemist.join(', '));
+
+/* Huisstijlkleuren aflezen uit het logo, zodat ze niet met de hand overgenomen
+   hoeven te worden. Alleen ter informatie - het invullen gebeurt in index.html. */
+const logoVoorKleur = ['logo-donker.png','logo-licht.png','pragmalux-logo.png']
+  .map(f=>join(merk,f)).find(p=>existsSync(p));
+if(logoVoorKleur){
+  const afb = leesPng(readFileSync(logoVoorKleur));
+  if(!afb){
+    console.log('\nKleuren aflezen uit het logo lukte niet (onbekend PNG-formaat) - geef de hexcodes met de hand door.');
+  } else {
+    const k = pngKleuren(afb);
+    console.log('\nKleuren gevonden in ' + logoVoorKleur.split('/').pop() + ' (' + afb.w + 'x' + afb.h + '):');
+    if(k.accenten.length){
+      console.log('  accent   ' + k.accenten.map(c=>c.hex).join('  '));
+    }
+    if(k.neutralen.length){
+      console.log('  neutraal ' + k.neutralen.map(c=>c.hex).join('  '));
+    }
+    console.log('  (controleer deze even tegen het huisstijlhandboek voordat ze in index.html gaan)');
+  }
+}
