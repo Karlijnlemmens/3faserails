@@ -2840,8 +2840,13 @@ async function buildPdf(presenterPages, totaalPaginas){
         rect(0,fotoY,W,fotoH,meng(C.hoofd,C.wit,0.14));
       }
 
-      /* schuine balk waar de projectnaam in komt */
-      poly([[0,99],[378,99],[378-34,226],[0,226]], C.hoofdDiep);
+      /* schuine balk waar de projectnaam in komt - zelfde hoek als de schuine kant
+         van het logovlak rechtsonder (34pt over 70pt hoogte), zodat de twee sneden in
+         de huisstijl met elkaar overeenkomen in plaats van toevallig verschillend. */
+      const titelY0=99, titelY1=226;
+      const schuineHoek=34/70;
+      const titelSchuin=(titelY1-titelY0)*schuineHoek;
+      poly([[0,titelY0],[378,titelY0],[378-titelSchuin,titelY1],[0,titelY1]], C.hoofdDiep);
 
       /* logovlak rechtsonder, doorlopend tot de paginarand */
       poly([[361+34,716],[W,716],[W,786],[361,786]], C.hoofd);
@@ -2849,11 +2854,13 @@ async function buildPdf(presenterPages, totaalPaginas){
       logo(W-logoBreedte(lh)-30, 716+(70-lh)/2, lh, true);
     }
 
-    /* projectnaam in de balk - maximaal 3 regels, anders loopt hij eruit */
+    /* projectnaam in de balk - maximaal 3 regels, anders loopt hij eruit. Breedte is
+       gebaseerd op de onderste (smalste) regel, want de balk versmalt door de schuine
+       kant hierboven - bij een bredere maat zou de laatste regel erover heen lopen. */
     const naam=(st.proj||'').trim() || 'Projectnaam';
-    const regels=wrapBreedte(naam, 350, 25, {bold:true,cond:true}).slice(0,3);
+    const regels=wrapBreedte(naam, 260, 20, {bold:true,cond:true}).slice(0,3);
     let ty=128;
-    regels.forEach(r=>{ text(45,ty,25,r,{bold:true,cond:true,color:C.wit}); ty+=36; });
+    regels.forEach(r=>{ text(45,ty,20,r,{bold:true,cond:true,color:C.wit}); ty+=36; });
 
     /* projectgegevens linksonder */
     const veld=(label,waarde,dy)=>{
