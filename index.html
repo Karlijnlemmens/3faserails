@@ -2754,10 +2754,12 @@ async function buildPdf(presenterPages, totaalPaginas){
   let extra = 0;
   function stampFooter(){
     pageNo++;
-    rect(0,H-24,W,24,C.hoofd);
-    /* merknaam als tekst: de balk is 24pt hoog, daar past geen leesbaar logo in */
-    text(Mg,H-19,7.5,thema.naam.toUpperCase(),{bold:true,cond:true,color:C.wit,tc:1.1});
-    text(W-Mg,H-19,7.5,'PRX 3-Fase Rail  \u00b7  '+sectie+'  \u00b7  '+(pageNo+extra),{color:C.lt,align:'right'});
+    /* Geen doorlopende balk maar een lichte schuine vorm linksonder, met de tekst
+       erop in de huisstijlkleur. Volgt het thema, dus op de armaturenboek-pagina's
+       wordt het vanzelf Pragmalux-blauw. */
+    poly([[0,H-52],[128,H-52],[92,H],[0,H]], meng(C.hoofd,C.wit,0.82));
+    text(Mg,H-34,7.5,thema.naam.toUpperCase(),{bold:true,cond:true,color:C.hoofd,tc:1.1});
+    text(W-Mg,H-34,7.5,'PRX 3-Fase Rail  \u00b7  '+sectie+'  \u00b7  '+(pageNo+extra),{color:C.hoofd,align:'right'});
   }
   function contHeader(){
     text(Mg,y,13,sectie.toUpperCase(),{bold:true,cond:true,color:C.hoofd});
@@ -2863,7 +2865,7 @@ async function buildPdf(presenterPages, totaalPaginas){
      uitgespaarde kapitalen, en daaronder projectnaam en datum. Ontbreekt het
      patroonbestand, dan blijft het een egale balk. Zet y na afloop onder de balk,
      zodat de aanroeper meteen verder kan. */
-  const BALK_H = 152;
+  const BALK_H = 122;   /* 20% lager dan de eerste opzet van 152 */
   function paginaKop(titel, onderschrift){
     rect(0,0,W,BALK_H,C.hoofd);
     if(BEELD.ruitpatroon){
@@ -2877,10 +2879,6 @@ async function buildPdf(presenterPages, totaalPaginas){
     if(onderschrift) text(Mg,111,11,onderschrift,{color:C.lt});
     y=BALK_H+38;
   }
-  /* Lichte schuine accentvorm onderaan de pagina, zoals in het ontwerp. */
-  function paginaVoetVorm(){
-    poly([[0,H-52],[128,H-52],[92,H],[0,H]], meng(C.hoofd,C.wit,0.80));
-  }
 
   /* --- pagina 2: Bestelgegevens. beginPage(true) = geen vervolg-kopregel, want
          deze pagina heeft zijn eigen kopbalk. --- */
@@ -2889,7 +2887,6 @@ async function buildPdf(presenterPages, totaalPaginas){
      begrenzen, dus alles wat eronder komt moet daarna getekend worden */
   paginaKop('Bestelgegevens',
     (st.proj||'').trim() + ((st.proj||'').trim()? '  \u2014  ':'') + datumNL(st.datum));
-  paginaVoetVorm();
 
   function tableStart(cols){ const totW=cols.reduce((s,c)=>s+c.w,0);
     need(20); let x=Mg; rect(Mg,y,totW,15,C.hoofd);
