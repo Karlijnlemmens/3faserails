@@ -13,8 +13,10 @@
  * Verwacht in merk/:
  *     OpenSans-Regular.ttf                     lopende tekst
  *     OpenSans-Bold.ttf                        nadruk en tabelkoppen
- *     SofiaSansExtraCondensed-ExtraBold.ttf    koppen
- *     SofiaSansExtraCondensed-Light.ttf        onderschriften
+ *     SofiaSansExtraCondensed-ExtraBold.ttf    koppen (Pragmalux-deel: armaturenboek)
+ *     SofiaSansExtraCondensed-Light.ttf        onderschriften (Pragmalux-deel)
+ *     Poppins-Bold.ttf                         koppen (Distrilight-deel: voorblad/bestelgegevens)
+ *     Poppins-Regular.ttf                      onderschriften (Distrilight-deel)
  *     Distrilight logo donker.png              voor op een witte ondergrond
  *     Distrilight logo licht.png               uitgespaard, voor op een donker vlak
  *     Pragmalux logo donker.png                idem, voor het armaturendeel
@@ -37,6 +39,8 @@ const FONTS = {
   bold:      'OpenSans-Bold.ttf',
   kopVet:    'SofiaSansExtraCondensed-ExtraBold.ttf',
   kopLicht:  'SofiaSansExtraCondensed-Light.ttf',
+  dlKopVet:   'Poppins-Bold.ttf',
+  dlKopLicht: 'Poppins-Regular.ttf',
 };
 /* "licht" en "donker" slaan op de ONDERGROND waar het logo op komt:
    dlLicht = uitgespaarde versie voor op een donker vlak. */
