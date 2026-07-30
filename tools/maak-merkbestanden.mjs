@@ -50,6 +50,8 @@ const BEELDEN = {
   /* Volledig voorblad in een afbeelding (alles behalve de projectgegevens). Is dit
      aanwezig, dan gaat het voor op omslagBoven. */
   omslagVolledig:    'omslag.png',
+  /* Vel met het ruitpatroon, gebruikt in de kopbalken van de inhoudspagina's. */
+  ruitpatroon:       'ruitpatroon.png',
 };
 const LOGOS = {
   dlDonker:  'Distrilight logo donker.png',   /* voor op wit */
