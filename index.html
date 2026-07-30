@@ -707,7 +707,9 @@
 </section>
 
 <!-- ===================== CONFIGURATOR ===================== -->
-<section id="configurator">
+<!-- active: dit is het tabblad dat bij het openen getoond wordt. De knop in #tabnav
+     draagt de klasse ook; die twee horen bij elkaar. -->
+<section id="configurator" class="active">
   <span class="eyebrow">Teken het traject</span>
   <h2 class="section-title">Railconfigurator</h2>
   <p class="lede">Teken alleen de gewenste railvorm en kies het stroomaansluitpunt. De tool bepaalt zelf alle koppelstukken, de polariteit (rode lijn, zoals in het polariteitsschema), de railverdeling in stukken van 1/2/3/4 meter en de complete artikellijst.</p>
@@ -830,6 +832,8 @@
       <div class="cfg-actions">
         <button id="c2Pdf">PDF voor installateur</button>
         <button id="c2Preview">Voorbeeld bekijken</button>
+        <!-- Hulpmiddel bij het afstemmen van de PDF-opmaak; mag weg zodra die klaar is. -->
+        <button id="c2Demo" class="ghost" title="Vult een complete voorbeeldconfiguratie in en toont meteen de PDF">Testvoorbeeld</button>
         <button id="c2Copy">Kopieer lijst</button>
         <button class="ghost" id="c2ResetAll">Reset</button>
       </div>
@@ -3472,6 +3476,70 @@ function init(){
     $('c2ShapeGrid').querySelectorAll('.shape-card').forEach(x=>x.classList.remove('sel'));
     refresh();
   });
+  /* ---------- testvoorbeeld ------------------------------------------------------
+     Hulpmiddel voor het afstemmen van de PDF-opmaak: vult in een klik een complete
+     configuratie in, zodat je niet elke keer de hele wizard door hoeft. Het loopt via
+     precies dezelfde functies als de tool zelf (selectShape, st, refresh), dus wat je
+     in de proef-PDF ziet is wat een gebruiker ook krijgt - er is geen aparte weg naar
+     de PDF die uit de pas kan gaan lopen.
+
+     De gekozen T-vorm is niet willekeurig: die levert een aansluitstuk, een
+     T-koppelstuk en twee eindkappen op, dus de tekening en de onderdelentabel zijn
+     meteen gevuld. Bij de armaturen zitten bewust drie gevallen door elkaar: twee
+     uitvoeringen van hetzelfde type (die samen onder een tabblad horen), een tweede
+     type, en een type zonder presenter.
+
+     Weghalen als de opmaak klaar is: deze functie, de knop c2Demo in de HTML en de
+     twee regels eronder die hem koppelen. Verder hangt er niets aan. */
+  function laadVoorbeeld(){
+    st.color='wit'; st.powercfg='A'; st.dali=false; st.use4m=false;
+    st.shape=null; st.nodes=[]; st.edges=[]; st.feeds=[]; st.angles={};
+    st.sheets=[{id:'s1',name:'Tekenvlak 1'}]; st.sheet='s1'; st.sid=1;
+    hist=[]; hIdx=-1;
+    selectShape('t-vorm');
+
+    /* voedingspunt op het eerste uiteinde */
+    const uiteinde = sheetNodes('s1').find(n=>nodeType(n.id)==='end');
+    if(uiteinde) st.feeds=[{kind:'node', node:uiteinde.id, side:'R'}];
+
+    st.mount='beugel';
+    st.proj='Renovatie kantoorpand Weena 120 te Rotterdam';
+    st.projNr='P.24187';
+    st.installateur='Van der Velden Elektrotechniek B.V.';
+    const d=new Date();
+    st.datum=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+
+    const zetArm=(id,naam,code,kleur,aantal)=>{
+      const a=st.armaturen[id]; a.name=naam; a.code=code; a.color=kleur; a.qty=aantal; a.groep='';
+    };
+    Object.keys(st.armaturen).forEach(k=>{ const a=st.armaturen[k]; a.name=''; a.code=''; a.codeDali=''; a.qty=0; a.groep=''; });
+    zetArm('arm01','Punto 15W 3000K','2001111','wit',8);
+    zetArm('arm02','Punto 15W 3000K','2001112','zwart',4);
+    zetArm('arm03','Dio 12W','2002222','wit',6);
+    zetArm('arm04','Arda 8W','2004444','wit',3);
+
+    Object.keys(st.overig).forEach(k=>{ st.overig[k].qty=0; });
+    st.overig.ao01.qty=21; /* ON/OFF rail adapter, hoort bij de armaturen */
+
+    /* invoervelden gelijktrekken met de state */
+    $('c2Proj').value=st.proj; $('c2ProjNr').value=st.projNr;
+    $('c2Inst').value=st.installateur; $('c2Datum').value=st.datum;
+    $('c2Mount').value=st.mount;
+    $('c2ShapeGrid').querySelectorAll('.shape-card').forEach(x=>x.classList.toggle('sel', x.dataset.shape==='t-vorm'));
+    buildArmList();
+    buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
+    st.step=6; refresh();
+  }
+  $('c2Demo').addEventListener('click', ()=>{ laadVoorbeeld(); previewPdf(); });
+  /* index.html?demo opent de tool met het voorbeeld ingevuld; ?demo=pdf toont meteen
+     de proef-PDF. Zo is na een wijziging in de opmaak een herlaadactie genoeg. */
+  (function(){
+    const q=new URLSearchParams(location.search);
+    if(!q.has('demo')) return;
+    laadVoorbeeld();
+    if(q.get('demo')==='pdf') setTimeout(previewPdf, 60);
+  })();
+
   $('c2Pdf').addEventListener('click', exportPdf);
   $('c2Preview').addEventListener('click', previewPdf);
   $('pdfPreviewClose').addEventListener('click', sluitVoorbeeld);
