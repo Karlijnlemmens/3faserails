@@ -56,6 +56,8 @@ const BEELDEN = {
   omslagVolledig:    'omslag.png',
   /* Vel met het ruitpatroon, gebruikt in de kopbalken van de inhoudspagina's. */
   ruitpatroon:       'ruitpatroon.png',
+  /* Foto op het voorblad van het armaturenhoofdstuk. */
+  armaturenFoto:     'afbarmaturen.png',
 };
 const LOGOS = {
   dlDonker:  'Distrilight logo donker.png',   /* voor op wit */

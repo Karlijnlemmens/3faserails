@@ -2648,7 +2648,7 @@ async function buildPdf(presenterPages, totaalPaginas){
     throw new Error('geen PNG of JPEG');
   }
   const BEELD={};
-  for(const sleutel of ['omslagVolledig','omslagBoven','ruitpatroon']){
+  for(const sleutel of ['omslagVolledig','omslagBoven','ruitpatroon','armaturenFoto']){
     if(!merk.beelden[sleutel]) continue;
     try{ BEELD[sleutel]=await sluitBeeldIn(b64Bytes(merk.beelden[sleutel])); }
     catch(err){ console.warn('Omslagbeeld "'+sleutel+'" kon niet worden ingesloten:', err && err.message); }
@@ -2805,6 +2805,17 @@ async function buildPdf(presenterPages, totaalPaginas){
      onderaan de projectgegevens met het logo. Achtergrond en foto komen uit merk/
      als ze er zijn (omslag-achtergrond.png / omslag-foto.png); zo niet, dan wordt er
      een vlak in de huisstijlkleuren getekend zodat het voorblad er altijd is. */
+  /* Tekent binnen een uitgeknipt vlak: alles wat de tekenfunctie buiten de veelhoek
+     zet, valt weg. Nodig voor beelden die het vlak moeten vullen zonder eroverheen
+     te lopen - pdf-lib heeft daar zelf geen voorziening voor. */
+  function metUitsnede(punten, tekenen){
+    pg.pushOperators(PDFLib.pushGraphicsState(),
+      PDFLib.moveTo(punten[0][0], H-punten[0][1]),
+      ...punten.slice(1).map(pt=>PDFLib.lineTo(pt[0], H-pt[1])),
+      PDFLib.closePath(), PDFLib.clip(), PDFLib.endPath());
+    tekenen();
+    pg.pushOperators(PDFLib.popGraphicsState());
+  }
   function beeldVullend(img, x, yt, w, h){
     /* schaalt het beeld zo dat het het vlak vult en snijdt de rest weg */
     const s=Math.max(w/img.width, h/img.height);
@@ -3068,6 +3079,35 @@ async function buildPdf(presenterPages, totaalPaginas){
   const armCode=(r)=>{ const c = st.dali ? r.s.codeDali : r.s.code; return (c&&c.trim()) ? c.trim() : 'volgt'; };
   const armKlr=(r)=> r.s.color==='custom' ? 'Custom' : CLRN(r.s.color);
   if(boek.length){
+    /* --- voorblad van het armaturenhoofdstuk ---------------------------------
+       Maten zijn opgemeten uit het aangeleverde ontwerp (AB_Armaturen.pdf):
+         titelbalk    y 85..200, rechterrand 379 boven -> 337 onder
+         witte band   y 534..769, rand naar de foto 308 boven -> 220 onder
+         "Armaturen"  x 27, basislijn 148, korps 36
+         citaat       x 27, basislijnen 605/634/664/693, korps 19,6
+       Dit blad is nog Distrilight: het patroon en het blauw komen daarvandaan.
+       Pas daarna schakelt het document over naar Pragmalux. */
+    sectie='Armaturen';
+    beginPage(true);
+    if(BEELD.ruitpatroon) beeldVullend(BEELD.ruitpatroon, 0, 0, W, H);
+    else rect(0,0,W,H,C.hoofd);
+
+    poly([[0,85],[379,85],[337,200],[0,200]], C.hoofd);
+    text(27, 148-36*0.78, 36, 'Armaturen', {cond:true, color:C.wit});
+
+    /* Foto rechtsonder; de schuine rand ontstaat door het witte vlak dat er links
+       overheen komt. De uitsnede houdt de foto binnen zijn eigen vlak. */
+    if(BEELD.armaturenFoto){
+      metUitsnede([[190,534],[W,534],[W,769],[190,769]],
+        ()=> beeldVullend(BEELD.armaturenFoto, 190, 534, W-190, 235));
+    }
+    poly([[0,534],[308,534],[220,769],[0,769]], C.wit);
+
+    ['Precisie in licht begint','bij de juiste armaturen,','geselecteerd met zorg','en aandacht.']
+      .forEach((r,i)=> text(27, 605+i*29.5-19.6*0.78, 19.6, r, {cond:true, bold:false, color:C.hoofd}));
+
+    flush(true); /* hoofdstukblad, geen voetregel - net als het voorblad */
+
     sectie='Armaturenboek';
     /* Vanaf hier gaat het over Pragmalux-armaturen en volgen er Pragmalux-presenters,
        dus schakelt het document over op die huisstijl. */
