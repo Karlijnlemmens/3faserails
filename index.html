@@ -2611,10 +2611,10 @@ async function buildPdf(presenterPages, totaalPaginas){
      accentkleuren van Distrilight (oranje/groen/paars) blijven bewust ongebruikt -
      die zijn bedoeld om spaarzaam iets uit te lichten, niet om vlakken mee te vullen. */
   const THEMAS = {
-    distrilight: {naam:'Distrilight', hoofd:'#0F7ABE', hoofd2:'#3E95CB', hoofdDiep:'#0A5A8C', lt:'#DCECF8', shade:'#EDF3F9', line:'#C7D9E7',
+    distrilight: {naam:'Distrilight', hoofd:'#0F7ABE', hoofd2:'#3E95CB', hoofdDiep:'#0A5A8C', tekst:'#123A5E', lt:'#DCECF8', shade:'#EDF3F9', line:'#C7D9E7',
                   logoLicht:'dlLicht', logoDonker:'dlDonker', logoRatio:993/445,
                   kopHoogte:20, omslagHoogte:46},
-    pragmalux:   {naam:'Pragmalux', hoofd:'#1A253C', hoofd2:'#2A3855', hoofdDiep:'#101728', lt:'#B9C4DA', shade:'#EDEFF3', line:'#CBD0DA',
+    pragmalux:   {naam:'Pragmalux', hoofd:'#1A253C', hoofd2:'#2A3855', hoofdDiep:'#101728', tekst:'#1A253C', lt:'#B9C4DA', shade:'#EDEFF3', line:'#CBD0DA',
                   logoLicht:'pmLicht', logoDonker:'pmDonker', logoRatio:1418/269,
                   kopHoogte:15, omslagHoogte:30},
   };
@@ -2622,11 +2622,11 @@ async function buildPdf(presenterPages, totaalPaginas){
      polariteitslijn zijn signaalkleuren in een technische tekening, geen merkkleur. */
   const C={grey:'#5B677E', rail:'#B7C0CE', red:'#D6362B', mount:'#98A6BC',
     wit:'#FFFFFF', zwart:'#000000',
-    hoofd:'', hoofd2:'', hoofdDiep:'', lt:'', shade:'', line:''};
+    hoofd:'', hoofd2:'', hoofdDiep:'', tekst:'', lt:'', shade:'', line:''};
   let thema=null;
   function zetThema(k){
     thema=THEMAS[k];
-    C.hoofd=thema.hoofd; C.hoofd2=thema.hoofd2; C.hoofdDiep=thema.hoofdDiep; C.lt=thema.lt; C.shade=thema.shade; C.line=thema.line;
+    C.hoofd=thema.hoofd; C.hoofd2=thema.hoofd2; C.hoofdDiep=thema.hoofdDiep; C.tekst=thema.tekst; C.lt=thema.lt; C.shade=thema.shade; C.line=thema.line;
   }
   zetThema('distrilight');
 
@@ -2648,7 +2648,7 @@ async function buildPdf(presenterPages, totaalPaginas){
     throw new Error('geen PNG of JPEG');
   }
   const BEELD={};
-  for(const sleutel of ['omslagVolledig','omslagBoven']){
+  for(const sleutel of ['omslagVolledig','omslagBoven','ruitpatroon']){
     if(!merk.beelden[sleutel]) continue;
     try{ BEELD[sleutel]=await sluitBeeldIn(b64Bytes(merk.beelden[sleutel])); }
     catch(err){ console.warn('Omslagbeeld "'+sleutel+'" kon niet worden ingesloten:', err && err.message); }
@@ -2876,18 +2876,38 @@ async function buildPdf(presenterPages, totaalPaginas){
   }
   omslag();
 
-  /* --- pagina 2: gekleurd kopvlak met puntjespatroon. beginPage(true) = geen
-         vervolg-kopregel, want deze pagina heeft zijn eigen kopvlak. --- */
+  /* --- kopbalk van een inhoudspagina --------------------------------------------
+     Blauwe balk over de volle breedte met het ruitpatroon, de sectietitel groot in
+     uitgespaarde kapitalen, en daaronder projectnaam en datum. Ontbreekt het
+     patroonbestand, dan blijft het een egale balk. Zet y na afloop onder de balk,
+     zodat de aanroeper meteen verder kan. */
+  const BALK_H = 152;
+  function paginaKop(titel, onderschrift){
+    rect(0,0,W,BALK_H,C.hoofd);
+    if(BEELD.ruitpatroon){
+      /* Het vel is op A4-verhouding; op paginabreedte geschaald valt de bovenkant
+         binnen de balk. Wat eronder uitsteekt wordt door de witte pagina afgedekt. */
+      const ph = W / (BEELD.ruitpatroon.width / BEELD.ruitpatroon.height);
+      pg.drawImage(BEELD.ruitpatroon, {x:0, y:H-ph, width:W, height:ph});
+      rect(0,BALK_H,W,H-BALK_H,C.wit);
+    }
+    text(Mg,74,30,String(titel).toUpperCase(),{bold:true,cond:true,color:C.wit});
+    if(onderschrift) text(Mg,111,11,onderschrift,{color:C.lt});
+    y=BALK_H+38;
+  }
+  /* Lichte schuine accentvorm onderaan de pagina, zoals in het ontwerp. */
+  function paginaVoetVorm(){
+    poly([[0,H-52],[128,H-52],[92,H],[0,H]], meng(C.hoofd,C.wit,0.80));
+  }
+
+  /* --- pagina 2: Bestelgegevens. beginPage(true) = geen vervolg-kopregel, want
+         deze pagina heeft zijn eigen kopbalk. --- */
   beginPage(true);
-  rect(0,0,W,124,C.hoofd);
-  dots(W-215,12,190,100,13,C.hoofd2);
-  logo(Mg,20,thema.omslagHoogte,true);
-  text(Mg,74,23,'INSTALLATIEOVERZICHT',{bold:true,cond:true,color:C.wit});
-  text(Mg,98,10.5,'PRX 3-FASE RAIL'+(st.proj? '  \u00b7  '+st.proj.toUpperCase():''),{bold:true,cond:true,color:C.lt,tc:0.5});
-  text(Mg,113,8.5,'Kleur: '+CLRN(st.color)+'   \u00b7   Voedingsconfiguratie '+st.powercfg
-    +'   \u00b7   '+new Date().toLocaleDateString('nl-NL')+(D.trCount>1?'   \u00b7   '+D.trCount+' trajecten':'')
-    +(D.sheets.length>1?'   \u00b7   '+D.sheets.length+' tekenvlakken':''),{color:C.lt});
-  y=140;
+  /* eerst de kopbalk: die dekt de rest van de pagina wit af om het patroon te
+     begrenzen, dus alles wat eronder komt moet daarna getekend worden */
+  paginaKop('Bestelgegevens',
+    (st.proj||'').trim() + ((st.proj||'').trim()? '  \u2014  ':'') + datumNL(st.datum));
+  paginaVoetVorm();
 
   function tableStart(cols){ const totW=cols.reduce((s,c)=>s+c.w,0);
     need(20); let x=Mg; rect(Mg,y,totW,15,C.hoofd);
@@ -2916,7 +2936,7 @@ async function buildPdf(presenterPages, totaalPaginas){
       T.cols.forEach(c=>{ text(x+5,y+2.6,8.5,c.h,{bold:true,color:C.wit}); x+=c.w; }); y+=15; }
     if(T.i%2===0) rect(Mg,y,T.totW,rowH,C.shade);
     let x=Mg;
-    T.cols.forEach((c,j)=>{ cellLines[j].forEach((ln,li)=>text(x+5,y+2.4+li*lineH,8.5,ln)); x+=c.w; });
+    T.cols.forEach((c,j)=>{ cellLines[j].forEach((ln,li)=>text(x+5,y+2.4+li*lineH,8.5,ln,{color:C.tekst})); x+=c.w; });
     line(Mg,y+rowH,Mg+T.totW,y+rowH,0.5,C.line);
     T.i++; y+=rowH;
   }
@@ -2925,13 +2945,19 @@ async function buildPdf(presenterPages, totaalPaginas){
          Hier staan de Pragmalux-artikelnummers (2000766-reeks): daarop wordt besteld
          bij Distrilight. De KKT-codes horen juist bij de tekening verderop, waar de
          installateur ze tijdens het installeren gebruikt - niet hier. --- */
-  h2('Bestelgegevens');
-  para('Bestellen bij Distrilight gaat op onderstaande artikelnummers.',8,C.grey);
-  let T=tableStart([{w:90,h:'Artikelnummer'},{w:330,h:'Omschrijving'},{w:56,h:'Aantal'}]);
+  let T=tableStart([{w:100,h:'Artikelnummer'},{w:355,h:'Omschrijving'},{w:60,h:'Aantal'}]);
   Object.keys(D.B.items).forEach(c=>{
     const it=D.B.items[c];
     tableRow(T,[c.indexOf('m-')===0?'volgt':c, it.name, String(it.qty)]);
   });
+  /* Technische gegevens onder de tabel: in het ontwerp is de kopbalk voor de titel en
+     het project, dus deze regel staat hier in plaats van bovenaan. */
+  y+=10;
+  para('Bestellen bij Distrilight gaat op bovenstaande artikelnummers.'
+    +'   ·   Kleur: '+CLRN(st.color)
+    +'   ·   Voedingsconfiguratie '+st.powercfg
+    +(D.trCount>1?'   ·   '+D.trCount+' trajecten':'')
+    +(D.sheets.length>1?'   ·   '+D.sheets.length+' tekenvlakken':''), 8, C.grey);
   flush();
   const bgPageCount = pages.length; /* checkpoint: hier komt bij het samenvoegen de 3-Fase Rail presenter tussen */
   extra += presenterPages.rail || 0;
