@@ -2765,12 +2765,20 @@ async function buildPdf(presenterPages, totaalPaginas){
   let extra = 0;
   function stampFooter(){
     pageNo++;
-    /* Geen doorlopende balk maar een lichte schuine vorm linksonder, met de tekst
-       erop in de huisstijlkleur. Volgt het thema, dus op de armaturenboek-pagina's
-       wordt het vanzelf Pragmalux-blauw. */
-    poly([[0,H-52],[128,H-52],[92,H],[0,H]], meng(C.hoofd,C.wit,0.82));
-    text(Mg,H-34,7.5,thema.naam.toUpperCase(),{bold:true,cond:true,color:C.hoofd,tc:1.1});
-    text(W-Mg,H-34,7.5,'PRX 3-Fase Rail  \u00b7  '+sectie+'  \u00b7  '+(pageNo+extra),{color:C.hoofd,align:'right'});
+    /* Geen doorlopende balk maar een lichte schuine vorm rechtsonder (40% kleiner dan
+       de oorspronkelijke maat), in een vaste lichtgrijze tint (dus niet thema-
+       afhankelijk, i.t.t. de rest van de opmaak). De onderste linkerpunt loopt door
+       tot de linkermarge (waar de tabel begint); de bovenste punt zit op dezelfde
+       afstand ervan als in de oorspronkelijke vorm, zodat de afsnijvorm (de schuine
+       snede) hetzelfde blijft. */
+    const vSchaal=0.6, vH=52*vSchaal, vBreed=128*vSchaal, vSmal=92*vSchaal, vTopY=H-vH;
+    const afstand=vBreed-vSmal, onderX=Mg, bovenX=onderX+afstand;
+    poly([[W,vTopY],[bovenX,vTopY],[onderX,H],[W,H]], '#EBEBEC');
+    /* Paginanummer blijft bij de rechteronderhoek staan: gecentreerd op de
+       oorspronkelijke, smalle vorm-maat bij de hoek, los van hoe ver de bovenste punt
+       nu naar links doorloopt. */
+    const vMid=(y)=>{ const t=(y-vTopY)/vH; return ((W-vSmal)+((W-vBreed)-(W-vSmal))*t + W)/2; };
+    text(vMid(822+8),822,8,String(pageNo+extra),{color:C.hoofd,align:'center'});
   }
   function contHeader(){
     text(Mg,y,13,sectie.toUpperCase(),{bold:true,cond:true,color:C.hoofd});
@@ -2894,7 +2902,7 @@ async function buildPdf(presenterPages, totaalPaginas){
       rect(0,BALK_H,W,H-BALK_H,C.wit);
     }
     text(Mg,74,30,String(titel).toUpperCase(),{bold:true,cond:true,color:C.wit});
-    if(onderschrift) text(Mg,111,11,onderschrift,{color:C.lt});
+    if(onderschrift) text(Mg,102,11,onderschrift,{color:C.lt});
     y=BALK_H+38;
   }
 
@@ -2956,26 +2964,15 @@ async function buildPdf(presenterPages, totaalPaginas){
     +(D.trCount>1?'   ·   '+D.trCount+' trajecten':'')
     +(D.sheets.length>1?'   ·   '+D.sheets.length+' tekenvlakken':''), 8, C.grey);
   flush();
-  const bgPageCount = pages.length; /* checkpoint: hier komt bij het samenvoegen de 3-Fase Rail presenter tussen */
-  extra += presenterPages.rail || 0;
-  beginPage(false);
 
-  /* --- Montage: direct na de (extern in te voegen) rail-presenter --- */
-  h2('Montage');
-  para('Montagepunten: '+D.M.count+' - om de meter langs de rail, inclusief uiteinden; hoeken, T- en kruispunten tellen als gedeeld punt (grijze stippen in de tekening). Advies-bevestigingsafstand 1000 mm; bij lichte belasting kan de installateur tussenpunten laten vervallen, maar uiteinden en knooppunten blijven altijd bevestigd.');
-  let mountDetail='';
-  if(st.mount==='sys' && st.sysOphang) mountDetail=' + ophangsetsysteempl verstelbaar '+st.sysOphangLen+' m';
-  if(st.mount==='pendel') mountDetail=' (bus '+CLRN(st.color)+' / kabel '+CLRN(pendelKabelkleur())+' '+st.pendelKabelLen+' m)';
-  para(st.mount==='geen' ? 'Nog geen montagewijze gekozen.' : 'Gekozen montagewijze: '+MOUNTS[st.mount].label+mountDetail+'.');
-  const armTotalPdf = visibleArmaturen().reduce((s,a)=>s+(st.armaturen[a.id].qty||0),0);
-  const overigTotalPdf = Object.values(st.overig).reduce((s,x)=>s+(x.qty||0),0);
-  if(armTotalPdf>0) para('Armaturen: '+armTotalPdf+' stuks (zie stuklijst hierboven voor kleur/aantal per type).');
-  if(overigTotalPdf>0) para('Let op: de 70mm Universal Adapter moet altijd samen met trekontlasting art. 2001947 (PRX trekontlasting brug met 2 schroefjes) besteld worden — wordt niet automatisch toegevoegd.');
-  y+=4;
-  para('Pragmalux PRX 3-Fase Rail. Controleer bij het koppelen altijd de polariteitslijn: de rode rib moet overal doorlopen. Vragen? Neem contact op met de binnendienst.',7.5,C.grey);
+  /* --- Installatieoverzicht: eigen kopbalk, zelfde sjabloon als Bestelgegevens
+         (paginaKop), direct na Bestelgegevens en gevolgd door de tekening met
+         onderdelen. Montage-tekst is voorlopig weggelaten. --- */
+  beginPage(true);
+  paginaKop('Installatieoverzicht',
+    'PRX 3-Fase Rail  —  '+((st.proj||'').trim()||'Projectnaam')+'  —  '+datumNL(st.datum));
 
   /* --- per tekenvlak: tekening + onderdelentabel --- */
-  flush(); beginPage(false);
   const boxW=W-2*Mg;
   function drawPlan(x0,y0,bw,bh,sheetId){
     const sn=sheetNodes(sheetId), se=sheetEdges(sheetId);
@@ -3056,6 +3053,8 @@ async function buildPdf(presenterPages, totaalPaginas){
     sh.legend.forEach(l=> tableRow(TL,[String(l.nr), String(l.tr), l.name, l.art]));
   });
   flush();
+  const bgPageCount = pages.length; /* checkpoint: hier komt bij het samenvoegen de 3-Fase Rail presenter tussen (na Bestelgegevens + Installatieoverzicht, voor het Armaturenboek) */
+  extra += presenterPages.rail || 0;
 
   /* --- Armaturenboek: een index en per armatuurtype een tabbladpagina. De echte
          presenter-PDF's worden er in assembleFinalPdf achter geplakt; bookGroups
@@ -3134,7 +3133,7 @@ if(typeof window!=='undefined') window.__c2BuildPdf=buildPdf;
    in de volgorde die buildPdf in bookGroups teruggeeft.
 
    De opbouw van de eindPDF:
-     Bestelgegevens  ->  rail-presenter  ->  Montage + tekenvlakken
+     Bestelgegevens  ->  Installatieoverzicht (tekenvlakken)  ->  rail-presenter
      ->  Armaturenboek-index  ->  per type: tabbladpagina + presenter */
 async function assembleFinalPdf(){
   /* De presenters gaan eerst open, nog voordat de eigen pagina's gemaakt worden: pas
@@ -3178,9 +3177,8 @@ async function assembleFinalPdf(){
     await copyRange(d, 0, d.getPageCount());
   };
 
-  await copyRange(ownDoc, 0, bgPageCount);            /* Bestelgegevens */
+  await copyRange(ownDoc, 0, bgPageCount);            /* Bestelgegevens + Installatieoverzicht */
   await appendPresenter('rail');                      /* altijd, indien aanwezig */
-  await copyRange(ownDoc, bgPageCount, bookStart);    /* Montage + tekenvlakken */
 
   if(bookGroups.length){
     await copyRange(ownDoc, bookStart, bookIndexEnd); /* Armaturenboek-index */
