@@ -2558,11 +2558,15 @@ async function buildPdf(presenterPages, totaalPaginas){
   const W=595,H=842,Mg=40,MB=64; const pages=[]; let y=Mg; let pageNo=0;
   const doc = await PDFLib.PDFDocument.create();
 
-  /* Huisstijllettertypen: Sofia Sans Extra Condensed voor koppen, Open Sans voor
-     lopende tekst. Lukt insluiten niet (bestand ontbreekt, fontkit niet geladen),
-     dan valt alles terug op Helvetica; de PDF komt er dan uit, alleen minder mooi.
-     eigenKop zegt of de koppen een echt smal lettertype hebben - zo ja, dan hoeft de
-     kunstmatige versmalling van vroeger niet meer. */
+  /* Huisstijllettertypen: Open Sans voor lopende tekst. Voor koppen (cond:true) heeft
+     elk merk zijn eigen kop-lettertype: Pragmalux (armaturenboek) blijft Sofia Sans
+     Extra Condensed, Distrilight (voorblad/bestelgegevens) gebruikt Poppins - zie
+     kiesFont() verderop, die op basis van het actieve thema kiest. Lukt insluiten niet
+     (bestand ontbreekt, fontkit niet geladen), dan valt alles terug op Helvetica; de
+     PDF komt er dan uit, alleen minder mooi. eigenKop zegt of de koppen een echt smal
+     lettertype hebben - zo ja, dan hoeft de kunstmatige versmalling van vroeger niet
+     meer (geldt voor Sofia Sans; Poppins is sowieso niet condensed en wordt nooit
+     kunstmatig versmald). */
   const merk = await merkData();
   let FONT, eigenKop=false;
   try{
@@ -2572,17 +2576,19 @@ async function buildPdf(presenterPages, totaalPaginas){
       ? doc.embedFont(b64Bytes(merk.fonts[sleutel]), {subset:true})
       : doc.embedFont(terugval);
     FONT = {
-      reg:      await laad('regular',  PDFLib.StandardFonts.Helvetica),
-      bold:     await laad('bold',     PDFLib.StandardFonts.HelveticaBold),
-      kopVet:   await laad('kopVet',   PDFLib.StandardFonts.HelveticaBold),
-      kopLicht: await laad('kopLicht', PDFLib.StandardFonts.Helvetica),
+      reg:        await laad('regular',    PDFLib.StandardFonts.Helvetica),
+      bold:       await laad('bold',       PDFLib.StandardFonts.HelveticaBold),
+      kopVet:     await laad('kopVet',     PDFLib.StandardFonts.HelveticaBold),
+      kopLicht:   await laad('kopLicht',   PDFLib.StandardFonts.Helvetica),
+      dlKopVet:   await laad('dlKopVet',   PDFLib.StandardFonts.HelveticaBold),
+      dlKopLicht: await laad('dlKopLicht', PDFLib.StandardFonts.Helvetica),
     };
     eigenKop = !!merk.fonts.kopVet;
   }catch(err){
     console.warn('Huisstijllettertypen niet ingesloten, terugval op Helvetica:', err && err.message);
     const reg = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
     const bold = await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-    FONT = {reg, bold, kopVet:bold, kopLicht:reg};
+    FONT = {reg, bold, kopVet:bold, kopLicht:reg, dlKopVet:bold, dlKopLicht:reg};
   }
   let pg = null; /* de pagina waarop nu getekend wordt */
 
@@ -2648,11 +2654,16 @@ async function buildPdf(presenterPages, totaalPaginas){
     catch(err){ console.warn('Omslagbeeld "'+sleutel+'" kon niet worden ingesloten:', err && err.message); }
   }
 
-  /* cond = een kop. Met de huisstijl is dat een echt smal lettertype (Sofia Sans
-     Extra Condensed); zonder valt het terug op Helvetica die kunstmatig versmald
-     wordt, zoals vroeger. Daarom wordt hz alleen ingezet als terugval. */
+  /* cond = een kop. Welk kop-lettertype dat is hangt af van het actieve thema (zie
+     zetThema): Distrilight-pagina's (voorblad, bestelgegevens) gebruiken Poppins,
+     Pragmalux-pagina's (armaturenboek) het echte smalle Sofia Sans Extra Condensed.
+     Zonder ingesloten lettertypen valt alles terug op Helvetica die kunstmatig
+     versmald wordt, zoals vroeger. Daarom wordt hz alleen ingezet als terugval. */
   function kiesFont(opt){
-    if(opt.cond) return opt.bold===false ? FONT.kopLicht : FONT.kopVet;
+    if(opt.cond){
+      const dl = thema===THEMAS.distrilight;
+      return opt.bold===false ? (dl?FONT.dlKopLicht:FONT.kopLicht) : (dl?FONT.dlKopVet:FONT.kopVet);
+    }
     return opt.bold ? FONT.bold : FONT.reg;
   }
   function text(x,yt,size,str,opt){ opt=opt||{};
@@ -2840,9 +2851,9 @@ async function buildPdf(presenterPages, totaalPaginas){
 
     /* projectnaam in de balk - maximaal 3 regels, anders loopt hij eruit */
     const naam=(st.proj||'').trim() || 'Projectnaam';
-    const regels=wrapBreedte(naam, 292, 17, {bold:true,cond:true}).slice(0,3);
+    const regels=wrapBreedte(naam, 350, 25, {bold:true,cond:true}).slice(0,3);
     let ty=128;
-    regels.forEach(r=>{ text(45,ty,17,r,{bold:true,cond:true,color:C.wit}); ty+=36; });
+    regels.forEach(r=>{ text(45,ty,25,r,{bold:true,cond:true,color:C.wit}); ty+=36; });
 
     /* projectgegevens linksonder */
     const veld=(label,waarde,dy)=>{
