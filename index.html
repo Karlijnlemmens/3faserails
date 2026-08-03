@@ -293,6 +293,8 @@
   }
   .cfg-actions #c2Pdf{background:var(--orange); color:#fff; box-shadow:0 4px 12px rgba(236,100,49,.35);}
   .cfg-actions #c2Pdf:hover{background:var(--orange-dark);}
+  .cfg-actions #c2Pdf.ghost{background:transparent; box-shadow:none; cursor:not-allowed;}
+  .cfg-actions #c2Pdf.ghost:hover{background:transparent;}
   #c2Next{background:var(--orange) !important; border-color:var(--orange) !important; box-shadow:0 4px 12px rgba(236,100,49,.35);}
   #c2Next:hover{background:var(--orange-dark) !important; border-color:var(--orange-dark) !important;}
   .cfg-actions button.ghost{background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,.3);}
@@ -453,8 +455,8 @@
   @media (max-width:640px){ .pdfprev-bar .hint{display:none;} }
 
   .c2-armrow input.c2-aanduiding{flex:0 0 96px; min-width:96px;}
-  .c2-armrow input.c2-armcode{flex:0 0 65px; min-width:65px;}
-  .c2-armrow input.c2-armnaam{flex:0 0 195px;}
+  .c2-armrow input.c2-armcode{flex:0 0 72px; min-width:65px;}
+  .c2-armrow input.c2-armnaam{flex:0 0 300px;}
   .c2-armrecog{font-size:11px; font-weight:700; white-space:nowrap; padding:3px 8px; border-radius:20px;}
   .c2-armrecog.ok{background:var(--green-light); color:var(--green);}
   .c2-armrecog.miss{background:#FDECEC; color:#B0362B;}
@@ -832,12 +834,11 @@
       </div>
       <div class="cfg-warns" id="c2Warns"></div>
       <div class="cfg-actions">
-        <button id="c2Pdf">PDF voor installateur</button>
-        <button id="c2Preview">Voorbeeld bekijken</button>
+        <button id="c2Pdf">Download PDF</button>
+        <button id="c2Preview">Preview PDF</button>
         <!-- Hulpmiddel bij het afstemmen van de PDF-opmaak; mag weg zodra die klaar is. -->
-        <button id="c2Demo" class="ghost" title="Vult een complete voorbeeldconfiguratie in en toont meteen de PDF">Testvoorbeeld</button>
-        <button id="c2Copy">Kopieer lijst</button>
-        <button class="ghost" id="c2ResetAll">Reset</button>
+        <button id="c2Demo" class="ghost" title="Vult een complete voorbeeldconfiguratie in en toont meteen de PDF">Test</button>
+        <button id="c2ResetAll">Reset</button>
       </div>
     </div>
   </div>
@@ -850,7 +851,7 @@
   <div class="pdfprev-bg" id="pdfPreviewBg">
     <div class="pdfprev">
       <div class="pdfprev-bar">
-        <b>Voorbeeld &mdash; PDF voor installateur</b>
+        <b>Voorbeeld &mdash; Download PDF</b>
         <span class="hint">Zo ziet de installateur het document.</span>
         <button id="pdfPreviewDl">Downloaden</button>
         <button class="ghost" id="pdfPreviewClose">Sluiten</button>
@@ -2444,6 +2445,15 @@ function refresh(){
   document.querySelectorAll('.c2-pane').forEach(p=> p.classList.toggle('active', +p.dataset.pane===st.step));
   $('c2Prev').style.visibility = st.step>1 ? 'visible':'hidden';
   $('c2Next').style.visibility = st.step<6 ? 'visible':'hidden';
+  /* Download PDF en Preview PDF: zien er als "Test" (ghost)
+     uit en zijn niet klikbaar vóór stap 5 (Tekening & maten) - daarvoor is er nog
+     geen tekening/BOM om een zinvolle PDF van te maken. Zodra ze weer beschikbaar
+     zijn, valt Preview PDF terug op zijn gewone (witte) opmaak. */
+  const pdfKlaar = st.step>=5;
+  $('c2Pdf').classList.toggle('ghost', !pdfKlaar);
+  $('c2Pdf').disabled = !pdfKlaar;
+  $('c2Preview').classList.toggle('ghost', !pdfKlaar);
+  $('c2Preview').disabled = !pdfKlaar;
   /* controls state */
   $('c2Undo').disabled = hIdx<=0;
   $('c2Redo').disabled = hIdx>=hist.length-1;
@@ -3241,7 +3251,7 @@ function pdfBestandsnaam(){
   return nm+'-prx-rail.pdf';
 }
 
-/* Gedeelde weg voor downloaden en voorbeeld bekijken: controleert of de tekening
+/* Gedeelde weg voor downloaden en Preview PDF: controleert of de tekening
    compleet is, waarschuwt over gaten in het armaturenboek en levert de bytes.
    Geeft null terug als er niets te maken valt. */
 async function maakPdfBytes(){
@@ -3463,7 +3473,7 @@ function renderMountOptions(){
 function init(){
   /* dali */
   const dr=$('c2DaliRow');
-  [{k:false,l:'Standaard (niet-DALI)'},{k:true,l:'DALI-dimbaar'}].forEach(o=>{
+  [{k:false,l:'Standaard'},{k:true,l:'DALI'}].forEach(o=>{
     const b=document.createElement('button');
     b.className='choice-btn'+(o.k===st.dali?' sel':'');
     b.textContent=o.l;
@@ -3627,20 +3637,6 @@ function init(){
   $('pdfPreviewDl').addEventListener('click', exportPdf);
   $('pdfPreviewBg').addEventListener('click', e=>{ if(e.target.id==='pdfPreviewBg') sluitVoorbeeld(); });
   document.addEventListener('keydown', e=>{ if(e.key==='Escape' && $('pdfPreviewBg').classList.contains('active')) sluitVoorbeeld(); });
-  $('c2Copy').addEventListener('click', ()=>{
-    const B=lastBOM||computeBOM();
-    const lines=['PRX 3-Fase Rail \u2014 materiaallijst ('+(st.shape?SHAPES[st.shape].label:'\u2014')+', '+st.color+', configuratie '+st.powercfg+')',''];
-    Object.keys(B.items).forEach(c=> lines.push((c.indexOf('m-')===0?'artikelnr volgt':c)+'  \u00D7'+B.items[c].qty+'  \u2014 '+B.items[c].name));
-    lines.push('');
-    B.railDetail.forEach(d=>{
-      lines.push('Segment '+mTxt(d.r.drawnM)+' m: '+piecesTxt(d.r.pieces)+(d.r.seams>0?' + '+d.r.seams+'x elektrisch koppelstuk':''));
-    });
-    const txt=lines.join('\n');
-    navigator.clipboard.writeText(txt).then(()=>{
-      const btn=$('c2Copy'); const o=btn.textContent; btn.textContent='Gekopieerd \u2713';
-      setTimeout(()=>btn.textContent=o,1600);
-    }).catch(()=>alert(txt));
-  });
   refresh();
 }
 init();
