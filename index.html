@@ -2539,12 +2539,7 @@ function pdfTxt(s){
   for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); o += String.fromCharCode(c>255?63:c); }
   return o;
 }
-/* presenterPages: {id: aantal pagina's} van de presenters die straks tussengevoegd
-   worden, en totaalPaginas: de omvang van het eindresultaat. Beide alleen nodig om de
-   paginanummering te laten kloppen - zonder die gegevens telt de voetregel gewoon de
-   eigen pagina's, wat handig is voor de telronde in assembleFinalPdf(). */
-async function buildPdf(presenterPages, totaalPaginas){
-  presenterPages = presenterPages || {};
+async function buildPdf(){
   /* Huisstijl: donker navy + puntjespatroon, condensed kapitalen, navy tabelkoppen,
      navy voetbalk.
 
@@ -2758,11 +2753,9 @@ async function buildPdf(presenterPages, totaalPaginas){
   /* Kop- en voetregel volgen de sectie: het armaturenboek achteraan is een eigen
      hoofdstuk en moet niet "Installatieoverzicht" blijven heten. */
   let sectie='Installatieoverzicht';
-  /* De presenters worden er pas bij het samenvoegen tussen geschoven, dus telt de
-     eigen paginateller niet vanzelf goed door. extra = het aantal presenter-pagina's
-     dat v\u00f3\u00f3r de huidige pagina komt te staan; die wordt bij de secties hieronder
-     opgehoogd zodra er een presenter tussen is gekomen. */
-  let extra = 0;
+  /* Alle eigen pagina's staan vooraan in het document; de presenters komen er in hun
+     geheel achter. Het paginanummer is daardoor gelijk aan de plek in de eind-PDF,
+     zonder correctie voor tussengevoegde pagina's. */
   function stampFooter(){
     pageNo++;
     /* Geen doorlopende balk maar een lichte schuine vorm rechtsonder (40% kleiner dan
@@ -2778,7 +2771,7 @@ async function buildPdf(presenterPages, totaalPaginas){
        oorspronkelijke, smalle vorm-maat bij de hoek, los van hoe ver de bovenste punt
        nu naar links doorloopt. */
     const vMid=(y)=>{ const t=(y-vTopY)/vH; return ((W-vSmal)+((W-vBreed)-(W-vSmal))*t + W)/2; };
-    text(vMid(822+8),822,8,String(pageNo+extra),{color:C.hoofd,align:'center'});
+    text(vMid(822+8),822,8,String(pageNo),{color:C.hoofd,align:'center'});
   }
   function contHeader(){
     text(Mg,y,13,sectie.toUpperCase(),{bold:true,cond:true,color:C.hoofd});
@@ -3064,29 +3057,24 @@ async function buildPdf(presenterPages, totaalPaginas){
     sh.legend.forEach(l=> tableRow(TL,[String(l.nr), String(l.tr), l.name, l.art]));
   });
   flush();
-  const bgPageCount = pages.length; /* checkpoint: hier komt bij het samenvoegen de 3-Fase Rail presenter tussen (na Bestelgegevens + Installatieoverzicht, voor het Armaturenboek) */
-  extra += presenterPages.rail || 0;
+  /* Vanaf hier volgen alleen nog externe presenters, dus alle eigen pagina's staan
+     vooraan in het document. Het paginanummer is daardoor gelijk aan de plek in de
+     eind-PDF en hoeft niet meer verschoven te worden voor tussengevoegde pagina's. */
 
-  /* --- Armaturenboek: een index en per armatuurtype een tabbladpagina. De echte
-         presenter-PDF's worden er in assembleFinalPdf achter geplakt; bookGroups
-         vertelt daar in welke volgorde en achter welke tabbladpagina. --- */
+  /* --- Armaturen: hoofdstukblad + armaturenlijst. De presenters worden er in
+         assembleFinalPdf achter geplakt, in de volgorde van bookGroups. --- */
   const boek = armaturenboek();
-  const bookStart = pages.length;
-  let bookIndexEnd = pages.length;
   const bookGroups = [];
-  const clip=(s,n)=>{ s=String(s||''); return s.length>n ? s.slice(0,n-1)+'…' : s; };
   const armOms=(r)=> (r.s.name&&r.s.name.trim()) ? r.s.name.trim() : armLabel(r.a);
   const armCode=(r)=>{ const c = st.dali ? r.s.codeDali : r.s.code; return (c&&c.trim()) ? c.trim() : 'volgt'; };
   const armKlr=(r)=> r.s.color==='custom' ? 'Custom' : CLRN(r.s.color);
   if(boek.length){
-    /* --- voorblad van het armaturenhoofdstuk ---------------------------------
+    /* --- hoofdstukblad ---------------------------------------------------------
        Maten zijn opgemeten uit het aangeleverde ontwerp (AB_Armaturen.pdf):
          titelbalk    y 85..200, rechterrand 379 boven -> 337 onder
          witte band   y 534..769, rand naar de foto 308 boven -> 220 onder
          "Armaturen"  x 27, basislijn 148, korps 36
-         citaat       x 27, basislijnen 605/634/664/693, korps 19,6
-       Dit blad is nog Distrilight: het patroon en het blauw komen daarvandaan.
-       Pas daarna schakelt het document over naar Pragmalux. */
+         citaat       x 27, basislijnen 605/634/664/693, korps 19,6 */
     sectie='Armaturen';
     beginPage(true);
     if(BEELD.ruitpatroon) beeldVullend(BEELD.ruitpatroon, 0, 0, W, H);
@@ -3108,100 +3096,47 @@ async function buildPdf(presenterPages, totaalPaginas){
 
     flush(true); /* hoofdstukblad, geen voetregel - net als het voorblad */
 
-    sectie='Armaturenboek';
-    /* Vanaf hier gaat het over Pragmalux-armaturen en volgen er Pragmalux-presenters,
-       dus schakelt het document over op die huisstijl. */
-    zetThema('pragmalux');
-    const boekTotaal = boek.reduce((n,b)=>n+b.totaal,0);
+    /* --- armaturenlijst: zelfde sjabloon als Bestelgegevens ------------------- */
+    sectie='Armaturenlijst';
     beginPage(true);
-    rect(0,0,W,124,C.hoofd);
-    dots(W-215,12,190,100,13,C.hoofd2);
-    logo(Mg,26,thema.omslagHoogte,true);
-    text(Mg,74,23,'ARMATURENBOEK',{bold:true,cond:true,color:C.wit});
-    text(Mg,98,10.5,'PRX 3-FASE RAIL'+(st.proj? '  ·  '+st.proj.toUpperCase():''),{bold:true,cond:true,color:C.lt,tc:0.5});
-    text(Mg,113,8.5,boek.length+(boek.length===1?' armatuurtype':' armatuurtypen')+'   ·   '
-      +boekTotaal+(boekTotaal===1?' armatuur':' armaturen')+' in totaal',{color:C.lt});
-    y=140;
-    h2('Gekozen armaturen');
-    para('Hierna volgt per armatuurtype een tabblad met daarachter de presenter met alle technische gegevens. '
-      +'Uitvoeringen van hetzelfde type - andere kleur, ander wattage, wel of niet dimbaar - delen een presenter '
-      +'en staan daarom samen onder een tabblad.');
-    let TB=tableStart([{w:30,h:'Tab'},{w:110,h:'Armatuurtype'},{w:150,h:'Omschrijving'},{w:76,h:'Artikelcode'},{w:58,h:'Kleur'},{w:52,h:'Aantal'}]);
-    boek.forEach((b,bi)=> b.rijen.forEach((r,ri)=>
-      tableRow(TB,[ ri===0?String(bi+1):'', ri===0?clip(b.g.naam,22):'',
-        clip(armOms(r),30), clip(armCode(r),14), clip(armKlr(r),10), String(r.s.qty) ])));
+    paginaKop('Armaturenlijst',
+      (st.proj||'').trim() + ((st.proj||'').trim()? '  \u2014  ':'') + datumNL(st.datum));
+    let TB=tableStart([{w:100,h:'Armatuurtype'},{w:200,h:'Omschrijving'},{w:95,h:'Artikelcode'},{w:60,h:'Kleur'},{w:60,h:'Aantal'}]);
+    /* Het type staat alleen op de eerste regel van zijn groep: de uitvoeringen
+       eronder horen bij hetzelfde type en delen straks een presenter. */
+    boek.forEach(b=> b.rijen.forEach((r,ri)=>
+      tableRow(TB,[ ri===0?b.g.naam:'', armOms(r), armCode(r), armKlr(r), String(r.s.qty) ])));
+    y+=10;
+    para('Hierna volgt per armatuurtype de presenter met alle technische gegevens. '
+      +'Uitvoeringen van hetzelfde type - andere kleur, ander wattage, wel of niet dimbaar - '
+      +'delen een presenter en staan hierboven bij elkaar.',8,C.grey);
     const ontbreekt = boek.filter(b=>!presenterAanwezig(b.g.id));
     if(ontbreekt.length){
-      y+=8;
-      para('Let op: van '+ontbreekt.map(b=>b.g.naam).join(', ')+' is de presenter nog niet in de tool geladen. '
-        +'Het tabblad staat er wel, de productpagina’s ontbreken.',8,C.red);
+      para('Let op: van '+ontbreekt.map(b=>b.g.naam).join(', ')+' is de presenter nog niet in de '
+        +'tool geladen; die productpagina\u2019s ontbreken.',8,C.red);
     }
     flush();
-    bookIndexEnd = pages.length;
 
-    boek.forEach((b,bi)=>{
-      beginPage(false);
-      const bw=W-2*Mg;
-      rect(Mg,y,bw,96,C.hoofd);
-      dots(W-Mg-150,y+10,132,74,13,C.hoofd2);
-      text(Mg+18,y+20,8.5,'TABBLAD '+(bi+1)+' VAN '+boek.length,{cond:true,color:C.lt,tc:1.1});
-      text(Mg+18,y+40,25,clip(b.g.naam.toUpperCase(),26),{bold:true,cond:true,color:C.wit});
-      text(Mg+18,y+76,8.5,b.totaal+(b.totaal===1?' armatuur':' armaturen')+' in deze opdracht',{color:C.lt});
-      y+=96+18;
-      h2('Uitvoeringen in deze opdracht');
-      let TT=tableStart([{w:200,h:'Omschrijving'},{w:110,h:'Artikelcode'},{w:96,h:'Kleur'},{w:70,h:'Aantal'}]);
-      b.rijen.forEach(r=> tableRow(TT,[clip(armOms(r),40), clip(armCode(r),20), armKlr(r), String(r.s.qty)]));
-      y+=8;
-      para(presenterAanwezig(b.g.id)
-        ? 'Hierna volgt de presenter van de '+b.g.naam+' met de volledige productinformatie.'
-        : 'De presenter van de '+b.g.naam+' is nog niet in de tool geladen en ontbreekt daarom in dit boek.',
-        8, presenterAanwezig(b.g.id)?C.grey:C.red);
-      flush();
-      extra += presenterPages[b.g.id] || 0; /* de presenter van dit tabblad komt hierna */
-      bookGroups.push(b.g.id);
-    });
+    boek.forEach(b=> bookGroups.push(b.g.id));
   }
 
   const bytes = await doc.save();
-  return {bytes, bgPageCount, bookStart, bookIndexEnd, bookGroups, ownPageCount:pages.length};
+  return {bytes, bookGroups, ownPageCount:pages.length};
 }
 if(typeof window!=='undefined') window.__c2BuildPdf=buildPdf;
 
 /* Presenter-PDF's: binaire data staat los in presenters-data.js (window.PRESENTER_DATA),
-   hier alleen de logica. De rail-presenter zit op een vaste plek (na Bestelgegevens);
-   de armatuur-presenters volgen achter hun eigen tabbladpagina in het armaturenboek,
-   in de volgorde die buildPdf in bookGroups teruggeeft.
+   hier alleen de logica.
 
    De opbouw van de eindPDF:
-     Bestelgegevens  ->  Installatieoverzicht (tekenvlakken)  ->  rail-presenter
-     ->  Armaturenboek-index  ->  per type: tabbladpagina + presenter */
+     voorblad -> bestelgegevens -> installatieoverzicht -> hoofdstukblad Armaturen
+     -> armaturenlijst        (dit alles maakt buildPdf zelf)
+     -> rail-presenter -> per armatuurtype de presenter   (extern, hier aangeplakt)
+
+   Alle eigen pagina's staan dus vooraan en de presenters komen er in hun geheel
+   achter; daardoor hoeft de paginanummering niet gecorrigeerd te worden. */
 async function assembleFinalPdf(){
-  /* De presenters gaan eerst open, nog voordat de eigen pagina's gemaakt worden: pas
-     als hun aantal pagina's bekend is, kan de voetregel het juiste paginanummer
-     tonen. Ze blijven daarna in geheugen zodat ze niet twee keer geparsed worden. */
-  const boek = armaturenboek();
-  const presDocs = {};        /* id -> PDFDocument, of null als hij ontbreekt */
-  const presenterPages = {};  /* id -> aantal pagina's, 0 als hij ontbreekt */
-  for(const id of ['rail'].concat(boek.map(b=>b.g.id))){
-    presDocs[id]=null; presenterPages[id]=0;
-    const b64 = await presenterData(id);
-    if(!b64){ console.warn('Presenter "'+id+'" is nog niet toegevoegd (presenters/'+id+'.js of presenters-data.js) \u2014 sectie overgeslagen.'); continue; }
-    try{
-      const bin=atob(b64); const arr=new Uint8Array(bin.length);
-      for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
-      const d = await PDFLib.PDFDocument.load(arr, {ignoreEncryption:true});
-      presDocs[id]=d; presenterPages[id]=d.getPageCount();
-    }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); }
-  }
-
-  /* Twee doorgangen: de eerste alleen om te tellen hoeveel eigen pagina's het worden,
-     de tweede om ze daadwerkelijk te maken. buildPdf leest alleen state en heeft geen
-     neveneffecten, dus twee keer draaien is veilig. */
-  const totaalPresenters = Object.keys(presenterPages).reduce((n,k)=>n+presenterPages[k],0);
-  const telling = await buildPdf(presenterPages);
-  const totaal = telling.ownPageCount + totaalPresenters;
-
-  const {bytes, bgPageCount, bookStart, bookIndexEnd, bookGroups} = await buildPdf(presenterPages, totaal);
+  const {bytes, bookGroups, ownPageCount} = await buildPdf();
   const ownDoc = await PDFLib.PDFDocument.load(bytes);
   const finalDoc = await PDFLib.PDFDocument.create();
 
@@ -3212,25 +3147,23 @@ async function assembleFinalPdf(){
     pgs.forEach(p=>finalDoc.addPage(p));
   };
   const appendPresenter = async(id)=>{
-    const d = presDocs[id];
-    if(!d) return; /* ontbreekt; er is hierboven al voor gewaarschuwd */
-    await copyRange(d, 0, d.getPageCount());
+    const b64 = await presenterData(id);
+    if(!b64){ console.warn('Presenter "'+id+'" is nog niet toegevoegd (presenters/'+id+'.js of presenters-data.js) \u2014 overgeslagen.'); return 0; }
+    try{
+      const d = await PDFLib.PDFDocument.load(b64Bytes(b64), {ignoreEncryption:true});
+      await copyRange(d, 0, d.getPageCount());
+      return d.getPageCount();
+    }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); return 0; }
   };
 
-  await copyRange(ownDoc, 0, bgPageCount);            /* Bestelgegevens + Installatieoverzicht */
-  await appendPresenter('rail');                      /* altijd, indien aanwezig */
-
-  if(bookGroups.length){
-    await copyRange(ownDoc, bookStart, bookIndexEnd); /* Armaturenboek-index */
-    for(let i=0;i<bookGroups.length;i++){
-      await copyRange(ownDoc, bookIndexEnd+i, bookIndexEnd+i+1); /* tabbladpagina */
-      await appendPresenter(bookGroups[i]);                      /* de presenter zelf */
-    }
-  }
+  await copyRange(ownDoc, 0, ownDoc.getPageCount());   /* alle eigen pagina's */
+  let presenterTotaal = await appendPresenter('rail'); /* eerst de rail */
+  for(const id of bookGroups) presenterTotaal += await appendPresenter(id);
 
   const eind = await finalDoc.save();
-  if(finalDoc.getPageCount()!==totaal){
-    console.warn('Paginanummering klopt niet: voorspeld '+totaal+', werkelijk '+finalDoc.getPageCount()+'.');
+  const verwacht = ownPageCount + presenterTotaal;
+  if(finalDoc.getPageCount()!==verwacht){
+    console.warn('Paginatelling klopt niet: verwacht '+verwacht+', werkelijk '+finalDoc.getPageCount()+'.');
   }
   return eind;
 }
