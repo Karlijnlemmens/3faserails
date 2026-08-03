@@ -3055,7 +3055,7 @@ async function buildPdf(){
       {sym:'feed', label:'Stroomaansluitpunt'},
       {sym:'pol', label:'Polariteitslijn'},
       {sym:'mount', label:'Montagepunt'},
-      {sym:'joint', label:'Koppelstuk (zie tabel)'},
+      {sym:'joint', label:'Koppelstuk'},
     ];
     const txtSize=7, rowH=13, padX=8, padY=6, symBlockW=28;
     const maxLabelW=Math.max.apply(null,items.map(it=>meet(it.label,txtSize)));
@@ -3074,7 +3074,7 @@ async function buildPdf(){
 
   D.sheets.forEach((sh,si)=>{
     if(si>0){ flush(); beginPage(false); }
-    if(D.sheets.length>1){ need(20); text(Mg,y,12.5,('TEKENVLAK: '+sh.name).toUpperCase(),{bold:true,cond:true,color:C.hoofd}); y+=18; }
+    if(D.sheets.length>1){ need(20); text(Mg,y,12.5,sh.name.toUpperCase(),{bold:true,cond:true,color:C.hoofd}); y+=18; }
     const boxH=320;
     need(boxH+16);
     rect(Mg,y,boxW,boxH,C.wit,C.line,1);
