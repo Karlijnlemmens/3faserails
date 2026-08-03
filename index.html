@@ -2556,7 +2556,7 @@ async function buildPdf(){
      signatuur en rekenen met y vanaf de BOVENkant van de pagina - pdf-lib rekent
      vanaf onder, dat wordt hier omgezet. */
   const D=reportData();
-  const W=595,H=842,Mg=40,MB=64; const pages=[]; let y=Mg; let pageNo=0;
+  const W=595,H=842,Mg=40,MB=64; const pages=[]; let y=Mg;
   const doc = await PDFLib.PDFDocument.create();
 
   /* Huisstijllettertypen: Open Sans voor lopende tekst. Voor koppen (cond:true) heeft
@@ -2759,25 +2759,16 @@ async function buildPdf(){
   /* Kop- en voetregel volgen de sectie: het armaturenboek achteraan is een eigen
      hoofdstuk en moet niet "Installatieoverzicht" blijven heten. */
   let sectie='Installatieoverzicht';
-  /* Alle eigen pagina's staan vooraan in het document; de presenters komen er in hun
-     geheel achter. Het paginanummer is daardoor gelijk aan de plek in de eind-PDF,
-     zonder correctie voor tussengevoegde pagina's. */
   function stampFooter(){
-    pageNo++;
     /* Geen doorlopende balk maar een lichte schuine vorm rechtsonder (40% kleiner dan
        de oorspronkelijke maat), in een vaste lichtgrijze tint (dus niet thema-
        afhankelijk, i.t.t. de rest van de opmaak). De onderste linkerpunt loopt door
        tot de linkermarge (waar de tabel begint); de bovenste punt zit op dezelfde
        afstand ervan als in de oorspronkelijke vorm, zodat de afsnijvorm (de schuine
-       snede) hetzelfde blijft. */
+       snede) hetzelfde blijft. Geen paginanummer meer op deze vorm. */
     const vSchaal=0.6, vH=52*vSchaal, vBreed=128*vSchaal, vSmal=92*vSchaal, vTopY=H-vH;
     const afstand=vBreed-vSmal, onderX=Mg, bovenX=onderX+afstand;
     poly([[W,vTopY],[bovenX,vTopY],[onderX,H],[W,H]], '#EBEBEC');
-    /* Paginanummer blijft bij de rechteronderhoek staan: gecentreerd op de
-       oorspronkelijke, smalle vorm-maat bij de hoek, los van hoe ver de bovenste punt
-       nu naar links doorloopt. */
-    const vMid=(y)=>{ const t=(y-vTopY)/vH; return ((W-vSmal)+((W-vBreed)-(W-vSmal))*t + W)/2; };
-    text(vMid(822+8),822,8,String(pageNo),{color:C.hoofd,align:'center'});
   }
   function contHeader(){
     text(Mg,y,13,sectie.toUpperCase(),{bold:true,cond:true,color:C.hoofd});
@@ -2788,9 +2779,8 @@ async function buildPdf(){
   /* beginPage maakt de pagina meteen aan (pages telt dus de al begonnen pagina's mee);
      flush zet er alleen de voetregel op. De checkpoints verderop lezen pages.length
      direct na een flush, dus voor die telling maakt het geen verschil. */
-  /* kaal = geen voetbalk (het voorblad); de pagina telt wel mee, anders zou de
-     nummering erna een pagina achterlopen. */
-  function flush(kaal){ if(kaal) pageNo++; else stampFooter(); }
+  /* kaal = geen voetbalk (het voorblad). */
+  function flush(kaal){ if(!kaal) stampFooter(); }
   function beginPage(first){ pg=doc.addPage([W,H]); pages.push(pg); y=Mg; if(!first) contHeader(); }
   function need(h){ if(y+h>H-MB){ flush(); beginPage(false); } }
   function h2(t){ need(30); y+=8; text(Mg,y,12.5,String(t).toUpperCase(),{bold:true,cond:true,color:C.hoofd}); y+=17; }
