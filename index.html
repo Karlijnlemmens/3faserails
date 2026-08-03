@@ -453,7 +453,6 @@
   @media (max-width:640px){ .pdfprev-bar .hint{display:none;} }
 
   .c2-armrow input.c2-aanduiding{flex:0 0 96px; min-width:96px;}
-  .c2-armrow select.c2-groepsel{flex:0 1 150px; min-width:120px;}
   .c2-armrecog{font-size:11px; font-weight:700; white-space:nowrap; padding:3px 8px; border-radius:20px;}
   .c2-armrecog.ok{background:var(--green-light); color:var(--green);}
   .c2-armrecog.miss{background:#FDECEC; color:#B0362B;}
@@ -2374,7 +2373,6 @@ function warnings(B){
     : miss1+' van de '+cm1.count+' trajecten heeft nog geen stroomaansluitpunt. Kies er per traject één via ⚡.'});
   if(B.P.conf.size) w.push({t:'warn', m:'Polariteitsconflict (gestreept rood): de rode lijn kan in deze vorm niet ononderbroken doorlopen. Pas de vorm of het aansluitpunt aan.'});
   B.errs.forEach(er=> w.push({t:'warn', m:er.msg}));
-  const armTotal = visibleArmaturen().reduce((s,a)=>s+(st.armaturen[a.id].qty||0),0);
   /* ao01 = 70mm Universal Adapter (GA-69), ao08 = de verplichte trekontlasting (art.
      2001947) daarbij. Zodra er minstens zoveel trekontlastingen als adapters zijn
      ingevuld, is er kennelijk per adapter een trekontlasting toegevoegd en vervalt
@@ -2382,10 +2380,6 @@ function warnings(B){
   const adapterQty = (st.overig.ao01 && st.overig.ao01.qty) || 0;
   const trekQty = (st.overig.ao08 && st.overig.ao08.qty) || 0;
   if(adapterQty>0 && trekQty<adapterQty) w.push({t:'tip', m:'De 70mm Universal Adapter moet altijd samen met trekontlasting art. 2001947 (PRX trekontlasting brug met 2 schroefjes) besteld worden \u2014 wordt niet automatisch toegevoegd.'});
-  if(armTotal>=6){
-    const per={A:'circuit (zelfde fase; totaal max. 16A over de 3 circuits samen)', B:'fase (elk max. 16A)', C:'fase (adapters kiezen zelf hun fase)'}[st.powercfg];
-    w.push({t:'warn', m:armTotal+' armaturen op configuratie '+st.powercfg+': tel het totale vermogen op en verdeel \u2014 check per '+per+'.'});
-  }
   const angleCount = Object.keys(st.angles).filter(nId=>node(nId)).length;
   if(angleCount>0) w.push({t:'tip', m:angleCount===1
     ? 'E\u00e9n hoek is ingesteld als Verstelbare Hoek \u2014 dit is een ander koppelstuk dan een vaste Bocht. Controleer de exacte hoekinstelling op locatie.'
@@ -3386,40 +3380,33 @@ function buildArmList(){
        code dragen; die code komt terug als eerste kolom in de armaturenlijst. */
     const codeNaamInp=document.createElement('input'); codeNaamInp.type='text';
     codeNaamInp.className='c2-textinp c2-aanduiding';
-    codeNaamInp.placeholder=armLabel(a); codeNaamInp.value=s.aanduiding||'';
+    codeNaamInp.placeholder='CODE'; codeNaamInp.value=s.aanduiding||'';
     codeNaamInp.addEventListener('change', ()=>{ s.aanduiding=codeNaamInp.value; refresh(); });
     const nameInp=document.createElement('input'); nameInp.type='text'; nameInp.className='c2-textinp';
     nameInp.classList.add('c2-armnaam');
     nameInp.placeholder='Volledige naam (bijv. Punto 15W wit)'; nameInp.value=s.name||'';
-    const groepSel=document.createElement('select'); groepSel.className='c2-select c2-groepsel';
-    const autoOpt=document.createElement('option'); autoOpt.value=''; groepSel.appendChild(autoOpt);
-    ARM_GROEPEN.forEach(g=>{ const o=document.createElement('option'); o.value=g.id; o.textContent=g.naam; groepSel.appendChild(o); });
-    const geenOpt=document.createElement('option'); geenOpt.value='-'; geenOpt.textContent='Geen presenter'; groepSel.appendChild(geenOpt);
-    groepSel.value=s.groep||'';
+    /* De uitklaplijst om het armatuurtype handmatig te overschrijven is vervallen -
+       de groep komt nu altijd uit matchArmGroep(naam), zie armGroepVan(). s.groep
+       blijft in de state staan (blijft leeg) zodat armGroepVan() ongewijzigd werkt. */
     const badge=document.createElement('span'); badge.className='c2-armrecog';
     function paintBadge(){
-      const herkend = matchArmGroep(nameInp.value);
-      autoOpt.textContent = 'Automatisch'+(herkend? ' ('+herkend.naam+')':'');
-      const g = armGroepVan({groep:groepSel.value, name:nameInp.value});
+      const g = armGroepVan(s);
       if(g){
         badge.textContent = (presenterAanwezig(g.id)?'✓ ':'⚠ ')+g.naam;
         badge.className = 'c2-armrecog '+(presenterAanwezig(g.id)?'ok':'warn');
         badge.title = presenterAanwezig(g.id)
           ? 'Presenter '+g.naam+' wordt in het armaturenboek opgenomen.'
           : 'Type herkend, maar de presenter-PDF van '+g.naam+' ontbreekt nog in presenters-data.js.';
-      } else if(groepSel.value==='-'){
-        badge.textContent='Geen presenter'; badge.className='c2-armrecog'; badge.title='Deze armatuur komt niet in het armaturenboek.';
       } else if(!nameInp.value.trim()){
         badge.textContent=''; badge.className='c2-armrecog'; badge.title='';
       } else {
         badge.textContent='Kies type'; badge.className='c2-armrecog miss';
-        badge.title='Type niet herkend uit de naam — kies het armatuurtype in de lijst ernaast.';
+        badge.title='Type niet herkend uit de naam — pas de omschrijving aan zodat het type duidelijk wordt.';
       }
     }
     paintBadge();
     nameInp.addEventListener('input', paintBadge);
     nameInp.addEventListener('change', ()=>{ s.name=nameInp.value; paintBadge(); refresh(); });
-    groepSel.addEventListener('change', ()=>{ s.groep=groepSel.value; paintBadge(); refresh(); });
     const codeInp=document.createElement('input'); codeInp.type='text'; codeInp.className='c2-textinp';
     codeInp.classList.add('c2-armcode');
     codeInp.placeholder='Artikelcode'+(st.dali?' (DALI)':'');
@@ -3431,8 +3418,8 @@ function buildArmList(){
     function commitQty(){ const v=Math.max(0, parseInt(qty.value)||0); s.qty=v; qty.value=String(v); refresh(); }
     qty.addEventListener('change', commitQty);
     qty.addEventListener('keydown', e=>{ if(e.key==='Enter') qty.blur(); });
-    row.appendChild(codeNaamInp); row.appendChild(nameInp); row.appendChild(groepSel); row.appendChild(badge);
-    row.appendChild(codeInp); row.appendChild(qty);
+    row.appendChild(codeNaamInp); row.appendChild(codeInp); row.appendChild(nameInp); row.appendChild(badge);
+    row.appendChild(qty);
     container.appendChild(row);
   });
 }
