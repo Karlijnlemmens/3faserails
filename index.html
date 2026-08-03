@@ -452,6 +452,7 @@
   .pdfprev iframe{flex:1 1 auto; width:100%; border:0; background:var(--shade,#EDEFF3);}
   @media (max-width:640px){ .pdfprev-bar .hint{display:none;} }
 
+  .c2-armrow input.c2-aanduiding{flex:0 0 96px; min-width:96px;}
   .c2-armrow select.c2-groepsel{flex:0 1 150px; min-width:120px;}
   .c2-armrecog{font-size:11px; font-weight:700; white-space:nowrap; padding:3px 8px; border-radius:20px;}
   .c2-armrecog.ok{background:var(--green-light); color:var(--green);}
@@ -1534,7 +1535,7 @@ const SHAPES = {
 
 let st = { step:1, dali:false, color:'wit', powercfg:'A', shape:null, gRows:2, gCols:2,
   nodes:[], edges:[], nid:0, eid:0, feeds:[], angles:{},
-  armaturen: ARMATUREN.reduce((o,a)=>{o[a.id]={color:'wit',qty:0,name:'',code:'',codeDali:'',groep:''};return o;},{}),
+  armaturen: ARMATUREN.reduce((o,a)=>{o[a.id]={aanduiding:'',qty:0,name:'',code:'',codeDali:'',groep:''};return o;},{}),
   overig: ADAPTERS_OVERIG.reduce((o,a)=>{o[a.id]={color:'wit',qty:0};return o;},{}),
   use4m:false, pick:false, mount:'geen',
   /* projectgegevens voor het voorblad */
@@ -1975,7 +1976,8 @@ function computeBOM(){
     const rawCode = st.dali ? s.codeDali : s.code;
     const code = (rawCode&&rawCode.trim()) ? rawCode.trim() : ('m-arm-'+a.id+(st.dali?'-dali':''));
     const label = (s.name&&s.name.trim()) ? s.name.trim() : armLabel(a);
-    add(code, code, label+' '+(s.color==='custom'?'(custom coating)':CLRN(s.color)), s.qty, null); });
+    /* geen kleur erachter: die staat al in de volledige naam die de gebruiker invult */
+    add(code, code, label, s.qty, null); });
   ADAPTERS_OVERIG.forEach(a=>{ const s=st.overig[a.id]; if(!s||s.qty<=0) return;
     const c=a.codes[s.color];
     add(c.p, c.l, a.name+' '+CLRN(s.color), s.qty, null); });
@@ -3067,7 +3069,6 @@ async function buildPdf(){
   const bookGroups = [];
   const armOms=(r)=> (r.s.name&&r.s.name.trim()) ? r.s.name.trim() : armLabel(r.a);
   const armCode=(r)=>{ const c = st.dali ? r.s.codeDali : r.s.code; return (c&&c.trim()) ? c.trim() : 'volgt'; };
-  const armKlr=(r)=> r.s.color==='custom' ? 'Custom' : CLRN(r.s.color);
   if(boek.length){
     /* --- hoofdstukblad ---------------------------------------------------------
        Maten zijn opgemeten uit het aangeleverde ontwerp (AB_Armaturen.pdf):
@@ -3101,11 +3102,14 @@ async function buildPdf(){
     beginPage(true);
     paginaKop('Armaturenlijst',
       (st.proj||'').trim() + ((st.proj||'').trim()? '  \u2014  ':'') + datumNL(st.datum));
-    let TB=tableStart([{w:100,h:'Armatuurtype'},{w:200,h:'Omschrijving'},{w:95,h:'Artikelcode'},{w:60,h:'Kleur'},{w:60,h:'Aantal'}]);
-    /* Het type staat alleen op de eerste regel van zijn groep: de uitvoeringen
-       eronder horen bij hetzelfde type en delen straks een presenter. */
+    let TB=tableStart([{w:75,h:'Code'},{w:100,h:'Armatuurtype'},{w:190,h:'Omschrijving'},{w:90,h:'Artikelcode'},{w:60,h:'Aantal'}]);
+    /* De code is die van de gebruiker zelf en staat op elke regel: meerdere armaturen
+       mogen dezelfde code dragen, ook als ze van een ander type zijn. Het type staat
+       juist alleen op de eerste regel van zijn groep - de uitvoeringen eronder horen
+       bij hetzelfde type en delen straks een presenter. Kleur staat er niet bij: die
+       zit al in de omschrijving die de gebruiker invult. */
     boek.forEach(b=> b.rijen.forEach((r,ri)=>
-      tableRow(TB,[ ri===0?b.g.naam:'', armOms(r), armCode(r), armKlr(r), String(r.s.qty) ])));
+      tableRow(TB,[ (r.s.aanduiding||'').trim(), ri===0?b.g.naam:'', armOms(r), armCode(r), String(r.s.qty) ])));
     y+=10;
     para('Hierna volgt per armatuurtype de presenter met alle technische gegevens. '
       +'Uitvoeringen van hetzelfde type - andere kleur, ander wattage, wel of niet dimbaar - '
@@ -3189,7 +3193,10 @@ async function maakPdfBytes(){
   const zonderGroep = armaturenZonderGroep();
   if(zonderGroep.length){
     meldingen.push('Van deze armaturen is het type niet herkend, dus komt er geen presenter in het armaturenboek:\n'
-      + zonderGroep.map(a=> '  • '+armLabel(a)+(st.armaturen[a.id].name? ' — '+st.armaturen[a.id].name:' (nog geen naam ingevuld)')).join('\n')
+      + zonderGroep.map(a=>{ const sa=st.armaturen[a.id];
+          /* de zelf ingevulde code zegt de gebruiker meer dan "Armatuur 06" */
+          const kop=(sa.aanduiding||'').trim() || armLabel(a);
+          return '  • '+kop+(sa.name? ' — '+sa.name:' (nog geen naam ingevuld)'); }).join('\n')
       + '\nKies het armatuurtype in de keuzelijst naast de naam om dit op te lossen.');
   }
   const zonderPresenter = armaturenboek().filter(b=>!presenterAanwezig(b.g.id));
@@ -3307,9 +3314,16 @@ function buildArmList(){
   visibleArmaturen().forEach(a=>{
     const s=st.armaturen[a.id];
     const row=document.createElement('div'); row.className='c2-armrow';
-    const nm=document.createElement('span'); nm.className='nm'; nm.textContent=armLabel(a);
+    /* De vaste aanduiding "Armatuur NN" is vervangen door een eigen code: de
+       gebruiker typt er bijvoorbeeld "CODE A" in. Meerdere armaturen mogen dezelfde
+       code dragen; die code komt terug als eerste kolom in de armaturenlijst. */
+    const codeNaamInp=document.createElement('input'); codeNaamInp.type='text';
+    codeNaamInp.className='c2-textinp c2-aanduiding';
+    codeNaamInp.placeholder=armLabel(a); codeNaamInp.value=s.aanduiding||'';
+    codeNaamInp.addEventListener('change', ()=>{ s.aanduiding=codeNaamInp.value; refresh(); });
     const nameInp=document.createElement('input'); nameInp.type='text'; nameInp.className='c2-textinp';
-    nameInp.placeholder='Volledige naam (bijv. Punto 15W)'; nameInp.value=s.name||'';
+    nameInp.classList.add('c2-armnaam');
+    nameInp.placeholder='Volledige naam (bijv. Punto 15W wit)'; nameInp.value=s.name||'';
     const groepSel=document.createElement('select'); groepSel.className='c2-select c2-groepsel';
     const autoOpt=document.createElement('option'); autoOpt.value=''; groepSel.appendChild(autoOpt);
     ARM_GROEPEN.forEach(g=>{ const o=document.createElement('option'); o.value=g.id; o.textContent=g.naam; groepSel.appendChild(o); });
@@ -3340,21 +3354,18 @@ function buildArmList(){
     nameInp.addEventListener('change', ()=>{ s.name=nameInp.value; paintBadge(); refresh(); });
     groepSel.addEventListener('change', ()=>{ s.groep=groepSel.value; paintBadge(); refresh(); });
     const codeInp=document.createElement('input'); codeInp.type='text'; codeInp.className='c2-textinp';
+    codeInp.classList.add('c2-armcode');
     codeInp.placeholder='Artikelcode'+(st.dali?' (DALI)':'');
     codeInp.value = st.dali ? (s.codeDali||'') : (s.code||'');
     codeInp.addEventListener('change', ()=>{ if(st.dali) s.codeDali=codeInp.value; else s.code=codeInp.value; refresh(); });
-    [nameInp,codeInp].forEach(inp=>inp.addEventListener('keydown', e=>{ if(e.key==='Enter') inp.blur(); }));
-    const sel=document.createElement('select'); sel.className='c2-select';
-    [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'custom',l:'Custom coating'}].forEach(c=>{ const o=document.createElement('option'); o.value=c.k; o.textContent=c.l; sel.appendChild(o); });
-    sel.value=s.color;
-    sel.addEventListener('change', ()=>{ s.color=sel.value; refresh(); });
+    [codeNaamInp,nameInp,codeInp].forEach(inp=>inp.addEventListener('keydown', e=>{ if(e.key==='Enter') inp.blur(); }));
     const qty=document.createElement('input'); qty.type='text'; qty.inputMode='numeric'; qty.className='c2-qtyinp';
     qty.value=String(s.qty);
     function commitQty(){ const v=Math.max(0, parseInt(qty.value)||0); s.qty=v; qty.value=String(v); refresh(); }
     qty.addEventListener('change', commitQty);
     qty.addEventListener('keydown', e=>{ if(e.key==='Enter') qty.blur(); });
-    row.appendChild(nm); row.appendChild(nameInp); row.appendChild(groepSel); row.appendChild(badge);
-    row.appendChild(codeInp); row.appendChild(sel); row.appendChild(qty);
+    row.appendChild(codeNaamInp); row.appendChild(nameInp); row.appendChild(groepSel); row.appendChild(badge);
+    row.appendChild(codeInp); row.appendChild(qty);
     container.appendChild(row);
   });
 }
@@ -3473,7 +3484,7 @@ function init(){
   $('c2ResetAll').addEventListener('click', ()=>{
     st.shape=null; st.nodes=[]; st.edges=[]; st.feeds=[]; st.angles={}; st.mount='geen'; st.pick=false; st.step=1;
     st.sysOphang=false; st.sysOphangLen='3'; st.pendelKabelkleur='zilver'; st.pendelKabelLen='3';
-    st.armaturen=ARMATUREN.reduce((o,a)=>{o[a.id]={color:'wit',qty:0,name:'',code:'',codeDali:'',groep:''};return o;},{});
+    st.armaturen=ARMATUREN.reduce((o,a)=>{o[a.id]={aanduiding:'',qty:0,name:'',code:'',codeDali:'',groep:''};return o;},{});
     st.overig=ADAPTERS_OVERIG.reduce((o,a)=>{o[a.id]={color:'wit',qty:0};return o;},{});
     buildArmList();
     buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
@@ -3521,14 +3532,16 @@ function init(){
     const d=new Date();
     st.datum=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 
-    const zetArm=(id,naam,code,kleur,aantal)=>{
-      const a=st.armaturen[id]; a.name=naam; a.code=code; a.color=kleur; a.qty=aantal; a.groep='';
+    const zetArm=(id,aanduiding,naam,code,aantal)=>{
+      const a=st.armaturen[id]; a.aanduiding=aanduiding; a.name=naam; a.code=code; a.qty=aantal; a.groep='';
     };
-    Object.keys(st.armaturen).forEach(k=>{ const a=st.armaturen[k]; a.name=''; a.code=''; a.codeDali=''; a.qty=0; a.groep=''; });
-    zetArm('arm01','Punto 15W 3000K','2001111','wit',8);
-    zetArm('arm02','Punto 15W 3000K','2001112','zwart',4);
-    zetArm('arm03','Dio 12W','2002222','wit',6);
-    zetArm('arm04','Arda 8W','2004444','wit',3);
+    Object.keys(st.armaturen).forEach(k=>{ const a=st.armaturen[k];
+      a.aanduiding=''; a.name=''; a.code=''; a.codeDali=''; a.qty=0; a.groep=''; });
+    /* CODE A staat twee keer: meerdere armaturen mogen dezelfde code dragen. */
+    zetArm('arm01','CODE A','Punto 15W 3000K wit','2001111',8);
+    zetArm('arm02','CODE A','Punto 15W 3000K zwart','2001112',4);
+    zetArm('arm03','CODE B','Dio 12W wit','2002222',6);
+    zetArm('arm04','CODE C','Arda 8W wit','2004444',3);
 
     Object.keys(st.overig).forEach(k=>{ st.overig[k].qty=0; });
     st.overig.ao01.qty=21; /* ON/OFF rail adapter, hoort bij de armaturen */
