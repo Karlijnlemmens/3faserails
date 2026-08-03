@@ -1340,7 +1340,10 @@ function visibleArmaturen(){ return st.dali ? ARMATUREN.filter(a=>a.dali) : ARMA
 const ARM_GROEPEN = [
   {id:'ag01', naam:'Punto', zoektermen:[]},
   {id:'ag02', naam:'Piccolo', zoektermen:[]},
-  {id:'ag03', naam:'Dio', zoektermen:[]},
+  /* stempelKleur: de code wordt rechtsboven op pagina 1 van de presenter gezet, in wit.
+     De Dio-presenter heeft daar een witte achtergrond, dus die krijgt de huisstijlkleur -
+     anders valt de tekst weg. Nakijken als een presenter vervangen wordt. */
+  {id:'ag03', naam:'Dio', zoektermen:[], stempelKleur:'#0F7ABE'},
   {id:'ag04', naam:'Alto', zoektermen:[]},
   {id:'ag05', naam:'Skyline', zoektermen:[]},
   {id:'ag06', naam:'Arda', zoektermen:[]},
@@ -3121,7 +3124,14 @@ async function buildPdf(){
     }
     flush();
 
-    boek.forEach(b=> bookGroups.push(b.g.id));
+    /* Per type ook de code(s) die de gebruiker eraan gaf; die worden op de
+       presenterpagina's gestempeld. Meerdere rijen mogen dezelfde code hebben, en
+       twee verschillende codes kunnen bij hetzelfde type horen - vandaar de unieke
+       lijst in plaats van de code van de eerste rij. */
+    boek.forEach(b=>{
+      const codes=[...new Set(b.rijen.map(r=>(r.s.aanduiding||'').trim()).filter(Boolean))];
+      bookGroups.push({id:b.g.id, code:codes.join(' / '), kleur:b.g.stempelKleur||'#FFFFFF'});
+    });
   }
 
   const bytes = await doc.save();
@@ -3150,19 +3160,54 @@ async function assembleFinalPdf(){
     const pgs = await finalDoc.copyPages(srcDoc, idx);
     pgs.forEach(p=>finalDoc.addPage(p));
   };
-  const appendPresenter = async(id)=>{
+  /* Lettertype voor de codestempel op de presenters. Die pagina's komen uit een
+     ander document, dus het lettertype moet apart in deze PDF worden ingesloten. */
+  const merk = await merkData();
+  let stempelFont;
+  try{
+    if(merk.fontkit && merk.fonts.dlKopVet){
+      finalDoc.registerFontkit(merk.fontkit);
+      stempelFont = await finalDoc.embedFont(b64Bytes(merk.fonts.dlKopVet), {subset:true});
+    } else throw new Error('huisstijllettertype niet beschikbaar');
+  }catch(err){
+    stempelFont = await finalDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+  }
+
+  /* Zet de code van de gebruiker rechtsboven op de EERSTE pagina van de presenter,
+     zodat te zien is bij welke regel uit de armaturenlijst dit blad hoort. De kleur
+     komt uit de groep: wit, behalve waar de presenter daar een lichte achtergrond
+     heeft (zie stempelKleur bij ARM_GROEPEN).
+
+     De band y 0..24 is op alle presenters vrij; daaronder begint bij de een het
+     PRAGMALUX-logo en bij de ander de garantiezegel. */
+  function stempelCode(pagina, tekst, kleur){
+    if(!pagina || !tekst) return;
+    const korps=11, marge=24, basislijn=17;
+    const {width, height} = pagina.getSize();
+    const tw = stempelFont.widthOfTextAtSize(tekst, korps);
+    const c = kleur.charAt(0)==='#'
+      ? PDFLib.rgb(parseInt(kleur.substr(1,2),16)/255, parseInt(kleur.substr(3,2),16)/255, parseInt(kleur.substr(5,2),16)/255)
+      : PDFLib.rgb(1,1,1);
+    pagina.drawText(tekst, {x: width-marge-tw, y: height-basislijn-korps*0.78,
+      size: korps, font: stempelFont, color: c});
+  }
+
+  const appendPresenter = async(id, code, kleur)=>{
     const b64 = await presenterData(id);
     if(!b64){ console.warn('Presenter "'+id+'" is nog niet toegevoegd (presenters/'+id+'.js of presenters-data.js) \u2014 overgeslagen.'); return 0; }
     try{
       const d = await PDFLib.PDFDocument.load(b64Bytes(b64), {ignoreEncryption:true});
-      await copyRange(d, 0, d.getPageCount());
-      return d.getPageCount();
+      const idx = d.getPageIndices();
+      const pgs = await finalDoc.copyPages(d, idx);
+      pgs.forEach(p=>finalDoc.addPage(p));
+      stempelCode(pgs[0], code, kleur||'#FFFFFF'); /* alleen op pagina 1 */
+      return pgs.length;
     }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); return 0; }
   };
 
   await copyRange(ownDoc, 0, ownDoc.getPageCount());   /* alle eigen pagina's */
-  let presenterTotaal = await appendPresenter('rail'); /* eerst de rail */
-  for(const id of bookGroups) presenterTotaal += await appendPresenter(id);
+  let presenterTotaal = await appendPresenter('rail'); /* de rail heeft geen code */
+  for(const g of bookGroups) presenterTotaal += await appendPresenter(g.id, g.code, g.kleur);
 
   const eind = await finalDoc.save();
   const verwacht = ownPageCount + presenterTotaal;
