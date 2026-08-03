@@ -3105,14 +3105,14 @@ async function buildPdf(){
     beginPage(true);
     paginaKop('Armaturenlijst',
       (st.proj||'').trim() + ((st.proj||'').trim()? '  \u2014  ':'') + datumNL(st.datum));
-    let TB=tableStart([{w:75,h:'Code'},{w:100,h:'Armatuurtype'},{w:190,h:'Omschrijving'},{w:90,h:'Artikelcode'},{w:60,h:'Aantal'}]);
+    let TB=tableStart([{w:75,h:'Code'},{w:290,h:'Omschrijving'},{w:90,h:'Artikelcode'},{w:60,h:'Aantal'}]);
     /* De code is die van de gebruiker zelf en staat op elke regel: meerdere armaturen
-       mogen dezelfde code dragen, ook als ze van een ander type zijn. Het type staat
-       juist alleen op de eerste regel van zijn groep - de uitvoeringen eronder horen
-       bij hetzelfde type en delen straks een presenter. Kleur staat er niet bij: die
-       zit al in de omschrijving die de gebruiker invult. */
-    boek.forEach(b=> b.rijen.forEach((r,ri)=>
-      tableRow(TB,[ (r.s.aanduiding||'').trim(), ri===0?b.g.naam:'', armOms(r), armCode(r), String(r.s.qty) ])));
+       mogen dezelfde code dragen, ook als ze van een ander type zijn. Het armatuurtype
+       staat niet apart in de tabel - de uitvoeringen van hetzelfde type staan wel na
+       elkaar en delen straks een presenter. Kleur staat er niet bij: die zit al in de
+       omschrijving die de gebruiker invult. */
+    boek.forEach(b=> b.rijen.forEach(r=>
+      tableRow(TB,[ (r.s.aanduiding||'').trim(), armOms(r), armCode(r), String(r.s.qty) ])));
     y+=10;
     para('Hierna volgt per armatuurtype de presenter met alle technische gegevens. '
       +'Uitvoeringen van hetzelfde type - andere kleur, ander wattage, wel of niet dimbaar - '
