@@ -24,12 +24,16 @@ const bronDir = join(root, 'presenters-bron');
 const uitDir = join(root, 'presenters');
 const dataBestand = join(root, 'presenters-data.js');
 
-/* Moet gelijk blijven aan ARM_GROEPEN in index.html. */
+/* Moet gelijk blijven aan ARM_GROEPEN in index.html. 'achterpaginas' is geen
+ * armatuurtype maar de vaste achterpagina's die altijd, ongevraagd, achteraan de
+ * eind-PDF komen (zie assembleFinalPdf in index.html) - net als 'rail' krijgt hij
+ * geen codestempel en staat hij niet in het armaturenboek. */
 const GROEPEN = [
   ['rail', '3-Fase Rail'],
   ['ag01', 'Punto'], ['ag02', 'Piccolo'], ['ag03', 'Dio'], ['ag04', 'Alto'],
   ['ag05', 'Skyline'], ['ag06', 'Arda'], ['ag07', 'Orion'], ['ag08', 'Notra'],
   ['ag09', 'Ario'], ['ag10', 'Lustra'], ['ag11', 'Fendi'], ['ag12', 'Altoflood'],
+  ['achterpaginas', 'AB Achterpaginas'],
 ];
 const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
 const opNaam = new Map();

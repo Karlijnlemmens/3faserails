@@ -12,6 +12,7 @@
    PRESENTER_DATA blijft bestaan voor presenters die je liever direct hier inplakt;
    die worden bij het openen al meegeladen en gaan voor op het losse bestand. */
 window.PRESENTER_FILES = [
+  'achterpaginas',   /* AB Achterpaginas */
   'ag01',   /* Punto */
   'ag02',   /* Piccolo */
   'ag03',   /* Dio */
