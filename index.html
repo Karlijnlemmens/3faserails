@@ -2375,8 +2375,13 @@ function warnings(B){
   if(B.P.conf.size) w.push({t:'warn', m:'Polariteitsconflict (gestreept rood): de rode lijn kan in deze vorm niet ononderbroken doorlopen. Pas de vorm of het aansluitpunt aan.'});
   B.errs.forEach(er=> w.push({t:'warn', m:er.msg}));
   const armTotal = visibleArmaturen().reduce((s,a)=>s+(st.armaturen[a.id].qty||0),0);
-  const overigTotal = Object.values(st.overig).reduce((s,x)=>s+(x.qty||0),0);
-  if(overigTotal>0) w.push({t:'tip', m:'De 70mm Universal Adapter moet altijd samen met trekontlasting art. 2001947 (PRX trekontlasting brug met 2 schroefjes) besteld worden \u2014 wordt niet automatisch toegevoegd.'});
+  /* ao01 = 70mm Universal Adapter (GA-69), ao08 = de verplichte trekontlasting (art.
+     2001947) daarbij. Zodra er minstens zoveel trekontlastingen als adapters zijn
+     ingevuld, is er kennelijk per adapter een trekontlasting toegevoegd en vervalt
+     de melding. */
+  const adapterQty = (st.overig.ao01 && st.overig.ao01.qty) || 0;
+  const trekQty = (st.overig.ao08 && st.overig.ao08.qty) || 0;
+  if(adapterQty>0 && trekQty<adapterQty) w.push({t:'tip', m:'De 70mm Universal Adapter moet altijd samen met trekontlasting art. 2001947 (PRX trekontlasting brug met 2 schroefjes) besteld worden \u2014 wordt niet automatisch toegevoegd.'});
   if(armTotal>=6){
     const per={A:'circuit (zelfde fase; totaal max. 16A over de 3 circuits samen)', B:'fase (elk max. 16A)', C:'fase (adapters kiezen zelf hun fase)'}[st.powercfg];
     w.push({t:'warn', m:armTotal+' armaturen op configuratie '+st.powercfg+': tel het totale vermogen op en verdeel \u2014 check per '+per+'.'});
