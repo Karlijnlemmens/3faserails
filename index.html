@@ -63,7 +63,10 @@
     background:var(--blue-light);
     color:var(--blue-dark); font-size:11px; padding:3px 10px; border-radius:999px;
     font-family:'JetBrains Mono',monospace; letter-spacing:.03em; font-weight:600;
+    text-decoration:none; display:inline-block; cursor:pointer; transition:.12s;
   }
+  .badge:hover{border-color:var(--blue);}
+  .badge.active{background:var(--blue); border-color:var(--blue); color:#fff;}
   .tagline{color:var(--slate); font-size:13px; margin-top:2px; max-width:640px; line-height:1.4;}
 
   nav{
@@ -491,13 +494,12 @@
       <img class="logo" src="merk/Distrilight logo donker.png" alt="Distrilight">
     </div>
     <div class="badges">
-      <span class="badge">Armaturenboek</span>
-      <span class="badge">Presenters</span>
-      <span class="badge">3 fase rail</span>
-      <span class="badge">Lichtlijn</span>
-      <span class="badge">Intake</span>
-      <span class="badge">Snoerenplan</span>
-
+      <a class="badge" href="armaturenboek.html">Armaturenboek</a>
+      <a class="badge" href="presenters.html">Presenters</a>
+      <a class="badge active" href="index.html">3 fase rail</a>
+      <a class="badge" href="lichtlijn.html">Lichtlijn</a>
+      <a class="badge" href="intake.html">Intake</a>
+      <a class="badge" href="snoerenplan.html">Snoerenplan</a>
     </div>
   </div>
   <div class="title-row">

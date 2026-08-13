@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Armaturenboek — Distrilight tools</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,600;0,700;0,800;0,900;1,900&family=Caveat:wght@600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-900:#1E2A4A;
+    --navy-800:#26365E;
+    --blue:#3E8EDE;
+    --blue-dark:#2C72BA;
+    --blue-light:#EAF3FC;
+    --orange:#EC6431;
+    --orange-dark:#D4531F;
+    --paper:#F3F7FC;
+    --white:#FFFFFF;
+    --ink:#1C2534;
+    --slate:#5A6B84;
+    --slate-light:#8FA0B8;
+    --red:#D6362B;
+    --green:#22935F;
+    --green-light:#E1F4EB;
+    --border:#DCE6F2;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Nunito Sans',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h4,.disp{font-family:'Nunito Sans',sans-serif; font-weight:800; letter-spacing:0;}
+
+  header{
+    background:var(--white);
+    color:var(--ink);
+    padding:12px 28px 8px;
+    position:sticky; top:0; z-index:50;
+    border-top:5px solid var(--blue);
+    box-shadow:0 2px 20px rgba(30,42,74,.10);
+  }
+  .brandrow{display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  .brand{display:flex; flex-direction:column; gap:0; align-items:flex-start;}
+  .brand .logo{height:100px; width:auto; display:block; transform:translateX(-7.65%);}
+  .title-row{display:flex; align-items:center; gap:14px; margin-top:4px; flex-wrap:wrap;}
+  h1{font-size:20px; margin:0; font-weight:800; color:var(--navy-900);}
+  .badges{display:flex; gap:6px; flex-wrap:wrap;}
+  .badge{
+    border:1px solid var(--blue-light);
+    background:var(--blue-light);
+    color:var(--blue-dark); font-size:11px; padding:3px 10px; border-radius:999px;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.03em; font-weight:600;
+    text-decoration:none; display:inline-block; cursor:pointer; transition:.12s;
+  }
+  .badge:hover{border-color:var(--blue);}
+  .badge.active{background:var(--blue); border-color:var(--blue); color:#fff;}
+
+  main{max-width:1400px; margin:0 auto; padding:16px 28px 60px;}
+  .lede{font-size:14px; color:var(--slate); max-width:760px; line-height:1.5; margin-bottom:12px;}
+  h2.section-title{font-size:20px; margin:0 0 4px; color:var(--navy-900);}
+  .eyebrow{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--blue-dark); margin-bottom:4px; display:block; font-weight:600;}
+
+  /* ---------- layout: lijst + live overzicht ---------- */
+  .cfg-layout{display:grid; grid-template-columns:1fr 380px; gap:22px; align-items:start;}
+  @media(max-width:980px){.cfg-layout{grid-template-columns:1fr;}}
+  .cfg-panel{display:flex; flex-direction:column; gap:10px;}
+  .cfg-block{background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px;}
+  .cfg-block h4{margin:0 0 2px; font-size:13px;}
+  .cfg-block .hint{font-size:11.5px; line-height:1.4; color:var(--slate); margin:0 0 8px;}
+
+  .c2-adapterrow{display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink); font-weight:600; margin-bottom:14px; flex-wrap:wrap;}
+  .c2-select, .c2-textinp{
+    border:1.5px solid var(--border); border-radius:8px; padding:7px 10px;
+    font-family:'Nunito Sans',sans-serif; font-size:12.5px; color:var(--ink); background:#fff;
+  }
+  .c2-textinp{min-width:200px;}
+  .c2-prodlist{display:flex; flex-direction:column; gap:5px; max-height:640px; overflow-y:auto; padding:6px; border:1.5px solid var(--border); border-radius:8px;}
+  .c2-armrow{display:flex; align-items:center; gap:8px; padding:6px 2px; flex-wrap:wrap;}
+  .c2-armrow input.c2-textinp{flex:1 1 130px; min-width:100px; padding:5px 8px; font-size:12px;}
+  .c2-armrow input.c2-aanduiding{flex:0 0 96px; min-width:96px;}
+  .c2-armrow input.c2-armcode{flex:0 0 100px; min-width:90px;}
+  .c2-armrow input.c2-armnaam{flex:1 1 260px;}
+  .c2-armrecog{font-size:11px; font-weight:700; white-space:nowrap; padding:3px 8px; border-radius:20px;}
+  .c2-armrecog.ok{background:var(--green-light); color:var(--green);}
+  .c2-armrecog.miss{background:#FDECEC; color:#B0362B;}
+  .c2-armrecog.warn{background:#FFF4E0; color:#95651A;}
+  .c2-qtyinp{width:48px; border:1.5px solid var(--border); border-radius:8px; padding:6px 4px; font-family:'JetBrains Mono',monospace; font-size:13px; text-align:center; color:var(--ink); background:#fff;}
+
+  /* ---------- live overzicht ---------- */
+  .cfg-summary{
+    position:sticky; top:150px; color:#fff; border-radius:var(--radius); padding:20px; display:flex; flex-direction:column; gap:14px;
+    background:linear-gradient(150deg, #3E8EDE 0%, #2C72BA 100%);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='84'%3E%3Cpath d='M0 0 L42 0 L0 42 Z' fill='%23ffffff' fill-opacity='0.045'/%3E%3Cpath d='M84 84 L42 84 L84 42 Z' fill='%23ffffff' fill-opacity='0.045'/%3E%3C/svg%3E"), linear-gradient(150deg, #3E8EDE 0%, #2C72BA 100%);
+    box-shadow:0 10px 26px rgba(44,114,186,.30);
+  }
+  .cfg-summary h4{margin:0; font-size:14px; color:#fff;}
+  .cfg-summary .eyebrow{color:#8FA3C7;}
+  .cfg-metric-row{display:flex; justify-content:space-between; font-size:13px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.12);}
+  .cfg-metric-row .k{color:#AFC0DA;}
+  .cfg-metric-row .v{font-family:'JetBrains Mono',monospace; font-weight:700;}
+  .cfg-art-list{display:flex; flex-direction:column; gap:6px; max-height:260px; overflow-y:auto;}
+  .cfg-art-row{display:flex; justify-content:space-between; font-size:12px; background:rgba(255,255,255,.06); border-radius:6px; padding:7px 10px;}
+  .cfg-art-row .name{color:#C6D2E8; margin-right:8px;}
+  .cfg-art-row .qty{color:#8FA3C7; font-family:'JetBrains Mono',monospace;}
+  .cfg-warns{display:flex; flex-direction:column; gap:8px;}
+  .cfg-warn{background:rgba(214,54,43,.18); border-left:3px solid var(--red); padding:8px 10px; border-radius:6px; font-size:11.5px; line-height:1.5; color:#FFE3E0;}
+  .cfg-actions{display:flex; gap:8px;}
+  .cfg-actions button{
+    flex:1; background:#fff; color:var(--blue-dark); border:none; border-radius:999px; padding:10px; font-weight:800; font-size:12.5px; cursor:pointer; font-family:'Nunito Sans',sans-serif;
+  }
+  .cfg-actions #abPdf{background:var(--orange); color:#fff; box-shadow:0 4px 12px rgba(236,100,49,.35);}
+  .cfg-actions #abPdf:hover{background:var(--orange-dark);}
+  .cfg-actions button:hover{opacity:.9;}
+  .cfg-actions button:disabled{opacity:.6; cursor:default;}
+
+  /* ---------- voorbeeldvenster voor de PDF ---------- */
+  .pdfprev-bg{position:fixed; inset:0; background:rgba(11,24,48,.66); display:none; align-items:center; justify-content:center; z-index:120; padding:18px;}
+  .pdfprev-bg.active{display:flex;}
+  .pdfprev{background:#fff; border-radius:14px; width:min(1100px,100%); height:min(94vh,100%); display:flex; flex-direction:column; overflow:hidden;}
+  .pdfprev-bar{display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); flex-wrap:wrap;}
+  .pdfprev-bar b{font-size:14px; color:var(--navy-900);}
+  .pdfprev-bar .hint{margin:0; flex:1 1 auto; font-size:12.5px; color:var(--slate);}
+  .pdfprev-bar button{
+    border:1.5px solid var(--border); background:#fff; border-radius:999px; padding:8px 14px;
+    font-family:'Nunito Sans',sans-serif; font-size:12.5px; font-weight:600; color:var(--ink); cursor:pointer;
+  }
+  .pdfprev iframe{flex:1 1 auto; width:100%; border:0; background:#EDEFF3;}
+  @media (max-width:640px){ .pdfprev-bar .hint{display:none;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brandrow">
+    <div class="brand">
+      <img class="logo" src="merk/Distrilight logo donker.png" alt="Distrilight">
+    </div>
+    <div class="badges">
+      <a class="badge active" href="armaturenboek.html">Armaturenboek</a>
+      <a class="badge" href="presenters.html">Presenters</a>
+      <a class="badge" href="index.html">3 fase rail</a>
+      <a class="badge" href="lichtlijn.html">Lichtlijn</a>
+      <a class="badge" href="intake.html">Intake</a>
+      <a class="badge" href="snoerenplan.html">Snoerenplan</a>
+    </div>
+  </div>
+  <div class="title-row">
+    <h1>Armaturenboek</h1>
+  </div>
+</header>
+
+<main>
+  <span class="eyebrow">Lichtplan</span>
+  <h2 class="section-title">Armaturenboek</h2>
+  <p class="lede">Kies welke armaturen in dit lichtplan komen en hoeveel. De tool herkent het type uit de naam en stelt op basis daarvan het armaturenboek samen (armaturenlijst + Pragmalux-presenters per type).</p>
+
+  <div class="cfg-layout">
+    <div class="cfg-panel">
+
+      <div class="cfg-block">
+        <h4>Projectgegevens</h4>
+        <p class="hint">Deze komen op het voorblad van de PDF.</p>
+        <div class="c2-adapterrow">
+          <span>Projectnaam:</span>
+          <input type="text" id="abProj" class="c2-textinp" placeholder="bijv. Winkel Hoofdstraat 12">
+          <span>Projectnummer:</span>
+          <input type="text" id="abProjNr" class="c2-textinp" placeholder="P.12345">
+        </div>
+        <div class="c2-adapterrow" style="margin-bottom:0;">
+          <span>Installateur:</span>
+          <input type="text" id="abInst" class="c2-textinp" placeholder="naam van de installateur">
+          <span>Datum:</span>
+          <input type="date" id="abDatum" class="c2-textinp">
+        </div>
+      </div>
+
+      <div class="cfg-block">
+        <h4>Armaturen</h4>
+        <p class="hint">Vul de volledige naam en artikelcode in en typ het aantal per type. Het type (= welke presenter in het boek komt) wordt herkend uit de naam.</p>
+        <div class="c2-prodlist" id="abArmList"></div>
+      </div>
+
+    </div>
+
+    <div class="cfg-summary">
+      <span class="eyebrow">Live overzicht</span>
+      <h4 id="abTitle">Nog geen armaturen gekozen</h4>
+      <div>
+        <div class="cfg-metric-row"><span class="k">Armaturen</span><span class="v" id="abTotArm">0</span></div>
+        <div class="cfg-metric-row"><span class="k">Typen herkend</span><span class="v" id="abTotType">0</span></div>
+      </div>
+      <div>
+        <span class="eyebrow">Types in het boek</span>
+        <div class="cfg-art-list" id="abArtList"></div>
+      </div>
+      <div class="cfg-warns" id="abWarns"></div>
+      <div class="cfg-actions">
+        <button id="abPdf">Download PDF</button>
+        <button id="abPreview">Preview PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pdfprev-bg" id="abPreviewBg">
+    <div class="pdfprev">
+      <div class="pdfprev-bar">
+        <b>Voorbeeld — Armaturenboek</b>
+        <span class="hint">Zo ziet de PDF eruit.</span>
+        <button id="abPreviewDl">Downloaden</button>
+        <button id="abPreviewClose">Sluiten</button>
+      </div>
+      <iframe id="abPreviewFrame" title="Voorbeeld van de PDF"></iframe>
+    </div>
+  </div>
+</main>
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="presenters-data.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+
+/* ---------- projectstate ---------- */
+const st = { proj:'', projNr:'', installateur:'', datum:'', armaturen:{} };
+
+/* ---------- armaturen: 12 vaste slots, zelfde opzet als de Railconfigurator ---------- */
+const ARMATUREN = [
+  {id:'arm01'}, {id:'arm02'}, {id:'arm03'}, {id:'arm04'}, {id:'arm05'},
+  {id:'arm06'}, {id:'arm07'}, {id:'arm08'}, {id:'arm09'}, {id:'arm10'}, {id:'arm11'}, {id:'arm12'},
+];
+function armLabel(a){ return 'Armatuur '+a.id.replace('arm',''); }
+
+/* ---------- armatuurgroepen (= presenter-types) — zelfde tabel/herkenning als index.html ---------- */
+const ARM_GROEPEN = [
+  {id:'ag01', naam:'Punto', zoektermen:[]},
+  {id:'ag02', naam:'Piccolo', zoektermen:[]},
+  {id:'ag03', naam:'Dio', zoektermen:[], stempelKleur:'#1A253C'},
+  {id:'ag04', naam:'Alto', zoektermen:[]},
+  {id:'ag05', naam:'Skyline', zoektermen:[]},
+  {id:'ag06', naam:'Arda', zoektermen:[]},
+  {id:'ag07', naam:'Orion', zoektermen:[]},
+  {id:'ag08', naam:'Notra', zoektermen:[]},
+  {id:'ag09', naam:'Ario GU10', zoektermen:['Ario']},
+  {id:'ag10', naam:'Lustra GU10', zoektermen:['Lustra']},
+  {id:'ag11', naam:'Fendi GU10', zoektermen:['Fendi']},
+  {id:'ag12', naam:'Altoflood', zoektermen:['Alto flood','Alto-flood']},
+];
+const ARM_STOPWOORDEN = new Set([
+  'wit','witte','white','zwart','zwarte','black','grijs','grijze','grey','gray',
+  'zilver','silver','aluminium','alu','goud','gold','brons','bronze',
+  'custom','coating','gecoat','mat','matte','glans','ral',
+  'dali','dimbaar','dimbare','dimmable','dim','onoff','on','off','push','triac',
+  'casambi','zigbee','switchdim','fase','driefase',
+  'led','lamp','armatuur','armaturen','spot','spots','spotje','opbouwspot','inbouwspot',
+  'track','rail','railspot','pragmalux','prx',
+  'ww','nw','cw','warmwit','neutraalwit','koelwit',
+  'stuks','stuk','type','serie','model','incl','excl','met','voor','de','het','een'
+]);
+const ARM_GETAL = /^\d+([.,]\d+)?(w|watt|k|lm|v|va|ma|mm|cm|m|gr|graden|deg)?$/;
+const ARM_CODE = /^[a-z]{0,4}\d{5,}$/;
+function armTokens(txt){
+  return String(txt||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().split(/\s+/).filter(Boolean);
+}
+const ARM_GROEP_TOKENS = ARM_GROEPEN.map(g=>({
+  g, varianten: [g.naam].concat(g.zoektermen||[]).map(armTokens).filter(v=>v.length)
+}));
+const ARM_VOCAB = (()=>{ const s=new Set();
+  ARM_GROEP_TOKENS.forEach(x=>x.varianten.forEach(v=>v.forEach(t=>s.add(t)))); return s; })();
+function armZinvolleTokens(txt){
+  return armTokens(txt).filter(t=>
+    ARM_VOCAB.has(t) || !(ARM_STOPWOORDEN.has(t) || ARM_GETAL.test(t) || ARM_CODE.test(t)));
+}
+function matchArmGroep(txt){
+  const toks = armZinvolleTokens(txt);
+  if(!toks.length) return null;
+  const heeft = new Set(toks);
+  let best=null, bestScore=0, gelijk=false;
+  ARM_GROEP_TOKENS.forEach(({g,varianten})=>{
+    let score=0;
+    varianten.forEach(v=>{
+      if(!heeft.has(v[0])) return;
+      const hits = v.filter(t=>heeft.has(t)).length;
+      const s = hits*100 + (hits===v.length?50:0) + v.join('').length;
+      if(s>score) score=s;
+    });
+    if(!score) return;
+    if(score>bestScore){ bestScore=score; best=g; gelijk=false; }
+    else if(score===bestScore && g!==best) gelijk=true;
+  });
+  return gelijk ? null : best;
+}
+function armGroepVan(s){
+  if(!s) return null;
+  if(s.groep==='-') return null;
+  if(s.groep) return ARM_GROEPEN.find(g=>g.id===s.groep) || null;
+  return matchArmGroep(s.name);
+}
+function armaturenboek(){
+  const boek=[], perGroep={};
+  ARMATUREN.forEach(a=>{
+    const s=st.armaturen[a.id];
+    if(!s || (s.qty||0)<=0) return;
+    const g=armGroepVan(s);
+    if(!g) return;
+    let b=perGroep[g.id];
+    if(!b){ b=perGroep[g.id]={g, rijen:[], totaal:0}; boek.push(b); }
+    b.rijen.push({a,s}); b.totaal+=(s.qty||0);
+  });
+  return boek;
+}
+function armaturenZonderGroep(){
+  return ARMATUREN.filter(a=>{
+    const s=st.armaturen[a.id];
+    return (s.qty||0)>0 && s.groep!=='-' && !armGroepVan(s);
+  });
+}
+
+/* ---------- presenter-PDF's ophalen (zelfde opzet als index.html) ---------- */
+function presenterAanwezig(id){
+  if(window.PRESENTER_DATA && window.PRESENTER_DATA[id]) return true;
+  return !!(window.PRESENTER_FILES && window.PRESENTER_FILES.indexOf(id)>=0);
+}
+const scriptLaad = {};
+function laadScript(src){
+  if(!scriptLaad[src]){
+    scriptLaad[src] = new Promise(res=>{
+      const s=document.createElement('script');
+      s.src=src;
+      s.onload=()=>res(true);
+      s.onerror=()=>res(false);
+      document.head.appendChild(s);
+    });
+  }
+  return scriptLaad[src];
+}
+function laadPresenterBestand(id){ return laadScript('presenters/'+id+'.js'); }
+let merkGeladen=null;
+function merkData(){
+  if(!merkGeladen){
+    merkGeladen = (async()=>{
+      await Promise.all([laadScript('vendor/fontkit.umd.min.js'), laadScript('merk/merk-data.js')]);
+      const fk = window.fontkit;
+      if(!fk) console.warn('fontkit kon niet worden geladen - de PDF gebruikt de standaardlettertypen.');
+      if(!window.MERK_FONTS) console.warn('merk/merk-data.js kon niet worden geladen - de PDF gebruikt de standaardlettertypen.');
+      return {fontkit:fk||null, fonts:window.MERK_FONTS||{}, logos:window.MERK_LOGOS||{},
+              beelden:window.MERK_BEELDEN||{}};
+    })();
+  }
+  return merkGeladen;
+}
+function b64Bytes(b64){
+  const bin=atob(b64); const arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  return arr;
+}
+async function presenterData(id){
+  const direct = window.PRESENTER_DATA && window.PRESENTER_DATA[id];
+  if(direct) return direct;
+  if(!(window.PRESENTER_FILES && window.PRESENTER_FILES.indexOf(id)>=0)) return null;
+  await laadPresenterBestand(id);
+  return (window.PRESENTER_DATA && window.PRESENTER_DATA[id]) || null;
+}
+
+/* ---------- tekst/datum helpers (zelfde als index.html) ---------- */
+function datumNL(s){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));
+  if(m) return m[3]+'-'+m[2]+'-'+m[1];
+  const d=new Date();
+  return String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
+}
+function pdfTxt(s){
+  s=String(s).replace(/—|–/g,'-').replace(/×/g,'x').replace(/→/g,'->')
+    .replace(/“|”/g,'"').replace(/‘|’/g,"'")
+    .replace(/⚡/g,'').replace(/＋/g,'+').replace(/−/g,'-');
+  let o='';
+  for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); o += String.fromCharCode(c>255?63:c); }
+  return o;
+}
+
+/* ---------- PDF opbouw: voorblad -> hoofdstukblad Armaturen -> armaturenlijst ---------- */
+async function buildArmaturenboekPdf(){
+  const W=595,H=842,Mg=40,MB=64; const pages=[]; let y=Mg;
+  const doc = await PDFLib.PDFDocument.create();
+
+  const merk = await merkData();
+  let FONT, eigenKop=false;
+  try{
+    if(!merk.fontkit || !merk.fonts.regular) throw new Error('huisstijllettertypen niet beschikbaar');
+    doc.registerFontkit(merk.fontkit);
+    const laad = async(sleutel, terugval)=> merk.fonts[sleutel]
+      ? doc.embedFont(b64Bytes(merk.fonts[sleutel]), {subset:true})
+      : doc.embedFont(terugval);
+    FONT = {
+      reg:        await laad('regular',    PDFLib.StandardFonts.Helvetica),
+      bold:       await laad('bold',       PDFLib.StandardFonts.HelveticaBold),
+      kopVet:     await laad('kopVet',     PDFLib.StandardFonts.HelveticaBold),
+      kopLicht:   await laad('kopLicht',   PDFLib.StandardFonts.Helvetica),
+      dlKopVet:   await laad('dlKopVet',   PDFLib.StandardFonts.HelveticaBold),
+      dlKopLicht: await laad('dlKopLicht', PDFLib.StandardFonts.Helvetica),
+    };
+    eigenKop = !!merk.fonts.kopVet;
+  }catch(err){
+    console.warn('Huisstijllettertypen niet ingesloten, terugval op Helvetica:', err && err.message);
+    const reg = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+    const bold = await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+    FONT = {reg, bold, kopVet:bold, kopLicht:reg, dlKopVet:bold, dlKopLicht:reg};
+  }
+  let pg = null;
+
+  const kleurCache = {};
+  function col(v){
+    if(kleurCache[v]) return kleurCache[v];
+    let r,g,b;
+    if(v.charAt(0)==='#'){
+      const h=v.slice(1);
+      r=parseInt(h.substr(0,2),16)/255; g=parseInt(h.substr(2,2),16)/255; b=parseInt(h.substr(4,2),16)/255;
+    } else { const p=v.trim().split(/\s+/).map(Number); r=p[0]; g=p[1]; b=p[2]; }
+    return (kleurCache[v]=PDFLib.rgb(r,g,b));
+  }
+  /* Alleen Distrilight-huisstijl: deze eigen pagina's (voorblad, armaturenlijst) zijn van
+     de afzender. De Pragmalux-huisstijl leeft in de aangeplakte presenter-PDF's zelf. */
+  const THEMA = {naam:'Distrilight', hoofd:'#0F7ABE', hoofd2:'#3E95CB', hoofdDiep:'#0A5A8C', tekst:'#123A5E', lt:'#DCECF8', shade:'#EDF3F9', line:'#C7D9E7',
+                 logoLicht:'dlLicht', logoDonker:'dlDonker', logoRatio:993/445, kopHoogte:40};
+  const C={grey:'#5B677E', red:'#D6362B', wit:'#FFFFFF', zwart:'#000000',
+    hoofd:THEMA.hoofd, hoofd2:THEMA.hoofd2, hoofdDiep:THEMA.hoofdDiep, tekst:THEMA.tekst, lt:THEMA.lt, shade:THEMA.shade, line:THEMA.line};
+
+  const LOGO={};
+  for(const sleutel of ['dlLicht','dlDonker']){
+    if(!merk.logos[sleutel]) continue;
+    try{ LOGO[sleutel]=await doc.embedPng(b64Bytes(merk.logos[sleutel])); }
+    catch(err){ console.warn('Logo "'+sleutel+'" kon niet worden ingesloten:', err && err.message); }
+  }
+  async function sluitBeeldIn(bytes){
+    const isPng = bytes[0]===0x89 && bytes[1]===0x50 && bytes[2]===0x4E && bytes[3]===0x47;
+    const isJpg = bytes[0]===0xFF && bytes[1]===0xD8;
+    if(isPng) return doc.embedPng(bytes);
+    if(isJpg) return doc.embedJpg(bytes);
+    throw new Error('geen PNG of JPEG');
+  }
+  const BEELD={};
+  for(const sleutel of ['omslagVolledig','omslagBoven','ruitpatroon','armaturenFoto']){
+    if(!merk.beelden[sleutel]) continue;
+    try{ BEELD[sleutel]=await sluitBeeldIn(b64Bytes(merk.beelden[sleutel])); }
+    catch(err){ console.warn('Omslagbeeld "'+sleutel+'" kon niet worden ingesloten:', err && err.message); }
+  }
+
+  function kiesFont(opt){
+    if(opt.cond) return opt.bold===false ? FONT.dlKopLicht : FONT.dlKopVet;
+    return opt.bold ? FONT.bold : FONT.reg;
+  }
+  function text(x,yt,size,str,opt){ opt=opt||{};
+    const s=pdfTxt(str);
+    const f=kiesFont(opt);
+    const hz=(opt.cond && !eigenKop) ? 84 : 100, tc=opt.tc||0;
+    const w=f.widthOfTextAtSize(s,size)*hz/100 + s.length*tc;
+    let xx=x; if(opt.align==='center')xx=x-w/2; else if(opt.align==='right')xx=x-w;
+    pg.setFont(f);
+    const key=pg.getFont()[1];
+    const c=col(opt.color||'#000000');
+    pg.pushOperators(
+      PDFLib.pushGraphicsState(), PDFLib.beginText(),
+      PDFLib.setFontAndSize(key,size),
+      PDFLib.setCharacterSqueeze(hz), PDFLib.setCharacterSpacing(tc),
+      PDFLib.setFillingRgbColor(c.red,c.green,c.blue),
+      PDFLib.setTextMatrix(1,0,0,1,xx,H-yt-size*0.78),
+      PDFLib.showText(f.encodeText(s)),
+      PDFLib.endText(), PDFLib.popGraphicsState());
+    return w;
+  }
+  function line(x1,y1,x2,y2,lw,color,round){
+    pg.drawLine({start:{x:x1,y:H-y1}, end:{x:x2,y:H-y2}, thickness:lw,
+      color:col(color||'#000000'), lineCap: round?PDFLib.LineCapStyle.Round:PDFLib.LineCapStyle.Butt});
+  }
+  function rect(x,yt,w,h,fill,stroke,lw){
+    if(!fill && !stroke) return;
+    const o={x:x, y:H-yt-h, width:w, height:h};
+    if(fill) o.color=col(fill);
+    if(stroke){ o.borderColor=col(stroke); o.borderWidth=lw||0.8; }
+    else o.borderWidth=0;
+    pg.drawRectangle(o);
+  }
+  function poly(pts,fill){
+    const d='M '+pts.map(p=>p[0]+' '+p[1]).join(' L ')+' Z';
+    pg.drawSvgPath(d,{x:0, y:H, color:col(fill), borderWidth:0});
+  }
+  function meet(str,size,opt){ opt=opt||{};
+    const s=pdfTxt(str), f=kiesFont(opt);
+    const hz=(opt.cond && !eigenKop) ? 84 : 100;
+    return f.widthOfTextAtSize(s,size)*hz/100 + s.length*(opt.tc||0);
+  }
+  function wrapBreedte(s,maxW,size,opt){
+    const woorden=String(s).split(/\s+/).filter(Boolean); const regels=[]; let cur='';
+    woorden.forEach(w=>{
+      const kandidaat = cur ? cur+' '+w : w;
+      if(cur && meet(kandidaat,size,opt)>maxW){ regels.push(cur); cur=w; }
+      else cur=kandidaat;
+    });
+    if(cur) regels.push(cur);
+    return regels;
+  }
+  function wrap(s,maxChars){
+    const words=String(s).split(' '); const lines=[]; let cur='';
+    words.forEach(wd=>{ if((cur+' '+wd).trim().length>maxChars){ lines.push(cur.trim()); cur=wd; } else cur+=' '+wd; });
+    if(cur.trim()) lines.push(cur.trim());
+    return lines;
+  }
+  function logoBreedte(hoogte){ return hoogte*THEMA.logoRatio; }
+  function logo(x,yt,hoogte,opDonker){
+    const img = LOGO[opDonker ? THEMA.logoLicht : THEMA.logoDonker];
+    const breedte = logoBreedte(hoogte);
+    if(img){
+      pg.drawImage(img, {x:x, y:H-yt-hoogte, width:breedte, height:hoogte});
+    } else {
+      text(x,yt,hoogte*0.8,THEMA.naam,{bold:true,color:opDonker?C.wit:C.hoofd});
+    }
+    return breedte;
+  }
+  let sectie='Armaturen';
+  function stampFooter(){
+    const vSchaal=0.6, vH=52*vSchaal, vBreed=128*vSchaal, vSmal=92*vSchaal, vTopY=H-vH;
+    const afstand=vBreed-vSmal, onderX=Mg, bovenX=onderX+afstand;
+    poly([[W,vTopY],[bovenX,vTopY],[onderX,H],[W,H]], '#EBEBEC');
+  }
+  function contHeader(){
+    text(Mg,y,13,sectie.toUpperCase(),{bold:true,cond:true,color:C.hoofd});
+    const lh=THEMA.kopHoogte; logo(W-Mg-logoBreedte(lh), 58-lh, lh, false);
+    y+=22; line(Mg,y,W-Mg,y,1.1,C.hoofd); y+=14;
+  }
+  function flush(kaal){ if(!kaal) stampFooter(); }
+  function beginPage(first){ pg=doc.addPage([W,H]); pages.push(pg); y=Mg; if(!first) contHeader(); }
+  function need(h){ if(y+h>H-MB){ flush(); beginPage(false); } }
+  function para(t,size,color){
+    wrap(t, Math.floor((W-2*Mg)/((size||8.5)*0.48))).forEach(l=>{ need(12); text(Mg,y,size||8.5,l,{color:color||'0 0 0'}); y+=11.5; });
+    y+=3;
+  }
+  function metUitsnede(punten, tekenen){
+    pg.pushOperators(PDFLib.pushGraphicsState(),
+      PDFLib.moveTo(punten[0][0], H-punten[0][1]),
+      ...punten.slice(1).map(pt=>PDFLib.lineTo(pt[0], H-pt[1])),
+      PDFLib.closePath(), PDFLib.clip(), PDFLib.endPath());
+    tekenen();
+    pg.pushOperators(PDFLib.popGraphicsState());
+  }
+  function beeldVullend(img, x, yt, w, h){
+    const s=Math.max(w/img.width, h/img.height);
+    const bw=img.width*s, bh=img.height*s;
+    pg.drawImage(img, {x:x-(bw-w)/2, y:H-yt-h-(bh-h)/2, width:bw, height:bh});
+  }
+  function meng(a,b,t){
+    const h=v=>[1,3,5].map(i=>parseInt(v.substr(i,2),16));
+    const A=h(a), B=h(b);
+    return '#'+[0,1,2].map(i=>Math.round(A[i]+(B[i]-A[i])*t).toString(16).padStart(2,'0')).join('').toUpperCase();
+  }
+
+  /* --- voorblad: zelfde opzet als de Railconfigurator-PDF --- */
+  function omslag(){
+    beginPage(true);
+    const bovenH=357, fotoY=357, fotoH=210;
+    const volledig = !!BEELD.omslagVolledig;
+    if(volledig){
+      beeldVullend(BEELD.omslagVolledig, 0, 0, W, H);
+    } else {
+      if(BEELD.omslagBoven){
+        const bh = W / (BEELD.omslagBoven.width / BEELD.omslagBoven.height);
+        pg.drawImage(BEELD.omslagBoven, {x:0, y:H-bh, width:W, height:bh});
+      } else {
+        rect(0,0,W,bovenH,C.hoofd);
+        const tinten=[C.hoofd, meng(C.hoofd,C.wit,0.10), meng(C.hoofd,C.wit,0.18), meng(C.hoofd,C.zwart,0.10)];
+        const stap=119;
+        for(let rij=0, ry=0; ry<bovenH; rij++, ry+=stap){
+          for(let kol=0, rx=0; rx<W; kol++, rx+=stap){
+            poly([[rx,ry],[rx+stap,ry],[rx,ry+stap]], tinten[(rij*3+kol*2)%4]);
+            poly([[rx+stap,ry],[rx+stap,ry+stap],[rx,ry+stap]], tinten[(rij*3+kol*2+1)%4]);
+          }
+        }
+        rect(0,fotoY,W,fotoH,meng(C.hoofd,C.wit,0.14));
+      }
+      const titelY0=99, titelY1=226;
+      const schuineHoek=34/70;
+      const titelSchuin=(titelY1-titelY0)*schuineHoek;
+      poly([[0,titelY0],[378,titelY0],[378-titelSchuin,titelY1],[0,titelY1]], C.hoofdDiep);
+      poly([[361+34,716],[W,716],[W,786],[361,786]], C.hoofd);
+      const lh=70;
+      logo(W-logoBreedte(lh)-30, 716+(70-lh)/2, lh, true);
+    }
+    const naam=(st.proj||'').trim() || 'Projectnaam';
+    const regels=wrapBreedte(naam, 260, 20, {bold:true,cond:true}).slice(0,3);
+    let ty=128;
+    regels.forEach(r=>{ text(45,ty,20,r,{bold:true,cond:true,color:C.wit}); ty+=36; });
+    const veld=(label,waarde,dy)=>{
+      const b=meet(label+' ',8.5,{});
+      text(38,748+dy,8.5,label,{color:C.zwart});
+      text(38+b,748+dy,8.5,waarde||'-',{bold:true,color:C.zwart});
+    };
+    veld('Projectnummer:', (st.projNr||'').trim(), 0);
+    veld('Installateur:',  (st.installateur||'').trim(), 14.5);
+    veld('Datum:',         datumNL(st.datum), 29);
+    flush(true);
+  }
+  omslag();
+
+  const BALK_H = 70;
+  function paginaKop(titel, onderschrift){
+    rect(0,0,W,BALK_H,C.hoofd);
+    if(BEELD.ruitpatroon){
+      const ph = W / (BEELD.ruitpatroon.width / BEELD.ruitpatroon.height);
+      pg.drawImage(BEELD.ruitpatroon, {x:0, y:H-ph, width:W, height:ph});
+      rect(0,BALK_H,W,H-BALK_H,C.wit);
+    }
+    text(Mg,30,25,String(titel).toUpperCase(),{bold:true,cond:true,color:C.wit});
+    if(onderschrift) text(Mg,55,10,onderschrift,{color:C.lt});
+    y=BALK_H+38;
+  }
+  function tableStart(cols){ const totW=cols.reduce((s,c)=>s+c.w,0);
+    need(20); let x=Mg; rect(Mg,y,totW,15,C.hoofd);
+    cols.forEach(c=>{ text(x+5,y+2.6,8.5,c.h,{bold:true,color:C.wit}); x+=c.w; });
+    y+=15; return {cols,totW,i:0};
+  }
+  function wrapCell(str,w){
+    const words=String(str==null?'':str).split(' ');
+    const lines=[]; let cur='';
+    words.forEach(wd=>{
+      const test=cur?cur+' '+wd:wd;
+      if(FONT.reg.widthOfTextAtSize(test,8.5)>w && cur){ lines.push(cur); cur=wd; }
+      else cur=test;
+    });
+    lines.push(cur);
+    return lines;
+  }
+  function tableRow(T,vals){
+    const lineH=11;
+    const cellLines=T.cols.map((c,j)=>wrapCell(vals[j],c.w-10));
+    const nLines=Math.max.apply(null,cellLines.map(l=>l.length));
+    const rowH=13.5+(nLines-1)*lineH;
+    if(y+rowH>H-MB){ flush(); beginPage(false); let x=Mg; rect(Mg,y,T.totW,15,C.hoofd);
+      T.cols.forEach(c=>{ text(x+5,y+2.6,8.5,c.h,{bold:true,color:C.wit}); x+=c.w; }); y+=15; }
+    if(T.i%2===0) rect(Mg,y,T.totW,rowH,C.shade);
+    let x=Mg;
+    T.cols.forEach((c,j)=>{ cellLines[j].forEach((ln,li)=>text(x+5,y+2.4+li*lineH,8.5,ln,{color:C.tekst})); x+=c.w; });
+    line(Mg,y+rowH,Mg+T.totW,y+rowH,0.5,C.line);
+    T.i++; y+=rowH;
+  }
+
+  /* --- hoofdstukblad Armaturen + armaturenlijst; de presenters worden er in
+         assembleArmaturenboekPdf achter geplakt, in de volgorde van bookGroups --- */
+  const boek = armaturenboek();
+  const bookGroups = [];
+  const armOms=(r)=> (r.s.name&&r.s.name.trim()) ? r.s.name.trim() : armLabel(r.a);
+  const armCode=(r)=>{ const c = r.s.code; return (c&&c.trim()) ? c.trim() : 'volgt'; };
+  if(boek.length){
+    sectie='Armaturen';
+    beginPage(true);
+    if(BEELD.ruitpatroon) beeldVullend(BEELD.ruitpatroon, 0, 0, W, H);
+    else rect(0,0,W,H,C.hoofd);
+    poly([[0,85],[379,85],[337,200],[0,200]], C.hoofd);
+    text(27, 148-36*0.78, 36, 'Armaturen', {cond:true, color:C.wit});
+    if(BEELD.armaturenFoto){
+      metUitsnede([[190,534],[W,534],[W,769],[190,769]],
+        ()=> beeldVullend(BEELD.armaturenFoto, 190, 534, W-190, 235));
+    }
+    poly([[0,534],[308,534],[220,769],[0,769]], C.wit);
+    ['Precisie in licht begint','bij de juiste armaturen,','geselecteerd met zorg','en aandacht.']
+      .forEach((r,i)=> text(27, 605+i*29.5-19.6*0.78, 19.6, r, {cond:true, bold:false, color:C.hoofd}));
+    flush(true);
+
+    sectie='Armaturenlijst';
+    beginPage(true);
+    paginaKop('Armaturenlijst',
+      (st.proj||'').trim() + ((st.proj||'').trim()? '  —  ':'') + datumNL(st.datum));
+    let TB=tableStart([{w:75,h:'Code'},{w:290,h:'Omschrijving'},{w:90,h:'Artikelcode'},{w:60,h:'Aantal'}]);
+    boek.forEach(b=> b.rijen.forEach(r=>
+      tableRow(TB,[ (r.s.aanduiding||'').trim(), armOms(r), armCode(r), String(r.s.qty) ])));
+    y+=10;
+    const ontbreekt = boek.filter(b=>!presenterAanwezig(b.g.id));
+    if(ontbreekt.length){
+      para('Let op: van '+ontbreekt.map(b=>b.g.naam).join(', ')+' is de presenter nog niet in de '
+        +'tool geladen; die productpagina’s ontbreken.',8,C.red);
+    }
+    flush();
+
+    boek.forEach(b=>{
+      const codes=[...new Set(b.rijen.map(r=>(r.s.aanduiding||'').trim()).filter(Boolean))];
+      bookGroups.push({id:b.g.id, code:codes.join(' / '), kleur:b.g.stempelKleur||'#FFFFFF'});
+    });
+  }
+
+  const bytes = await doc.save();
+  return {bytes, bookGroups, ownPageCount:pages.length};
+}
+
+/* ---------- presenters achter de eigen pagina's plakken, sluit af met AB Achterpaginas ---------- */
+async function assembleArmaturenboekPdf(){
+  const {bytes, bookGroups, ownPageCount} = await buildArmaturenboekPdf();
+  const ownDoc = await PDFLib.PDFDocument.load(bytes);
+  const finalDoc = await PDFLib.PDFDocument.create();
+
+  const copyRange = async(srcDoc, from, to)=>{
+    const idx = srcDoc.getPageIndices().slice(from, to);
+    if(!idx.length) return;
+    const pgs = await finalDoc.copyPages(srcDoc, idx);
+    pgs.forEach(p=>finalDoc.addPage(p));
+  };
+
+  const merk = await merkData();
+  let stempelFont;
+  try{
+    if(merk.fontkit && merk.fonts.dlKopVet){
+      finalDoc.registerFontkit(merk.fontkit);
+      stempelFont = await finalDoc.embedFont(b64Bytes(merk.fonts.dlKopVet), {subset:true});
+    } else throw new Error('huisstijllettertype niet beschikbaar');
+  }catch(err){
+    stempelFont = await finalDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+  }
+  function stempelCode(pagina, tekst, kleur){
+    if(!pagina || !tekst) return;
+    const korps=11, marge=32, basislijn=17;
+    const {width, height} = pagina.getSize();
+    const tw = stempelFont.widthOfTextAtSize(tekst, korps);
+    const c = kleur.charAt(0)==='#'
+      ? PDFLib.rgb(parseInt(kleur.substr(1,2),16)/255, parseInt(kleur.substr(3,2),16)/255, parseInt(kleur.substr(5,2),16)/255)
+      : PDFLib.rgb(1,1,1);
+    pagina.drawText(tekst, {x: width-marge-tw, y: height-basislijn-korps*0.78,
+      size: korps, font: stempelFont, color: c});
+  }
+  const appendPresenter = async(id, code, kleur)=>{
+    const b64 = await presenterData(id);
+    if(!b64){ console.warn('Presenter "'+id+'" is nog niet toegevoegd (presenters/'+id+'.js) — overgeslagen.'); return 0; }
+    try{
+      const d = await PDFLib.PDFDocument.load(b64Bytes(b64), {ignoreEncryption:true});
+      const idx = d.getPageIndices();
+      const pgs = await finalDoc.copyPages(d, idx);
+      pgs.forEach(p=>finalDoc.addPage(p));
+      stempelCode(pgs[0], code, kleur||'#FFFFFF');
+      return pgs.length;
+    }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); return 0; }
+  };
+
+  await copyRange(ownDoc, 0, ownDoc.getPageCount());
+  let presenterTotaal = 0;
+  for(const g of bookGroups) presenterTotaal += await appendPresenter(g.id, g.code, g.kleur);
+  presenterTotaal += await appendPresenter('achterpaginas'); /* AB Achterpaginas, helemaal achteraan */
+
+  const eind = await finalDoc.save();
+  const verwacht = ownPageCount + presenterTotaal;
+  if(finalDoc.getPageCount()!==verwacht){
+    console.warn('Paginatelling klopt niet: verwacht '+verwacht+', werkelijk '+finalDoc.getPageCount()+'.');
+  }
+  return eind;
+}
+
+function pdfBestandsnaam(){
+  const nm=(st.proj||'armaturenboek').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'armaturenboek';
+  return nm+'-armaturenboek.pdf';
+}
+
+async function maakPdfBytes(){
+  const totQty = ARMATUREN.reduce((s,a)=> s + (st.armaturen[a.id].qty||0), 0);
+  if(totQty<=0){
+    alert('Vul eerst een aantal in bij minimaal één armatuur voordat de PDF gemaakt kan worden.');
+    return null;
+  }
+  const meldingen=[];
+  const zonderGroep = armaturenZonderGroep();
+  if(zonderGroep.length){
+    meldingen.push('Van deze armaturen is het type niet herkend, dus komt er geen presenter in het armaturenboek:\n'
+      + zonderGroep.map(a=>{ const sa=st.armaturen[a.id];
+          const kop=(sa.aanduiding||'').trim() || armLabel(a);
+          return '  • '+kop+(sa.name? ' — '+sa.name:' (nog geen naam ingevuld)'); }).join('\n')
+      + '\nPas de omschrijving aan zodat het type duidelijk wordt.');
+  }
+  const zonderPresenter = armaturenboek().filter(b=>!presenterAanwezig(b.g.id));
+  if(zonderPresenter.length){
+    meldingen.push('Van deze armatuurtypen staat de presenter-PDF nog niet in de tool:\n'
+      + zonderPresenter.map(b=>'  • '+b.g.naam+'  (presenters/'+b.g.id+'.js)').join('\n')
+      + '\nHet tabblad komt wel in het boek, de productpagina’s ontbreken.\n'
+      + 'Toevoegen: zet de PDF in presenters-bron/ en draai "node tools/maak-presenters.mjs".');
+  }
+  if(meldingen.length) alert(meldingen.join('\n\n')+'\n\nDe PDF wordt verder gewoon gegenereerd.');
+  try{ return await assembleArmaturenboekPdf(); }
+  catch(err){ console.error(err); alert('De PDF kon niet worden gegenereerd: '+(err&&err.message?err.message:err)); return null; }
+}
+
+async function metBezigKnop(id, fn){
+  const knop=$(id); const oud=knop.textContent;
+  knop.disabled=true; knop.textContent='Bezig…';
+  try{ return await fn(); }
+  finally{ knop.disabled=false; knop.textContent=oud; }
+}
+async function exportPdf(){
+  return metBezigKnop('abPdf', async()=>{
+    const bytes = await maakPdfBytes();
+    if(!bytes) return;
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    a.download=pdfBestandsnaam();
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(_){ } }, 4000);
+  });
+}
+let pdfVoorbeeldUrl=null;
+function sluitVoorbeeld(){
+  $('abPreviewBg').classList.remove('active');
+  $('abPreviewFrame').removeAttribute('src');
+  if(pdfVoorbeeldUrl){ try{ URL.revokeObjectURL(pdfVoorbeeldUrl); }catch(_){ } pdfVoorbeeldUrl=null; }
+}
+async function previewPdf(){
+  return metBezigKnop('abPreview', async()=>{
+    const bytes = await maakPdfBytes();
+    if(!bytes) return;
+    if(pdfVoorbeeldUrl){ try{ URL.revokeObjectURL(pdfVoorbeeldUrl); }catch(_){ } }
+    pdfVoorbeeldUrl = URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    $('abPreviewFrame').src = pdfVoorbeeldUrl;
+    $('abPreviewBg').classList.add('active');
+  });
+}
+
+/* ---------- armaturenlijst-UI (zelfde bouwstijl als buildArmList in index.html) ---------- */
+function buildArmList(){
+  const container=$('abArmList'); container.innerHTML='';
+  ARMATUREN.forEach(a=>{
+    const s=st.armaturen[a.id];
+    const row=document.createElement('div'); row.className='c2-armrow';
+    const codeNaamInp=document.createElement('input'); codeNaamInp.type='text';
+    codeNaamInp.className='c2-textinp c2-aanduiding';
+    codeNaamInp.placeholder='CODE'; codeNaamInp.value=s.aanduiding||'';
+    codeNaamInp.addEventListener('change', ()=>{ s.aanduiding=codeNaamInp.value; updateSummary(); });
+    const nameInp=document.createElement('input'); nameInp.type='text'; nameInp.className='c2-textinp c2-armnaam';
+    nameInp.placeholder='Volledige naam (bijv. Punto 15W wit)'; nameInp.value=s.name||'';
+    const badge=document.createElement('span'); badge.className='c2-armrecog';
+    function paintBadge(){
+      const g = armGroepVan(s);
+      if(g){
+        badge.textContent = (presenterAanwezig(g.id)?'✓ ':'⚠ ')+g.naam;
+        badge.className = 'c2-armrecog '+(presenterAanwezig(g.id)?'ok':'warn');
+        badge.title = presenterAanwezig(g.id)
+          ? 'Presenter '+g.naam+' wordt in het armaturenboek opgenomen.'
+          : 'Type herkend, maar de presenter-PDF van '+g.naam+' ontbreekt nog in presenters-data.js.';
+      } else if(!nameInp.value.trim()){
+        badge.textContent=''; badge.className='c2-armrecog'; badge.title='';
+      } else {
+        badge.textContent='Kies type'; badge.className='c2-armrecog miss';
+        badge.title='Type niet herkend uit de naam — pas de omschrijving aan zodat het type duidelijk wordt.';
+      }
+    }
+    paintBadge();
+    nameInp.addEventListener('input', paintBadge);
+    nameInp.addEventListener('change', ()=>{ s.name=nameInp.value; paintBadge(); updateSummary(); });
+    const codeInp=document.createElement('input'); codeInp.type='text'; codeInp.className='c2-textinp c2-armcode';
+    codeInp.placeholder='Artikelcode';
+    codeInp.value = s.code||'';
+    codeInp.addEventListener('change', ()=>{ s.code=codeInp.value; updateSummary(); });
+    [codeNaamInp,nameInp,codeInp].forEach(inp=>inp.addEventListener('keydown', e=>{ if(e.key==='Enter') inp.blur(); }));
+    const qty=document.createElement('input'); qty.type='text'; qty.inputMode='numeric'; qty.className='c2-qtyinp';
+    qty.value=String(s.qty);
+    function commitQty(){ const v=Math.max(0, parseInt(qty.value)||0); s.qty=v; qty.value=String(v); updateSummary(); }
+    qty.addEventListener('change', commitQty);
+    qty.addEventListener('keydown', e=>{ if(e.key==='Enter') qty.blur(); });
+    row.appendChild(codeNaamInp); row.appendChild(codeInp); row.appendChild(nameInp); row.appendChild(badge);
+    row.appendChild(qty);
+    container.appendChild(row);
+  });
+}
+
+function updateSummary(){
+  const boek = armaturenboek();
+  const totArm = ARMATUREN.reduce((s,a)=> s + (st.armaturen[a.id].qty||0), 0);
+  $('abTotArm').textContent = String(totArm);
+  $('abTotType').textContent = String(boek.length);
+  $('abTitle').textContent = totArm ? ((st.proj||'').trim() || 'Armaturenboek') : 'Nog geen armaturen gekozen';
+  const list=$('abArtList'); list.innerHTML='';
+  boek.forEach(b=>{
+    const row=document.createElement('div'); row.className='cfg-art-row';
+    const name=document.createElement('span'); name.className='name'; name.textContent=b.g.naam;
+    const qty=document.createElement('span'); qty.className='qty'; qty.textContent=b.totaal+'x';
+    row.appendChild(name); row.appendChild(qty);
+    list.appendChild(row);
+  });
+  const warns=$('abWarns'); warns.innerHTML='';
+  const zonderGroep = armaturenZonderGroep();
+  if(zonderGroep.length){
+    const w=document.createElement('div'); w.className='cfg-warn';
+    w.textContent = zonderGroep.length+' armatuur(en) hebben nog geen herkend type — vul de naam duidelijker in.';
+    warns.appendChild(w);
+  }
+  const zonderPresenter = boek.filter(b=>!presenterAanwezig(b.g.id));
+  if(zonderPresenter.length){
+    const w=document.createElement('div'); w.className='cfg-warn';
+    w.textContent = 'Presenter ontbreekt nog voor: '+zonderPresenter.map(b=>b.g.naam).join(', ')+'.';
+    warns.appendChild(w);
+  }
+}
+
+/* ---------- init ---------- */
+st.armaturen = ARMATUREN.reduce((o,a)=>{o[a.id]={aanduiding:'',name:'',code:'',groep:'',qty:0};return o;},{});
+(function(){ const d=new Date();
+  st.datum = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+})();
+buildArmList();
+updateSummary();
+$('abProj').value=st.proj; $('abProjNr').value=st.projNr; $('abInst').value=st.installateur; $('abDatum').value=st.datum;
+$('abProj').addEventListener('input', e=>{ st.proj=e.target.value; updateSummary(); });
+$('abProjNr').addEventListener('input', e=>{ st.projNr=e.target.value; });
+$('abInst').addEventListener('input', e=>{ st.installateur=e.target.value; });
+$('abDatum').addEventListener('input', e=>{ st.datum=e.target.value; });
+$('abPdf').addEventListener('click', exportPdf);
+$('abPreview').addEventListener('click', previewPdf);
+$('abPreviewClose').addEventListener('click', sluitVoorbeeld);
+$('abPreviewDl').addEventListener('click', exportPdf);
+$('abPreviewBg').addEventListener('click', e=>{ if(e.target.id==='abPreviewBg') sluitVoorbeeld(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && $('abPreviewBg').classList.contains('active')) sluitVoorbeeld(); });
+</script>
+</body>
+</html>

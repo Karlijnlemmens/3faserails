@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Presenters — Distrilight tools</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,600;0,700;0,800;0,900;1,900&family=Caveat:wght@600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-900:#1E2A4A;
+    --blue:#3E8EDE;
+    --blue-dark:#2C72BA;
+    --blue-light:#EAF3FC;
+    --paper:#F3F7FC;
+    --white:#FFFFFF;
+    --ink:#1C2534;
+    --slate:#5A6B84;
+    --border:#DCE6F2;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Nunito Sans',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,.disp{font-family:'Nunito Sans',sans-serif; font-weight:800; letter-spacing:0;}
+
+  header{
+    background:var(--white);
+    color:var(--ink);
+    padding:12px 28px 8px;
+    position:sticky; top:0; z-index:50;
+    border-top:5px solid var(--blue);
+    box-shadow:0 2px 20px rgba(30,42,74,.10);
+  }
+  .brandrow{display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  .brand{display:flex; flex-direction:column; gap:0; align-items:flex-start;}
+  .brand .logo{height:100px; width:auto; display:block; transform:translateX(-7.65%);}
+  .title-row{display:flex; align-items:center; gap:14px; margin-top:4px; flex-wrap:wrap;}
+  h1{font-size:20px; margin:0; font-weight:800; color:var(--navy-900);}
+  .badges{display:flex; gap:6px; flex-wrap:wrap;}
+  .badge{
+    border:1px solid var(--blue-light);
+    background:var(--blue-light);
+    color:var(--blue-dark); font-size:11px; padding:3px 10px; border-radius:999px;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.03em; font-weight:600;
+    text-decoration:none; display:inline-block; cursor:pointer; transition:.12s;
+  }
+  .badge:hover{border-color:var(--blue);}
+  .badge.active{background:var(--blue); border-color:var(--blue); color:#fff;}
+  .tagline{color:var(--slate); font-size:13px; margin-top:2px; max-width:640px; line-height:1.4;}
+
+  main{max-width:1400px; margin:0 auto; padding:16px 28px 60px;}
+  .lede{font-size:14px; color:var(--slate); max-width:760px; line-height:1.5; margin-bottom:12px;}
+  h2.section-title{font-size:20px; margin:0 0 4px; color:var(--navy-900);}
+  .eyebrow{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--blue-dark); margin-bottom:4px; display:block; font-weight:600;}
+  .card{
+    background:var(--white); border:1px solid var(--border); border-radius:var(--radius);
+    padding:24px; max-width:560px;
+  }
+  .card p{margin:0; color:var(--slate); font-size:14px; line-height:1.6;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brandrow">
+    <div class="brand">
+      <img class="logo" src="merk/Distrilight logo donker.png" alt="Distrilight">
+    </div>
+    <div class="badges">
+      <a class="badge" href="armaturenboek.html">Armaturenboek</a>
+      <a class="badge active" href="presenters.html">Presenters</a>
+      <a class="badge" href="index.html">3 fase rail</a>
+      <a class="badge" href="lichtlijn.html">Lichtlijn</a>
+      <a class="badge" href="intake.html">Intake</a>
+      <a class="badge" href="snoerenplan.html">Snoerenplan</a>
+    </div>
+  </div>
+  <div class="title-row">
+    <h1>Presenters</h1>
+  </div>
+</header>
+
+<main>
+  <span class="eyebrow">Binnenkort beschikbaar</span>
+  <h2 class="section-title">Presenters</h2>
+  <p class="lede">Deze tool wordt binnenkort toegevoegd aan de Distrilight tools-suite.</p>
+  <div class="card">
+    <p>Nog in ontwikkeling.</p>
+  </div>
+</main>
+
+</body>
+</html>
