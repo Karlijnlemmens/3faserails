@@ -248,8 +248,8 @@ const ARM_GROEPEN = [
   {id:'ag10', naam:'Lustra GU10', zoektermen:['Lustra']},
   {id:'ag11', naam:'Fendi GU10', zoektermen:['Fendi']},
   {id:'ag12', naam:'Altoflood', zoektermen:['Alto flood','Alto-flood']},
-  {id:'ag13', naam:'Paneel Essence G3', zoektermen:['Paneel Essence']},
-  {id:'ag14', naam:'Downlight Essence G2', zoektermen:['Downlight Essence']},
+  {id:'ag13', naam:'Paneel Essence G3', zoektermen:['Essence G3','Essence']},
+  {id:'ag14', naam:'Downlight Essence G2', zoektermen:['Essence G2','Essence']},
   {id:'ag15', naam:'Mondial Pir', zoektermen:[]},
 ];
 const ARM_STOPWOORDEN = new Set([
@@ -259,6 +259,7 @@ const ARM_STOPWOORDEN = new Set([
   'dali','dimbaar','dimbare','dimmable','dim','onoff','on','off','push','triac',
   'casambi','zigbee','switchdim','fase','driefase',
   'led','lamp','armatuur','armaturen','spot','spots','spotje','opbouwspot','inbouwspot',
+  'downlight','paneel',
   'track','rail','railspot','pragmalux','prx',
   'ww','nw','cw','warmwit','neutraalwit','koelwit',
   'stuks','stuk','type','serie','model','incl','excl','met','voor','de','het','een'
@@ -268,11 +269,15 @@ const ARM_CODE = /^[a-z]{0,4}\d{5,}$/;
 function armTokens(txt){
   return String(txt||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().split(/\s+/).filter(Boolean);
 }
+/* Generieke formaatwoorden (downlight/paneel = stopwoord) blijven weggefilterd ook al
+   staan ze als eerste woord van een groepsnaam, anders wint dat woord altijd van het
+   echte productwoord - zie index.html voor de volledige toelichting. */
 const ARM_GROEP_TOKENS = ARM_GROEPEN.map(g=>({
   g, varianten: [g.naam].concat(g.zoektermen||[]).map(armTokens).filter(v=>v.length)
 }));
 const ARM_VOCAB = (()=>{ const s=new Set();
-  ARM_GROEP_TOKENS.forEach(x=>x.varianten.forEach(v=>v.forEach(t=>s.add(t)))); return s; })();
+  ARM_GROEP_TOKENS.forEach(x=>x.varianten.forEach(v=>v.forEach(t=>{ if(!ARM_STOPWOORDEN.has(t)) s.add(t); })));
+  return s; })();
 function armZinvolleTokens(txt){
   return armTokens(txt).filter(t=>
     ARM_VOCAB.has(t) || !(ARM_STOPWOORDEN.has(t) || ARM_GETAL.test(t) || ARM_CODE.test(t)));
