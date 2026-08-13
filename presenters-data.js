@@ -28,6 +28,26 @@ window.PRESENTER_FILES = [
   'ag13',   /* Paneel Essence G3 */
   'ag14',   /* Downlight Essence G2 */
   'ag15',   /* Mondial Pir */
+  'ag16',   /* Bandraster Miro */
+  'ag17',   /* Downlight Essence Pir */
+  'ag18',   /* Downlight Essence Ugr */
+  'ag19',   /* Downlight Fora IP65 */
+  'ag20',   /* Downlight Mado */
+  'ag21',   /* Downlight Mondial */
+  'ag22',   /* Downlight Spectre */
+  'ag23',   /* In-/Opbouw Downlight Luna G2 */
+  'ag24',   /* Mondial Nood */
+  'ag25',   /* Mondial Opbouw Pendel */
+  'ag26',   /* Mondial Track */
+  'ag27',   /* Opbouw Downlight Relio */
+  'ag28',   /* Paneel Conto */
+  'ag29',   /* Paneel Easy G2 */
+  'ag30',   /* Paneel Flexcore */
+  'ag31',   /* Paneel Modul */
+  'ag32',   /* Paneel Optic */
+  'ag33',   /* Paneel Rondix */
+  'ag34',   /* Paneel Sigma G2 */
+  'ag35',   /* Paneel Wingar */
   'rail',   /* 3-Fase Rail */
 ];
 window.PRESENTER_DATA = window.PRESENTER_DATA || {};
