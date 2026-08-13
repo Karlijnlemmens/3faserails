@@ -33,6 +33,7 @@ const GROEPEN = [
   ['ag01', 'Punto'], ['ag02', 'Piccolo'], ['ag03', 'Dio'], ['ag04', 'Alto'],
   ['ag05', 'Skyline'], ['ag06', 'Arda'], ['ag07', 'Orion'], ['ag08', 'Notra'],
   ['ag09', 'Ario'], ['ag10', 'Lustra'], ['ag11', 'Fendi'], ['ag12', 'Altoflood'],
+  ['ag13', 'Paneel Essence G3'], ['ag14', 'Downlight Essence G2'], ['ag15', 'Mondial Pir'],
   ['achterpaginas', 'AB Achterpaginas'],
 ];
 const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');

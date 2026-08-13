@@ -25,6 +25,9 @@ window.PRESENTER_FILES = [
   'ag10',   /* Lustra */
   'ag11',   /* Fendi */
   'ag12',   /* Altoflood */
+  'ag13',   /* Paneel Essence G3 */
+  'ag14',   /* Downlight Essence G2 */
+  'ag15',   /* Mondial Pir */
   'rail',   /* 3-Fase Rail */
 ];
 window.PRESENTER_DATA = window.PRESENTER_DATA || {};
