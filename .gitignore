@@ -1,3 +1,7 @@
 # Werkmap voor tools/maak-presenters.mjs: de originele presenter-PDF's.
 # De tool leest presenters/<id>.js — die worden wel meegeleverd.
 presenters-bron/
+
+# Werkmap voor vergelijker/bouw-data.py: de prijslijst-exports uit Excel.
+# De tool leest vergelijker/data/armaturen.json — die wordt wel meegeleverd.
+vergelijker/data/bron/

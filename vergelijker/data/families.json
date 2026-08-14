@@ -1,0 +1,646 @@
+[
+  {
+    "id": "essence-g2-downlight",
+    "naam": "LED Downlight Essence G2",
+    "merk": "Pragmalux",
+    "lijn": "Essence",
+    "armatuurtype": "downlight",
+    "montagewijzen": [
+      "inbouw",
+      "opbouw"
+    ],
+    "balvast": false,
+    "look": [
+      "strak"
+    ],
+    "zoektermen": [
+      "downlight",
+      "downlighter",
+      "inbouwspot",
+      "essence g2"
+    ],
+    "ip": "IP54 kamerzijde / IP20 achterzijde",
+    "ik": "IK03",
+    "ugr": "<=22",
+    "cri_min": 80,
+    "cct": [
+      3000,
+      4000,
+      6000
+    ],
+    "levensduur": ">50.000 L80B10 Ta25",
+    "garantie_jaar": 5,
+    "modulair": true,
+    "inbouwdiepte_mm": {
+      "standaard": 55,
+      "verdiept_6w": 73,
+      "verdiept_9w": 87,
+      "verdiept_15_21w": 89
+    },
+    "bron_excel": "essence-g2-downlight.xlsx",
+    "alleen_codes_met_prefix": "^[WZ][SVO]\\d{7}"
+  },
+  {
+    "id": "essence-g3-paneel",
+    "naam": "LED Paneel Essence G3",
+    "merk": "Pragmalux",
+    "lijn": "Essence",
+    "armatuurtype": "paneel",
+    "zoektermen": [
+      "paneel",
+      "panel",
+      "inlegpaneel",
+      "backlit",
+      "60x60",
+      "600",
+      "30x120",
+      "1200",
+      "essence g3"
+    ],
+    "montagewijzen": [
+      "inbouw",
+      "opbouw",
+      "pendel"
+    ],
+    "ip": "IP20",
+    "ik": "IK02",
+    "ugr": "<19",
+    "cri_min": 80,
+    "cct": [
+      3000,
+      4000,
+      6000
+    ],
+    "cct_type": "3-CCT instelbaar",
+    "levensduur": "106.000 L80B10 Ta25",
+    "garantie_jaar": 5,
+    "driver_inbegrepen": true,
+    "driver_opmerking": "Driver zit in de artikelcode verwerkt via achtervoegsel: -PR Pragmalux, -UN universeel, -PH Philips, -PH-DA Philips DALI2, -TC-DA TCI DALI.",
+    "inbouwdiepte_mm": 35,
+    "varianten": [
+      {
+        "artikelcode": "1044507-PR",
+        "omschrijving": "Paneel Essence G3 25-34W 600 3000K-6000K 3-CCT UGR<19",
+        "vermogen_w": {
+          "min": 25,
+          "max": 34
+        },
+        "lichtstroom_lm": {
+          "min": 3050,
+          "max": 4350
+        },
+        "kleur": "wit",
+        "maat": "60x60",
+        "afmetingen_mm": {
+          "l": 595,
+          "b": 595,
+          "h": 34
+        },
+        "zaagmaat_mm": {
+          "l": 580,
+          "b": 580
+        },
+        "dimprotocol": "geen",
+        "driver": "Pragmalux",
+        "rendement_lm_w": "122-127"
+      },
+      {
+        "artikelcode": "1044507-UN",
+        "omschrijving": "Paneel Essence G3 25-34W 600 3000K-6000K 3-CCT UGR<19 DALI2,0/1-10V,Push-dim",
+        "vermogen_w": {
+          "min": 25,
+          "max": 34
+        },
+        "lichtstroom_lm": {
+          "min": 3050,
+          "max": 4350
+        },
+        "kleur": "wit",
+        "maat": "60x60",
+        "afmetingen_mm": {
+          "l": 595,
+          "b": 595,
+          "h": 34
+        },
+        "zaagmaat_mm": {
+          "l": 580,
+          "b": 580
+        },
+        "dimprotocol": "dali2/1-10v/push-dim",
+        "driver": "Universeel",
+        "rendement_lm_w": "122-127"
+      },
+      {
+        "artikelcode": "1044507-PH",
+        "omschrijving": "Paneel Essence G3 27-34W 600 3000K-6000K 3-CCT UGR<19 Philips",
+        "vermogen_w": {
+          "min": 27,
+          "max": 34
+        },
+        "lichtstroom_lm": {
+          "min": 3300,
+          "max": 4350
+        },
+        "kleur": "wit",
+        "maat": "60x60",
+        "afmetingen_mm": {
+          "l": 595,
+          "b": 595,
+          "h": 34
+        },
+        "zaagmaat_mm": {
+          "l": 580,
+          "b": 580
+        },
+        "dimprotocol": "geen",
+        "driver": "Philips",
+        "rendement_lm_w": "122-127"
+      },
+      {
+        "artikelcode": "1044507-PH-DA",
+        "omschrijving": "Paneel Essence G3 34W 600 3000K-6000K 3-CCT UGR<19 Philips DALI2, Push-dim",
+        "vermogen_w": {
+          "min": 34,
+          "max": 34
+        },
+        "lichtstroom_lm": {
+          "min": 4250,
+          "max": 4350
+        },
+        "kleur": "wit",
+        "maat": "60x60",
+        "afmetingen_mm": {
+          "l": 595,
+          "b": 595,
+          "h": 34
+        },
+        "zaagmaat_mm": {
+          "l": 580,
+          "b": 580
+        },
+        "dimprotocol": "dali2/push-dim",
+        "driver": "Philips DALI2",
+        "rendement_lm_w": "127"
+      },
+      {
+        "artikelcode": "1044507-TC-DA",
+        "omschrijving": "Paneel 60x60cm Essence G3 34W 3000K-6000K 3-CCT 4250-4350lm UGR<19 +TCI DALI Driver (4x14W)",
+        "vermogen_w": {
+          "min": 34,
+          "max": 34
+        },
+        "lichtstroom_lm": {
+          "min": 4250,
+          "max": 4350
+        },
+        "kleur": "wit",
+        "maat": "60x60",
+        "afmetingen_mm": {
+          "l": 595,
+          "b": 595,
+          "h": 34
+        },
+        "zaagmaat_mm": {
+          "l": 580,
+          "b": 580
+        },
+        "dimprotocol": "dali",
+        "driver": "TCI DALI",
+        "rendement_lm_w": "127"
+      },
+      {
+        "artikelcode": "1044514-PR",
+        "omschrijving": "Paneel Essence G3 25-34W 1200 3000K-6000K 3-CCT UGR<19",
+        "vermogen_w": {
+          "min": 25,
+          "max": 34
+        },
+        "lichtstroom_lm": {
+          "min": 3050,
+          "max": 4350
+        },
+        "kleur": "wit",
+        "maat": "30x120",
+        "afmetingen_mm": {
+          "l": 1195,
+          "b": 295,
+          "h": 34
+        },
+        "zaagmaat_mm": {
+          "l": 1180,
+          "b": 280
+        },
+        "dimprotocol": "geen",
+        "driver": "Pragmalux",
+        "rendement_lm_w": "122-127"
+      },
+      {
+        "artikelcode": "1044514-UN",
+        "omschrijving": "Paneel Essence G3 25-34W 1200 3000K-6000K 3-CCT UGR<19 DALI2,0/1-10V,Push-dim",
+        "vermogen_w": {
+          "min": 25,
+          "max": 34
+        },
+        "lichtstroom_lm": {
+          "min": 3050,
+          "max": 4350
+        },
+        "kleur": "wit",
+        "maat": "30x120",
+        "afmetingen_mm": {
+          "l": 1195,
+          "b": 295,
+          "h": 34
+        },
+        "zaagmaat_mm": {
+          "l": 1180,
+          "b": 280
+        },
+        "dimprotocol": "dali2/1-10v/push-dim",
+        "driver": "Universeel",
+        "rendement_lm_w": "122-127"
+      },
+      {
+        "artikelcode": "1044514-PH",
+        "omschrijving": "Paneel Essence G3 27-34W 1200 3000K-6000K 3-CCT UGR<19 Philips",
+        "vermogen_w": {
+          "min": 27,
+          "max": 34
+        },
+        "lichtstroom_lm": {
+          "min": 3300,
+          "max": 4350
+        },
+        "kleur": "wit",
+        "maat": "30x120",
+        "afmetingen_mm": {
+          "l": 1195,
+          "b": 295,
+          "h": 34
+        },
+        "zaagmaat_mm": {
+          "l": 1180,
+          "b": 280
+        },
+        "dimprotocol": "geen",
+        "driver": "Philips",
+        "rendement_lm_w": "122-127"
+      },
+      {
+        "artikelcode": "1044514-PH-DA",
+        "omschrijving": "Paneel Essence G3 34W 1200 3000K-6000K 3-CCT UGR<19 Philips DALI2, Push-dim",
+        "vermogen_w": {
+          "min": 34,
+          "max": 34
+        },
+        "lichtstroom_lm": {
+          "min": 4250,
+          "max": 4350
+        },
+        "kleur": "wit",
+        "maat": "30x120",
+        "afmetingen_mm": {
+          "l": 1195,
+          "b": 295,
+          "h": 34
+        },
+        "zaagmaat_mm": {
+          "l": 1180,
+          "b": 280
+        },
+        "dimprotocol": "dali2/push-dim",
+        "driver": "Philips DALI2",
+        "rendement_lm_w": "127"
+      },
+      {
+        "artikelcode": "1044514-TC-DA",
+        "omschrijving": "Paneel 30x120cm Essence G3 34W 3000K-6000K 3-CCT 4250-4350lm UGR<19 +TCI DALI Driver (2x28W)",
+        "vermogen_w": {
+          "min": 34,
+          "max": 34
+        },
+        "lichtstroom_lm": {
+          "min": 4250,
+          "max": 4350
+        },
+        "kleur": "wit",
+        "maat": "30x120",
+        "afmetingen_mm": {
+          "l": 1195,
+          "b": 295,
+          "h": 34
+        },
+        "zaagmaat_mm": {
+          "l": 1180,
+          "b": 280
+        },
+        "dimprotocol": "dali",
+        "driver": "TCI DALI",
+        "rendement_lm_w": "127"
+      }
+    ],
+    "accessoires": [
+      {
+        "artikelcode": "4607764",
+        "omschrijving": "Paneel Opbouwset 60x60cm Wit"
+      },
+      {
+        "artikelcode": "4607771",
+        "omschrijving": "Paneel Opbouwset 30x120cm Wit"
+      },
+      {
+        "artikelcode": "1000992",
+        "omschrijving": "Paneel Ophangset G2"
+      },
+      {
+        "artikelcode": "1000985",
+        "omschrijving": "Paneel Bevestigingsclips G2 (4 stuks)"
+      },
+      {
+        "artikelcode": "1001005",
+        "omschrijving": "Paneel Veiligheidskabel G2 1 meter"
+      },
+      {
+        "artikelcode": "1000282",
+        "omschrijving": "Noodmodule Kit t.b.v. Panelen & Downlights 3 uur met autotest"
+      }
+    ],
+    "balvast": false
+  },
+  {
+    "id": "essence-classic-g3-waterdicht",
+    "naam": "LED TL Waterdicht Armatuur Essence Classic G3 IP66",
+    "merk": "Pragmalux",
+    "lijn": "Essence",
+    "armatuurtype": "waterdicht_tl",
+    "zoektermen": [
+      "waterdicht",
+      "tl armatuur",
+      "balk",
+      "opbouwbalk",
+      "ip66",
+      "essence classic"
+    ],
+    "montagewijzen": [
+      "opbouw"
+    ],
+    "ip": "IP66",
+    "ik": "IK08",
+    "cri_min": 80,
+    "cri_bereik": "80-89",
+    "cct": [
+      3000,
+      4000,
+      6500
+    ],
+    "cct_type": "3-CCT instelbaar",
+    "lichtbundelspreiding_graden": 120,
+    "levensduur": "50.000 L80B10 / 35.000 L90B10 Ta25",
+    "garantie_jaar": 5,
+    "driver_inbegrepen": true,
+    "toepassingen_familieblad": [
+      "parkeergarage",
+      "magazijn",
+      "bedrijfshal",
+      "kelder"
+    ],
+    "varianten": [
+      {
+        "artikelcode": "2024670",
+        "omschrijving": "Essence Classic G3 IP66 60cm 11-19W 1400-2450lm 3CCT 3x2,5mm Doorvoerbedrading (2x18W)",
+        "vermogen_w": {
+          "min": 11,
+          "max": 19
+        },
+        "lichtstroom_lm": {
+          "min": 1400,
+          "max": 2450
+        },
+        "kleur": "grijs",
+        "lengte_cm": 60,
+        "afmetingen_mm": {
+          "l": 600,
+          "b": 80,
+          "h": 68
+        },
+        "sensor": false,
+        "noodverlichting": null,
+        "dimprotocol": "geen"
+      },
+      {
+        "artikelcode": "2024670-S",
+        "omschrijving": "Essence Classic G3 IP66 60cm 11-19W 1400-2450lm 3CCT (2x18W) + Bewegingssensor",
+        "vermogen_w": {
+          "min": 11,
+          "max": 19
+        },
+        "lichtstroom_lm": {
+          "min": 1400,
+          "max": 2450
+        },
+        "kleur": "grijs",
+        "lengte_cm": 60,
+        "afmetingen_mm": {
+          "l": 600,
+          "b": 80,
+          "h": 68
+        },
+        "sensor": true,
+        "noodverlichting": null,
+        "dimprotocol": "geen"
+      },
+      {
+        "artikelcode": "2024687",
+        "omschrijving": "Essence Classic G3 IP66 120cm 22-39W 3100-5400lm 3CCT 4x2,5mm Doorvoerbedrading (2x36W)",
+        "vermogen_w": {
+          "min": 22,
+          "max": 39
+        },
+        "lichtstroom_lm": {
+          "min": 3100,
+          "max": 5400
+        },
+        "kleur": "grijs",
+        "lengte_cm": 120,
+        "afmetingen_mm": {
+          "l": 1200,
+          "b": 80,
+          "h": 68
+        },
+        "sensor": false,
+        "noodverlichting": null,
+        "dimprotocol": "geen"
+      },
+      {
+        "artikelcode": "2024687-S",
+        "omschrijving": "Essence Classic G3 IP66 120cm 22-39W 3100-5400lm 3CCT (2x36W) + Bewegingssensor",
+        "vermogen_w": {
+          "min": 22,
+          "max": 39
+        },
+        "lichtstroom_lm": {
+          "min": 3100,
+          "max": 5400
+        },
+        "kleur": "grijs",
+        "lengte_cm": 120,
+        "afmetingen_mm": {
+          "l": 1200,
+          "b": 80,
+          "h": 68
+        },
+        "sensor": true,
+        "noodverlichting": null,
+        "dimprotocol": "geen"
+      },
+      {
+        "artikelcode": "2024687-N",
+        "omschrijving": "Essence Classic G3 IP66 120cm 22-39W 3100-5400lm 3CCT (2x36W) + Noodmodule 3uur zelftest & manueel",
+        "vermogen_w": {
+          "min": 22,
+          "max": 39
+        },
+        "lichtstroom_lm": {
+          "min": 3100,
+          "max": 5400
+        },
+        "kleur": "grijs",
+        "lengte_cm": 120,
+        "afmetingen_mm": {
+          "l": 1200,
+          "b": 80,
+          "h": 68
+        },
+        "sensor": false,
+        "noodverlichting": "3u",
+        "dimprotocol": "geen"
+      },
+      {
+        "artikelcode": "2024687-SN",
+        "omschrijving": "Essence Classic G3 IP66 120cm 22-39W 3100-5400lm 3CCT (2x36W) + Bewegingssensor & Noodmodule 3uur",
+        "vermogen_w": {
+          "min": 22,
+          "max": 39
+        },
+        "lichtstroom_lm": {
+          "min": 3100,
+          "max": 5400
+        },
+        "kleur": "grijs",
+        "lengte_cm": 120,
+        "afmetingen_mm": {
+          "l": 1200,
+          "b": 80,
+          "h": 68
+        },
+        "sensor": true,
+        "noodverlichting": "3u",
+        "dimprotocol": "geen"
+      },
+      {
+        "artikelcode": "2024694",
+        "omschrijving": "Essence Classic G3 IP66 150cm 33-58W 4500-7700lm 3CCT 4x2,5mm Doorvoerbedrading (2x58W)",
+        "vermogen_w": {
+          "min": 33,
+          "max": 58
+        },
+        "lichtstroom_lm": {
+          "min": 4500,
+          "max": 7700
+        },
+        "kleur": "grijs",
+        "lengte_cm": 150,
+        "afmetingen_mm": {
+          "l": 1500,
+          "b": 80,
+          "h": 68
+        },
+        "sensor": false,
+        "noodverlichting": null,
+        "dimprotocol": "geen"
+      },
+      {
+        "artikelcode": "2024694-S",
+        "omschrijving": "Essence Classic G3 IP66 150cm 33-58W 4500-7700lm 3CCT (2x58W) + Bewegingssensor",
+        "vermogen_w": {
+          "min": 33,
+          "max": 58
+        },
+        "lichtstroom_lm": {
+          "min": 4500,
+          "max": 7700
+        },
+        "kleur": "grijs",
+        "lengte_cm": 150,
+        "afmetingen_mm": {
+          "l": 1500,
+          "b": 80,
+          "h": 68
+        },
+        "sensor": true,
+        "noodverlichting": null,
+        "dimprotocol": "geen"
+      },
+      {
+        "artikelcode": "2024694-N",
+        "omschrijving": "Essence Classic G3 IP66 150cm 33-58W 4500-7700lm 3CCT (2x58W) + Noodmodule 3uur zelftest & manueel",
+        "vermogen_w": {
+          "min": 33,
+          "max": 58
+        },
+        "lichtstroom_lm": {
+          "min": 4500,
+          "max": 7700
+        },
+        "kleur": "grijs",
+        "lengte_cm": 150,
+        "afmetingen_mm": {
+          "l": 1500,
+          "b": 80,
+          "h": 68
+        },
+        "sensor": false,
+        "noodverlichting": "3u",
+        "dimprotocol": "geen"
+      },
+      {
+        "artikelcode": "2024694-SN",
+        "omschrijving": "Essence Classic G3 IP66 150cm 33-58W 4500-7700lm 3CCT (2x58W) + Bewegingssensor & Noodmodule 3uur",
+        "vermogen_w": {
+          "min": 33,
+          "max": 58
+        },
+        "lichtstroom_lm": {
+          "min": 4500,
+          "max": 7700
+        },
+        "kleur": "grijs",
+        "lengte_cm": 150,
+        "afmetingen_mm": {
+          "l": 1500,
+          "b": 80,
+          "h": 68
+        },
+        "sensor": true,
+        "noodverlichting": "3u",
+        "dimprotocol": "geen"
+      }
+    ],
+    "accessoires": [
+      {
+        "artikelcode": "2024786",
+        "omschrijving": "Bewegingssensor Set"
+      },
+      {
+        "artikelcode": "2024793",
+        "omschrijving": "Noodmodule Set"
+      },
+      {
+        "artikelcode": "2024946",
+        "omschrijving": "Afstandsbediening Bewegingssensor"
+      }
+    ],
+    "dimbaar": false,
+    "balvast": false
+  }
+]

@@ -10,6 +10,18 @@ There is no build system, package manager, or test suite. Everything — HTML, C
 
 `DesignTool` (no extension) is a stale duplicate/backup of an earlier version of `index.html`, kept in the repo root. Don't treat it as a source file to edit — changes belong in `index.html`.
 
+### The rest of the suite
+
+`index.html` is one tab of a small suite of standalone pages that share a header: a Distrilight logo plus a row of `.badge` links (`armaturenboek.html`, `presenters.html`, `vergelijking.html`, `index.html`, and the still-empty `lichtlijn.html` / `intake.html` / `snoerenplan.html`). Each page carries its own copy of that markup with `class="badge active"` on itself, so **adding a page means editing the badge row in every other page** — there is no shared include.
+
+`vergelijking.html` is the **Armatuurvergelijker**: per bestekpositie it puts the installer's reference fixture next to the Distrilight alternative. Unlike the rest of the suite it is *generated*, so don't edit it by hand — the sources live in `vergelijker/` (see `vergelijker/README.md`):
+
+- `vergelijker/index-template.html` — the tool itself; this is what you change.
+- `vergelijker/data/armaturen.json` — the product data, injected into the template at the `/*__ARMATUREN_DATA__*/ null` placeholder.
+- `python3 vergelijker/bouw-tool.py` regenerates `vergelijking.html` from those two. `bouw-data.py` only needs re-running when new Excel price-list exports land in the gitignored `vergelijker/data/bron/`; `armaturen.json` is committed, so the tool can be rebuilt without them.
+
+Like everything else here it stays a single self-contained file that runs from `file://` — the Python scripts are data prep, not a build step for the suite.
+
 ## Working in this codebase
 
 - There is no linter, formatter, or test runner configured. Verify changes by opening `index.html` in a browser and exercising the relevant tab manually.

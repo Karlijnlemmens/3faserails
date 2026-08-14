@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Armatuurvergelijker — Distrilight</title>
+<!--SJABLOON--><!-- ==========================================================================
+     Dit is het SJABLOON, niet de werkende tool.
+     Hier staat nog geen productdata in; die wordt er door bouw-tool.py in gezet.
+     Wil je de tool gebruiken? Open vergelijking.html in de hoofdmap.
+     Wil je de tool aanpassen? Doe dat hier en draai daarna: python bouw-tool.py
+     ========================================================================== --><!--/SJABLOON-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,600;0,700;0,800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#0E6FB0; --blue-dark:#0A4E7C; --blue-soft:#E8F2F9; --blue-line:#BBD7EA;
+  --orange:#F5821F; --orange-soft:#FDF0E2;
+  --ink:#1B2733; --muted:#6B7B8A; --line:#DCE5EC; --bg:#F4F7FA; --white:#fff;
+  --ok:#2E9E5B; --warn:#C9721A; --err:#C0392B;
+  --r:10px; --rail:264px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:"Nunito Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+
+/* ---------- suite-koptekst: navigatie tussen de Distrilight-tools ----------
+   Zelfde opmaak als op de andere pagina's van de suite. Bewust met vaste
+   kleuren opgeschreven: de tool heeft zijn eigen --blue en die is anders. */
+.suite{background:#fff;border-top:5px solid #3E8EDE;border-bottom:1px solid #DCE6F2;
+  padding:12px 20px 8px;display:flex;align-items:center;justify-content:space-between;
+  gap:10px;flex-wrap:wrap}
+.suite-logo{height:100px;width:auto;display:block;transform:translateX(-7.65%)}
+.badges{display:flex;gap:6px;flex-wrap:wrap}
+.badge{border:1px solid #EAF3FC;background:#EAF3FC;color:#2C72BA;font-size:11px;
+  padding:3px 10px;border-radius:999px;font-family:'JetBrains Mono',ui-monospace,monospace;
+  letter-spacing:.03em;font-weight:600;text-decoration:none;display:inline-block;transition:.12s}
+.badge:hover{border-color:#3E8EDE}
+.badge.active{background:#3E8EDE;border-color:#3E8EDE;color:#fff}
+
+/* ---------- header ---------- */
+.top{background:var(--blue-dark);color:#fff;padding:10px 20px;display:flex;
+  align-items:center;gap:18px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+.brand{font-weight:800;font-size:17px;letter-spacing:-.2px}
+.brand span{color:var(--orange)}
+.top .spacer{flex:1}
+.projbar{background:var(--white);border-bottom:1px solid var(--line);padding:10px 20px;
+  display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.f{display:flex;flex-direction:column;gap:3px}
+.f label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+.f input,.f select,.f textarea{border:1px solid var(--line);border-radius:7px;padding:6px 9px;background:#fff}
+.f input:focus,.f select:focus,.f textarea:focus{outline:2px solid var(--blue);outline-offset:1px;border-color:var(--blue)}
+.f.sm input{width:110px}
+.f.xs input{width:74px}
+
+/* ---------- pills ---------- */
+.pill{border:1px solid var(--blue);background:#fff;color:var(--blue);border-radius:999px;
+  padding:6px 15px;font-weight:700;cursor:pointer;font-size:13px}
+.pill:hover{background:var(--blue-soft)}
+.pill.solid{background:var(--blue);color:#fff}
+.pill.solid:hover{background:var(--blue-dark)}
+.pill.ghost{border-color:var(--line);color:var(--muted)}
+.pill.ghost:hover{background:var(--bg);color:var(--ink)}
+.pill.acc{border-color:var(--orange);color:var(--orange)}
+.pill.acc:hover{background:var(--orange-soft)}
+.pill:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+
+/* ---------- layout ---------- */
+.wrap{display:grid;grid-template-columns:var(--rail) 1fr;gap:0;align-items:start}
+.rail{background:#fff;border-right:1px solid var(--line);min-height:calc(100vh - 96px);padding:14px 12px;
+  position:sticky;top:96px;max-height:calc(100vh - 96px);overflow:auto}
+.rail h2{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:0 0 8px 4px}
+.poslist{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-direction:column;gap:4px}
+.posbtn{width:100%;text-align:left;border:1px solid transparent;background:none;border-radius:8px;
+  padding:8px 10px;cursor:pointer;display:flex;align-items:center;gap:9px}
+.posbtn:hover{background:var(--bg)}
+.posbtn.on{background:var(--blue-soft);border-color:var(--blue-line)}
+.posbtn .code{font-weight:800;min-width:34px}
+.posbtn .art{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);flex:none}
+.dot.done{background:var(--ok)} .dot.part{background:var(--orange)}
+.main{padding:18px 22px 60px;max-width:1180px}
+
+/* ---------- comparison sheet ---------- */
+.sheet{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.sheet-head{background:var(--blue);color:#fff;display:grid;grid-template-columns:170px 1fr 1fr;
+  align-items:center;padding:9px 14px;gap:14px}
+.sheet-head b{font-size:15px}
+.sheet-head .h{font-weight:800;font-size:13px}
+.row{display:grid;grid-template-columns:170px 1fr 1fr;gap:14px;padding:7px 14px;border-top:1px solid var(--line);align-items:start}
+.row:nth-child(odd){background:#FBFDFE}
+.row .lbl{color:var(--blue);font-weight:700;font-size:12.5px;padding-top:6px}
+.row input,.row select,.row textarea{width:100%;border:1px solid transparent;background:transparent;
+  border-radius:6px;padding:5px 7px}
+.row input:hover,.row textarea:hover{border-color:var(--line);background:#fff}
+.row input:focus,.row select:focus,.row textarea:focus{border-color:var(--blue);background:#fff;outline:none}
+.row textarea{resize:vertical;min-height:32px}
+.auto{background:var(--blue-soft)!important;border-color:var(--blue-line)!important}
+.edited{background:var(--orange-soft)!important;border-color:var(--orange)!important}
+.cel{display:flex;flex-direction:column;gap:3px}
+.hint{font-size:11px;color:var(--muted);padding:0 7px}
+.hint.warn{color:var(--warn);font-weight:700}
+.hint.err{color:var(--err);font-weight:700}
+
+.picker{background:var(--blue-soft);border-top:1px solid var(--blue-line);padding:11px 14px;
+  display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.picker .f select,.picker .f input{background:#fff}
+.counts{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+
+.paste{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:14px}
+.paste-kop{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.paste-kop .hint{padding:0}
+.paste-ta{width:100%;min-height:150px;margin-top:11px;border:1px solid var(--line);border-radius:8px;
+  padding:9px 11px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:12px;resize:vertical}
+.paste-ta:focus{outline:2px solid var(--blue);outline-offset:1px;border-color:var(--blue)}
+.paste-knoppen{margin-top:9px;display:flex;gap:9px}
+.paste-res{margin-top:13px;border-top:1px solid var(--line);padding-top:11px}
+.paste-sub{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;
+  color:var(--muted);margin:9px 0 5px}
+.paste-rij{display:grid;grid-template-columns:190px 1fr;gap:10px;padding:3px 0;font-size:13px}
+.paste-veld{color:var(--blue);font-weight:700}
+.paste-waarde{color:var(--ink)}
+.paste-onb{margin-top:9px;font-size:12px;color:var(--muted)}
+.paste-onb summary{cursor:pointer;font-weight:700}
+.paste-res .pill.solid{margin-top:12px}
+.bar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.bar h1{font-size:19px;margin:0 10px 0 0}
+.note{background:var(--orange-soft);border:1px solid var(--orange);border-radius:8px;
+  padding:9px 12px;margin-bottom:14px;font-size:13px}
+.empty{background:#fff;border:1px dashed var(--line);border-radius:var(--r);padding:44px 20px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:5px}
+.tag{display:inline-block;background:var(--blue-soft);color:var(--blue-dark);border-radius:999px;
+  padding:1px 9px;font-size:11px;font-weight:700}
+.tag.g{background:#E6F5EC;color:#1F7A45}
+.tag.o{background:var(--orange-soft);color:#A85E12}
+.hidden{display:none!important}
+
+@media print{
+  .suite,.top,.projbar,.rail,.bar,.picker,.hint{display:none!important}
+  .wrap{display:block}.main{padding:0;max-width:none}
+  .sheet{page-break-after:always;border:none}
+  .row input,.row textarea,.row select{border:none!important;background:none!important}
+}
+@media (max-width:900px){.wrap{grid-template-columns:1fr}.rail{position:static;max-height:none;min-height:0}
+  .row,.sheet-head{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<!--SJABLOON--><div style="background:#FDF0E2;border-bottom:1px solid #F5821F;padding:8px 20px;font-size:13px">
+  <b>Sjabloon</b> — hier staat nog geen productdata in. Open <code>vergelijking.html</code> in de hoofdmap,
+  of draai <code>python bouw-tool.py</code> om die opnieuw te maken.
+</div><!--/SJABLOON-->
+
+<header class="suite">
+  <img class="suite-logo" src="merk/Distrilight logo donker.png" alt="Distrilight">
+  <div class="badges">
+    <a class="badge" href="armaturenboek.html">Armaturenboek</a>
+    <a class="badge" href="presenters.html">Presenters</a>
+    <a class="badge active" href="vergelijking.html">Vergelijking</a>
+    <a class="badge" href="index.html">3 fase rail</a>
+    <a class="badge" href="lichtlijn.html">Lichtlijn</a>
+    <a class="badge" href="intake.html">Intake</a>
+    <a class="badge" href="snoerenplan.html">Snoerenplan</a>
+  </div>
+</header>
+
+<div class="top">
+  <div class="brand">Armatuur<span>vergelijker</span></div>
+  
+  <div class="spacer"></div>
+  <button class="pill ghost" id="btnLoadData">Productdata laden</button>
+  <button class="pill ghost" id="btnOpen">Project openen</button>
+  <button class="pill" id="btnSave">Project opslaan</button>
+  <button class="pill solid" id="btnPrint">Afdrukken</button>
+  <input type="file" id="fileData" accept=".json" class="hidden">
+  <input type="file" id="fileProj" accept=".json" class="hidden">
+</div>
+
+<div class="projbar">
+  <div class="f"><label>Projectnummer</label><input id="pNr" placeholder="P.11590IB"></div>
+  <div class="f"><label>Projectnaam</label><input id="pNaam" placeholder="MFA Macharen"></div>
+  <div class="f"><label>Installateur</label><input id="pInst" placeholder="Van Delft"></div>
+  <div class="f sm"><label>Datum</label><input id="pDatum" type="date"></div>
+  <div class="f"><label>Bouwlagen</label><input id="pLagen" placeholder="BG, V1" style="width:150px"></div>
+  <div class="f"><label>Type project</label>
+    <select id="pType"><option value="nieuwbouw">Nieuwbouw</option><option value="renovatie">Renovatie</option></select>
+  </div>
+  <div class="f"><label>&nbsp;</label><span class="tag" id="dataTag">geen data geladen</span></div>
+</div>
+
+<div class="wrap">
+  <nav class="rail">
+    <h2>Posities</h2>
+    <ul class="poslist" id="posList"></ul>
+    <button class="pill acc" id="btnAdd" style="width:100%">Positie toevoegen</button>
+  </nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+/* ======================= productdata ======================= */
+let DATA = /*__ARMATUREN_DATA__*/ null;
+
+/* ======================= state ======================= */
+const S = {
+  project:{nr:'',naam:'',inst:'',datum:'',lagen:['BG'],type:'nieuwbouw'},
+  posities:[], actief:0
+};
+const REF_VELDEN = [
+  ['leverancier','Leverancier'],['type','Type'],['artikelnummer','Artikelnummer'],
+  ['omschrijving','Omschrijving'],['toepassing','Toepassing'],['vermogen','Vermogen'],
+  ['cct','Kleurtemperatuur'],['lumen','Nuttige lichtstroom'],['dimbaar','Dimbaar'],
+  ['afmetingen','Afmetingen']
+];
+const KENMERKEN = [['uitvoering','Uitvoering'],['kleur','Kleur'],['driver','Driver'],
+                   ['sensor','Sensor'],['noodverlichting','Noodverlichting']];
+
+function nieuwePositie(code){
+  return {code:code||volgendeCode(), aantallen:{}, bestaandeZaagmaat:'',
+          ref:{}, familieId:'', artikelcode:'', overrides:{}, opmerking:''};
+}
+function volgendeCode(){
+  const g=['A','B','C','D','E','F','G','H','J','K','L','M'];
+  const used=new Set(S.posities.map(p=>p.code));
+  return g.find(c=>!used.has(c)) || 'X'+(S.posities.length+1);
+}
+
+/* ======================= variantkeuze ======================= */
+function grootte(v){
+  if(v.buitenmaat_mm) return v.buitenmaat_mm;
+  if(v.lengte_cm) return v.lengte_cm*10;
+  if(v.afmetingen_mm) return (v.afmetingen_mm.l||0)*(v.afmetingen_mm.b||1)/100;
+  return 99999;
+}
+function zaagmaatVan(v){
+  if(typeof v.zaagmaat_mm==='number') return v.zaagmaat_mm;
+  if(v.zaagmaat_mm && v.zaagmaat_mm.l) return v.zaagmaat_mm.l;
+  return null;
+}
+function dektLumen(v,lm){
+  if(lm==null||isNaN(lm)) return true;
+  const a=v.lichtstroom_lm||{}; if(a.min==null&&a.max==null) return true;
+  return lm >= (a.min??0) && lm <= (a.max??Infinity);
+}
+/* Filteren: eerst weggooien wat niet kan, dan de kleinste die overblijft. */
+function kandidaten(fam,pos){
+  const lm = parseGetal(pos.ref.lumen);
+  const bestaand = parseGetal(pos.bestaandeZaagmaat);
+  return (fam.varianten||[]).filter(v=>{
+    if(!dektLumen(v,lm)) return false;
+    if(S.project.type==='renovatie' && bestaand){
+      // Harde eis: de sierrand moet het bestaande gat afdekken.
+      if(v.buitenmaat_mm!=null && v.buitenmaat_mm < bestaand) return false;
+    }
+    return true;
+  }).sort((a,b)=>grootte(a)-grootte(b));
+}
+function autoKies(fam,pos,vast){
+  let k = kandidaten(fam,pos);
+  for(const [key] of KENMERKEN){
+    if(vast && vast[key]!=null && vast[key]!==''){
+      const f = k.filter(v=>String(v[key]??'')===String(vast[key]));
+      if(f.length) k=f;
+    }
+  }
+  const score=v=>(v.sensor?1:0)+(v.noodverlichting?1:0)+(v.kleur==='wit'?0:1)+(v.driver?0:2);
+  return k.sort((a,b)=>grootte(a)-grootte(b)||score(a)-score(b))[0]||null;
+}
+function parseGetal(s){
+  if(s==null) return null;
+  const m=String(s).replace(',','.').match(/[\d.]+/);
+  return m?parseFloat(m[0]):null;
+}
+function famById(id){return (DATA?.families||[]).find(f=>f.id===id)||null}
+function varByCode(fam,code){return (fam?.varianten||[]).find(v=>v.artikelcode===code)||null}
+
+/* ======================= specificaties uitlezen ======================= */
+/* Kopregels van leveranciersbladen: geven context, hebben zelf geen waarde. */
+const SECTIE=/^(elektrisch|lichttechniek|controle|bescherming|energie|materiaal|montage|afmeting|verpakking|algemeen|optiek|garantie|akoestiek|overig)/i;
+
+const VELDMAP=[
+  {v:'vermogen',   l:/^(systeem\s?wattage|wattage|vermogen|opgenomen vermogen|system power|power)$/i},
+  {v:'lumen',      l:/^(luminous flux|lichtstroom|nuttige lichtstroom|armatuurlichtstroom|lichtstroom armatuur|output)$/i},
+  {v:'cct',        l:/^(kleur\s?temperatuur|kleurtemperatuur|colour temperature|color temperature|cct)$/i},
+  {v:'dimbaar',    l:/^(type|dimmen|dimming|besturing|sturing)$/i, s:/controle|dim/i},
+  {v:'dimbaar',    l:/^(dimbaar|dimbaarheid|dimmable)$/i},
+  {v:'_nood',      l:/^(noodlumen|nood lumen|emergency lumen|noodverlichting)/i},
+  {v:'_cri',       l:/^(kleurweergave|cri|colour rendering)/i},
+  {v:'_ugr',       l:/^ugr/i},
+  {v:'_ip',        l:/^(ip\s?klasse|ip\s?class|beschermingsgraad|ip)$/i},
+  {v:'_ik',        l:/^(ik\s?klasse|ik\s?class|ik)$/i},
+  {v:'_diameter',  l:/^diameter/i},
+  {v:'_hoogte',    l:/^hoogte/i},
+  {v:'_breedte',   l:/^breedte/i},
+  {v:'_lengte',    l:/^lengte/i},
+  {v:'_cutout',    l:/^(cut-?out|zaagmaat|gatmaat|inbouwopening|inbouwmaat)/i},
+  {v:'_diepte',    l:/^inbouwdiepte/i},
+  {v:'_kleur',     l:/^kleur$/i, s:/materiaal|afwerking/i},
+  {v:'_montage',   l:/^montage$/i},
+  {v:'_bundel',    l:/^(lichtbundel|bundelhoek|beam|stralingshoek)/i},
+  {v:'_optiek',    l:/^optiek/i},
+  {v:'_levensduur',l:/^levensduur/i},
+  {v:'_klasse',    l:/^isolatieklasse/i},
+  {v:'_aansluiting',l:/^aansluiting/i}
+];
+const LABELS={_nood:'Noodlumen',_cri:'Kleurweergave',_ugr:'UGR',_ip:'IP-klasse',_ik:'IK-klasse',
+  _kleur:'Kleur',_montage:'Montage',_bundel:'Lichtbundel',_optiek:'Optiek',_levensduur:'Levensduur',
+  _klasse:'Isolatieklasse',_aansluiting:'Aansluiting',_diepte:'Inbouwdiepte',_cutout:'Cut-out'};
+
+/* Een regel met cijfers of vergelijkingstekens is een waarde, geen label —
+   anders wordt "UGR<19" voor het label "UGR" aangezien. */
+function lijktWaarde(s){return /[\d<>=]/.test(s)||/^(ja|nee|yes|no)$/i.test(s)}
+function isLabel(s){return !lijktWaarde(s) && VELDMAP.some(x=>x.l.test(s))}
+function mm(s){const n=parseGetal(s);return n==null?null:Math.round(n)}
+
+function leesSpecs(tekst){
+  const regels=String(tekst||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  const uit={}, herkend=[], onbekend=[];
+  let sectie='';
+  for(let i=0;i<regels.length;i++){
+    let label=regels[i], waarde=null;
+    /* "Label: waarde" op één regel — alleen splitsen als het linkerdeel echt een label is */
+    const d=label.indexOf(':');
+    if(d>0 && d<40 && isLabel(label.slice(0,d).trim())){
+      waarde=label.slice(d+1).trim(); label=label.slice(0,d).trim();
+    }
+    /* kopregel: onthouden en niets consumeren */
+    if(!waarde && SECTIE.test(label) && !/\d/.test(label) && label.length<40 && !isLabel(label)){
+      sectie=label; continue;
+    }
+    const m=(waarde!=null || !lijktWaarde(label))
+      ? VELDMAP.find(x=>x.l.test(label) && (!x.s || x.s.test(sectie))) : null;
+    if(!m){ onbekend.push(label); continue; }
+    if(waarde==null){
+      const volg=regels[i+1];
+      if(volg && !isLabel(volg) && !SECTIE.test(volg)){ waarde=volg; i++; }
+    }
+    if(waarde==null){ onbekend.push(label); continue; }
+    if(uit[m.v]==null){ uit[m.v]=waarde; herkend.push({label,waarde,veld:m.v,sectie}); }
+  }
+  return {uit,herkend,onbekend};
+}
+
+/* Vertaal de uitgelezen waarden naar de velden van het vergelijkingsblad. */
+function naarBladvelden(u){
+  const r={};
+  if(u.vermogen) r.vermogen=u.vermogen;
+  if(u.lumen)    r.lumen=u.lumen;
+  if(u.cct)      r.cct=u.cct;
+  if(u.dimbaar)  r.dimbaar=/niet|geen|aan\/uit|on\/off|non-?dim/i.test(u.dimbaar)?'Nee':'Ja — '+u.dimbaar.toLowerCase();
+  const maten=[];
+  if(u._diameter) maten.push('Ø'+mm(u._diameter));
+  else if(u._lengte&&u._breedte) maten.push(mm(u._lengte)+'×'+mm(u._breedte));
+  if(u._hoogte) maten.push('H'+mm(u._hoogte));
+  let a=maten.join(' × ');
+  if(u._cutout) a+=(a?' — ':'')+'cut-out Ø'+mm(u._cutout);
+  if(u._diepte) a+=(a?', ':'')+'inbouwdiepte '+mm(u._diepte)+'mm';
+  if(a) r.afmetingen=a;
+  return r;
+}
+function bereik(o,eh){
+  if(!o) return '';
+  const a=o.min,b=o.max;
+  if(a==null&&b==null) return '';
+  if(a==null) return 'max. '+b+eh;
+  if(b==null||a===b) return a+eh;
+  return a+'-'+b+eh;
+}
+function onzeWaarden(fam,v){
+  if(!fam||!v) return {};
+  const d={
+    leverancier:'Pragmalux / Distrilight',
+    type:fam.naam,
+    artikelnummer:v.artikelcode,
+    omschrijving:v.omschrijving||'',
+    toepassing:'',
+    vermogen:bereik(v.vermogen_w,'W'),
+    cct:(fam.cct||[]).join('-')+(fam.cct?'K':''),
+    lumen:bereik(v.lichtstroom_lm,'lm'),
+    dimbaar: v.dimprotocol==null ? '' : (v.dimprotocol==='geen'?'Nee':v.dimprotocol.toUpperCase()),
+    afmetingen: v.buitenmaat_mm ? ('Ø'+v.buitenmaat_mm+(zaagmaatVan(v)?' — zaagmaat Ø'+zaagmaatVan(v):''))
+      : v.afmetingen_mm ? [v.afmetingen_mm.l,v.afmetingen_mm.b,v.afmetingen_mm.h].filter(Boolean).join('×')+'mm'
+      : ''
+  };
+  if(v.vermogen_w && v.vermogen_w.min==null && v.vermogen_w.opmerking)
+    d.vermogen='tot '+v.vermogen_w.max+'W';
+  return d;
+}
+
+function bouwPlakblok(p){
+  const box=el('div','paste');
+  if(!p._plak) p._plak={open:false,tekst:'',res:null};
+  const st=p._plak;
+
+  const kop=el('div','paste-kop');
+  const b=el('button','pill acc', st.open?'Plakvak sluiten':'Specificaties plakken');
+  b.onclick=()=>{st.open=!st.open;render()};
+  kop.append(b);
+  if(!st.open) kop.append(el('span','hint','Plak de specificatietabel van de leverancier; de tool leest eruit wat bruikbaar is.'));
+  box.append(kop);
+  if(!st.open) return box;
+
+  const ta=el('textarea'); ta.className='paste-ta'; ta.value=st.tekst;
+  ta.placeholder='Plak hier de specificaties van het armatuur van de installateur…';
+  ta.addEventListener('input',()=>{st.tekst=ta.value});
+  ta.addEventListener('paste',()=>setTimeout(()=>{st.tekst=ta.value;st.res=leesSpecs(st.tekst);render()},0));
+  box.append(ta);
+
+  const kn=el('div','paste-knoppen');
+  const lees=el('button','pill','Lees uit');
+  lees.onclick=()=>{st.res=leesSpecs(st.tekst);render()};
+  kn.append(lees); box.append(kn);
+
+  if(st.res){
+    const r=st.res, velden=naarBladvelden(r.uit);
+    const tab=el('div','paste-res');
+    if(!Object.keys(velden).length && !r.herkend.length){
+      tab.append(el('div','hint err','Niets herkend. Zet label en waarde op aparte regels of scheid ze met een dubbele punt.'));
+    } else {
+      tab.append(el('div','paste-sub','Wordt ingevuld in het blad'));
+      Object.entries(velden).forEach(([k,v])=>{
+        const rij=el('div','paste-rij');
+        rij.append(el('span','paste-veld',(REF_VELDEN.find(x=>x[0]===k)||[,k])[1]), el('span','paste-waarde',v));
+        tab.append(rij);
+      });
+      const rest=r.herkend.filter(h=>h.veld.startsWith('_'));
+      if(rest.length){
+        tab.append(el('div','paste-sub','Ook bewaard, niet in het blad'));
+        const s=el('div','paste-rij');
+        s.append(el('span','paste-waarde',rest.map(h=>(LABELS[h.veld]||h.label)+': '+h.waarde).join(' · ')));
+        tab.append(s);
+      }
+      if(r.uit._nood) tab.append(el('div','hint warn',
+        'Deze referentie heeft noodverlichting ('+r.uit._nood+'). Kies aan onze kant een variant met noodmodule of splits de positie.'));
+      if(r.uit._cutout) tab.append(el('div','hint',
+        'Cut-out Ø'+mm(r.uit._cutout)+' mm wordt overgenomen als bestaand gat voor de renovatiecontrole.'));
+      if(r.onbekend.length){
+        const d=document.createElement('details'); d.className='paste-onb';
+        const sm=document.createElement('summary'); sm.textContent=r.onbekend.length+' regel(s) niet herkend';
+        d.append(sm, el('div','paste-waarde',r.onbekend.join(' · '))); tab.append(d);
+      }
+      const ok=el('button','pill solid','Invullen in het blad');
+      ok.onclick=()=>{
+        Object.entries(velden).forEach(([k,v])=>{ if(v) p.ref[k]=v });
+        p.ref.extra=r.uit;
+        if(r.uit._cutout) p.bestaandeZaagmaat=String(mm(r.uit._cutout));
+        st.open=false; st.res=null;
+        const fam=famById(p.familieId);
+        if(fam && !p.handmatig){ const k=autoKies(fam,p,null); if(k) p.artikelcode=k.artikelcode; }
+        render();
+      };
+      tab.append(ok);
+    }
+    box.append(tab);
+  }
+  return box;
+}
+
+/* ======================= render ======================= */
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+
+function renderRail(){
+  const ul=document.getElementById('posList'); ul.innerHTML='';
+  S.posities.forEach((p,i)=>{
+    const li=el('li'); const b=el('button','posbtn'+(i===S.actief?' on':''));
+    const st = p.artikelcode ? 'done' : (p.ref.type||p.ref.leverancier ? 'part':'');
+    b.append(Object.assign(el('span','dot '+st),{}), el('span','code',p.code),
+             el('span','art', p.artikelcode || '—'));
+    b.onclick=()=>{S.actief=i;render()};
+    li.append(b); ul.append(li);
+  });
+}
+
+function veldRij(lblTxt, links, rechts){
+  const r=el('div','row'); r.append(el('div','lbl',lblTxt), links, rechts); return r;
+}
+function invoer(waarde,onInput,ph,area){
+  const i=document.createElement(area?'textarea':'input');
+  i.value=waarde||''; if(ph)i.placeholder=ph;
+  i.addEventListener('input',()=>onInput(i.value));
+  return i;
+}
+
+function renderSheet(){
+  const main=document.getElementById('main'); main.innerHTML='';
+  if(!S.posities.length){
+    const e=el('div','empty'); e.innerHTML='<b>Nog geen posities</b>Voeg de eerste bestekpositie toe om te beginnen.';
+    main.append(e); return;
+  }
+  const p=S.posities[S.actief];
+  const fam=famById(p.familieId);
+  const v=varByCode(fam,p.artikelcode);
+  const waarden=onzeWaarden(fam,v);
+
+  /* balk */
+  const bar=el('div','bar');
+  const h=el('h1'); h.textContent='Positie '; 
+  const codeIn=invoer(p.code,x=>{p.code=x;renderRail()},'A'); codeIn.style.width='70px';
+  codeIn.style.font='800 19px "Nunito Sans"'; codeIn.style.border='1px solid var(--line)';
+  codeIn.style.borderRadius='7px'; codeIn.style.padding='2px 8px';
+  const del=el('button','pill ghost','Positie verwijderen');
+  del.onclick=()=>{S.posities.splice(S.actief,1);S.actief=Math.max(0,S.actief-1);render()};
+  bar.append(h,codeIn,el('span','',' '),del);
+  main.append(bar);
+
+  main.append(bouwPlakblok(p));
+
+  if(!DATA){ const n=el('div','note');
+    n.textContent='Er is nog geen productdata geladen. De linkerkolom werkt al; kies rechtsboven “Productdata laden”.';
+    main.append(n); }
+
+  /* blad */
+  const sheet=el('div','sheet');
+  const head=el('div','sheet-head');
+  head.append(el('b','','CODE '+p.code), el('div','h','Referentie installateur'), el('div','h','Voorstel Distrilight'));
+  sheet.append(head);
+
+  /* aantallen */
+  const cnt=el('div','counts');
+  S.project.lagen.forEach(l=>{
+    const f=el('div','f xs'); f.append(el('label','',l));
+    f.append(invoer(p.aantallen[l]??'',x=>{p.aantallen[l]=x;renderRail()},'0'));
+    cnt.append(f);
+  });
+  const tot=S.project.lagen.reduce((a,l)=>a+(parseInt(p.aantallen[l])||0),0);
+  const ft=el('div','f xs'); ft.append(el('label','','Totaal'));
+  const ti=el('input'); ti.value=tot; ti.readOnly=true; ti.style.fontWeight='800'; ft.append(ti); cnt.append(ft);
+  sheet.append(veldRij('Aantallen', cnt, el('div')));
+
+  /* referentievelden + onze kolom */
+  REF_VELDEN.forEach(([k,lbl])=>{
+    const links=invoer(p.ref[k],x=>{p.ref[k]=x; if(k==='lumen') herkies(); },'');
+    const rechts=el('div','cel');
+    const heeftAuto = waarden[k]!=null && waarden[k]!=='';
+    const ov = p.overrides[k];
+    const inp=invoer(ov!=null?ov:(waarden[k]||''),x=>{
+      p.overrides[k] = (x===(waarden[k]||'')) ? undefined : x; markeer();
+    },heeftAuto?'':'—');
+    if(ov!=null) inp.classList.add('edited'); else if(heeftAuto) inp.classList.add('auto');
+    rechts.append(inp);
+    if(ov!=null){
+      const u=el('div','hint'); u.innerHTML='handmatig aangepast — ';
+      const a=el('button','pill ghost','herstel'); a.style.cssText='padding:0 8px;font-size:11px';
+      a.onclick=()=>{p.overrides[k]=undefined;render()}; u.append(a); rechts.append(u);
+    }
+    sheet.append(veldRij(lbl,links,rechts));
+  });
+
+  /* opmerkingen */
+  sheet.append(veldRij('Opmerkingen',
+    invoer(p.ref.opmerking,x=>p.ref.opmerking=x,'','area'),
+    invoer(p.opmerking,x=>p.opmerking=x,'Toelichting bij afwijkingen','area')));
+
+  /* keuzeblok */
+  sheet.append(bouwPicker(p,fam,v));
+  main.append(sheet);
+
+  function markeer(){renderRail()}
+  function herkies(){ if(fam && !p.handmatig){ const n=autoKies(fam,p,huidigeKenmerken(v));
+    if(n){p.artikelcode=n.artikelcode;} render(); } }
+}
+
+function huidigeKenmerken(v){
+  if(!v) return {};
+  const o={}; KENMERKEN.forEach(([k])=>{ if(v[k]!=null) o[k]=v[k] }); return o;
+}
+
+function bouwPicker(p,fam,v){
+  const box=el('div','picker');
+
+  const ff=el('div','f'); ff.append(el('label','','Onze familie'));
+  const fs=el('select'); fs.append(new Option('— kies familie —',''));
+  (DATA?.families||[]).forEach(f=>fs.append(new Option(f.naam,f.id)));
+  fs.value=p.familieId||'';
+  fs.onchange=()=>{ p.familieId=fs.value; p.artikelcode=''; p.overrides={};
+    const f=famById(p.familieId); if(f){const k=autoKies(f,p,null); if(k)p.artikelcode=k.artikelcode;} render(); };
+  ff.append(fs); box.append(ff);
+
+  if(fam){
+    /* kenmerkfilters, alleen tonen waar echt keuze is */
+    KENMERKEN.forEach(([key,lbl])=>{
+      const waarden=[...new Set((fam.varianten||[]).map(x=>x[key]).filter(x=>x!=null&&x!==''))];
+      if(waarden.length<2) return;
+      const f=el('div','f'); f.append(el('label','',lbl));
+      const s=el('select'); s.append(new Option('geen voorkeur',''));
+      waarden.forEach(w=>s.append(new Option(String(w)===  'true'?'ja':String(w),String(w))));
+      s.value = v && v[key]!=null ? String(v[key]) : '';
+      s.onchange=()=>{ const vast=huidigeKenmerken(v); vast[key]=s.value||null;
+        const n=autoKies(fam,p,vast); if(n){p.artikelcode=n.artikelcode;p.handmatig=false;} render(); };
+      f.append(s); box.append(f);
+    });
+
+    /* variantkeuze */
+    const k=kandidaten(fam,p);
+    const vf=el('div','f'); vf.append(el('label','','Gekozen artikel'));
+    const vs=el('select'); vs.style.minWidth='330px';
+    const lijst = k.length?k:(fam.varianten||[]);
+    lijst.forEach(x=>vs.append(new Option(x.artikelcode+'  —  '+kort(x),x.artikelcode)));
+    if(v && !lijst.some(x=>x.artikelcode===v.artikelcode)) vs.append(new Option(v.artikelcode+'  —  '+kort(v),v.artikelcode));
+    vs.value=p.artikelcode||'';
+    vs.onchange=()=>{p.artikelcode=vs.value;p.handmatig=true;p.overrides={};render()};
+    vf.append(vs); box.append(vf);
+
+    /* renovatie: bestaande zaagmaat */
+    if(S.project.type==='renovatie'){
+      const zf=el('div','f xs'); zf.append(el('label','','Bestaand gat Ø'));
+      zf.append(invoer(p.bestaandeZaagmaat,x=>{p.bestaandeZaagmaat=x;
+        const n=autoKies(fam,p,huidigeKenmerken(v)); if(n&&!p.handmatig)p.artikelcode=n.artikelcode; render()},'mm'));
+      box.append(zf);
+    }
+
+    /* melding */
+    const lm=parseGetal(p.ref.lumen);
+    const m=el('div','hint'); m.style.flexBasis='100%';
+    if(lm && !k.length){ m.className='hint err';
+      m.textContent='Geen variant dekt '+lm+' lm binnen deze familie'+
+        (S.project.type==='renovatie'&&p.bestaandeZaagmaat?' bij een bestaand gat van Ø'+p.bestaandeZaagmaat+' mm.':'.')+
+        ' Kies een andere familie of pas de eis aan.';
+    } else if(p.handmatig){ m.className='hint warn'; m.textContent='Handmatig gekozen — de automatische keuze is overschreven.';
+    } else if(lm && k.length){ m.textContent=k.length+' variant(en) dekken '+lm+' lm; de kleinste is gekozen.'; }
+    box.append(m);
+
+    /* zaagwerk melden: past het in het bestaande gat, of moet het vergroot? */
+    const gat=parseGetal(p.bestaandeZaagmaat), z=v?zaagmaatVan(v):null;
+    if(S.project.type==='renovatie' && gat && z!=null){
+      const w=el('div','hint'+(z>gat?' warn':'')); w.style.flexBasis='100%';
+      w.textContent = z>gat
+        ? 'Let op: bestaand gat moet worden vergroot van Ø'+gat+' naar Ø'+z+' mm.'
+        : 'Past in het bestaande gat van Ø'+gat+' mm; sierrand Ø'+v.buitenmaat_mm+' dekt af.';
+      box.append(w);
+    }
+  }
+  return box;
+}
+function kort(v){
+  const b=[]; if(v.uitvoering)b.push(v.uitvoering); if(v.kleur)b.push(v.kleur);
+  if(v.lengte_cm)b.push(v.lengte_cm+'cm'); if(v.maat)b.push(v.maat);
+  if(v.buitenmaat_mm)b.push('Ø'+v.buitenmaat_mm);
+  if(v.lichtstroom_lm)b.push(bereik(v.lichtstroom_lm,'lm'));
+  if(v.driver)b.push(v.driver);
+  if(v.sensor)b.push('sensor'); if(v.noodverlichting)b.push('nood '+v.noodverlichting);
+  return b.join(' · ');
+}
+
+function render(){renderRail();renderSheet()}
+
+/* ======================= projectvelden ======================= */
+const bind=(id,key,fn)=>{const e=document.getElementById(id);
+  e.addEventListener('input',()=>{S.project[key]=fn?fn(e.value):e.value;render()})};
+bind('pNr','nr'); bind('pNaam','naam'); bind('pInst','inst'); bind('pDatum','datum');
+bind('pLagen','lagen',x=>x.split(',').map(s=>s.trim()).filter(Boolean).slice(0,6)||['BG']);
+document.getElementById('pType').addEventListener('change',e=>{S.project.type=e.target.value;render()});
+document.getElementById('btnAdd').onclick=()=>{S.posities.push(nieuwePositie());S.actief=S.posities.length-1;render()};
+document.getElementById('btnPrint').onclick=()=>window.print();
+
+/* opslaan / openen */
+function download(naam,obj){
+  const b=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=naam; a.click();
+}
+document.getElementById('btnSave').onclick=()=>
+  download((S.project.nr||'project')+'.json',{project:S.project,posities:S.posities});
+document.getElementById('btnOpen').onclick=()=>document.getElementById('fileProj').click();
+document.getElementById('fileProj').onchange=e=>leesJson(e.target.files[0],o=>{
+  S.project=o.project||S.project; S.posities=o.posities||[]; S.actief=0; vulProjectVelden(); render();
+});
+document.getElementById('btnLoadData').onclick=()=>document.getElementById('fileData').click();
+document.getElementById('fileData').onchange=e=>leesJson(e.target.files[0],o=>{
+  if(!o.families){alert('Dit bestand bevat geen "families". Controleer of je armaturen.json hebt gekozen.');return}
+  DATA=o;
+  dataTag(o); render();
+});
+function leesJson(f,cb){ if(!f)return; const r=new FileReader();
+  r.onload=()=>{try{cb(JSON.parse(r.result))}catch(err){alert('Kan het bestand niet lezen: '+err.message)}};
+  r.readAsText(f); }
+function vulProjectVelden(){
+  pNr.value=S.project.nr; pNaam.value=S.project.naam; pInst.value=S.project.inst;
+  pDatum.value=S.project.datum; pLagen.value=(S.project.lagen||[]).join(', '); pType.value=S.project.type;
+}
+function dataTag(d){
+  const t=document.getElementById('dataTag');
+  if(!d){t.textContent='geen data geladen';t.className='tag o';return}
+  const n=(d.families||[]).reduce((a,f)=>a+(f.varianten||[]).length,0);
+  t.textContent=(d.families||[]).length+' families · '+n+' artikelen'; t.className='tag g';
+}
+
+/* start */
+if(DATA) dataTag(DATA); else dataTag(null);
+S.posities.push(nieuwePositie('A'));
+vulProjectVelden(); render();
+</script>
+</body>
+</html>
