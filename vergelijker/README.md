@@ -63,6 +63,12 @@ Alleen de tool aangepast en geen nieuwe data? Dan is `bouw-tool.py` genoeg;
 `data/armaturen.json` staat in de repo, dus daar heb je de Excel-exports niet
 voor nodig.
 
+Pas je alleen een familiegegeven aan (een foto, een cct) terwijl de exports niet
+op je schijf staan? Dat kan: staat de export van een familie niet in
+`data/bron/`, dan houdt `bouw-data.py` de artikelen aan die al in
+`armaturen.json` stonden, en meldt dat. Staat de export er wel, dan wint die —
+zo blijft bijwerken gewoon bijwerken.
+
 `bouw-data.py` haalt vermogen, lichtstroom, buiten- en zaagmaat, kleur, uitvoering
 en IP uit de omschrijvingstekst. Wat het niet kan lezen, meldt het per artikel —
 het raadt nooit. Zolang er meldingen staan, controleer je die eerst.

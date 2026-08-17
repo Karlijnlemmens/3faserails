@@ -126,6 +126,19 @@ def main():
     except ImportError:
         sys.exit("openpyxl ontbreekt. Draai eerst: pip install openpyxl")
 
+    # Wat er al in armaturen.json staat. De Excel-exports blijven buiten de
+    # repo, dus wie alleen een familiegegeven aanpast (een foto, een cct) heeft
+    # ze niet op schijf staan. Zonder deze vangnet zou zo iemand de artikelen
+    # wissen die wel meegeleverd zijn.
+    eerder = {}
+    if UIT.exists():
+        try:
+            for f in json.loads(UIT.read_text(encoding="utf-8")).get("families", []):
+                if f.get("varianten"):
+                    eerder[f.get("id")] = f["varianten"]
+        except (json.JSONDecodeError, OSError) as e:
+            print(f"Let op: {UIT.name} kon niet gelezen worden ({e}); niets om op terug te vallen.")
+
     meldingen, totaal = [], 0
 
     for fam in families:
@@ -137,8 +150,19 @@ def main():
             continue
         bestand = BRON / fam["bron_excel"]
         if not bestand.exists():
-            meldingen.append(f"[{fam['id']}] bronbestand niet gevonden: {bestand.name}")
-            fam.setdefault("varianten", [])
+            bewaard = eerder.get(fam.get("id"))
+            if bewaard:
+                fam["varianten"] = bewaard
+                fam.pop("bron_excel", None)
+                fam.pop("alleen_codes_met_prefix", None)
+                totaal += len(bewaard)
+                print(f"  {fam['id']:34} {len(bewaard):4} artikelen  (export ontbreekt, bestaande bewaard)")
+                meldingen.append(f"[{fam['id']}] export {bestand.name} niet gevonden; "
+                                 f"de {len(bewaard)} artikelen uit armaturen.json blijven staan. "
+                                 f"Zet de export in data/bron/ als je ze wilt bijwerken.")
+            else:
+                meldingen.append(f"[{fam['id']}] bronbestand niet gevonden: {bestand.name}")
+                fam.setdefault("varianten", [])
             continue
 
         ws = openpyxl.load_workbook(bestand, read_only=True).worksheets[0]
