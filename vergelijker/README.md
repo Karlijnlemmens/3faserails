@@ -118,7 +118,10 @@ Het vergelijkingsblad begint met een rij **Foto**: links het armatuur van de
 installateur, rechts dat van ons.
 
 **Links** laadt de gebruiker zelf: klikken, een bestand erheen slepen, of
-plakken met Ctrl+V als het vak de aandacht heeft. De afbeelding wordt
+Ctrl+V. Dat plakken luistert op de hele pagina — na een schermafdruk hoef je
+niets aan te klikken, en de afbeelding komt bij de positie waar je in staat.
+Tekst plakken raakt de foto niet; er wordt alleen ingegrepen als er echt een
+afbeelding op het klembord staat. De afbeelding wordt
 verkleind tot 1000 px op de langste zijde en als data-URI in de positie
 bewaard, dus hij gaat mee met **Project opslaan** en is er straks nog bij de
 PDF-stap. Een verwijzing naar een bestand op de schijf van de gebruiker zou

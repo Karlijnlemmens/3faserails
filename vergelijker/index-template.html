@@ -670,7 +670,7 @@ function refFotoVak(p){
     } else {
       vak.classList.remove('gevuld');
       vak.append(el('div','fotovak-uitleg','Foto van het armatuur van de installateur'),
-                 el('div','fotovak-hoe','klik om te kiezen · sleep een bestand hierheen · of plak met Ctrl+V'));
+                 el('div','fotovak-hoe','klik om een bestand te kiezen · sleep er een hierheen · of maak een schermafdruk en druk Ctrl+V'));
     }
   }
 
@@ -685,12 +685,7 @@ function refFotoVak(p){
     e.preventDefault(); vak.classList.remove('sleep');
     leesAfbeelding((e.dataTransfer.files||[])[0],zet);
   });
-  /* Plakken werkt alleen als het vak de aandacht heeft, anders zou het met
-     het plakvak voor specificaties in de knoop raken. */
-  vak.addEventListener('paste',e=>{
-    const item=[...(e.clipboardData&&e.clipboardData.items||[])].find(i=>/^image\//.test(i.type));
-    if(item){ e.preventDefault(); leesAfbeelding(item.getAsFile(),zet); }
-  });
+  /* Plakken zit op de hele pagina, zie onderaan bij "start". */
 
   teken();
   return cel;
@@ -1007,6 +1002,21 @@ function dataTag(d){
   const n=(d.families||[]).reduce((a,f)=>a+(f.varianten||[]).length,0);
   t.textContent=(d.families||[]).length+' families · '+n+' artikelen'; t.className='tag g';
 }
+
+/* Ctrl+V met een afbeelding op het klembord zet die bij de positie waar je
+   in staat. Dat luistert op de hele pagina: na een schermafdruk wil je niet
+   eerst een vakje hoeven aanklikken, en klikken op het lege vak opent juist
+   de bestandskiezer. Tekst plakken verandert er niets aan - we grijpen alleen
+   in als er echt een afbeelding op het klembord staat. */
+document.addEventListener('paste',e=>{
+  const items=[...(e.clipboardData && e.clipboardData.items || [])];
+  const plaatje=items.find(i=>/^image\//.test(i.type));
+  if(!plaatje) return;
+  const p=S.posities[S.actief];
+  if(!p) return;
+  e.preventDefault();
+  leesAfbeelding(plaatje.getAsFile(), uri=>{ p.fotoRef=uri; render(); });
+});
 
 /* start */
 if(DATA) dataTag(DATA); else dataTag(null);
