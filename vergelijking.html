@@ -81,9 +81,11 @@ button,input,select,textarea{font:inherit;color:inherit}
 .main{padding:18px 22px 60px;max-width:1180px}
 
 /* ---------- comparison sheet ---------- */
-.sheet{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+/* overflow:visible, anders knipt het blad de keuzelijst van de familiekiezer af.
+   De ronde hoeken zitten daarom op de kop en op het keuzeblok zelf. */
+.sheet{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:visible}
 .sheet-head{background:var(--blue);color:#fff;display:grid;grid-template-columns:170px 1fr 1fr;
-  align-items:center;padding:9px 14px;gap:14px}
+  align-items:center;padding:9px 14px;gap:14px;border-radius:var(--r) var(--r) 0 0}
 .sheet-head b{font-size:15px}
 .sheet-head .h{font-weight:800;font-size:13px}
 .row{display:grid;grid-template-columns:170px 1fr 1fr;gap:14px;padding:7px 14px;border-top:1px solid var(--line);align-items:start}
@@ -102,8 +104,23 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hint.err{color:var(--err);font-weight:700}
 
 .picker{background:var(--blue-soft);border-top:1px solid var(--blue-line);padding:11px 14px;
-  display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+  display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;border-radius:0 0 var(--r) var(--r)}
 .picker .f select,.picker .f input{background:#fff}
+
+/* ---------- familiekiezer: typen of kiezen ---------- */
+.fam{position:relative}
+.fam input{min-width:300px}
+.fam-lijst{position:absolute;top:100%;left:0;z-index:30;min-width:100%;width:max-content;
+  max-width:440px;background:#fff;border:1px solid var(--blue-line);border-radius:9px;
+  margin-top:4px;padding:4px;max-height:290px;overflow:auto;
+  box-shadow:0 10px 26px rgba(16,44,66,.16)}
+.fam-lijst[hidden]{display:none}
+.fam-op{padding:6px 9px;border-radius:6px;cursor:pointer;display:flex;flex-direction:column;gap:1px}
+.fam-op:hover,.fam-op.aan{background:var(--blue-soft)}
+.fam-op b{font-size:13.5px;font-weight:700}
+.fam-op span{font-size:11.5px;color:var(--muted)}
+.fam-op.leeg b{font-weight:400;color:var(--muted)}
+.fam-niets{padding:9px;font-size:12.5px;color:var(--muted)}
 .counts{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
 
 .paste{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:14px}
@@ -560,16 +577,101 @@ function huidigeKenmerken(v){
   const o={}; KENMERKEN.forEach(([k])=>{ if(v[k]!=null) o[k]=v[k] }); return o;
 }
 
+/* Zoeken op naam, merk, lijn, armatuurtype en zoektermen. Elk getypt woord moet
+   ergens raken, zodat "essence downlight" hetzelfde vindt als "downlight essence".
+   Volgorde: naam die ermee begint eerst, dan naam die het bevat, dan de rest. */
+function zoekFamilies(term){
+  const families=DATA?.families||[];
+  const t=String(term||'').trim().toLowerCase();
+  if(!t) return families.slice();
+  const woorden=t.split(/\s+/);
+  const raak=[];
+  for(const f of families){
+    const naam=String(f.naam||'').toLowerCase();
+    const hooiberg=[f.naam,f.merk,f.lijn,f.armatuurtype,...(f.zoektermen||[])]
+      .filter(Boolean).join(' ').toLowerCase();
+    if(!woorden.every(w=>hooiberg.includes(w))) continue;
+    const score = naam.startsWith(t) ? 0
+      : naam.includes(t) ? 1
+      : (f.zoektermen||[]).some(z=>String(z).toLowerCase().startsWith(t)) ? 2 : 3;
+    raak.push([score,f]);
+  }
+  raak.sort((a,b)=>a[0]-b[0] || String(a[1].naam).localeCompare(String(b[1].naam)));
+  return raak.map(x=>x[1]);
+}
+
+function familieKiezer(p,fam){
+  const doos=el('div','f fam');
+  doos.append(el('label','','Onze familie'));
+  const inp=document.createElement('input');
+  inp.type='text'; inp.autocomplete='off'; inp.spellcheck=false;
+  inp.placeholder='typ of kies een familie';
+  inp.value=fam?fam.naam:'';
+  const lijst=el('div','fam-lijst'); lijst.hidden=true;
+  doos.append(inp,lijst);
+
+  let treffers=[], aan=-1;
+
+  function kies(f){
+    p.familieId=f?f.id:''; p.artikelcode=''; p.overrides={}; p.handmatig=false;
+    if(f){ const k=autoKies(f,p,null); if(k)p.artikelcode=k.artikelcode; }
+    render();                       /* bouwt het hele blad opnieuw op */
+  }
+  function sluit(){ lijst.hidden=true; aan=-1; }
+  function merk(){
+    [...lijst.children].forEach((n,i)=>n.classList.toggle('aan',i===aan));
+    const n=lijst.children[aan]; if(n) n.scrollIntoView({block:'nearest'});
+  }
+  function open(term){
+    treffers=zoekFamilies(term);
+    lijst.innerHTML='';
+    if(p.familieId){
+      const geen=el('div','fam-op leeg'); geen.append(el('b','','— geen familie —'));
+      geen.onmousedown=e=>{e.preventDefault();kies(null)};
+      lijst.append(geen);
+    }
+    if(!treffers.length){
+      lijst.append(el('div','fam-niets','Geen familie gevonden voor "'+term+'".'));
+    }
+    treffers.forEach(f=>{
+      const r=el('div','fam-op');
+      r.append(el('b','',f.naam||f.id));
+      const bij=[f.merk,f.armatuurtype,(f.varianten||[]).length+' artikelen'].filter(Boolean);
+      r.append(el('span','',bij.join(' · ')));
+      /* mousedown, want blur zou de lijst al sluiten voor de klik aankomt */
+      r.onmousedown=e=>{e.preventDefault();kies(f)};
+      lijst.append(r);
+    });
+    /* De familie die er nu staat licht op, zodat Enter niets omgooit. */
+    const verschuiving = p.familieId ? 1 : 0;
+    const huidig = treffers.findIndex(f=>f.id===p.familieId);
+    aan = treffers.length ? (huidig>=0?huidig:0)+verschuiving : -1;
+    lijst.hidden=false; merk();
+  }
+
+  inp.addEventListener('focus',()=>{inp.select();open('')});
+  inp.addEventListener('input',()=>open(inp.value));
+  inp.addEventListener('blur',()=>{ sluit(); inp.value=fam?fam.naam:''; });
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+      e.preventDefault();
+      if(lijst.hidden){open(inp.value);return}
+      const n=lijst.children.length; if(!n) return;
+      aan=(aan+(e.key==='ArrowDown'?1:-1)+n)%n; merk();
+    } else if(e.key==='Enter'){
+      e.preventDefault();
+      const n=lijst.children[aan]; if(n) n.dispatchEvent(new MouseEvent('mousedown',{cancelable:true}));
+    } else if(e.key==='Escape'){
+      sluit(); inp.value=fam?fam.naam:''; inp.blur();
+    }
+  });
+  return doos;
+}
+
 function bouwPicker(p,fam,v){
   const box=el('div','picker');
 
-  const ff=el('div','f'); ff.append(el('label','','Onze familie'));
-  const fs=el('select'); fs.append(new Option('— kies familie —',''));
-  (DATA?.families||[]).forEach(f=>fs.append(new Option(f.naam,f.id)));
-  fs.value=p.familieId||'';
-  fs.onchange=()=>{ p.familieId=fs.value; p.artikelcode=''; p.overrides={};
-    const f=famById(p.familieId); if(f){const k=autoKies(f,p,null); if(k)p.artikelcode=k.artikelcode;} render(); };
-  ff.append(fs); box.append(ff);
+  box.append(familieKiezer(p,fam));
 
   if(fam){
     /* kenmerkfilters, alleen tonen waar echt keuze is */
