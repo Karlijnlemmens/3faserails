@@ -112,6 +112,31 @@ zegt de tool dat, in plaats van iets voor te stellen dat niet past.
 Elke automatisch ingevulde waarde is te overschrijven; overschreven velden
 kleuren oranje en zijn met één klik te herstellen.
 
+## Specificaties plakken
+
+Het plakvak leest de specificatietabel van de leverancier uit. Drie vormen
+worden herkend:
+
+| Vorm | Voorbeeld |
+|---|---|
+| Label en waarde op één regel | `Systeem wattage: 19,5 W` |
+| Label boven de waarde | `IP degree` op de ene regel, `IP20` op de volgende |
+| Bestektekst op één regel | `..., Elektrisch: Systeem wattage: 1W, Luminous flux: 80lm, ...` |
+
+Bij de bestekvorm wordt alleen geknipt waar na de komma een nieuw `Label:`
+begint, zodat `Reflector, spot` en `L70/B50>50,000` heel blijven. Groepsnamen
+(`Elektrisch:`, `Materiaal en afwerking:`) worden herkend als kop en niet als
+veld — die staan in `SECTIE` in de template.
+
+Labelnamen staan in `VELDMAP`. Bij het opzoeken vervalt een eenheid of
+vraagteken achter het label (`Maximum bulb wattage (W)`, `Dimmable?`), en staat
+de eenheid in het label bij een kale waarde, dan wordt hij eraan geplakt: `60`
+uit `Maximum bulb wattage (W)` wordt `60W`.
+
+Wat niet herkend wordt, staat onder het voorbeeld onder «regels niet herkend».
+Komt daar iets in te staan dat je vaker tegenkomt, voeg het label dan toe aan
+`VELDMAP` in `index-template.html` en draai `bouw-tool.py` opnieuw.
+
 ## Nog niet gebouwd
 
 Inlezen van het armaturenboek van de installateur, de vergelijkings-PDF,

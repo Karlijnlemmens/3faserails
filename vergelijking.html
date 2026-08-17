@@ -322,15 +322,19 @@ function varByCode(fam,code){return (fam?.varianten||[]).find(v=>v.artikelcode==
 const SECTIE=/^(elektrisch|lichttechniek|controle|bescherming|energie|materiaal|montage|afmeting|verpakking|algemeen|optiek|garantie|akoestiek|overig)/i;
 
 const VELDMAP=[
-  {v:'vermogen',   l:/^(systeem\s?wattage|wattage|vermogen|opgenomen vermogen|system power|power)$/i},
+  {v:'artikelnummer',l:/^(artikelcode|artikelnummer|item ?number|article ?(code|number)|bestelnummer|productcode|sku)$/i},
+  {v:'vermogen',   l:/^(systeem\s?wattage|wattage|vermogen|opgenomen vermogen|system power|power|max(imum)? bulb wattage)$/i},
   {v:'lumen',      l:/^(luminous flux|lichtstroom|nuttige lichtstroom|armatuurlichtstroom|lichtstroom armatuur|output)$/i},
   {v:'cct',        l:/^(kleur\s?temperatuur|kleurtemperatuur|colour temperature|color temperature|cct)$/i},
   {v:'dimbaar',    l:/^(type|dimmen|dimming|besturing|sturing)$/i, s:/controle|dim/i},
   {v:'dimbaar',    l:/^(dimbaar|dimbaarheid|dimmable)$/i},
+  /* "Type" zonder dimsectie is het soort armatuur, niet de dimwijze.
+     Staat na de regel hierboven, zodat die eerst aan bod komt. */
+  {v:'type',       l:/^(type|producttype|armatuurtype|product ?type)$/i},
   {v:'_nood',      l:/^(noodlumen|nood lumen|emergency lumen|noodverlichting)/i},
   {v:'_cri',       l:/^(kleurweergave|cri|colour rendering)/i},
   {v:'_ugr',       l:/^ugr/i},
-  {v:'_ip',        l:/^(ip\s?klasse|ip\s?class|beschermingsgraad|ip)$/i},
+  {v:'_ip',        l:/^(ip\s?(klasse|class|degree|rating|code)|beschermingsgraad|ip)$/i},
   {v:'_ik',        l:/^(ik\s?klasse|ik\s?class|ik)$/i},
   {v:'_diameter',  l:/^diameter/i},
   {v:'_hoogte',    l:/^hoogte/i},
@@ -338,12 +342,12 @@ const VELDMAP=[
   {v:'_lengte',    l:/^lengte/i},
   {v:'_cutout',    l:/^(cut-?out|zaagmaat|gatmaat|inbouwopening|inbouwmaat)/i},
   {v:'_diepte',    l:/^inbouwdiepte/i},
-  {v:'_kleur',     l:/^kleur$/i, s:/materiaal|afwerking/i},
-  {v:'_montage',   l:/^montage$/i},
+  {v:'_kleur',     l:/^(kleur|colou?r)$/i},
+  {v:'_montage',   l:/^(montage|mounting)$/i},
   {v:'_bundel',    l:/^(lichtbundel|bundelhoek|beam|stralingshoek)/i},
   {v:'_optiek',    l:/^optiek/i},
   {v:'_levensduur',l:/^levensduur/i},
-  {v:'_klasse',    l:/^isolatieklasse/i},
+  {v:'_klasse',    l:/^(isolatieklasse|beschermingsklasse|class|klasse|protection class)$/i},
   {v:'_aansluiting',l:/^aansluiting/i}
 ];
 const LABELS={_nood:'Noodlumen',_cri:'Kleurweergave',_ugr:'UGR',_ip:'IP-klasse',_ik:'IK-klasse',
@@ -353,15 +357,47 @@ const LABELS={_nood:'Noodlumen',_cri:'Kleurweergave',_ugr:'UGR',_ip:'IP-klasse',
 /* Een regel met cijfers of vergelijkingstekens is een waarde, geen label —
    anders wordt "UGR<19" voor het label "UGR" aangezien. */
 function lijktWaarde(s){return /[\d<>=]/.test(s)||/^(ja|nee|yes|no)$/i.test(s)}
-function isLabel(s){return !lijktWaarde(s) && VELDMAP.some(x=>x.l.test(s))}
+
+/* Labels komen in het wild met een eenheid of een vraagteken erachter:
+   "Maximum bulb wattage (W)", "Dimmable?", "Cut-out (mm)". Voor het opzoeken
+   halen we die eraf; de oorspronkelijke tekst blijft in de melding staan. */
+function schoonLabel(s){
+  return String(s||'').replace(/\s*\([^)]*\)\s*$/,'').replace(/[?:]+$/,'').trim();
+}
+function isLabel(s){const k=schoonLabel(s); return !lijktWaarde(k) && VELDMAP.some(x=>x.l.test(k))}
 function mm(s){const n=parseGetal(s);return n==null?null:Math.round(n)}
 
+/* Geplakte webpagina's brengen hun entiteiten mee: Ra&gt;90, UGR&lt;19. */
+function ontHtml(s){
+  return String(s||'')
+    .replace(/&(lt|gt|amp|quot|apos|nbsp|#39);/g,
+      m=>({'&lt;':'<','&gt;':'>','&amp;':'&','&quot;':'"','&apos;':"'",'&#39;':"'",'&nbsp;':' '}[m]))
+    .replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(+n));
+}
+
 function leesSpecs(tekst){
-  const regels=String(tekst||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  const regels=ontHtml(tekst).split(/\r?\n/)
+    /* Bestekteksten staan op één regel met komma's ertussen. Alleen knippen
+       waar na de komma een nieuw "Label:" begint, anders valt "Reflector, spot"
+       uit elkaar en wordt "L70/B50>50,000" halverwege afgekapt. */
+    .flatMap(r=>r.split(/,\s*(?=[^,:]{2,40}:)/))
+    .map(s=>s.trim()).filter(Boolean);
   const uit={}, herkend=[], onbekend=[];
   let sectie='';
   for(let i=0;i<regels.length;i++){
     let label=regels[i], waarde=null;
+
+    /* Kopregel van een bestektekst: de omschrijving van het armatuur zelf. */
+    if(i===0 && !label.includes(':') && label.length>15 && /[a-z]/i.test(label) && !SECTIE.test(label)){
+      uit.omschrijving=label; herkend.push({label:'Omschrijving',waarde:label,veld:'omschrijving',sectie});
+      continue;
+    }
+
+    /* "Groep: Veld: waarde" — de bestektekst zet de groepsnaam ervoor.
+       Groep onthouden en verder lezen alsof hij er niet stond. */
+    const groep=label.match(/^([^:]{2,40}):\s*(.+:.+)$/);
+    if(groep && SECTIE.test(groep[1].trim())){ sectie=groep[1].trim(); label=groep[2].trim(); }
+
     /* "Label: waarde" op één regel — alleen splitsen als het linkerdeel echt een label is */
     const d=label.indexOf(':');
     if(d>0 && d<40 && isLabel(label.slice(0,d).trim())){
@@ -372,13 +408,18 @@ function leesSpecs(tekst){
       sectie=label; continue;
     }
     const m=(waarde!=null || !lijktWaarde(label))
-      ? VELDMAP.find(x=>x.l.test(label) && (!x.s || x.s.test(sectie))) : null;
+      ? VELDMAP.find(x=>x.l.test(schoonLabel(label)) && (!x.s || x.s.test(sectie))) : null;
     if(!m){ onbekend.push(label); continue; }
     if(waarde==null){
       const volg=regels[i+1];
       if(volg && !isLabel(volg) && !SECTIE.test(volg)){ waarde=volg; i++; }
     }
     if(waarde==null){ onbekend.push(label); continue; }
+    /* Staat de eenheid in het label en is de waarde een kaal getal, dan hoort
+       hij erbij: "Maximum bulb wattage (W)" met "60" wordt 60W. */
+    const eenheid=(label.match(/\(([^)]{1,4})\)\s*$/)||[])[1];
+    if(eenheid && /^[A-Za-z°%]+$/.test(eenheid) && /^-?\d+([.,]\d+)?$/.test(waarde.trim()))
+      waarde=waarde.trim()+eenheid;
     if(uit[m.v]==null){ uit[m.v]=waarde; herkend.push({label,waarde,veld:m.v,sectie}); }
   }
   return {uit,herkend,onbekend};
@@ -387,10 +428,23 @@ function leesSpecs(tekst){
 /* Vertaal de uitgelezen waarden naar de velden van het vergelijkingsblad. */
 function naarBladvelden(u){
   const r={};
+  if(u.omschrijving)  r.omschrijving=u.omschrijving;
+  if(u.artikelnummer) r.artikelnummer=u.artikelnummer;
+  if(u.type)     r.type=u.type;
   if(u.vermogen) r.vermogen=u.vermogen;
   if(u.lumen)    r.lumen=u.lumen;
   if(u.cct)      r.cct=u.cct;
-  if(u.dimbaar)  r.dimbaar=/niet|geen|aan\/uit|on\/off|non-?dim/i.test(u.dimbaar)?'Nee':'Ja — '+u.dimbaar.toLowerCase();
+  /* Alleen "Ja" zeggen als de leverancier dat zegt of een dimwijze noemt.
+     Staat er iets anders, dan nemen we het over zoals het er staat: bij
+     "Driver 350mA apart te bestellen" is "Ja" een bewering die er niet staat. */
+  if(u.dimbaar){
+    const t=u.dimbaar.trim();
+    const zonderJa=t.replace(/^(ja|yes)[,:]?\s*/i,'');
+    r.dimbaar = /^(nee|no)\b|niet dimbaar|non-?dim|aan\/uit|on\/off|\bgeen\b/i.test(t) ? 'Nee'
+      : /^(ja|yes)\b/i.test(t) ? (zonderJa ? 'Ja — '+zonderJa : 'Ja')
+      : /dali|1-?10|0-?10\s?v|push|fase|phase|triac|casambi|dimbaar|dimming/i.test(t) ? 'Ja — '+t
+      : t;
+  }
   const maten=[];
   if(u._diameter) maten.push('Ø'+mm(u._diameter));
   else if(u._lengte&&u._breedte) maten.push(mm(u._lengte)+'×'+mm(u._breedte));
