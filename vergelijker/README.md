@@ -112,6 +112,30 @@ zegt de tool dat, in plaats van iets voor te stellen dat niet past.
 Elke automatisch ingevulde waarde is te overschrijven; overschreven velden
 kleuren oranje en zijn met één klik te herstellen.
 
+## Foto's
+
+Het vergelijkingsblad begint met een rij **Foto**: links het armatuur van de
+installateur, rechts dat van ons.
+
+**Links** laadt de gebruiker zelf: klikken, een bestand erheen slepen, of
+plakken met Ctrl+V als het vak de aandacht heeft. De afbeelding wordt
+verkleind tot 1000 px op de langste zijde en als data-URI in de positie
+bewaard, dus hij gaat mee met **Project opslaan** en is er straks nog bij de
+PDF-stap. Een verwijzing naar een bestand op de schijf van de gebruiker zou
+dat niet overleven. Png blijft png, zodat een doorzichtige achtergrond niet
+verloren gaat; de rest wordt jpeg op wit.
+
+**Rechts** komt uit de data. Zet het pad in `families.json`:
+
+```json
+{ "id": "essence-g3-paneel", "naam": "LED Paneel Essence G3",
+  "foto": "merk/armaturen/paneel-essence-g3.jpg" }
+```
+
+Het pad is relatief aan `vergelijking.html` in de hoofdmap. Een `foto` bij een
+variant gaat vóór die van de familie, voor het geval één uitvoering er echt
+anders uitziet. Een data-URI mag ook, maar een pad houdt het bestand klein.
+
 ## Specificaties plakken
 
 Het plakvak leest de specificatietabel van de leverancier uit. Drie vormen

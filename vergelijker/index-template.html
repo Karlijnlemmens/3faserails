@@ -111,6 +111,23 @@ button,input,select,textarea{font:inherit;color:inherit}
   display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;border-radius:0 0 var(--r) var(--r)}
 .picker .f select,.picker .f input{background:#fff}
 
+/* ---------- fotovakken ---------- */
+.foto-cel{display:flex;flex-direction:column;gap:6px}
+.fotovak{border:1px dashed var(--line);border-radius:8px;background:#fff;min-height:112px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  padding:10px;cursor:pointer;text-align:center}
+.fotovak:hover,.fotovak:focus-visible{border-color:var(--blue);background:var(--blue-soft);outline:none}
+.fotovak.sleep{border-color:var(--orange);background:var(--orange-soft)}
+.fotovak.gevuld{border-style:solid;padding:6px;cursor:default;background:#fff}
+.fotovak img,.foto-onze img{max-width:100%;max-height:190px;object-fit:contain;display:block}
+.fotovak-uitleg{font-size:12.5px;font-weight:700}
+.fotovak-hoe{font-size:11px;color:var(--muted);line-height:1.4}
+.foto-knoppen{display:flex;gap:7px}
+.foto-knoppen .pill{padding:2px 11px;font-size:11.5px}
+.foto-onze{border:1px solid var(--line);border-radius:8px;background:#fff;min-height:112px;
+  display:flex;align-items:center;justify-content:center;padding:6px}
+.foto-onze.leeg{border-style:dashed;font-size:11.5px;color:var(--muted);text-align:center;padding:10px}
+
 /* ---------- familiekiezer: typen of kiezen ---------- */
 .fam{position:relative}
 .fam input{min-width:300px}
@@ -270,7 +287,7 @@ function sorteerKenmerk(waarden){
 
 function nieuwePositie(code){
   return {code:code||volgendeCode(), aantallen:{}, bestaandeZaagmaat:'',
-          ref:{}, familieId:'', artikelcode:'', overrides:{}, opmerking:''};
+          ref:{}, fotoRef:'', familieId:'', artikelcode:'', overrides:{}, opmerking:''};
 }
 function volgendeCode(){
   const g=['A','B','C','D','E','F','G','H','J','K','L','M'];
@@ -588,6 +605,114 @@ function invoer(waarde,onInput,ph,area){
   return i;
 }
 
+/* ======================= foto's ======================= */
+/* Grens waarboven verkleind wordt. 1000 px is op een halve A4-breedte nog
+   ruim 250 dpi, en houdt het projectbestand hanteerbaar. */
+const FOTO_MAX=1000;
+
+/* Leest een bestand als afbeelding en verkleint hem. Het resultaat is een
+   data-URI: die gaat mee in het projectbestand en straks in de PDF, terwijl
+   een pad naar de schijf van de gebruiker dat niet doet. */
+function leesAfbeelding(bestand, klaar){
+  if(!bestand) return;
+  if(!/^image\//.test(bestand.type||'')){ alert('Kies een afbeelding (jpg, png of webp).'); return; }
+  const lezer=new FileReader();
+  lezer.onerror=()=>alert('Kan dit bestand niet lezen.');
+  lezer.onload=()=>{
+    const img=new Image();
+    img.onerror=()=>alert('Deze afbeelding kan niet worden getoond.');
+    img.onload=()=>{
+      const grootste=Math.max(img.width,img.height);
+      if(grootste<=FOTO_MAX && String(lezer.result).length<400000){ klaar(lezer.result); return; }
+      const schaal=Math.min(1,FOTO_MAX/grootste);
+      const c=document.createElement('canvas');
+      c.width=Math.max(1,Math.round(img.width*schaal));
+      c.height=Math.max(1,Math.round(img.height*schaal));
+      const ctx=c.getContext('2d');
+      /* Productfoto's in png hebben vaak een doorzichtige achtergrond; die
+         willen we houden. Jpeg kan dat niet, dus daar zetten we wit onder. */
+      const alsPng = bestand.type==='image/png';
+      if(!alsPng){ ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height); }
+      ctx.drawImage(img,0,0,c.width,c.height);
+      try{ klaar(alsPng ? c.toDataURL('image/png') : c.toDataURL('image/jpeg',0.82)); }
+      catch(err){ klaar(lezer.result); }   /* verkleinen mislukt: dan maar op ware grootte */
+    };
+    img.src=lezer.result;
+  };
+  lezer.readAsDataURL(bestand);
+}
+
+/* Onze eigen foto komt uit de data: per variant, anders per familie. Het mag
+   een pad zijn (merk/armaturen/sigma-g2.jpg) of een data-URI. */
+function onzeFoto(fam,v){ return (v&&v.foto) || (fam&&fam.foto) || ''; }
+
+function refFotoVak(p){
+  const cel=el('div','cel foto-cel');
+  const kiezer=document.createElement('input');
+  kiezer.type='file'; kiezer.accept='image/*'; kiezer.className='hidden';
+  const vak=el('div','fotovak'); vak.tabIndex=0;
+  const knoppen=el('div','foto-knoppen');
+  cel.append(vak,knoppen,kiezer);
+
+  const zet=uri=>{ p.fotoRef=uri; teken(); };
+  function teken(){
+    vak.innerHTML=''; knoppen.innerHTML='';
+    if(p.fotoRef){
+      vak.classList.add('gevuld');
+      const img=document.createElement('img');
+      img.src=p.fotoRef; img.alt='Foto van het armatuur van de installateur';
+      vak.append(img);
+      const vervang=el('button','pill ghost','Vervangen');
+      vervang.onclick=()=>kiezer.click();
+      const weg=el('button','pill ghost','Verwijderen');
+      weg.onclick=()=>{ p.fotoRef=''; teken(); };
+      knoppen.append(vervang,weg);
+    } else {
+      vak.classList.remove('gevuld');
+      vak.append(el('div','fotovak-uitleg','Foto van het armatuur van de installateur'),
+                 el('div','fotovak-hoe','klik om te kiezen · sleep een bestand hierheen · of plak met Ctrl+V'));
+    }
+  }
+
+  kiezer.onchange=e=>{ leesAfbeelding(e.target.files[0],zet); kiezer.value=''; };
+  vak.onclick=()=>{ if(!p.fotoRef) kiezer.click(); };
+  vak.addEventListener('keydown',e=>{
+    if(e.key==='Enter'||e.key===' '){ e.preventDefault(); kiezer.click(); }
+  });
+  vak.addEventListener('dragover',e=>{ e.preventDefault(); vak.classList.add('sleep'); });
+  vak.addEventListener('dragleave',()=>vak.classList.remove('sleep'));
+  vak.addEventListener('drop',e=>{
+    e.preventDefault(); vak.classList.remove('sleep');
+    leesAfbeelding((e.dataTransfer.files||[])[0],zet);
+  });
+  /* Plakken werkt alleen als het vak de aandacht heeft, anders zou het met
+     het plakvak voor specificaties in de knoop raken. */
+  vak.addEventListener('paste',e=>{
+    const item=[...(e.clipboardData&&e.clipboardData.items||[])].find(i=>/^image\//.test(i.type));
+    if(item){ e.preventDefault(); leesAfbeelding(item.getAsFile(),zet); }
+  });
+
+  teken();
+  return cel;
+}
+
+function onzeFotoCel(fam,v){
+  const bron=onzeFoto(fam,v);
+  if(!bron){
+    const leeg=el('div','foto-onze leeg');
+    leeg.textContent = fam
+      ? 'Nog geen foto voor deze familie. Zet het pad bij "foto" in families.json.'
+      : 'Kies eerst een familie.';
+    return leeg;
+  }
+  const doos=el('div','foto-onze');
+  const img=document.createElement('img');
+  img.src=bron; img.alt='Foto '+((fam&&fam.naam)||'ons armatuur');
+  img.onerror=()=>{ doos.classList.add('leeg'); doos.textContent='Foto niet gevonden: '+bron; };
+  doos.append(img);
+  return doos;
+}
+
 function renderSheet(){
   const main=document.getElementById('main'); main.innerHTML='';
   if(!S.posities.length){
@@ -621,6 +746,9 @@ function renderSheet(){
   const head=el('div','sheet-head');
   head.append(el('b','','CODE '+p.code), el('div','h','Referentie installateur'), el('div','h','Voorstel Distrilight'));
   sheet.append(head);
+
+  /* foto's — bovenaan, zoals in de opmaak van het vergelijkingsblad */
+  sheet.append(veldRij('Foto', refFotoVak(p), onzeFotoCel(fam,v)));
 
   /* aantallen */
   const cnt=el('div','counts');
