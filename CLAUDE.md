@@ -22,7 +22,7 @@ There is no build system, package manager, or test suite. Everything — HTML, C
 
 Like everything else here it stays a single self-contained file that runs from `file://` — the Python scripts are data prep, not a build step for the suite.
 
-`vergelijking.html` also generates its own PDF (one page per bestekpositie, "PDF-voorbeeld" in the top bar). It reuses the house-style measurements of the installer PDF described below — blue header band with `ruitpatroon`, the grey diagonal footer shape — but has its own, much smaller drawing code in the template; the two do not share a module. It lazy-loads `vendor/pdf-lib.min.js`, `vendor/fontkit.umd.min.js` and `merk/merk-data.js` on first use, so opening the tool stays fast.
+`vergelijking.html` also generates its own PDF ("PDF-voorbeeld" in the top bar), in the order: cover → one page per bestekpositie → ARMATUREN divider → presenter per used family → `achterpaginas`. It reuses the house-style measurements of the installer PDF described below — the cover, the ARMATUREN divider page, the blue header band with `ruitpatroon`, the grey diagonal footer shape — but has its own, much smaller drawing code in the template; the two do not share a module. Which presenter belongs to a family is a `presenter` field (an `ag..` id) in `vergelijker/data/families.json`, not name-matching as in `index.html`. It lazy-loads `vendor/pdf-lib.min.js`, `vendor/fontkit.umd.min.js`, `merk/merk-data.js` and `presenters-data.js` on first use, so opening the tool stays fast.
 
 ## Working in this codebase
 

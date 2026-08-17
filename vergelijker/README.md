@@ -151,11 +151,30 @@ anders uitziet. Een data-URI mag ook, maar een pad houdt het bestand klein.
 
 ## PDF
 
-**PDF-voorbeeld** in de bovenbalk maakt het vergelijkingsblad zoals het op
-papier komt: één pagina per positie, met de blauwe kopbalk en ruitpatroon, de
-foto's naast elkaar, de velden eronder en de lichtgrijze schuine voet. Dezelfde
-opmaak en maten als de installateur-PDF van de 3-fase railtool, zodat de twee
-documenten als één set ogen. In het voorbeeld zit een knop **Downloaden**.
+**PDF-voorbeeld** in de bovenbalk maakt het hele document, in deze volgorde:
+
+```
+voorblad -> per bestekpositie een vergelijking -> tussenblad Armaturen
+-> presenter van elk gebruikt armatuur -> AB achterpagina's
+```
+
+Opmaak en maten komen uit de installateur-PDF van de 3-fase railtool, zodat de
+twee documenten als één set ogen: hetzelfde voorblad, hetzelfde tussenblad, de
+blauwe kopbalk met ruitpatroon en de lichtgrijze schuine voet. In het voorbeeld
+zit een knop **Downloaden**.
+
+Welke presenter bij een familie hoort staat in `families.json`:
+
+```json
+{ "id": "essence-g3-paneel", "presenter": "ag13" }
+```
+
+De ids staan in `presenters-data.js` in de hoofdmap, met de naam erachter.
+Elke familie komt één keer in het boek, in de volgorde waarin hij in het
+project voor het eerst voorkomt. Ontbreekt de presenter, dan meldt het
+voorbeeld dat boven de pagina en blijft dat armatuur uit het boek. Is er van
+geen enkele familie een presenter, dan vervallen het tussenblad en de
+achterpagina's ook — dan is er geen boek om in te leiden.
 
 De PDF wordt met `vendor/pdf-lib.min.js` getekend, met de huisstijl­lettertypen
 en het ruitpatroon uit `merk/merk-data.js`. Die drie bestanden zijn samen ruim

@@ -1070,13 +1070,30 @@ function pdfTxt(s){
   for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); o+=String.fromCharCode(c>255?63:c); }
   return o;
 }
+/* De presenters zijn de armatuurbladen van Pragmalux, per stuk zo'n twee
+   megabyte. Ze staan als los bestand in presenters/<id>.js en worden alleen
+   opgehaald voor de armaturen die in dit project voorkomen. presenters-data.js
+   houdt bij welke er zijn, zodat we vooraf weten wat ontbreekt zonder het te
+   downloaden. Dit is dezelfde opzet als in de railtool. */
+function presenterAanwezig(id){
+  return !!id && !!(window.PRESENTER_FILES && window.PRESENTER_FILES.indexOf(id)>=0);
+}
+async function presenterData(id){
+  const direct = window.PRESENTER_DATA && window.PRESENTER_DATA[id];
+  if(direct) return direct;
+  if(!presenterAanwezig(id)) return null;
+  await laadScript('presenters/'+id+'.js');
+  return (window.PRESENTER_DATA && window.PRESENTER_DATA[id]) || null;
+}
+
 let pdfSpul=null;
 function pdfOnderdelen(){
   if(!pdfSpul){
     pdfSpul=(async()=>{
       await Promise.all([laadScript('vendor/pdf-lib.min.js'),
                          laadScript('vendor/fontkit.umd.min.js'),
-                         laadScript('merk/merk-data.js')]);
+                         laadScript('merk/merk-data.js'),
+                         laadScript('presenters-data.js')]);
       if(!window.PDFLib) throw new Error('vendor/pdf-lib.min.js kon niet geladen worden.');
       return {fontkit:window.fontkit||null, fonts:window.MERK_FONTS||{},
               logos:window.MERK_LOGOS||{}, beelden:window.MERK_BEELDEN||{}};
@@ -1142,8 +1159,8 @@ async function bouwPdf(){
   }
 
   /* --- kleuren en maten, gelijk aan de installateur-PDF --- */
-  const C={hoofd:'#0F7ABE', tekst:'#123A5E', lt:'#DCECF8', line:'#C7D9E7',
-           grijs:'#5B677E', wit:'#FFFFFF', voet:'#EBEBEC'};
+  const C={hoofd:'#0F7ABE', hoofdDiep:'#0A5A8C', tekst:'#123A5E', lt:'#DCECF8',
+           line:'#C7D9E7', grijs:'#5B677E', wit:'#FFFFFF', voet:'#EBEBEC'};
   const W=595,H=842,Mg=40,MB=64,BALK_H=70;
   const KOL_L=105, KOL_B=(W-2*Mg-KOL_L)/2;      /* label, referentie, ons */
   const kolX=[Mg, Mg+KOL_L, Mg+KOL_L+KOL_B];
@@ -1210,10 +1227,38 @@ async function bouwPdf(){
     const s=0.6, vH=52*s, vBreed=128*s, vSmal=92*s, vTop=H-vH;
     poly([[W,vTop],[Mg+(vBreed-vSmal),vTop],[Mg,H],[W,H]], C.voet);
   }
-  const RUIT = merk.beelden.ruitpatroon
-    ? await doc.embedPng(b64Bytes(merk.beelden.ruitpatroon)).catch(()=>null) : null;
+  /* Beelden uit merk/. Ontbreekt er een, dan tekent de betreffende pagina een
+     vlak in de huisstijlkleur - liever ingetogen dan geen pagina. */
+  const BEELD={};
+  for(const sleutel of ['ruitpatroon','omslagBoven','armaturenFoto']){
+    if(!merk.beelden[sleutel]) continue;
+    const bytes=b64Bytes(merk.beelden[sleutel]);
+    try{ BEELD[sleutel] = bytes[0]===0x89 ? await doc.embedPng(bytes) : await doc.embedJpg(bytes); }
+    catch(err){ console.warn('Beeld "'+sleutel+'" kon niet worden ingesloten:', err && err.message); }
+  }
+  const RUIT = BEELD.ruitpatroon || null;
   const LOGO = merk.logos.dlLicht
     ? await doc.embedPng(b64Bytes(merk.logos.dlLicht)).catch(()=>null) : null;
+
+  function beeldVullend(img,x,yt,w,h){
+    const s=Math.max(w/img.width, h/img.height);
+    const bw=img.width*s, bh=img.height*s;
+    pg.drawImage(img,{x:x-(bw-w)/2, y:H-yt-h-(bh-h)/2, width:bw, height:bh});
+  }
+  /* Tekent binnen een uitgeknipt vlak; pdf-lib heeft daar zelf niets voor. */
+  function metUitsnede(punten, tekenen){
+    pg.pushOperators(PDFLib.pushGraphicsState(),
+      PDFLib.moveTo(punten[0][0], H-punten[0][1]),
+      ...punten.slice(1).map(pt=>PDFLib.lineTo(pt[0], H-pt[1])),
+      PDFLib.closePath(), PDFLib.clip(), PDFLib.endPath());
+    tekenen();
+    pg.pushOperators(PDFLib.popGraphicsState());
+  }
+  function datumNL(s){
+    if(!s) return '';
+    const d=new Date(s); if(isNaN(d)) return String(s);
+    return d.getDate()+'-'+(d.getMonth()+1)+'-'+d.getFullYear();
+  }
 
   function nieuwePagina(){
     pg=doc.addPage([W,H]); paginas.push(pg); y=Mg;
@@ -1249,10 +1294,67 @@ async function bouwPdf(){
     y+=hoogte; scheiding();
   }
 
+  /* --- voorblad --------------------------------------------------------------
+     Overgenomen uit de installateur-PDF van de railtool: bovenblok uit merk/,
+     schuine balk met de projectnaam, logovlak rechtsonder, projectgegevens
+     linksonder. Zelfde maten, zodat de twee documenten hetzelfde voorblad
+     hebben. Geen voetvorm, net als daar. */
+  function omslag(){
+    pg=doc.addPage([W,H]); paginas.push(pg);
+    if(BEELD.omslagBoven){
+      const bh=W/(BEELD.omslagBoven.width/BEELD.omslagBoven.height);
+      pg.drawImage(BEELD.omslagBoven,{x:0,y:H-bh,width:W,height:bh});
+    } else {
+      rect(0,0,W,357,C.hoofd);
+      rect(0,357,W,210,C.lt);
+    }
+    /* schuine balk: dezelfde hoek als de snede van het logovlak (34 over 70) */
+    const titelY0=99, titelY1=226, schuin=(titelY1-titelY0)*(34/70);
+    poly([[0,titelY0],[378,titelY0],[378-schuin,titelY1],[0,titelY1]], C.hoofdDiep);
+    poly([[361+34,716],[W,716],[W,786],[361,786]], C.hoofd);
+    if(LOGO){
+      const lh=70, lb=lh*(LOGO.width/LOGO.height);
+      pg.drawImage(LOGO,{x:W-lb-30, y:H-716-lh, width:lb, height:lh});
+    }
+    const naam=(S.project.naam||'').trim() || 'Projectnaam';
+    let ty=128;
+    wrap(naam,260,20,{bold:true,cond:true}).slice(0,3)
+      .forEach(r=>{ text(45,ty,20,r,{bold:true,cond:true,color:C.wit}); ty+=36; });
+    const veld=(label,waarde,dy)=>{
+      const b=meet(label+' ',8.5,{});
+      text(38,748+dy,8.5,label,{color:'#000000'});
+      text(38+b,748+dy,8.5,waarde||'-',{bold:true,color:'#000000'});
+    };
+    veld('Projectnummer:', (S.project.nr||'').trim(), 0);
+    veld('Installateur:',  (S.project.inst||'').trim(), 14.5);
+    veld('Datum:',         datumNL(S.project.datum), 29);
+  }
+
+  /* --- tussenblad Armaturen ---------------------------------------------------
+     Maten opgemeten uit het aangeleverde ontwerp (AB_Armaturen.pdf), gelijk aan
+     de railtool: titelbalk y 85..200 met rechterrand 379 -> 337, witte band
+     y 534..769 met rand 308 -> 220, "Armaturen" op x 27 basislijn 148 korps 36,
+     citaat op x 27 met basislijnen 605/634/664/693 korps 19,6. */
+  function tussenblad(){
+    pg=doc.addPage([W,H]); paginas.push(pg);
+    if(RUIT) beeldVullend(RUIT,0,0,W,H); else rect(0,0,W,H,C.hoofd);
+    poly([[0,85],[379,85],[337,200],[0,200]], C.hoofd);
+    text(27, 148-36*0.78, 36, 'Armaturen', {cond:true, color:C.wit});
+    if(BEELD.armaturenFoto){
+      metUitsnede([[190,534],[W,534],[W,769],[190,769]],
+        ()=> beeldVullend(BEELD.armaturenFoto, 190, 534, W-190, 235));
+    }
+    poly([[0,534],[308,534],[220,769],[0,769]], C.wit);
+    ['Precisie in licht begint','bij de juiste armaturen,','geselecteerd met zorg','en aandacht.']
+      .forEach((r,i)=> text(27, 605+i*29.5-19.6*0.78, 19.6, r, {cond:true, bold:false, color:C.hoofd}));
+  }
+
   const posities=S.posities.filter(p=>p);
   if(!posities.length) throw new Error('Er zijn nog geen posities om af te drukken.');
 
   const meldingen=[];
+  let bladNr=0;
+  omslag();
   for(const p of posities){
     const fam=famById(p.familieId), v=varByCode(fam,p.artikelcode);
     const waarden=onzeWaarden(fam,v);
@@ -1310,8 +1412,46 @@ async function bouwPdf(){
     });
     rij('Opmerkingen', p.ref.opmerking||'', p.opmerking||'');
 
-    /* paginanummer op de grijze vorm */
-    text(W-Mg,H-26,8,'pagina '+paginas.length+' van '+posities.length,{align:'right',color:C.hoofd});
+    /* nummering telt de vergelijkingen, niet de pagina's van het hele document:
+       het voorblad, het tussenblad en de presenters horen daar niet bij */
+    bladNr++;
+    text(W-Mg,H-26,8,'blad '+bladNr+' van '+posities.length,{align:'right',color:C.hoofd});
+  }
+
+  /* --- armaturenboek ----------------------------------------------------------
+     Na de vergelijkingen het tussenblad, daarna van elk gebruikt armatuur de
+     presenter, en tot slot de vaste achterpagina's. Elke familie komt één keer
+     voor, in de volgorde waarin hij in het project voor het eerst voorkomt. */
+  const gebruikt=[];
+  posities.forEach(p=>{
+    const fam=famById(p.familieId);
+    if(fam && !gebruikt.some(f=>f.id===fam.id)) gebruikt.push(fam);
+  });
+
+  const plakPresenter=async id=>{
+    const b64=await presenterData(id);
+    if(!b64) return 0;
+    try{
+      const bron=await PDFLib.PDFDocument.load(b64Bytes(b64),{ignoreEncryption:true});
+      const kopie=await doc.copyPages(bron, bron.getPageIndices());
+      kopie.forEach(p=>doc.addPage(p));
+      return kopie.length;
+    }catch(err){
+      console.warn('Presenter "'+id+'" kon niet worden geladen:', err);
+      return 0;
+    }
+  };
+
+  const metPresenter=gebruikt.filter(f=>presenterAanwezig(f.presenter));
+  const zonder=gebruikt.filter(f=>!presenterAanwezig(f.presenter));
+  if(zonder.length){
+    meldingen.push('Nog geen presenter voor '+zonder.map(f=>f.naam||f.id).join(', ')+
+      ' — dat armatuur ontbreekt in het boek.');
+  }
+  if(metPresenter.length){
+    tussenblad();
+    for(const fam of metPresenter) await plakPresenter(fam.presenter);
+    await plakPresenter('achterpaginas');
   }
 
   return {bytes: await doc.save(), meldingen};

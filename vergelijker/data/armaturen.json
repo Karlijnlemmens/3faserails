@@ -39,6 +39,7 @@
         "verdiept_9w": 87,
         "verdiept_15_21w": 89
       },
+      "presenter": "ag14",
       "varianten": [
         {
           "vermogen_w": {
@@ -2075,7 +2076,8 @@
           "omschrijving": "Noodmodule Kit t.b.v. Panelen & Downlights 3 uur met autotest"
         }
       ],
-      "balvast": false
+      "balvast": false,
+      "presenter": "ag13"
     },
     {
       "id": "essence-classic-g3-waterdicht",

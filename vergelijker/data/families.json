@@ -38,7 +38,8 @@
       "verdiept_15_21w": 89
     },
     "bron_excel": "essence-g2-downlight.xlsx",
-    "alleen_codes_met_prefix": "^[WZ][SVO]\\d{7}"
+    "alleen_codes_met_prefix": "^[WZ][SVO]\\d{7}",
+    "presenter": "ag14"
   },
   {
     "id": "essence-g3-paneel",
@@ -365,7 +366,8 @@
         "omschrijving": "Noodmodule Kit t.b.v. Panelen & Downlights 3 uur met autotest"
       }
     ],
-    "balvast": false
+    "balvast": false,
+    "presenter": "ag13"
   },
   {
     "id": "essence-classic-g3-waterdicht",
