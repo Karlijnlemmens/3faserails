@@ -67,7 +67,11 @@ def lees_omschrijving(o):
         else:
             mist.append("lichtstroom")
 
-    m = re.search(r"(?:Gatmaat|Z:)\s*Ø\s*(\d+)", o)
+    # "Buitenmaat - Gatmaat Ø90" is de gebruikelijke schrijfwijze, maar in de
+    # prijslijst staat het soms afgekort als "B - G Ø150". Beide meenemen,
+    # anders blijft de gatmaat leeg zonder dat er een melding komt: de
+    # buitenmaat is dan immers wel gevonden.
+    m = re.search(r"(?:Gatmaat|Z:|\bB\s*-\s*G)\s*Ø\s*(\d+)", o)
     if m:
         v["zaagmaat_mm"] = int(m.group(1))
     m = re.search(r"Ø\s*(\d+)", o)
