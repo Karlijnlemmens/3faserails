@@ -234,8 +234,39 @@ const REF_VELDEN = [
   ['cct','Kleurtemperatuur'],['lumen','Nuttige lichtstroom'],['dimbaar','Dimbaar'],
   ['afmetingen','Afmetingen']
 ];
-const KENMERKEN = [['uitvoering','Uitvoering'],['kleur','Kleur'],['driver','Driver'],
-                   ['sensor','Sensor'],['noodverlichting','Noodverlichting']];
+const KENMERKEN = [['uitvoering','Uitvoering'],['kleur','Kleur'],['wattage','Wattage'],
+                   ['driver','Driver'],['sensor','Sensor'],['noodverlichting','Noodverlichting']];
+
+/* Wattage staat niet als los veld in de data maar als bereik in vermogen_w.
+   Voor de keuzebalk maken we er een korte tekst van: 15W, of 11-19W als het
+   een bereik is. Staat er alleen een bovengrens (de ondergrens hangt dan van
+   de driver af), dan is dat getal het wattage waar iedereen het over heeft. */
+function wattLabel(v){
+  const w = v && v.vermogen_w;
+  if(!w) return '';
+  const kort = x => String(Number(x));
+  if(w.min==null && w.max==null) return '';
+  if(w.min==null) return kort(w.max)+'W';
+  if(w.max==null || w.min===w.max) return kort(w.min)+'W';
+  return kort(w.min)+'-'+kort(w.max)+'W';
+}
+const KENMERK_AFLEIDING = {wattage: wattLabel};
+
+/* De waarde van een kenmerk: uit het veld, of afgeleid als het geen veld is. */
+function kenmerkVan(v,key){
+  if(!v) return null;
+  const afleiden = KENMERK_AFLEIDING[key];
+  if(!afleiden) return v[key];
+  const w = afleiden(v);
+  return (w===''||w==null) ? null : w;
+}
+
+/* Waarden die met een getal beginnen op getal sorteren: 6W hoort voor 15W,
+   en alfabetisch zou 15W eerst zetten. */
+function sorteerKenmerk(waarden){
+  if(!waarden.every(w=>/^\d/.test(String(w)))) return waarden;
+  return waarden.slice().sort((a,b)=>parseFloat(a)-parseFloat(b));
+}
 
 function nieuwePositie(code){
   return {code:code||volgendeCode(), aantallen:{}, bestaandeZaagmaat:'',
@@ -281,7 +312,7 @@ function autoKies(fam,pos,vast){
   let k = kandidaten(fam,pos);
   for(const [key] of KENMERKEN){
     if(vast && vast[key]!=null && vast[key]!==''){
-      const f = k.filter(v=>String(v[key]??'')===String(vast[key]));
+      const f = k.filter(v=>String(kenmerkVan(v,key)??'')===String(vast[key]));
       if(f.length) k=f;
     }
   }
@@ -584,7 +615,7 @@ function renderSheet(){
 
 function huidigeKenmerken(v){
   if(!v) return {};
-  const o={}; KENMERKEN.forEach(([k])=>{ if(v[k]!=null) o[k]=v[k] }); return o;
+  const o={}; KENMERKEN.forEach(([k])=>{ const w=kenmerkVan(v,k); if(w!=null&&w!=='') o[k]=w }); return o;
 }
 
 /* Zoeken op naam, merk, lijn, armatuurtype en zoektermen. Elk getypt woord moet
@@ -686,12 +717,15 @@ function bouwPicker(p,fam,v){
   if(fam){
     /* kenmerkfilters, alleen tonen waar echt keuze is */
     KENMERKEN.forEach(([key,lbl])=>{
-      const waarden=[...new Set((fam.varianten||[]).map(x=>x[key]).filter(x=>x!=null&&x!==''))];
+      const waarden=sorteerKenmerk(
+        [...new Set((fam.varianten||[]).map(x=>kenmerkVan(x,key)).filter(x=>x!=null&&x!==''))]);
       if(waarden.length<2) return;
       const f=el('div','f'); f.append(el('label','',lbl));
       const s=el('select'); s.append(new Option('geen voorkeur',''));
-      waarden.forEach(w=>s.append(new Option(String(w)===  'true'?'ja':String(w),String(w))));
-      s.value = v && v[key]!=null ? String(v[key]) : '';
+      waarden.forEach(w=>s.append(new Option(
+        String(w)==='true'?'ja':String(w)==='false'?'nee':String(w), String(w))));
+      const nu = v ? kenmerkVan(v,key) : null;
+      s.value = nu!=null ? String(nu) : '';
       s.onchange=()=>{ const vast=huidigeKenmerken(v); vast[key]=s.value||null;
         const n=autoKies(fam,p,vast); if(n){p.artikelcode=n.artikelcode;p.handmatig=false;} render(); };
       f.append(s); box.append(f);
@@ -743,6 +777,7 @@ function kort(v){
   const b=[]; if(v.uitvoering)b.push(v.uitvoering); if(v.kleur)b.push(v.kleur);
   if(v.lengte_cm)b.push(v.lengte_cm+'cm'); if(v.maat)b.push(v.maat);
   if(v.buitenmaat_mm)b.push('Ø'+v.buitenmaat_mm);
+  const w=wattLabel(v); if(w)b.push(w);
   if(v.lichtstroom_lm)b.push(bereik(v.lichtstroom_lm,'lm'));
   if(v.driver)b.push(v.driver);
   if(v.sensor)b.push('sensor'); if(v.noodverlichting)b.push('nood '+v.noodverlichting);
