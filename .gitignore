@@ -5,3 +5,6 @@ presenters-bron/
 # Werkmap voor vergelijker/bouw-data.py: de prijslijst-exports uit Excel.
 # De tool leest vergelijker/data/armaturen.json — die wordt wel meegeleverd.
 vergelijker/data/bron/
+
+# Python-werkbestanden van de scripts in vergelijker/.
+__pycache__/
