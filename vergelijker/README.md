@@ -123,18 +123,22 @@ kleuren oranje en zijn met één klik te herstellen.
 Het vergelijkingsblad begint met een rij **Foto**: links het armatuur van de
 installateur, rechts dat van ons.
 
-**Links** laadt de gebruiker zelf: klikken, een bestand erheen slepen, of
-Ctrl+V. Dat plakken luistert op de hele pagina — na een schermafdruk hoef je
-niets aan te klikken, en de afbeelding komt bij de positie waar je in staat.
-Tekst plakken raakt de foto niet; er wordt alleen ingegrepen als er echt een
-afbeelding op het klembord staat. De afbeelding wordt
-verkleind tot 1000 px op de langste zijde en als data-URI in de positie
-bewaard, dus hij gaat mee met **Project opslaan** en is er straks nog bij de
-PDF-stap. Een verwijzing naar een bestand op de schijf van de gebruiker zou
-dat niet overleven. Png blijft png, zodat een doorzichtige achtergrond niet
-verloren gaat; de rest wordt jpeg op wit.
+Beide vakken werken hetzelfde: **Bestand kiezen**, een bestand erheen slepen,
+of Ctrl+V. Plakken luistert op de hele pagina en vult het vak met het
+`Ctrl+V`-merkje; klik een vak aan om dat te verplaatsen. Tekst plakken raakt de
+foto's niet — er wordt alleen ingegrepen als er echt een afbeelding op het
+klembord staat.
 
-**Rechts** komt uit de data. Zet het pad in `families.json`:
+De afbeelding wordt verkleind tot 1000 px op de langste zijde en als data-URI
+in de positie bewaard, dus hij gaat mee met **Project opslaan** en is er straks
+nog bij de PDF-stap. Een verwijzing naar een bestand op de schijf van de
+gebruiker zou dat niet overleven. Png blijft png, zodat een doorzichtige
+achtergrond niet verloren gaat; de rest wordt jpeg op wit.
+
+**Rechts** staat de foto uit de productdata voorgevuld, met «uit de
+productdata» eronder. Plak of kies je er zelf een, dan wint die voor deze
+positie; met **Terug naar productdata** haal je de vaste foto terug. Zet het
+pad in `families.json`:
 
 ```json
 { "id": "essence-g3-paneel", "naam": "LED Paneel Essence G3",

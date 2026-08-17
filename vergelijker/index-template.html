@@ -113,10 +113,15 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 /* ---------- fotovakken ---------- */
 .foto-cel{display:flex;flex-direction:column;gap:6px}
-.fotovak{border:1px dashed var(--line);border-radius:8px;background:#fff;min-height:112px;
+.fotovak{position:relative;border:1px dashed var(--line);border-radius:8px;background:#fff;min-height:112px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
   padding:10px;cursor:pointer;text-align:center}
 .fotovak:hover,.fotovak:focus-visible{border-color:var(--blue);background:var(--blue-soft);outline:none}
+/* Het vak dat Ctrl+V vangt. Met twee vakken moet zichtbaar zijn waar je plakt. */
+.fotovak.doel{border-color:var(--blue);border-style:solid;box-shadow:0 0 0 3px var(--blue-soft)}
+.fotovak-doelmerk{position:absolute;top:5px;right:6px;font-size:10px;font-weight:800;
+  letter-spacing:.04em;color:#fff;background:var(--blue);border-radius:999px;padding:1px 7px}
+.fotovak-bron{font-size:10.5px;color:var(--muted)}
 .fotovak.sleep{border-color:var(--orange);background:var(--orange-soft)}
 .fotovak.gevuld{border-style:solid;padding:6px;cursor:default;background:#fff}
 .fotovak img,.foto-onze img{max-width:100%;max-height:190px;object-fit:contain;display:block}
@@ -287,7 +292,7 @@ function sorteerKenmerk(waarden){
 
 function nieuwePositie(code){
   return {code:code||volgendeCode(), aantallen:{}, bestaandeZaagmaat:'',
-          ref:{}, fotoRef:'', familieId:'', artikelcode:'', overrides:{}, opmerking:''};
+          ref:{}, fotoRef:'', fotoOns:'', familieId:'', artikelcode:'', overrides:{}, opmerking:''};
 }
 function volgendeCode(){
   const g=['A','B','C','D','E','F','G','H','J','K','L','M'];
@@ -646,7 +651,14 @@ function leesAfbeelding(bestand, klaar){
    een pad zijn (merk/armaturen/sigma-g2.jpg) of een data-URI. */
 function onzeFoto(fam,v){ return (v&&v.foto) || (fam&&fam.foto) || ''; }
 
-function refFotoVak(p){
+/* Welk fotovak Ctrl+V vult. Met twee vakken moet dat aanwijsbaar zijn; je
+   kiest het door op een vak te klikken. Standaard is dat de installateur,
+   want dat is de foto die per positie altijd binnenkomt. */
+let plakDoel='fotoRef';
+
+/* Eén component voor beide vakken. terugval is de foto uit de productdata:
+   die staat er zolang er niets ingeladen is. */
+function fotoVak(p, sleutel, opties){
   const cel=el('div','cel foto-cel');
   const kiezer=document.createElement('input');
   kiezer.type='file'; kiezer.accept='image/*'; kiezer.className='hidden';
@@ -654,28 +666,49 @@ function refFotoVak(p){
   const knoppen=el('div','foto-knoppen');
   cel.append(vak,knoppen,kiezer);
 
-  const zet=uri=>{ p.fotoRef=uri; teken(); };
+  const terugval=opties.terugval||'';
+  const zet=uri=>{ p[sleutel]=uri; render(); };
+
   function teken(){
     vak.innerHTML=''; knoppen.innerHTML='';
-    if(p.fotoRef){
+    vak.classList.toggle('doel', plakDoel===sleutel);
+    if(plakDoel===sleutel) vak.append(el('div','fotovak-doelmerk','Ctrl+V'));
+
+    const eigen=p[sleutel];
+    const bron=eigen||terugval;
+    if(bron){
       vak.classList.add('gevuld');
       const img=document.createElement('img');
-      img.src=p.fotoRef; img.alt='Foto van het armatuur van de installateur';
+      img.src=bron; img.alt=opties.uitleg;
+      img.onerror=()=>{ vak.classList.remove('gevuld');
+        vak.append(el('div','fotovak-hoe','Foto niet gevonden: '+bron)); };
       vak.append(img);
-      const vervang=el('button','pill ghost','Vervangen');
-      vervang.onclick=()=>kiezer.click();
-      const weg=el('button','pill ghost','Verwijderen');
-      weg.onclick=()=>{ p.fotoRef=''; teken(); };
-      knoppen.append(vervang,weg);
+      if(!eigen) vak.append(el('div','fotovak-bron','uit de productdata'));
+      const vervang=el('button','pill ghost', eigen?'Vervangen':'Eigen foto');
+      vervang.onclick=e=>{ e.stopPropagation(); kiezer.click(); };
+      knoppen.append(vervang);
+      if(eigen){
+        const weg=el('button','pill ghost', terugval?'Terug naar productdata':'Verwijderen');
+        weg.onclick=e=>{ e.stopPropagation(); p[sleutel]=''; render(); };
+        knoppen.append(weg);
+      }
     } else {
       vak.classList.remove('gevuld');
-      vak.append(el('div','fotovak-uitleg','Foto van het armatuur van de installateur'),
-                 el('div','fotovak-hoe','klik om een bestand te kiezen · sleep er een hierheen · of maak een schermafdruk en druk Ctrl+V'));
+      vak.append(el('div','fotovak-uitleg',opties.uitleg),
+                 el('div','fotovak-hoe','klik dit vak aan en druk Ctrl+V · sleep een bestand hierheen'));
+      const kies=el('button','pill ghost','Bestand kiezen');
+      kies.onclick=e=>{ e.stopPropagation(); kiezer.click(); };
+      knoppen.append(kies);
+      if(opties.leeguitleg) knoppen.append(el('span','fotovak-bron',opties.leeguitleg));
     }
   }
 
   kiezer.onchange=e=>{ leesAfbeelding(e.target.files[0],zet); kiezer.value=''; };
-  vak.onclick=()=>{ if(!p.fotoRef) kiezer.click(); };
+  /* Klikken wijst dit vak aan als plakdoel; het bestand kiezen doe je met de
+     knop eronder. Anders opent er een bestandsvenster als je alleen wilt
+     aanwijzen waar je plakt. */
+  vak.onclick=()=>{ if(plakDoel!==sleutel){ plakDoel=sleutel; render(); } };
+  vak.addEventListener('focus',()=>{ if(plakDoel!==sleutel){ plakDoel=sleutel; render(); } });
   vak.addEventListener('keydown',e=>{
     if(e.key==='Enter'||e.key===' '){ e.preventDefault(); kiezer.click(); }
   });
@@ -685,27 +718,9 @@ function refFotoVak(p){
     e.preventDefault(); vak.classList.remove('sleep');
     leesAfbeelding((e.dataTransfer.files||[])[0],zet);
   });
-  /* Plakken zit op de hele pagina, zie onderaan bij "start". */
 
   teken();
   return cel;
-}
-
-function onzeFotoCel(fam,v){
-  const bron=onzeFoto(fam,v);
-  if(!bron){
-    const leeg=el('div','foto-onze leeg');
-    leeg.textContent = fam
-      ? 'Nog geen foto voor deze familie. Zet het pad bij "foto" in families.json.'
-      : 'Kies eerst een familie.';
-    return leeg;
-  }
-  const doos=el('div','foto-onze');
-  const img=document.createElement('img');
-  img.src=bron; img.alt='Foto '+((fam&&fam.naam)||'ons armatuur');
-  img.onerror=()=>{ doos.classList.add('leeg'); doos.textContent='Foto niet gevonden: '+bron; };
-  doos.append(img);
-  return doos;
 }
 
 function renderSheet(){
@@ -743,7 +758,10 @@ function renderSheet(){
   sheet.append(head);
 
   /* foto's — bovenaan, zoals in de opmaak van het vergelijkingsblad */
-  sheet.append(veldRij('Foto', refFotoVak(p), onzeFotoCel(fam,v)));
+  sheet.append(veldRij('Foto',
+    fotoVak(p,'fotoRef',{uitleg:'Foto van het armatuur van de installateur'}),
+    fotoVak(p,'fotoOns',{uitleg:'Foto van ons armatuur', terugval:onzeFoto(fam,v),
+      leeguitleg: fam ? 'of zet "foto" bij deze familie in families.json' : 'kies eerst een familie'})));
 
   /* aantallen */
   const cnt=el('div','counts');
@@ -1003,11 +1021,11 @@ function dataTag(d){
   t.textContent=(d.families||[]).length+' families · '+n+' artikelen'; t.className='tag g';
 }
 
-/* Ctrl+V met een afbeelding op het klembord zet die bij de positie waar je
-   in staat. Dat luistert op de hele pagina: na een schermafdruk wil je niet
-   eerst een vakje hoeven aanklikken, en klikken op het lege vak opent juist
-   de bestandskiezer. Tekst plakken verandert er niets aan - we grijpen alleen
-   in als er echt een afbeelding op het klembord staat. */
+/* Ctrl+V met een afbeelding op het klembord zet die in het aangewezen fotovak
+   van de positie waar je in staat. Dat luistert op de hele pagina: na een
+   schermafdruk wil je niet eerst iets hoeven aanklikken. Tekst plakken
+   verandert er niets aan - we grijpen alleen in als er echt een afbeelding
+   op het klembord staat. */
 document.addEventListener('paste',e=>{
   const items=[...(e.clipboardData && e.clipboardData.items || [])];
   const plaatje=items.find(i=>/^image\//.test(i.type));
@@ -1015,7 +1033,8 @@ document.addEventListener('paste',e=>{
   const p=S.posities[S.actief];
   if(!p) return;
   e.preventDefault();
-  leesAfbeelding(plaatje.getAsFile(), uri=>{ p.fotoRef=uri; render(); });
+  const doel = plakDoel==='fotoOns' ? 'fotoOns' : 'fotoRef';
+  leesAfbeelding(plaatje.getAsFile(), uri=>{ p[doel]=uri; render(); });
 });
 
 /* start */
