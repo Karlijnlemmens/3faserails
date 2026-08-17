@@ -22,6 +22,8 @@ There is no build system, package manager, or test suite. Everything — HTML, C
 
 Like everything else here it stays a single self-contained file that runs from `file://` — the Python scripts are data prep, not a build step for the suite.
 
+`vergelijking.html` also generates its own PDF (one page per bestekpositie, "PDF-voorbeeld" in the top bar). It reuses the house-style measurements of the installer PDF described below — blue header band with `ruitpatroon`, the grey diagonal footer shape — but has its own, much smaller drawing code in the template; the two do not share a module. It lazy-loads `vendor/pdf-lib.min.js`, `vendor/fontkit.umd.min.js` and `merk/merk-data.js` on first use, so opening the tool stays fast.
+
 ## Working in this codebase
 
 - There is no linter, formatter, or test runner configured. Verify changes by opening `index.html` in a browser and exercising the relevant tab manually.

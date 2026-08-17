@@ -177,6 +177,17 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tag.o{background:var(--orange-soft);color:#A85E12}
 .hidden{display:none!important}
 
+/* ---------- pdf-voorbeeld ---------- */
+.pdfprev{position:fixed;inset:0;z-index:100;background:rgba(8,24,38,.92);
+  display:flex;flex-direction:column;padding:18px 22px 22px}
+.pdfprev-kop{display:flex;gap:9px;align-items:center;margin-bottom:11px;color:#fff}
+.pdfprev-kop b{flex:1;font-size:16px}
+.pdfprev-kop .pill{background:#fff}
+.pdfprev iframe{flex:1 1 auto;width:100%;border:0;border-radius:8px;background:#fff}
+.pdfprev-melding{background:var(--orange-soft);border:1px solid var(--orange);color:#8A4E0C;
+  border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12.5px}
+.pdfprev-bezig{color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;flex:1}
+
 @media print{
   .suite,.top,.projbar,.rail,.bar,.picker,.hint{display:none!important}
   .wrap{display:block}.main{padding:0;max-width:none}
@@ -215,6 +226,7 @@ button,input,select,textarea{font:inherit;color:inherit}
   <button class="pill ghost" id="btnLoadData">Productdata laden</button>
   <button class="pill ghost" id="btnOpen">Project openen</button>
   <button class="pill" id="btnSave">Project opslaan</button>
+  <button class="pill" id="btnPdf">PDF-voorbeeld</button>
   <button class="pill solid" id="btnPrint">Afdrukken</button>
   <input type="file" id="fileData" accept=".json" class="hidden">
   <input type="file" id="fileProj" accept=".json" class="hidden">
@@ -1020,6 +1032,335 @@ function dataTag(d){
   const n=(d.families||[]).reduce((a,f)=>a+(f.varianten||[]).length,0);
   t.textContent=(d.families||[]).length+' families · '+n+' artikelen'; t.className='tag g';
 }
+
+
+/* ======================= PDF =======================
+   Zelfde opmaak als de installateur-PDF van de 3-fase railtool: blauwe kopbalk
+   met ruitpatroon, huisstijllettertypen, en de lichtgrijze schuine vorm
+   rechtsonder. De maten komen daar vandaan, zodat de twee documenten naast
+   elkaar als één set ogen.
+
+   pdf-lib, fontkit en merk-data zijn samen ruim vier megabyte. Die worden pas
+   opgehaald als er echt een PDF gevraagd wordt; het openen van de tool blijft
+   zo net zo snel als eerst. */
+const scriptLaad={};
+function laadScript(src){
+  if(!scriptLaad[src]){
+    scriptLaad[src]=new Promise(res=>{
+      const s=document.createElement('script');
+      s.src=src; s.onload=()=>res(true); s.onerror=()=>res(false);
+      document.head.appendChild(s);
+    });
+  }
+  return scriptLaad[src];
+}
+function b64Bytes(b64){
+  const bin=atob(b64), arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  return arr;
+}
+/* De ingesloten lettertypen zijn 8-bits; alleen tekens omzetten die in onze
+   teksten voorkomen. Loopt er iets doorheen dat er niet in zit, dan wordt het
+   een vraagteken in plaats van een lege pagina. */
+function pdfTxt(s){
+  s=String(s==null?'':s).replace(/—|–/g,'-').replace(/×/g,'x')
+    .replace(/“|”/g,'"').replace(/‘|’/g,"'")
+    .replace(/«/g,'"').replace(/»/g,'"').replace(/→/g,'->');
+  let o='';
+  for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); o+=String.fromCharCode(c>255?63:c); }
+  return o;
+}
+let pdfSpul=null;
+function pdfOnderdelen(){
+  if(!pdfSpul){
+    pdfSpul=(async()=>{
+      await Promise.all([laadScript('vendor/pdf-lib.min.js'),
+                         laadScript('vendor/fontkit.umd.min.js'),
+                         laadScript('merk/merk-data.js')]);
+      if(!window.PDFLib) throw new Error('vendor/pdf-lib.min.js kon niet geladen worden.');
+      return {fontkit:window.fontkit||null, fonts:window.MERK_FONTS||{},
+              logos:window.MERK_LOGOS||{}, beelden:window.MERK_BEELDEN||{}};
+    })();
+  }
+  return pdfSpul;
+}
+
+/* Een afbeelding uit de tool omzetten naar bytes. Wat geplakt of ingeladen is,
+   is al een data-URI en kan zo mee. Een pad uit families.json moet eerst
+   opgehaald worden; dat lukt niet als de tool vanaf schijf draait (de browser
+   staat het uitlezen van zo'n plaatje dan niet toe). Dan melden we dat, in
+   plaats van een lege plek in de PDF zonder uitleg. */
+function beeldBytes(bron){
+  return new Promise(res=>{
+    if(!bron) return res(null);
+    if(/^data:/.test(bron)){
+      const komma=bron.indexOf(','); if(komma<0) return res(null);
+      try{ res({bytes:b64Bytes(bron.slice(komma+1))}); }catch(e){ res(null); }
+      return;
+    }
+    const img=new Image();
+    img.onerror=()=>res({fout:'niet gevonden: '+bron});
+    img.onload=()=>{
+      try{
+        const c=document.createElement('canvas');
+        c.width=img.naturalWidth; c.height=img.naturalHeight;
+        c.getContext('2d').drawImage(img,0,0);
+        const uri=c.toDataURL('image/png');
+        res({bytes:b64Bytes(uri.slice(uri.indexOf(',')+1))});
+      }catch(err){
+        res({fout:'kan '+bron+' niet insluiten vanaf schijf'});
+      }
+    };
+    img.src=bron;
+  });
+}
+
+async function bouwPdf(){
+  const merk=await pdfOnderdelen();
+  const doc=await PDFLib.PDFDocument.create();
+  doc.setTitle('Armatuurvergelijking '+(S.project.nr||''));
+  doc.setProducer('Distrilight Armatuurvergelijker');
+
+  /* --- lettertypen --- */
+  let FONT, eigenKop=false;
+  try{
+    if(!merk.fontkit || !merk.fonts.regular) throw new Error('huisstijllettertypen niet beschikbaar');
+    doc.registerFontkit(merk.fontkit);
+    const laad=async(sleutel,terugval)=> merk.fonts[sleutel]
+      ? doc.embedFont(b64Bytes(merk.fonts[sleutel]),{subset:true})
+      : doc.embedFont(terugval);
+    FONT={ reg:  await laad('regular',   PDFLib.StandardFonts.Helvetica),
+           bold: await laad('bold',      PDFLib.StandardFonts.HelveticaBold),
+           kop:  await laad('dlKopVet',  PDFLib.StandardFonts.HelveticaBold),
+           kopL: await laad('dlKopLicht',PDFLib.StandardFonts.Helvetica) };
+    eigenKop=!!merk.fonts.dlKopVet;
+  }catch(err){
+    console.warn('Huisstijllettertypen niet ingesloten, terugval op Helvetica:', err && err.message);
+    const reg=await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+    const bold=await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+    FONT={reg,bold,kop:bold,kopL:reg};
+  }
+
+  /* --- kleuren en maten, gelijk aan de installateur-PDF --- */
+  const C={hoofd:'#0F7ABE', tekst:'#123A5E', lt:'#DCECF8', line:'#C7D9E7',
+           grijs:'#5B677E', wit:'#FFFFFF', voet:'#EBEBEC'};
+  const W=595,H=842,Mg=40,MB=64,BALK_H=70;
+  const KOL_L=105, KOL_B=(W-2*Mg-KOL_L)/2;      /* label, referentie, ons */
+  const kolX=[Mg, Mg+KOL_L, Mg+KOL_L+KOL_B];
+  const kleurCache={};
+  let pg=null, y=Mg;
+  const paginas=[];
+
+  function col(v){
+    if(kleurCache[v]) return kleurCache[v];
+    const h=v.slice(1);
+    return (kleurCache[v]=PDFLib.rgb(parseInt(h.substr(0,2),16)/255,
+      parseInt(h.substr(2,2),16)/255, parseInt(h.substr(4,2),16)/255));
+  }
+  function kiesFont(o){ return o.cond ? (o.bold===false?FONT.kopL:FONT.kop) : (o.bold?FONT.bold:FONT.reg); }
+  /* y telt vanaf de bovenkant van de pagina; pdf-lib rekent vanaf onder. */
+  function text(x,yt,size,str,opt){ opt=opt||{};
+    const s=pdfTxt(str), f=kiesFont(opt);
+    const hz=(opt.cond && !eigenKop)?84:100, tc=opt.tc||0;
+    const w=f.widthOfTextAtSize(s,size)*hz/100 + s.length*tc;
+    let xx=x; if(opt.align==='center')xx=x-w/2; else if(opt.align==='right')xx=x-w;
+    pg.setFont(f);
+    const key=pg.getFont()[1], c=col(opt.color||'#000000');
+    pg.pushOperators(
+      PDFLib.pushGraphicsState(), PDFLib.beginText(),
+      PDFLib.setFontAndSize(key,size),
+      PDFLib.setCharacterSqueeze(hz), PDFLib.setCharacterSpacing(tc),
+      PDFLib.setFillingRgbColor(c.red,c.green,c.blue),
+      PDFLib.setTextMatrix(1,0,0,1,xx,H-yt-size*0.78),
+      PDFLib.showText(f.encodeText(s)),
+      PDFLib.endText(), PDFLib.popGraphicsState());
+    return w;
+  }
+  function meet(str,size,opt){ opt=opt||{};
+    const s=pdfTxt(str), f=kiesFont(opt);
+    const hz=(opt.cond && !eigenKop)?84:100;
+    return f.widthOfTextAtSize(s,size)*hz/100 + s.length*(opt.tc||0);
+  }
+  function wrap(s,maxW,size,opt){
+    const woorden=String(s==null?'':s).split(/\s+/).filter(Boolean);
+    const regels=[]; let cur='';
+    woorden.forEach(w=>{
+      const kandidaat=cur?cur+' '+w:w;
+      if(cur && meet(kandidaat,size,opt)>maxW){ regels.push(cur); cur=w; }
+      else cur=kandidaat;
+    });
+    if(cur) regels.push(cur);
+    return regels.length?regels:[''];
+  }
+  function rect(x,yt,w,h,fill,stroke,lw){
+    if(!fill && !stroke) return;
+    const o={x, y:H-yt-h, width:w, height:h};
+    if(fill) o.color=col(fill);
+    if(stroke){ o.borderColor=col(stroke); o.borderWidth=lw||0.8; } else o.borderWidth=0;
+    pg.drawRectangle(o);
+  }
+  function line(x1,y1,x2,y2,lw,kleur){
+    pg.drawLine({start:{x:x1,y:H-y1}, end:{x:x2,y:H-y2}, thickness:lw, color:col(kleur)});
+  }
+  function poly(pts,fill){
+    pg.drawSvgPath('M '+pts.map(p=>p[0]+' '+p[1]).join(' L ')+' Z',{x:0,y:H,color:col(fill),borderWidth:0});
+  }
+  /* De lichtgrijze schuine vorm rechtsonder, zelfde maat als in de andere PDF. */
+  function voet(){
+    const s=0.6, vH=52*s, vBreed=128*s, vSmal=92*s, vTop=H-vH;
+    poly([[W,vTop],[Mg+(vBreed-vSmal),vTop],[Mg,H],[W,H]], C.voet);
+  }
+  const RUIT = merk.beelden.ruitpatroon
+    ? await doc.embedPng(b64Bytes(merk.beelden.ruitpatroon)).catch(()=>null) : null;
+  const LOGO = merk.logos.dlLicht
+    ? await doc.embedPng(b64Bytes(merk.logos.dlLicht)).catch(()=>null) : null;
+
+  function nieuwePagina(){
+    pg=doc.addPage([W,H]); paginas.push(pg); y=Mg;
+    rect(0,0,W,BALK_H,C.hoofd);
+    if(RUIT){
+      const ph=W/(RUIT.width/RUIT.height);
+      pg.drawImage(RUIT,{x:0,y:H-ph,width:W,height:ph});
+      rect(0,BALK_H,W,H-BALK_H,C.wit);
+    }
+    text(Mg,22,22,'Armatuurvergelijker',{bold:true,cond:true,color:C.wit});
+    const regel=[S.project.nr,S.project.naam,S.project.inst].filter(Boolean).join('  —  ');
+    if(regel) text(Mg,50,9,regel,{color:C.lt});
+    if(LOGO){
+      const lh=26, lb=lh*(LOGO.width/LOGO.height);
+      pg.drawImage(LOGO,{x:W-Mg-lb, y:H-24-lh, width:lb, height:lh});
+    }
+    voet();
+    y=BALK_H+34;
+  }
+  function ruimte(h){ if(y+h>H-MB){ nieuwePagina(); } }
+
+  /* --- de rijen van het vergelijkingsblad --- */
+  function scheiding(){ line(Mg,y,W-Mg,y,0.6,C.line); }
+  function rij(label, links, rechts, opt){
+    opt=opt||{};
+    const size=opt.size||8.5;
+    const lLinks=wrap(links,KOL_B-12,size), lRechts=wrap(rechts,KOL_B-12,size);
+    const hoogte=Math.max(lLinks.length,lRechts.length)*11+9;
+    ruimte(hoogte+4);
+    text(kolX[0],y+4,8,label,{bold:true,color:C.hoofd});
+    lLinks.forEach((r,i)=>text(kolX[1]+6,y+4+i*11,size,r,{color:'#1B2733'}));
+    lRechts.forEach((r,i)=>text(kolX[2]+6,y+4+i*11,size,r,{color:'#1B2733'}));
+    y+=hoogte; scheiding();
+  }
+
+  const posities=S.posities.filter(p=>p);
+  if(!posities.length) throw new Error('Er zijn nog geen posities om af te drukken.');
+
+  const meldingen=[];
+  for(const p of posities){
+    const fam=famById(p.familieId), v=varByCode(fam,p.artikelcode);
+    const waarden=onzeWaarden(fam,v);
+    nieuwePagina();
+
+    /* kopbalk van het blad */
+    rect(Mg,y,W-2*Mg,19,C.hoofd);
+    text(kolX[0]+6,y+5,9,'CODE (BESTEK)',{bold:true,cond:true,color:C.wit,tc:.3});
+    text(kolX[1]+6,y+4.5,11,p.code||'',{bold:true,cond:true,color:C.wit});
+    y+=19;
+    text(kolX[1]+6,y+5,7.5,'REFERENTIE INSTALLATEUR',{bold:true,color:C.hoofd,tc:.3});
+    text(kolX[2]+6,y+5,7.5,'VOORSTEL DISTRILIGHT',{bold:true,color:C.hoofd,tc:.3});
+    y+=17; scheiding();
+
+    /* foto's — de rij vervalt als er aan geen van beide kanten een foto is,
+       anders staat er een blok wit van anderhalve decimeter zonder reden */
+    const bronnen=[p.fotoRef, p.fotoOns || onzeFoto(fam,v)];
+    if(bronnen.some(Boolean)){
+      const fotoH=150, boven=y+4;
+      ruimte(fotoH+14);
+      text(kolX[0],boven,8,'Foto',{bold:true,color:C.hoofd});
+      for(let k=0;k<2;k++){
+        if(!bronnen[k]) continue;
+        const vakX=kolX[k+1]+6, vakB=KOL_B-12;
+        const res=await beeldBytes(bronnen[k]);
+        if(res && res.bytes){
+          let img=null;
+          try{ img = res.bytes[0]===0x89 ? await doc.embedPng(res.bytes) : await doc.embedJpg(res.bytes); }
+          catch(err){ meldingen.push('Een foto bij positie '+p.code+' kon niet worden ingesloten.'); }
+          if(img){
+            /* passend in het vak en daarbinnen gecentreerd; y telt van boven,
+               pdf-lib van onder, dus de onderkant van het beeld is het midden
+               van het vak min de halve beeldhoogte */
+            const s=Math.min(vakB/img.width, fotoH/img.height);
+            const bw=img.width*s, bh=img.height*s;
+            pg.drawImage(img,{x:vakX+(vakB-bw)/2, y:H-boven-fotoH/2-bh/2, width:bw, height:bh});
+          }
+        } else if(res && res.fout){
+          meldingen.push('Positie '+p.code+': foto '+res.fout);
+          text(vakX,boven+fotoH/2,8,'(foto niet ingesloten)',{color:C.grijs});
+        }
+      }
+      y=boven+fotoH+8; scheiding();
+    }
+
+    /* aantallen */
+    const perLaag=(S.project.lagen||[]).map(l=>l+': '+(p.aantallen[l]||0)).join('   ');
+    const totaal=(S.project.lagen||[]).reduce((a,l)=>a+(parseInt(p.aantallen[l])||0),0);
+    rij('Aantallen', perLaag+(perLaag?'      ':'')+'totaal '+totaal, '');
+
+    /* de velden van het blad */
+    REF_VELDEN.forEach(([k,lbl])=>{
+      const ov=p.overrides[k];
+      rij(lbl, p.ref[k]||'', ov!=null?ov:(waarden[k]||''));
+    });
+    rij('Opmerkingen', p.ref.opmerking||'', p.opmerking||'');
+
+    /* paginanummer op de grijze vorm */
+    text(W-Mg,H-26,8,'pagina '+paginas.length+' van '+posities.length,{align:'right',color:C.hoofd});
+  }
+
+  return {bytes: await doc.save(), meldingen};
+}
+
+/* --- voorbeeld op het scherm --- */
+let pdfUrl=null;
+function sluitPdfVoorbeeld(){
+  const bg=document.getElementById('pdfPreviewBg');
+  if(bg) bg.remove();
+  /* De blob is enkele megabytes; niet vrijgeven laat die in het geheugen staan. */
+  if(pdfUrl){ URL.revokeObjectURL(pdfUrl); pdfUrl=null; }
+}
+async function toonPdfVoorbeeld(){
+  sluitPdfVoorbeeld();
+  const bg=el('div','pdfprev'); bg.id='pdfPreviewBg';
+  const kop=el('div','pdfprev-kop');
+  kop.append(el('b','','PDF-voorbeeld'));
+  const sluit=el('button','pill','Sluiten'); sluit.onclick=sluitPdfVoorbeeld;
+  kop.append(sluit); bg.append(kop);
+  const bezig=el('div','pdfprev-bezig','Bezig met opmaken...');
+  bg.append(bezig);
+  document.body.append(bg);
+  bg.addEventListener('click',e=>{ if(e.target===bg) sluitPdfVoorbeeld(); });
+  document.addEventListener('keydown',function esc(e){
+    if(e.key==='Escape'){ sluitPdfVoorbeeld(); document.removeEventListener('keydown',esc); }
+  });
+
+  try{
+    const {bytes,meldingen}=await bouwPdf();
+    bezig.remove();
+    if(meldingen.length){
+      const m=el('div','pdfprev-melding',[...new Set(meldingen)].join(' · '));
+      bg.insertBefore(m,bg.children[1]||null);
+    }
+    pdfUrl=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    const haal=el('button','pill solid','Downloaden');
+    haal.onclick=()=>{ const a=document.createElement('a');
+      a.href=pdfUrl; a.download=(S.project.nr||'armatuurvergelijking')+'.pdf'; a.click(); };
+    kop.insertBefore(haal,sluit);
+    const iframe=document.createElement('iframe');
+    iframe.src=pdfUrl; iframe.title='PDF-voorbeeld';
+    bg.append(iframe);
+  }catch(err){
+    bezig.textContent='De PDF kon niet gemaakt worden: '+(err && err.message || err);
+    console.error(err);
+  }
+}
+document.getElementById('btnPdf').onclick=toonPdfVoorbeeld;
 
 /* Ctrl+V met een afbeelding op het klembord zet die in het aangewezen fotovak
    van de positie waar je in staat. Dat luistert op de hele pagina: na een

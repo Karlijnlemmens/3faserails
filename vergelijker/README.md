@@ -149,6 +149,24 @@ Het pad is relatief aan `vergelijking.html` in de hoofdmap. Een `foto` bij een
 variant gaat vóór die van de familie, voor het geval één uitvoering er echt
 anders uitziet. Een data-URI mag ook, maar een pad houdt het bestand klein.
 
+## PDF
+
+**PDF-voorbeeld** in de bovenbalk maakt het vergelijkingsblad zoals het op
+papier komt: één pagina per positie, met de blauwe kopbalk en ruitpatroon, de
+foto's naast elkaar, de velden eronder en de lichtgrijze schuine voet. Dezelfde
+opmaak en maten als de installateur-PDF van de 3-fase railtool, zodat de twee
+documenten als één set ogen. In het voorbeeld zit een knop **Downloaden**.
+
+De PDF wordt met `vendor/pdf-lib.min.js` getekend, met de huisstijl­lettertypen
+en het ruitpatroon uit `merk/merk-data.js`. Die drie bestanden zijn samen ruim
+vier megabyte en worden pas opgehaald bij de eerste klik op de knop — het
+openen van de tool blijft daardoor even snel.
+
+Foto's die geplakt of ingeladen zijn gaan zo mee. Een foto die via een **pad**
+in `families.json` staat, kan de browser niet insluiten zolang de tool vanaf
+schijf draait; dat meldt het voorbeeld dan boven de pagina. Wordt de tool via
+een webserver aangeboden, dan werkt ook dat pad.
+
 ## Specificaties plakken
 
 Het plakvak leest de specificatietabel van de leverancier uit. Drie vormen
