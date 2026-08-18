@@ -48,6 +48,13 @@ window.PRESENTER_FILES = [
   'ag33',   /* Paneel Rondix */
   'ag34',   /* Paneel Sigma G2 */
   'ag35',   /* Paneel Wingar */
+  'ag36',   /* BRIQ */
+  'ag37',   /* Inbouwspot Alpha */
+  'ag38',   /* Inbouwspot Apollo Round */
+  'ag39',   /* Lumio */
+  'ag40',   /* Noodverlichting Dot */
+  'ag41',   /* Noodverlichting Uni */
+  'ag42',   /* Waterdicht Hermes */
   'rail',   /* 3-Fase Rail */
 ];
 window.PRESENTER_DATA = window.PRESENTER_DATA || {};

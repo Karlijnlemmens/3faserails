@@ -41,6 +41,9 @@ const GROEPEN = [
   ['ag28', 'Paneel Conto'], ['ag29', 'Paneel Easy G2'], ['ag30', 'Paneel Flexcore'],
   ['ag31', 'Paneel Modul'], ['ag32', 'Paneel Optic'], ['ag33', 'Paneel Rondix'],
   ['ag34', 'Paneel Sigma G2'], ['ag35', 'Paneel Wingar'],
+  ['ag36', 'BRIQ'], ['ag37', 'Inbouwspot Alpha'], ['ag38', 'Inbouwspot Apollo Round'],
+  ['ag39', 'Lumio'], ['ag40', 'Noodverlichting Dot'], ['ag41', 'Noodverlichting Uni'],
+  ['ag42', 'Waterdicht Hermes'],
   ['achterpaginas', 'AB Achterpaginas'],
 ];
 const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
