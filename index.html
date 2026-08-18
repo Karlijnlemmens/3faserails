@@ -1550,6 +1550,15 @@ function armaturenZonderGroep(){
     return (s.qty||0)>0 && s.groep!=='-' && !armGroepVan(s);
   });
 }
+/* Armaturen met een aantal die niet in een boek-hoofdstuk vallen: type niet herkend
+   én bewust op 'Geen presenter' gezet. Die missen dus in armaturenboek(), maar horen
+   wel in de armaturenlijst thuis (anders verdwijnt de regel helemaal uit de PDF). */
+function armaturenOverig(){
+  return visibleArmaturen().filter(a=>{
+    const s=st.armaturen[a.id];
+    return (s.qty||0)>0 && !armGroepVan(s);
+  });
+}
 /* Adapters & overig: 9 placeholders, wit/zwart/grijs, zelfde intern/extern-codescheiding. */
 const ADAPTERS_OVERIG = [
   {id:'ao01', name:'ON/OFF Rail Adapter GA-69 70mm', codes:{wit:{p:'2001404',l:'KKT30133'}, zwart:{p:'2001398',l:'KKT30132'}, grijs:{p:'2001381',l:'KKT30131'}}},
@@ -2022,7 +2031,10 @@ function computeBOM(){
     const code = (rawCode&&rawCode.trim()) ? rawCode.trim() : ('m-arm-'+a.id+(st.dali?'-dali':''));
     const label = (s.name&&s.name.trim()) ? s.name.trim() : armLabel(a);
     /* geen kleur erachter: die staat al in de volledige naam die de gebruiker invult */
-    add(code, code, label, s.qty, null); });
+    add(code, code, label, s.qty, null);
+    /* markering zodat de materialenpagina van de PDF armaturen kan overslaan: die
+       staan daar niet, maar enkel in de armaturenlijst in het armaturenboek. */
+    items[code].isArm=true; });
   ADAPTERS_OVERIG.forEach(a=>{ const s=st.overig[a.id]; if(!s||s.qty<=0) return;
     const c=a.codes[s.color];
     add(c.p, c.l, a.name+' '+CLRN(s.color), s.qty, null); });
@@ -2961,7 +2973,7 @@ async function buildPdf(){
   beginPage(true);
   /* eerst de kopbalk: die dekt de rest van de pagina wit af om het patroon te
      begrenzen, dus alles wat eronder komt moet daarna getekend worden */
-  paginaKop('Bestelgegevens',
+  paginaKop('Materialen PRX 3 fase rails',
     (st.proj||'').trim() + ((st.proj||'').trim()? '  \u2014  ':'') + datumNL(st.datum));
 
   function tableStart(cols){ const totW=cols.reduce((s,c)=>s+c.w,0);
@@ -3001,8 +3013,11 @@ async function buildPdf(){
          bij Distrilight. De KKT-codes horen juist bij de tekening verderop, waar de
          installateur ze tijdens het installeren gebruikt - niet hier. --- */
   let T=tableStart([{w:100,h:'Artikelnummer'},{w:355,h:'Omschrijving'},{w:60,h:'Aantal'}]);
+  /* Armaturen komen hier bewust niet in mee - die staan enkel in de armaturenlijst
+     verderop in het armaturenboekgedeelte (zie isArm-markering in computeBOM). */
   Object.keys(D.B.items).forEach(c=>{
     const it=D.B.items[c];
+    if(it.isArm) return;
     tableRow(T,[c.indexOf('m-')===0?'volgt':c, it.name, String(it.qty)]);
   });
   /* Technische gegevens onder de tabel: in het ontwerp is de kopbalk voor de titel en
@@ -3135,10 +3150,11 @@ async function buildPdf(){
   /* --- Armaturen: hoofdstukblad + armaturenlijst. De presenters worden er in
          assembleFinalPdf achter geplakt, in de volgorde van bookGroups. --- */
   const boek = armaturenboek();
+  const overigeArm = armaturenOverig();
   const bookGroups = [];
   const armOms=(r)=> (r.s.name&&r.s.name.trim()) ? r.s.name.trim() : armLabel(r.a);
   const armCode=(r)=>{ const c = st.dali ? r.s.codeDali : r.s.code; return (c&&c.trim()) ? c.trim() : 'volgt'; };
-  if(boek.length){
+  if(boek.length || overigeArm.length){
     /* --- hoofdstukblad ---------------------------------------------------------
        Maten zijn opgemeten uit het aangeleverde ontwerp (AB_Armaturen.pdf):
          titelbalk    y 85..200, rechterrand 379 boven -> 337 onder
@@ -3179,12 +3195,23 @@ async function buildPdf(){
        omschrijving die de gebruiker invult. */
     boek.forEach(b=> b.rijen.forEach(r=>
       tableRow(TB,[ (r.s.aanduiding||'').trim(), armOms(r), armCode(r), String(r.s.qty) ])));
+    /* Armaturen zonder herkend type (of bewust op 'Geen presenter' gezet) horen ook
+       gewoon besteld te worden, dus staan ze onderaan mee in de lijst - alleen zonder
+       hoofdstuk/presenterpagina verderop in het boek. */
+    overigeArm.forEach(a=>{ const s=st.armaturen[a.id];
+      tableRow(TB,[ (s.aanduiding||'').trim(), armOms({a,s}), armCode({a,s}), String(s.qty) ]);
+    });
     y+=10;
     para('*',8,C.grey);
     const ontbreekt = boek.filter(b=>!presenterAanwezig(b.g.id));
     if(ontbreekt.length){
       para('Let op: van '+ontbreekt.map(b=>b.g.naam).join(', ')+' is de presenter nog niet in de '
         +'tool geladen; die productpagina\u2019s ontbreken.',8,C.red);
+    }
+    if(overigeArm.length){
+      para('Let op: van '+overigeArm.map(a=>{ const s=st.armaturen[a.id];
+        return (s.aanduiding||'').trim() || armLabel(a); }).join(', ')+' is het type niet herkend '
+        +'(of bewust op \u2018geen presenter\u2019 gezet), dus komt hier geen productpagina van in het armaturenboek.',8,C.red);
     }
     flush();
 
