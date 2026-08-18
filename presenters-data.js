@@ -55,6 +55,7 @@ window.PRESENTER_FILES = [
   'ag40',   /* Noodverlichting Dot */
   'ag41',   /* Noodverlichting Uni */
   'ag42',   /* Waterdicht Hermes */
+  'ag43',   /* Module Mico */
   'rail',   /* 3-Fase Rail */
 ];
 window.PRESENTER_DATA = window.PRESENTER_DATA || {};
