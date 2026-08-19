@@ -1330,7 +1330,7 @@ function activeL(){ return st.dali ? LCODES_DALI : LCODES; }
    kruis 50/arm, middenvoeding 100, elektrisch koppelstuk 0, eindkap 3. */
 const MM = { aansluit:66, eindkap:3, bochtArm:66, tBarArm:50, tStemArm:66, kruisArm:50, midden:100, elkoppel:0 };
 
-/* Armaturen: 12 vaste slots voor de normale 3-fase rail; 5 daarvan (arm01-arm05)
+/* Armaturen: 32 vaste slots voor de normale 3-fase rail; 5 daarvan (arm01-arm05)
    bestaan ook als DALI-dimbare versie — zichtbaar/gefilterd via visibleArmaturen().
    Naam en artikelcode worden niet meer hardcoded bijgehouden: de gebruiker vult ze
    zelf in via de UI (buildArmList) en ze worden opgeslagen in st.armaturen[id].
@@ -1342,6 +1342,11 @@ const ARMATUREN = [
   {id:'arm04', dali:true}, {id:'arm05', dali:true},
   {id:'arm06', dali:false}, {id:'arm07', dali:false}, {id:'arm08', dali:false},
   {id:'arm09', dali:false}, {id:'arm10', dali:false}, {id:'arm11', dali:false}, {id:'arm12', dali:false},
+  {id:'arm13', dali:false}, {id:'arm14', dali:false}, {id:'arm15', dali:false}, {id:'arm16', dali:false},
+  {id:'arm17', dali:false}, {id:'arm18', dali:false}, {id:'arm19', dali:false}, {id:'arm20', dali:false},
+  {id:'arm21', dali:false}, {id:'arm22', dali:false}, {id:'arm23', dali:false}, {id:'arm24', dali:false},
+  {id:'arm25', dali:false}, {id:'arm26', dali:false}, {id:'arm27', dali:false}, {id:'arm28', dali:false},
+  {id:'arm29', dali:false}, {id:'arm30', dali:false}, {id:'arm31', dali:false}, {id:'arm32', dali:false},
 ];
 function armLabel(a){ return 'Armatuur '+a.id.replace('arm',''); }
 function visibleArmaturen(){ return st.dali ? ARMATUREN.filter(a=>a.dali) : ARMATUREN; }
@@ -3719,7 +3724,15 @@ function init(){
         Object.assign(window.PRESENTER_DATA, OPGESLAGEN_PROJECT.presenters);
       }
       const s = OPGESLAGEN_PROJECT.st || {};
-      Object.keys(st).forEach(k=>{ if(Object.prototype.hasOwnProperty.call(s,k)) st[k]=s[k]; });
+      /* armaturen/overig zijn sloten-maps (arm01, ao01, ...): mergen i.p.v.
+         vervangen, anders vallen sloten die na het opslaan zijn toegevoegd
+         (bijv. door uitbreiding van ARMATUREN) terug op undefined i.p.v. hun
+         lege default, en crasht buildArmList(). */
+      Object.keys(st).forEach(k=>{
+        if(!Object.prototype.hasOwnProperty.call(s,k)) return;
+        if(k==='armaturen' || k==='overig'){ st[k] = Object.assign({}, st[k], s[k]); }
+        else { st[k]=s[k]; }
+      });
       hist=[]; hIdx=-1; view={zoom:1,px:0,py:0};
       $('c2Proj').value=st.proj; $('c2ProjNr').value=st.projNr;
       $('c2Inst').value=st.installateur; $('c2Datum').value=st.datum;
