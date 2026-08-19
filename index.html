@@ -2505,7 +2505,7 @@ function warnings(B){
 function renderSheetsBar(){
   const bar=$('c2Sheets'); if(!bar) return;
   bar.innerHTML = st.sheets.map(sh=>
-    '<button class="c2-sheettab'+(sh.id===st.sheet?' active':'')+'" data-sh="'+sh.id+'">'
+    '<button class="c2-sheettab'+(sh.id===st.sheet?' active':'')+'" data-sh="'+sh.id+'" title="Dubbelklik om te hernoemen (bijv. Begane grond, Kamer 3)">'
     +sh.name.replace(/</g,'&lt;')
     +(st.sheets.length>1?'<span class="c2-shdel" data-shdel="'+sh.id+'">\u00d7</span>':'')
     +'</button>').join('')
