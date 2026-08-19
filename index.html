@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
+<!--__BASE_HREF__--><!-- wordt bij "Project opslaan" een <base href> naar de installatiemap; blijft hier inert. -->
 <title>PRX 3-Fase Rail — Kennistool</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -851,8 +852,7 @@
       <div class="cfg-actions">
         <button id="c2Pdf">Download PDF</button>
         <button id="c2Preview">Preview PDF</button>
-        <!-- Hulpmiddel bij het afstemmen van de PDF-opmaak; mag weg zodra die klaar is. -->
-        <button id="c2Demo" class="ghost" title="Vult een complete voorbeeldconfiguratie in en toont meteen de PDF">Test</button>
+        <button id="c2ProjectOpslaan" title="Slaat een kopie van deze tool op met het huidige project erin - dubbelklikken op dat bestand opent de tool weer precies zo ingevuld">Project opslaan</button>
         <button id="c2ResetAll">Reset</button>
       </div>
     </div>
@@ -1639,6 +1639,12 @@ const SHAPES = {
  '88-vorm':{label:'88-vorm', grid:[2,2]},
  'andere-vorm':{label:'Andere vorm', grid:'custom'},
 };
+
+/* Wordt bij "Project opslaan" vervangen door het opgeslagen project (JSON, als JS-
+   objectliteral). Blijft null in de originele tool. init() leest dit bij het opstarten
+   en herstelt, indien niet null, de hele configuratie voordat de rest van init() de
+   normale (lege) opbouw doet. */
+const OPGESLAGEN_PROJECT = /*__PROJECT_DATA_START__*/null/*__PROJECT_DATA_END__*/;
 
 let st = { step:1, dali:false, color:'wit', powercfg:'A', shape:null, gRows:2, gCols:2,
   nodes:[], edges:[], nid:0, eid:0, feeds:[], angles:{},
@@ -3375,6 +3381,58 @@ function pdfBestandsnaam(){
   return nm+'-prx-rail.pdf';
 }
 
+/* ---------- Project opslaan/openen ----------
+   "Opslaan" maakt geen los databestand, maar een volledige kopie van deze tool met
+   het huidige project erin gebakken (zie OPGESLAGEN_PROJECT + init()): dubbelklikken
+   op die kopie opent de tool weer precies zo ingevuld. Verandert st zelf niet - net
+   als exportPdf() is dit puur "download een snapshot". */
+function projectBestandsnaam(){
+  const nm=(st.proj||'railproject').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'railproject';
+  return nm+'-prx-railproject.html';
+}
+/* Alleen de sp<armId>-sleutels van momenteel actieve Special-armaturen, nooit het
+   hele PRESENTER_DATA-object (dat bevat ook de ingebakken presenters van de tool
+   zelf, zoals 'ag01'/'rail'). */
+function verzamelSpecialPresenters(){
+  const out={};
+  Object.keys(st.armaturen).forEach(id=>{
+    const s=st.armaturen[id];
+    if(!isSpecial(s)) return;
+    const pid=specialPresenterId(id);
+    const data=window.PRESENTER_DATA && window.PRESENTER_DATA[pid];
+    if(data) out[pid]=data;
+  });
+  return out;
+}
+function slaProjectOp(){
+  const payload = { versie:1, st:JSON.parse(JSON.stringify(st)), presenters:verzamelSpecialPresenters() };
+  let json = JSON.stringify(payload).replace(/<\/script/gi, '<\\/script');
+
+  /* document.baseURI is altijd het juiste antwoord: bij de originele tool is dat
+     gewoon zijn eigen map (geen <base>-tag aanwezig); bij een al eerder geopend
+     projectbestand maakt de <base href> die er al in zit baseURI gelijk aan de
+     OORSPRONKELIJKE installatiemap, ongeacht waar dít bestand nu op schijf staat -
+     opnieuw opslaan geeft dus geen padverschuiving. */
+  const baseHref = new URL('.', document.baseURI).href;
+
+  const dataMarker = /\/\*__PROJECT_DATA_START__\*\/[\s\S]*?\/\*__PROJECT_DATA_END__\*\//;
+  const baseMarker = /<!--__BASE_HREF__-->|<base href="[^"]*">/;
+  let html = document.documentElement.outerHTML;
+  if(!dataMarker.test(html) || !baseMarker.test(html)){
+    alert('Opslaan mislukt: de opslag-plekken zijn niet gevonden in de broncode.');
+    return;
+  }
+  html = html.replace(dataMarker, '/*__PROJECT_DATA_START__*/'+json+'/*__PROJECT_DATA_END__*/');
+  html = html.replace(baseMarker, '<base href="'+baseHref.replace(/"/g,'&quot;')+'">');
+  html = '<!doctype html>\n' + html;   /* outerHTML bevat de <!DOCTYPE> zelf niet */
+
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download=projectBestandsnaam();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(_){ } }, 4000);
+}
+
 /* Gedeelde weg voor downloaden en Preview PDF: controleert of de tekening
    compleet is, waarschuwt over gaten in het armaturenboek en levert de bytes.
    Geeft null terug als er niets te maken valt. */
@@ -3649,6 +3707,29 @@ function renderMountOptions(){
 }
 
 function init(){
+  /* Een opgeslagen project (dubbelgeklikt .html-bestand, zie slaProjectOp()) herstellen
+     vóórdat de rest van init() zijn normale (lege) opbouw doet: de kleur/DALI/voeding-
+     knoppenrijen hieronder bakken hun .sel-klasse in op het moment dat ze gebouwd
+     worden, dus door st al hier te muteren krijgen ze de juiste selectie automatisch
+     mee, zonder aparte resync-code. */
+  if(OPGESLAGEN_PROJECT){
+    try{
+      if(OPGESLAGEN_PROJECT.presenters){
+        window.PRESENTER_DATA = window.PRESENTER_DATA || {};
+        Object.assign(window.PRESENTER_DATA, OPGESLAGEN_PROJECT.presenters);
+      }
+      const s = OPGESLAGEN_PROJECT.st || {};
+      Object.keys(st).forEach(k=>{ if(Object.prototype.hasOwnProperty.call(s,k)) st[k]=s[k]; });
+      hist=[]; hIdx=-1; view={zoom:1,px:0,py:0};
+      $('c2Proj').value=st.proj; $('c2ProjNr').value=st.projNr;
+      $('c2Inst').value=st.installateur; $('c2Datum').value=st.datum;
+      $('c2Mount').value=st.mount; $('c2Use4m').checked=st.use4m;
+      snap();
+    }catch(err){
+      console.error('Kon opgeslagen project niet laden:', err);
+      alert('Het opgeslagen project kon niet worden geladen: '+(err&&err.message?err.message:err));
+    }
+  }
   /* dali */
   const dr=$('c2DaliRow');
   [{k:false,l:'Standaard'},{k:true,l:'DALI'}].forEach(o=>{
@@ -3688,6 +3769,10 @@ function init(){
     });
     sg.appendChild(card);
   });
+  /* shape-cards bakken hun .sel niet bij het bouwen in (in tegenstelling tot de
+     kleur/DALI/voeding-rijen hierboven), dus die moet hier alsnog voor een geladen
+     project gezet worden - kan niet eerder, de kaarten bestaan pas na deze lus. */
+  if(OPGESLAGEN_PROJECT) sg.querySelectorAll('.shape-card').forEach(x=>x.classList.toggle('sel', x.dataset.shape===st.shape));
   renderGridRow();
   /* stepper + nav */
   document.querySelectorAll('#c2Steps button').forEach(b=> b.addEventListener('click', ()=>goStep(+b.dataset.step)));
@@ -3717,11 +3802,12 @@ function init(){
   $('c2ProjNr').addEventListener('input', e=>{ st.projNr=e.target.value; });
   $('c2Inst').addEventListener('input', e=>{ st.installateur=e.target.value; });
   $('c2Datum').addEventListener('input', e=>{ st.datum=e.target.value; });
-  /* datum standaard op vandaag, zodat het voorblad nooit leeg blijft */
-  (function(){ const d=new Date();
+  /* datum standaard op vandaag, zodat het voorblad nooit leeg blijft - maar niet als
+     een geladen project al zijn eigen datum heeft meegebracht */
+  if(!OPGESLAGEN_PROJECT){ (function(){ const d=new Date();
     st.datum = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     $('c2Datum').value = st.datum;
-  })();
+  })(); }
   buildArmList();
   buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
   /* acties */
@@ -3758,8 +3844,9 @@ function init(){
      uitvoeringen van hetzelfde type (die samen onder een tabblad horen), een tweede
      type, en een type zonder presenter.
 
-     Weghalen als de opmaak klaar is: deze functie, de knop c2Demo in de HTML en de
-     twee regels eronder die hem koppelen. Verder hangt er niets aan. */
+     De knop in de UI is weg; alleen de ?demo-route hieronder roept dit nog aan.
+     Weghalen als ook die niet meer nodig is: deze functie en de query-param-check
+     eronder. Verder hangt er niets aan. */
   function laadVoorbeeld(){
     st.color='wit'; st.powercfg='A'; st.dali=false; st.use4m=false;
     st.shape=null; st.nodes=[]; st.edges=[]; st.feeds=[]; st.angles={};
@@ -3802,7 +3889,6 @@ function init(){
     buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
     st.step=6; refresh();
   }
-  $('c2Demo').addEventListener('click', ()=>{ laadVoorbeeld(); previewPdf(); });
   /* index.html?demo opent de tool met het voorbeeld ingevuld; ?demo=pdf toont meteen
      de proef-PDF. Zo is na een wijziging in de opmaak een herlaadactie genoeg. */
   (function(){
@@ -3813,6 +3899,7 @@ function init(){
   })();
 
   $('c2Pdf').addEventListener('click', exportPdf);
+  $('c2ProjectOpslaan').addEventListener('click', slaProjectOp);
   $('c2Preview').addEventListener('click', previewPdf);
   $('pdfPreviewClose').addEventListener('click', sluitVoorbeeld);
   $('pdfPreviewDl').addEventListener('click', exportPdf);
