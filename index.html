@@ -402,6 +402,9 @@
   #c2Svg .c2-cornercustom{fill:var(--amber);}
   #c2Svg .c2-cornercustom:hover{fill:var(--amber);}
   #c2Svg .c2-feed{fill:var(--red); stroke:#fff; stroke-width:2; cursor:pointer;}
+  /* Voeding op een hoek: een ring, zodat de hoekknop eronder bereikbaar blijft. */
+  #c2Svg .c2-feed.c2-feedring{fill:none; stroke:var(--red); stroke-width:4;}
+  #c2Svg .c2-feed.c2-feedring:hover{stroke-width:5.5;}
   #c2Svg .c2-tag{font-family:'Nunito Sans',sans-serif; font-size:10px; font-weight:700; fill:#3D4C63;}
   #c2Svg .c2-tag.red{fill:var(--red);}
   #c2Svg .c2-art{font-family:'JetBrains Mono',monospace; font-size:9px; fill:var(--slate-light); font-weight:600;}
@@ -1743,8 +1746,20 @@ function selectShape(id){
 }
 
 /* ---------- mutaties ---------- */
+/* Waar mag een voedingspunt zitten?
+   - op een uiteinde: daar komt een Aansluitstuk R/L (artikel);
+   - op een hoek: door het hoekkoppelstuk lopen draden waar de voedingskabel
+     doorheen getrokken wordt, dus daar is geen apart artikel voor nodig. De hoek
+     blijft gewoon een bocht; alleen de polariteitsrichting begint daar.
+   - midden op een segment: dat is de middenvoeding (kind 'edge').
+   Een knooppunt met twee segmenten in dezelfde lijn ('straight') valt af: dat is
+   geen hoek maar een naad, en daar hoort de middenvoeding. */
+function feedNodeMag(nId){
+  const t=nodeType(nId);
+  return t==='end' || t==='corner';
+}
 function validateFeeds(){
-  st.feeds = st.feeds.filter(f=> f.kind==='node' ? (node(f.node)&&edgesAt(f.node).length===1) : !!edge(f.edge));
+  st.feeds = st.feeds.filter(f=> f.kind==='node' ? (node(f.node)&&feedNodeMag(f.node)) : !!edge(f.edge));
   const {m}=compMap(); const seen={};
   st.feeds = st.feeds.filter(f=>{ const c=feedComp(f,m); if(c===undefined||seen[c]) return false; seen[c]=true; return true; });
   Object.keys(st.angles).forEach(nId=>{ if(!node(nId)) delete st.angles[nId]; });
@@ -2260,11 +2275,18 @@ function renderCanvas(B){
       }
     } else if(t==='corner'){
       const hasAngle = st.angles[nd.id]!=null && st.angles[nd.id]!==90;
+      /* Voeding op een hoek: rode ring om de ruit heen. De ruit zelf blijft de
+         hoekknop (graden aanpassen), de ring wisselt de lijnzijde - vandaar een
+         ring en geen vlak, anders liggen die twee acties op elkaar. */
+      if(isFeedN){
+        g.push('<circle class="c2-feed c2-feedring" data-feednode="'+nd.id+'" cx="'+p.x+'" cy="'+p.y+'" r="13"><title>Stroomaansluitpunt — klik om de lijnzijde te wisselen</title></circle>');
+      }
       const cornerAttrs = st.pick ? '' : ' data-cornerangle="'+nd.id+'" data-x="'+p.x+'" data-y="'+p.y+'" class="c2-nodedark c2-cornerbtn'+(hasAngle?' c2-cornercustom':'')+'"';
-      g.push('<rect'+(st.pick? ' class="c2-nodedark"':cornerAttrs)+' x="'+(p.x-8)+'" y="'+(p.y-8)+'" width="16" height="16" transform="rotate(45 '+p.x+' '+p.y+')">'
-        +(st.pick?'':'<title>Klik om de hoek in graden aan te passen</title>')+'</rect>');
+      const pickAttrs = ' class="c2-nodedark c2-pickable" data-picknode="'+nd.id+'"';
+      g.push('<rect'+(st.pick? pickAttrs:cornerAttrs)+' x="'+(p.x-8)+'" y="'+(p.y-8)+'" width="16" height="16" transform="rotate(45 '+p.x+' '+p.y+')">'
+        +(st.pick?'<title>Kies deze hoek als stroomaansluitpunt</title>':'<title>Klik om de hoek in graden aan te passen</title>')+'</rect>');
       if(!st.pick){
-        g.push('<text class="c2-tag" x="'+lx+'" y="'+ly+'" text-anchor="'+anchor+'">'+v.label+'</text>');
+        g.push('<text class="c2-tag'+(isFeedN?' red':'')+'" x="'+lx+'" y="'+ly+'" text-anchor="'+anchor+'">'+v.label+(isFeedN?' ⚡':'')+'</text>');
       }
     } else if(t==='t'||t==='cross'){
       g.push('<rect class="c2-nodedark" x="'+(p.x-9)+'" y="'+(p.y-9)+'" width="18" height="18" rx="4"/>');
@@ -3151,6 +3173,10 @@ async function buildPdf(){
         if(feedForNode(nd.id)) circle(p.x,p.y,5.5,C.red,C.wit,1.3);
         else circle(p.x,p.y,4.5,C.wit,C.hoofd,1.5);
       } else if(t==='corner'){
+        /* Voeding op een hoek kost geen apart onderdeel, maar moet wel te zien
+           zijn: rode ruit achter de blauwe, net als de rode stip bij een
+           aansluitstuk. */
+        if(feedForNode(nd.id)) poly([[p.x,p.y-9],[p.x+9,p.y],[p.x,p.y+9],[p.x-9,p.y]],C.red);
         poly([[p.x,p.y-5.5],[p.x+5.5,p.y],[p.x,p.y+5.5],[p.x-5.5,p.y]],C.hoofd);
       } else {
         rect(p.x-5,p.y-5,10,10,C.hoofd);
