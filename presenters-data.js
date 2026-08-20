@@ -56,6 +56,9 @@ window.PRESENTER_FILES = [
   'ag41',   /* Noodverlichting Uni */
   'ag42',   /* Waterdicht Hermes */
   'ag43',   /* Module Mico */
+  'lichtlijn-prxline',   /* Lichtlijn PRX-Line */
+  'lichtlijn-retroline',   /* Lichtlijn Retroline PRX */
+  'lichtlijn-uniline',   /* Lichtlijn PRX-Uniline */
   'rail',   /* 3-Fase Rail */
 ];
 window.PRESENTER_DATA = window.PRESENTER_DATA || {};

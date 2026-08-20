@@ -24,12 +24,18 @@ const bronDir = join(root, 'presenters-bron');
 const uitDir = join(root, 'presenters');
 const dataBestand = join(root, 'presenters-data.js');
 
-/* Moet gelijk blijven aan ARM_GROEPEN in index.html. 'achterpaginas' is geen
- * armatuurtype maar de vaste achterpagina's die altijd, ongevraagd, achteraan de
- * eind-PDF komen (zie assembleFinalPdf in index.html) - net als 'rail' krijgt hij
- * geen codestempel en staat hij niet in het armaturenboek. */
+/* Moet minstens gelijk blijven aan ARM_GROEPEN in index.html (alle ag*-ids moeten
+ * hier ook staan). 'achterpaginas' is geen armatuurtype maar de vaste achterpagina's
+ * die altijd, ongevraagd, achteraan de eind-PDF komen (zie assembleFinalPdf in
+ * index.html) - net als 'rail' krijgt hij geen codestempel en staat hij niet in het
+ * armaturenboek. De 'lichtlijn-*'-ids horen niet bij ARM_GROEPEN en worden nergens
+ * in index.html gebruikt - ze staan hier zodat hun presenter-PDF's alvast
+ * gecomprimeerd en ingebakken worden voor de nog te bouwen lichtlijn.html. */
 const GROEPEN = [
   ['rail', '3-Fase Rail'],
+  ['lichtlijn-prxline', 'Lichtlijn PRX-Line'], /* standaard lichtlijn */
+  ['lichtlijn-uniline', 'Lichtlijn PRX-Uniline'],
+  ['lichtlijn-retroline', 'Lichtlijn Retroline PRX'],
   ['ag01', 'Punto'], ['ag02', 'Piccolo'], ['ag03', 'Dio'], ['ag04', 'Alto'],
   ['ag05', 'Skyline'], ['ag06', 'Arda'], ['ag07', 'Orion'], ['ag08', 'Notra'],
   ['ag09', 'Ario'], ['ag10', 'Lustra'], ['ag11', 'Fendi'], ['ag12', 'Altoflood'],
@@ -79,7 +85,10 @@ for (const bestand of pdfs) {
   writeFileSync(uit,
     '/* ' + bestand + ' - automatisch gegenereerd door tools/maak-presenters.mjs. Niet met de hand aanpassen. */\n'
     + 'window.PRESENTER_DATA = window.PRESENTER_DATA || {};\n'
-    + 'window.PRESENTER_DATA.' + id + " = '" + b64 + "';\n");
+    /* Bracket-notatie, niet .puntnotatie: een id met een koppelteken (bv. 'lichtlijn-prxline')
+       zou anders als aftrekking geparsed worden ('window.PRESENTER_DATA.lichtlijn - prxline'),
+       een syntax error. */
+    + "window.PRESENTER_DATA['" + id + "'] = '" + b64 + "';\n");
   gedaan.push({ id, bestand, mb: (statSync(pad).size / 1048576).toFixed(1) });
 }
 
