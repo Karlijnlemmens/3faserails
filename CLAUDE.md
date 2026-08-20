@@ -66,6 +66,8 @@ Presenters are large (~2 MB each), so they load **on demand at export time**, no
 
 Don't hand-encode these. Drop the PDFs in `presenters-bron/` named by group id or name (`ag01.pdf`, `Punto.pdf`, `rail.pdf`) and run `node tools/maak-presenters.mjs`, which regenerates `presenters/` and `presenters-data.js`. That script is a data-prep utility, not a build step — the app still runs by opening `index.html` directly. `presenters-bron/` is gitignored; the generated `presenters/*.js` is committed. Keep the `GROEPEN` table in that script in sync with `ARM_GROEPEN`.
 
+Presenter PDFs are typically 0.5–4+ MB each of high-resolution product photography, and `assembleFinalPdf()` always includes `rail` + `achterpaginas` plus one presenter per used fixture type — a project with several types can easily push the downloaded PDF past a mailable size. `pdf-lib` can't downsample images already embedded in a copied page, so any size reduction has to happen on the source PDF before baking. Run `node tools/comprimeer-presenters.mjs` (needs Ghostscript on PATH — `winget install --id ArtifexSoftware.Ghostscript -e` or `choco install ghostscript`) before `maak-presenters.mjs` when adding or replacing a presenter; it recompresses images in `presenters-bron/*.pdf` in place (keeping a pristine copy in `presenters-bron/origineel/`) and reports the size saved per file.
+
 ## Structure of `index.html`
 
 **`<style>` (lines ~9–449):** CSS custom properties define the navy/blue Pragmalux theme (`--navy-900`, `--blue`, etc.) at `:root`. All component styling lives here as plain CSS (`.card`, `.wtab`, `.c2-*` for the configurator, etc.) — no CSS modules/scoping, so class names must stay unique by convention.
