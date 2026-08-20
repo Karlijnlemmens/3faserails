@@ -17,10 +17,14 @@
  *      te bakken van de gecomprimeerde bytes.
  *
  * Comprimeert altijd vanaf het ongewijzigde origineel in presenters-bron/origineel/
- * (wordt bij de eerste run automatisch aangemaakt), zodat opnieuw draaien met een
- * andere instelling nooit kwaliteit stapelt op een eerdere compressie. Alleen
- * rasterbeelden worden gedownsampled/hergecomprimeerd - tekst en vectors in de
- * presenters blijven scherp.
+ * (wordt per bestand automatisch bijgehouden via .comprimeer-status.json), zodat
+ * opnieuw draaien nooit kwaliteit stapelt op een eerdere compressie - en zodat een
+ * presenter die je vervangt door een nieuwe versie (zelfde bestandsnaam, andere
+ * inhoud) automatisch als nieuw origineel wordt herkend in plaats van dat de oude
+ * back-up per ongeluk opnieuw gebruikt wordt. Alleen rasterbeelden worden
+ * gedownsampled/hergecomprimeerd - tekst en vectors in de presenters blijven scherp.
+ * Kortom: nieuwe of vervangen PDF in presenters-bron/ zetten en dit script draaien
+ * is altijd genoeg, zonder iets handmatig te hoeven bijhouden.
  *
  * Geen npm-pakket nodig - dit script roept alleen het externe Ghostscript-programma
  * aan, net zoals maak-presenters.mjs een data-prep-utility is en geen deel van de
@@ -30,10 +34,15 @@ import { readFileSync, writeFileSync, copyFileSync, readdirSync, mkdirSync, exis
 import { join, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const bronDir = join(root, 'presenters-bron');
 const origineelDir = join(bronDir, 'origineel');
+const statusBestand = join(bronDir, '.comprimeer-status.json');
+
+const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
+const status = existsSync(statusBestand) ? JSON.parse(readFileSync(statusBestand, 'utf8')) : {};
 
 /* Beeldschermkwaliteit (~150 dpi) - flink kleiner, tekst blijft scherp, foto's
  * blijven prima leesbaar op scherm en in een gemailde PDF. Bij zichtbaar
@@ -93,12 +102,24 @@ const rapport = [];
 for(const bestand of pdfs){
   const huidig = join(bronDir, bestand);
   const origineel = join(origineelDir, bestand);
+  const huidigeBytes = readFileSync(huidig);
+  const huidigeHash = hash(huidigeBytes);
 
-  /* Altijd comprimeren vanaf het pristine origineel, niet vanaf een eerder
-   * gecomprimeerd resultaat - anders stapelt kwaliteitsverlies bij herhaald draaien. */
-  if(!existsSync(origineel)) copyFileSync(huidig, origineel);
+  /* Staat de hash van het huidige bestand al als "eerder gecomprimeerd resultaat"
+   * geregistreerd, dan is er sinds de vorige run niets veranderd - overslaan
+   * voorkomt dat een al gecomprimeerd bestand nog een keer door Ghostscript gaat
+   * (kwaliteitsverlies zou dan stapelen). */
+  if(status[bestand] === huidigeHash){
+    rapport.push({ bestand, voorMaat: huidigeBytes.length, naMaat: huidigeBytes.length, overgeslagen: true, reden: 'al gecomprimeerd' });
+    continue;
+  }
 
-  const voorMaat = statSync(origineel).size;
+  /* Anders is dit óf de allereerste keer, óf de gebruiker heeft het bestand
+   * vervangen door een nieuwe versie: in beide gevallen is het huidige bestand
+   * het nieuwe pristine origineel, ongeacht wat er al in origineel/ stond. */
+  copyFileSync(huidig, origineel);
+
+  const voorMaat = huidigeBytes.length;
   const tmp = huidig + '.tmp';
   const args = [
     '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.4', '-dPDFSETTINGS=/ebook',
@@ -112,25 +133,23 @@ for(const bestand of pdfs){
     if(existsSync(tmp)) unlinkSync(tmp);
     continue;
   }
-  const naMaat = statSync(tmp).size;
+  const naBytes = readFileSync(tmp);
+  unlinkSync(tmp);
   /* Ghostscript kan bij een al compacte PDF soms een groter bestand teruggeven
    * (herschreven structuur); in dat geval het origineel gewoon laten staan. */
-  if(naMaat >= voorMaat){
-    unlinkSync(tmp);
-    rapport.push({ bestand, voorMaat, naMaat: voorMaat, overgeslagen: true });
-    continue;
-  }
-  writeFileSync(huidig, readFileSync(tmp));
-  unlinkSync(tmp);
-  rapport.push({ bestand, voorMaat, naMaat, overgeslagen: false });
+  const gebruik = naBytes.length < voorMaat ? naBytes : huidigeBytes;
+  writeFileSync(huidig, gebruik);
+  status[bestand] = hash(gebruik);
+  rapport.push({ bestand, voorMaat, naMaat: gebruik.length, overgeslagen: gebruik === huidigeBytes, reden: gebruik === huidigeBytes ? 'al compact' : null });
 }
+writeFileSync(statusBestand, JSON.stringify(status, null, 2));
 
 const mb = (n) => (n / 1048576).toFixed(2) + ' MB';
 let totVoor = 0, totNa = 0;
 console.log('\nResultaat (' + IMAGE_DPI + ' dpi):');
 for(const r of rapport){
   totVoor += r.voorMaat; totNa += r.naMaat;
-  const pct = r.overgeslagen ? '(al compact, overgeslagen)' : '-' + (100 - (r.naMaat / r.voorMaat * 100)).toFixed(0) + '%';
+  const pct = r.overgeslagen ? '(' + r.reden + ')' : '-' + (100 - (r.naMaat / r.voorMaat * 100)).toFixed(0) + '%';
   console.log('  ' + r.bestand.padEnd(28) + mb(r.voorMaat).padStart(10) + ' -> ' + mb(r.naMaat).padStart(10) + '   ' + pct);
 }
 console.log('\nTotaal: ' + mb(totVoor) + ' -> ' + mb(totNa) + '  (-' + (100 - (totNa / totVoor * 100)).toFixed(0) + '%)');
