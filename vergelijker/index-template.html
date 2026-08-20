@@ -254,6 +254,7 @@ button,input,select,textarea{font:inherit;color:inherit}
   <main class="main" id="main"></main>
 </div>
 
+<script src="pdf-huisstijl.js"></script>
 <script>
 /* ======================= productdata ======================= */
 let DATA = /*__ARMATUREN_DATA__*/ null;
@@ -1044,60 +1045,19 @@ function dataTag(d){
    pdf-lib, fontkit en merk-data zijn samen ruim vier megabyte. Die worden pas
    opgehaald als er echt een PDF gevraagd wordt; het openen van de tool blijft
    zo net zo snel als eerst. */
-const scriptLaad={};
-function laadScript(src){
-  if(!scriptLaad[src]){
-    scriptLaad[src]=new Promise(res=>{
-      const s=document.createElement('script');
-      s.src=src; s.onload=()=>res(true); s.onerror=()=>res(false);
-      document.head.appendChild(s);
-    });
-  }
-  return scriptLaad[src];
-}
-function b64Bytes(b64){
-  const bin=atob(b64), arr=new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
-  return arr;
-}
-/* De ingesloten lettertypen zijn 8-bits; alleen tekens omzetten die in onze
-   teksten voorkomen. Loopt er iets doorheen dat er niet in zit, dan wordt het
-   een vraagteken in plaats van een lege pagina. */
-function pdfTxt(s){
-  s=String(s==null?'':s).replace(/—|–/g,'-').replace(/×/g,'x')
-    .replace(/“|”/g,'"').replace(/‘|’/g,"'")
-    .replace(/«/g,'"').replace(/»/g,'"').replace(/→/g,'->');
-  let o='';
-  for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); o+=String.fromCharCode(c>255?63:c); }
-  return o;
-}
-/* De presenters zijn de armatuurbladen van Pragmalux, per stuk zo'n twee
-   megabyte. Ze staan als los bestand in presenters/<id>.js en worden alleen
-   opgehaald voor de armaturen die in dit project voorkomen. presenters-data.js
-   houdt bij welke er zijn, zodat we vooraf weten wat ontbreekt zonder het te
-   downloaden. Dit is dezelfde opzet als in de railtool. */
-function presenterAanwezig(id){
-  return !!id && !!(window.PRESENTER_FILES && window.PRESENTER_FILES.indexOf(id)>=0);
-}
-async function presenterData(id){
-  const direct = window.PRESENTER_DATA && window.PRESENTER_DATA[id];
-  if(direct) return direct;
-  if(!presenterAanwezig(id)) return null;
-  await laadScript('presenters/'+id+'.js');
-  return (window.PRESENTER_DATA && window.PRESENTER_DATA[id]) || null;
-}
+/* Het inladen van scripts en presenters, en het omzetten van tekens die de
+   PDF-lettertypen niet kennen, staat in pdf-huisstijl.js - samen met de tekenlaag
+   die deze tool en de railtool delen. */
+const {laadScript, merkData, b64Bytes, presenterAanwezig, presenterData, pdfTxt} = PdfHuisstijl;
 
 let pdfSpul=null;
 function pdfOnderdelen(){
   if(!pdfSpul){
     pdfSpul=(async()=>{
       await Promise.all([laadScript('vendor/pdf-lib.min.js'),
-                         laadScript('vendor/fontkit.umd.min.js'),
-                         laadScript('merk/merk-data.js'),
-                         laadScript('presenters-data.js')]);
+                         laadScript('presenters-data.js'),
+                         merkData()]);
       if(!window.PDFLib) throw new Error('vendor/pdf-lib.min.js kon niet geladen worden.');
-      return {fontkit:window.fontkit||null, fonts:window.MERK_FONTS||{},
-              logos:window.MERK_LOGOS||{}, beelden:window.MERK_BEELDEN||{}};
     })();
   }
   return pdfSpul;
@@ -1134,127 +1094,40 @@ function beeldBytes(bron){
 }
 
 async function bouwPdf(){
-  const merk=await pdfOnderdelen();
+  await pdfOnderdelen();
   const doc=await PDFLib.PDFDocument.create();
   doc.setTitle('Armatuurvergelijking '+(S.project.nr||''));
   doc.setProducer('Distrilight Armatuurvergelijker');
 
-  /* --- lettertypen --- */
-  let FONT, eigenKop=false;
-  try{
-    if(!merk.fontkit || !merk.fonts.regular) throw new Error('huisstijllettertypen niet beschikbaar');
-    doc.registerFontkit(merk.fontkit);
-    const laad=async(sleutel,terugval)=> merk.fonts[sleutel]
-      ? doc.embedFont(b64Bytes(merk.fonts[sleutel]),{subset:true})
-      : doc.embedFont(terugval);
-    FONT={ reg:  await laad('regular',   PDFLib.StandardFonts.Helvetica),
-           bold: await laad('bold',      PDFLib.StandardFonts.HelveticaBold),
-           kop:  await laad('dlKopVet',  PDFLib.StandardFonts.HelveticaBold),
-           kopL: await laad('dlKopLicht',PDFLib.StandardFonts.Helvetica) };
-    eigenKop=!!merk.fonts.dlKopVet;
-  }catch(err){
-    console.warn('Huisstijllettertypen niet ingesloten, terugval op Helvetica:', err && err.message);
-    const reg=await doc.embedFont(PDFLib.StandardFonts.Helvetica);
-    const bold=await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-    FONT={reg,bold,kop:bold,kopL:reg};
-  }
-
-  /* --- kleuren en maten, gelijk aan de installateur-PDF --- */
-  const C={hoofd:'#0F7ABE', hoofdDiep:'#0A5A8C', tekst:'#123A5E', lt:'#DCECF8',
-           line:'#C7D9E7', grijs:'#5B677E', wit:'#FFFFFF', voet:'#EBEBEC'};
   const W=595,H=842,Mg=40,MB=64,BALK_H=70;
   const KOL_L=105, KOL_B=(W-2*Mg-KOL_L)/2;      /* label, referentie, ons */
   const kolX=[Mg, Mg+KOL_L, Mg+KOL_L+KOL_B];
-  const kleurCache={};
   let pg=null, y=Mg;
   const paginas=[];
 
-  function col(v){
-    if(kleurCache[v]) return kleurCache[v];
-    const h=v.slice(1);
-    return (kleurCache[v]=PDFLib.rgb(parseInt(h.substr(0,2),16)/255,
-      parseInt(h.substr(2,2),16)/255, parseInt(h.substr(4,2),16)/255));
-  }
-  function kiesFont(o){ return o.cond ? (o.bold===false?FONT.kopL:FONT.kop) : (o.bold?FONT.bold:FONT.reg); }
-  /* y telt vanaf de bovenkant van de pagina; pdf-lib rekent vanaf onder. */
-  function text(x,yt,size,str,opt){ opt=opt||{};
-    const s=pdfTxt(str), f=kiesFont(opt);
-    const hz=(opt.cond && !eigenKop)?84:100, tc=opt.tc||0;
-    const w=f.widthOfTextAtSize(s,size)*hz/100 + s.length*tc;
-    let xx=x; if(opt.align==='center')xx=x-w/2; else if(opt.align==='right')xx=x-w;
-    pg.setFont(f);
-    const key=pg.getFont()[1], c=col(opt.color||'#000000');
-    pg.pushOperators(
-      PDFLib.pushGraphicsState(), PDFLib.beginText(),
-      PDFLib.setFontAndSize(key,size),
-      PDFLib.setCharacterSqueeze(hz), PDFLib.setCharacterSpacing(tc),
-      PDFLib.setFillingRgbColor(c.red,c.green,c.blue),
-      PDFLib.setTextMatrix(1,0,0,1,xx,H-yt-size*0.78),
-      PDFLib.showText(f.encodeText(s)),
-      PDFLib.endText(), PDFLib.popGraphicsState());
-    return w;
-  }
-  function meet(str,size,opt){ opt=opt||{};
-    const s=pdfTxt(str), f=kiesFont(opt);
-    const hz=(opt.cond && !eigenKop)?84:100;
-    return f.widthOfTextAtSize(s,size)*hz/100 + s.length*(opt.tc||0);
-  }
-  function wrap(s,maxW,size,opt){
-    const woorden=String(s==null?'':s).split(/\s+/).filter(Boolean);
-    const regels=[]; let cur='';
-    woorden.forEach(w=>{
-      const kandidaat=cur?cur+' '+w:w;
-      if(cur && meet(kandidaat,size,opt)>maxW){ regels.push(cur); cur=w; }
-      else cur=kandidaat;
-    });
-    if(cur) regels.push(cur);
-    return regels.length?regels:[''];
-  }
-  function rect(x,yt,w,h,fill,stroke,lw){
-    if(!fill && !stroke) return;
-    const o={x, y:H-yt-h, width:w, height:h};
-    if(fill) o.color=col(fill);
-    if(stroke){ o.borderColor=col(stroke); o.borderWidth=lw||0.8; } else o.borderWidth=0;
-    pg.drawRectangle(o);
-  }
-  function line(x1,y1,x2,y2,lw,kleur){
-    pg.drawLine({start:{x:x1,y:H-y1}, end:{x:x2,y:H-y2}, thickness:lw, color:col(kleur)});
-  }
-  function poly(pts,fill){
-    pg.drawSvgPath('M '+pts.map(p=>p[0]+' '+p[1]).join(' L ')+' Z',{x:0,y:H,color:col(fill),borderWidth:0});
-  }
-  /* De lichtgrijze schuine vorm rechtsonder, zelfde maat als in de andere PDF. */
-  function voet(){
-    const s=0.6, vH=52*s, vBreed=128*s, vSmal=92*s, vTop=H-vH;
-    poly([[W,vTop],[Mg+(vBreed-vSmal),vTop],[Mg,H],[W,H]], C.voet);
-  }
-  /* Beelden uit merk/. Ontbreekt er een, dan tekent de betreffende pagina een
-     vlak in de huisstijlkleur - liever ingetogen dan geen pagina. */
-  const BEELD={};
-  for(const sleutel of ['ruitpatroon','omslagBoven','armaturenFoto']){
-    if(!merk.beelden[sleutel]) continue;
-    const bytes=b64Bytes(merk.beelden[sleutel]);
-    try{ BEELD[sleutel] = bytes[0]===0x89 ? await doc.embedPng(bytes) : await doc.embedJpg(bytes); }
-    catch(err){ console.warn('Beeld "'+sleutel+'" kon niet worden ingesloten:', err && err.message); }
-  }
-  const RUIT = BEELD.ruitpatroon || null;
-  const LOGO = merk.logos.dlLicht
-    ? await doc.embedPng(b64Bytes(merk.logos.dlLicht)).catch(()=>null) : null;
+  /* Kleuren, lettertypen, de primitieven en het voorblad komen uit
+     pdf-huisstijl.js - dezelfde laag als de railtool gebruikt, zodat de twee
+     documenten naast elkaar als een set blijven ogen. y en pg blijven hier, zodat
+     de opmaak hieronder gewoon `y += 12` kan schrijven.
 
-  function beeldVullend(img,x,yt,w,h){
-    const s=Math.max(w/img.width, h/img.height);
-    const bw=img.width*s, bh=img.height*s;
-    pg.drawImage(img,{x:x-(bw-w)/2, y:H-yt-h-(bh-h)/2, width:bw, height:bh});
-  }
-  /* Tekent binnen een uitgeknipt vlak; pdf-lib heeft daar zelf niets voor. */
-  function metUitsnede(punten, tekenen){
-    pg.pushOperators(PDFLib.pushGraphicsState(),
-      PDFLib.moveTo(punten[0][0], H-punten[0][1]),
-      ...punten.slice(1).map(pt=>PDFLib.lineTo(pt[0], H-pt[1])),
-      PDFLib.closePath(), PDFLib.clip(), PDFLib.endPath());
-    tekenen();
-    pg.pushOperators(PDFLib.popGraphicsState());
-  }
+     Alleen de Distrilight-huisstijl: deze tool zet geen Pragmalux-pagina's neer,
+     die zitten in de aangeplakte presenters zelf. */
+  const HS = await PdfHuisstijl.tekenaar(doc, {
+    haalY:()=>y, zetY:v=>{y=v;}, haalPg:()=>pg, zetPg:p=>{pg=p;},
+    paginas, fonts:'distrilight',
+    logos:['dlLicht'],
+    beelden:['ruitpatroon','omslagBoven','armaturenFoto'],
+  });
+  const {C, BEELD, col, text, meet, rect, line, poly, voet, logo, logoBreedte,
+         beeldVullend, metUitsnede, sluitBeeldIn, beginPage, omslag} = HS;
+  /* Deze tool rekent in regels: een leeg veld telt als een lege regel, anders klopt
+     de rijhoogte niet als beide kolommen leeg zijn. De gedeelde wrapBreedte geeft
+     dan een lege lijst terug, dus dat vangen we hier op. */
+  const wrap = (s,maxW,size,opt)=>{
+    const r = HS.wrapBreedte(s==null?'':s, maxW, size, opt);
+    return r.length ? r : [''];
+  };
+
   function datumNL(s){
     if(!s) return '';
     const d=new Date(s); if(isNaN(d)) return String(s);
@@ -1264,18 +1137,15 @@ async function bouwPdf(){
   function nieuwePagina(){
     pg=doc.addPage([W,H]); paginas.push(pg); y=Mg;
     rect(0,0,W,BALK_H,C.hoofd);
-    if(RUIT){
-      const ph=W/(RUIT.width/RUIT.height);
-      pg.drawImage(RUIT,{x:0,y:H-ph,width:W,height:ph});
+    if(BEELD.ruitpatroon){
+      const ph=W/(BEELD.ruitpatroon.width/BEELD.ruitpatroon.height);
+      pg.drawImage(BEELD.ruitpatroon,{x:0,y:H-ph,width:W,height:ph});
       rect(0,BALK_H,W,H-BALK_H,C.wit);
     }
     text(Mg,22,22,'Armatuurvergelijker',{bold:true,cond:true,color:C.wit});
     const regel=[S.project.nr,S.project.naam,S.project.inst].filter(Boolean).join('  —  ');
     if(regel) text(Mg,50,9,regel,{color:C.lt});
-    if(LOGO){
-      const lh=26, lb=lh*(LOGO.width/LOGO.height);
-      pg.drawImage(LOGO,{x:W-Mg-lb, y:H-24-lh, width:lb, height:lh});
-    }
+    const lh=26; logo(W-Mg-logoBreedte(lh), 24, lh, true);
     voet();
     y=BALK_H+34;
   }
@@ -1295,42 +1165,6 @@ async function bouwPdf(){
     y+=hoogte; scheiding();
   }
 
-  /* --- voorblad --------------------------------------------------------------
-     Overgenomen uit de installateur-PDF van de railtool: bovenblok uit merk/,
-     schuine balk met de projectnaam, logovlak rechtsonder, projectgegevens
-     linksonder. Zelfde maten, zodat de twee documenten hetzelfde voorblad
-     hebben. Geen voetvorm, net als daar. */
-  function omslag(){
-    pg=doc.addPage([W,H]); paginas.push(pg);
-    if(BEELD.omslagBoven){
-      const bh=W/(BEELD.omslagBoven.width/BEELD.omslagBoven.height);
-      pg.drawImage(BEELD.omslagBoven,{x:0,y:H-bh,width:W,height:bh});
-    } else {
-      rect(0,0,W,357,C.hoofd);
-      rect(0,357,W,210,C.lt);
-    }
-    /* schuine balk: dezelfde hoek als de snede van het logovlak (34 over 70) */
-    const titelY0=99, titelY1=226, schuin=(titelY1-titelY0)*(34/70);
-    poly([[0,titelY0],[378,titelY0],[378-schuin,titelY1],[0,titelY1]], C.hoofdDiep);
-    poly([[361+34,716],[W,716],[W,786],[361,786]], C.hoofd);
-    if(LOGO){
-      const lh=70, lb=lh*(LOGO.width/LOGO.height);
-      pg.drawImage(LOGO,{x:W-lb-30, y:H-716-lh, width:lb, height:lh});
-    }
-    const naam=(S.project.naam||'').trim() || 'Projectnaam';
-    let ty=128;
-    wrap(naam,260,20,{bold:true,cond:true}).slice(0,3)
-      .forEach(r=>{ text(45,ty,20,r,{bold:true,cond:true,color:C.wit}); ty+=36; });
-    const veld=(label,waarde,dy)=>{
-      const b=meet(label+' ',8.5,{});
-      text(38,748+dy,8.5,label,{color:'#000000'});
-      text(38+b,748+dy,8.5,waarde||'-',{bold:true,color:'#000000'});
-    };
-    veld('Projectnummer:', (S.project.nr||'').trim(), 0);
-    veld('Installateur:',  (S.project.inst||'').trim(), 14.5);
-    veld('Datum:',         datumNL(S.project.datum), 29);
-  }
-
   /* --- tussenblad Armaturen ---------------------------------------------------
      Maten opgemeten uit het aangeleverde ontwerp (AB_Armaturen.pdf), gelijk aan
      de railtool: titelbalk y 85..200 met rechterrand 379 -> 337, witte band
@@ -1338,7 +1172,7 @@ async function bouwPdf(){
      citaat op x 27 met basislijnen 605/634/664/693 korps 19,6. */
   function tussenblad(){
     pg=doc.addPage([W,H]); paginas.push(pg);
-    if(RUIT) beeldVullend(RUIT,0,0,W,H); else rect(0,0,W,H,C.hoofd);
+    if(BEELD.ruitpatroon) beeldVullend(BEELD.ruitpatroon,0,0,W,H); else rect(0,0,W,H,C.hoofd);
     poly([[0,85],[379,85],[337,200],[0,200]], C.hoofd);
     text(27, 148-36*0.78, 36, 'Armaturen', {cond:true, color:C.wit});
     if(BEELD.armaturenFoto){
@@ -1355,7 +1189,8 @@ async function bouwPdf(){
 
   const meldingen=[];
   let bladNr=0;
-  omslag();
+  omslag({naam:S.project.naam, nr:S.project.nr, inst:S.project.inst,
+           datum:datumNL(S.project.datum)});
   for(const p of posities){
     const fam=famById(p.familieId), v=varByCode(fam,p.artikelcode);
     const waarden=onzeWaarden(fam,v);
@@ -1383,7 +1218,7 @@ async function bouwPdf(){
         const res=await beeldBytes(bronnen[k]);
         if(res && res.bytes){
           let img=null;
-          try{ img = res.bytes[0]===0x89 ? await doc.embedPng(res.bytes) : await doc.embedJpg(res.bytes); }
+          try{ img = await sluitBeeldIn(res.bytes); }
           catch(err){ meldingen.push('Een foto bij positie '+p.code+' kon niet worden ingesloten.'); }
           if(img){
             /* passend in het vak en daarbinnen gecentreerd; y telt van boven,
