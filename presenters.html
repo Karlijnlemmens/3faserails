@@ -210,6 +210,7 @@
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="pdf-huisstijl.js"></script>
 <script src="armaturen-data.js"></script>
+<script src="armatuur-beelden.js"></script>
 <script>
 /* ===================================================================
    Presenters — stelt uit de productdata een presenter samen en tekent
@@ -359,7 +360,7 @@ const STANDAARD = () => ({
   familieId:'',
   titel:'', ondertitel:'Productsheet',
   voettekst:'',   /* wordt bij de familiekeuze uit het merk in de data gevuld */
-  toon:{specs:true, badges:true, assortiment:true, artikelcodes:true, teksten:true},
+  toon:{specs:true, badges:true, assortiment:true, artikelcodes:true, teksten:true, uitvoeringen:true},
   specs:SPECS_STANDAARD.slice(),
   intro:'',
   blokken:[],                 /* [{kop, tekst, aan}] */
@@ -398,6 +399,74 @@ function gekozenVarianten(){
   const f=familie();
   if(!f) return [];
   return f.varianten.filter(v=>!S.uit[v.artikelcode]);
+}
+
+/* ======================= productfoto's =======================
+   Beeld kan niet als los bestand naast de tool staan. Vanaf schijf (file://)
+   weigert de browser een plaatje in een canvas uit te lezen - "tainted canvas" -
+   en zonder dat komt het de PDF niet in. Daarom staan foto's, net als de
+   presenters en de merkbestanden, als data-URI in een javascriptbestand.
+   armatuur-beelden.js schrijft deze tool zelf; die hoort in de hoofdmap naast
+   presenters.html en gaat mee de repo in, zodat iedereen dezelfde foto's ziet.
+
+   Koppelen gebeurt op sleutel, van precies naar algemeen. De meeste series
+   hebben veel minder foto's nodig dan artikelen: de Essence G2 telt 72
+   artikelen maar zes zichtbaar verschillende uitvoeringen. */
+const BEELDEN = Object.assign({}, window.ARMATUUR_BEELDEN || {});
+let beeldenGewijzigd = false;
+
+/* De sleutel van een variant: familie + uitvoering + kleur. Alles wat de foto
+   anders maakt zit erin, de rest (wattage, dimprotocol) juist niet. */
+function variantSleutel(fam, v){
+  return [fam.id, v.uitvoering||'', v.kleur||''].join('--');
+}
+/* De zichtbaar verschillende uitvoeringen van een familie, in de volgorde waarin
+   ze in de data staan. */
+function uitvoeringen(fam){
+  const gezien=new Map();
+  fam.varianten.forEach(v=>{
+    const s=variantSleutel(fam,v);
+    if(!gezien.has(s)) gezien.set(s, {sleutel:s, uitvoering:v.uitvoering||'', kleur:v.kleur||'', aantal:0});
+    gezien.get(s).aantal++;
+  });
+  return Array.from(gezien.values());
+}
+function uitvoeringLabel(u){
+  const d=[u.uitvoering, u.kleur].filter(Boolean);
+  return d.length ? d.map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' · ') : 'Standaard';
+}
+/* De foto bij een variant: eerst het artikel zelf, dan de basiscode, dan de
+   uitvoering, dan de kleur, dan de familie. Zo dekt een enkele familiefoto alles
+   en kan een afwijkend artikel toch zijn eigen foto krijgen. */
+function beeldVoorVariant(fam, v){
+  return BEELDEN[v.artikelcode] || BEELDEN[v.basiscode] ||
+         BEELDEN[variantSleutel(fam,v)] || BEELDEN[fam.id+'--'+(v.kleur||'')] ||
+         BEELDEN[fam.id] || '';
+}
+function zetFoto(sleutel, uri){
+  if(uri) BEELDEN[sleutel]=uri; else delete BEELDEN[sleutel];
+  beeldenGewijzigd=true;
+  tekenPaneel(); plan();
+}
+/* Schrijft de bibliotheek weg als javascriptbestand. Sleutels op alfabet, zodat
+   twee keer opslaan na dezelfde wijzigingen hetzelfde bestand geeft en git alleen
+   toont wat er echt veranderd is. */
+function schrijfBeeldbestand(){
+  const regels=Object.keys(BEELDEN).sort()
+    .map(k=>'  '+JSON.stringify(k)+': '+JSON.stringify(BEELDEN[k]));
+  const inhoud =
+    "/* Productfoto's voor presenters.html - geschreven door de tool zelf.\n"+
+    "   Zet dit bestand in de hoofdmap naast presenters.html.\n"+
+    "   Losse beeldbestanden kunnen niet: vanaf schijf mag de browser die niet\n"+
+    "   uitlezen, en dan komen ze de PDF niet in. */\n"+
+    "window.ARMATUUR_BEELDEN = {\n"+regels.join(',\n')+"\n};\n";
+  const url=URL.createObjectURL(new Blob([inhoud],{type:'text/javascript'}));
+  const a=document.createElement('a');
+  a.href=url; a.download='armatuur-beelden.js';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  beeldenGewijzigd=false;
+  tekenPaneel();
 }
 
 /* ======================= beeld inlezen ======================= */
@@ -511,8 +580,9 @@ function tekenPaneel(){
   /* --- weergave --- */
   const kToon=kaart('Weergave');
   const rij=el('div','schakels');
-  [['badges','Kenmerk-balk'],['teksten','Teksten'],['specs','Specificatietabel'],
-   ['assortiment','Assortiment'],['artikelcodes','Artikelcodes']].forEach(([k,l])=>{
+  [['badges','Kenmerk-balk'],['teksten','Teksten'],['uitvoeringen','Uitvoeringen'],
+   ['specs','Specificatietabel'],['assortiment','Assortiment'],
+   ['artikelcodes','Artikelcodes']].forEach(([k,l])=>{
     rij.append(schakel(l, S.toon[k], w=>{ S.toon[k]=w; tekenPaneel(); plan(); }));
   });
   kToon.append(rij);
@@ -567,6 +637,30 @@ function tekenPaneel(){
     kTxt.append(bij);
     p.append(kTxt);
   }
+
+  /* --- productfoto's per uitvoering --- */
+  const uitv=uitvoeringen(fam);
+  const metFoto=uitv.filter(u=>BEELDEN[u.sleutel]).length;
+  const kFoto=kaart("Productfoto's", metFoto+'/'+uitv.length);
+  kFoto.append(el('p','hint',
+    'Een foto per zichtbaar verschillende uitvoering; wattage en dimprotocol maken '+
+    'voor de foto niets uit. Deze '+fam.varianten.length+' artikelen hebben er '+uitv.length+' nodig. '+
+    'Klik een vak om een bestand te kiezen, of klik en plak met Ctrl+V.'));
+  const fotoRooster=el('div','beeldrooster');
+  /* familiefoto: vangt alles op waar geen eigen foto voor is */
+  fotoRooster.append(fotoVak(fam.id, 'Hele serie', BEELDEN[fam.id]));
+  uitv.forEach(u=> fotoRooster.append(fotoVak(u.sleutel, uitvoeringLabel(u), BEELDEN[u.sleutel], u.aantal)));
+  kFoto.append(fotoRooster);
+  const fknop=el('div','knoppen'); fknop.style.marginTop='10px';
+  const opsl=el('button','pil'+(beeldenGewijzigd?' vol':''),'Beeldbestand opslaan');
+  opsl.onclick=schrijfBeeldbestand;
+  fknop.append(opsl);
+  kFoto.append(fknop);
+  if(beeldenGewijzigd)
+    kFoto.append(el('p','hint',
+      'Er zijn foto\'s bijgekomen of gewijzigd. Sla het beeldbestand op en zet '+
+      'armatuur-beelden.js in de hoofdmap, anders zijn ze na het herladen weg.'));
+  p.append(kFoto);
 
   /* --- beeld --- */
   const kBeeld=kaart('Beeld');
@@ -629,6 +723,26 @@ function schuif(label, waarde, min, max, eh, bij){
   d.append(i,w);
   return d;
 }
+/* Een vak in de fotobibliotheek. Anders dan beeldVak() hangt dit niet aan de
+   sheet maar aan de productdata: wat je hier neerzet geldt voor elk blad. */
+function fotoVak(sleutel, label, uri, aantal){
+  const w=el('div');
+  const b=el('button','beeldvak'+(plakDoel==='foto:'+sleutel?' gekozen':''));
+  b.type='button';
+  b.title=label+(aantal?' — '+aantal+' artikelen':'');
+  if(uri){
+    const i=document.createElement('img'); i.src=uri; i.alt=label; b.append(i);
+    const x=el('button','weg','×');
+    x.onclick=e=>{ e.stopPropagation(); zetFoto(sleutel, ''); };
+    b.append(x);
+  } else b.append(el('span','leeg', label));
+  b.onclick=()=>{ plakDoel='foto:'+sleutel; beeldDoel='foto:'+sleutel; $('beeldKiezer').click(); tekenPaneel(); };
+  w.append(b);
+  const bijschrift=el('div',null,label);
+  bijschrift.style.cssText='font-size:10px;color:var(--slate);text-align:center;margin-top:3px;line-height:1.25';
+  w.append(bijschrift);
+  return w;
+}
 function beeldVak(uri, sleutel, verwijder){
   const b=el('button','beeldvak'+(plakDoel===sleutel?' gekozen':''));
   b.type='button';
@@ -658,6 +772,7 @@ $('beeldKiezer').onchange=e=>{
   leesAfbeelding(bestand, uri=>{ zetBeeld(beeldDoel, uri); });
 };
 function zetBeeld(sleutel, uri){
+  if(sleutel.indexOf('foto:')===0){ zetFoto(sleutel.slice(5), uri); return; }
   if(sleutel==='hero') S.hero=uri;
   else if(sleutel==='extra-nieuw') S.extra.push(uri);
   else if(/^extra(\d+)$/.test(sleutel)) S.extra[+RegExp.$1]=uri;
@@ -753,7 +868,8 @@ async function bouwBlad(){
     try{ return await sluitBeeldIn(PdfHuisstijl.b64Bytes(String(uri).slice(komma+1))); }
     catch(err){ meldingen.push('Een afbeelding kon niet worden ingesloten.'); return null; }
   };
-  const heroImg = await beeldUri(S.hero);
+  /* Zonder eigen hoofdbeeld pakt het blad de familiefoto uit de bibliotheek. */
+  const heroImg = await beeldUri(S.hero || BEELDEN[fam.id]);
   const extraImgs = [];
   for(const uri of S.extra){ const i=await beeldUri(uri); if(i) extraImgs.push(i); }
 
@@ -841,6 +957,37 @@ async function bouwBlad(){
       y+=z+8;
     }
     y+=4;
+  }
+
+  /* Uitvoeringen: de zichtbaar verschillende varianten met hun foto. Alleen die
+     in de selectie zitten - vinkt iemand alle zwarte artikelen uit, dan hoort
+     zwart hier ook niet meer te staan. */
+  if(S.toon.uitvoeringen){
+    const inSelectie = uitvoeringen(fam)
+      .filter(u=> varianten.some(v=>variantSleutel(fam,v)===u.sleutel));
+    const vakken=[];
+    for(const u of inSelectie){
+      const img = await beeldUri(BEELDEN[u.sleutel] || BEELDEN[fam.id]);
+      if(img) vakken.push({label:uitvoeringLabel(u), img});
+    }
+    if(vakken.length){
+      kop2('Uitvoeringen');
+      const z=Math.min(108, (W-2*Mg-3*10)/4);   /* vier op een rij, of smaller */
+      const perRij=Math.max(1, Math.floor((W-2*Mg+10)/(z+10)));
+      for(let i=0;i<vakken.length;i+=perRij){
+        const rij=vakken.slice(i,i+perRij);
+        need(z+24);
+        let bx=Mg;
+        rij.forEach(vak=>{
+          rect(bx,y,z,z,C.shade);
+          beeldPassend(vak.img, bx, y, z, z);
+          text(bx+z/2, y+z+5, 7.5, vak.label, {align:'center', color:C.tekst});
+          bx+=z+10;
+        });
+        y+=z+22;
+      }
+      y+=4;
+    }
   }
 
   /* specificaties */
