@@ -359,7 +359,7 @@ const STANDAARD = () => ({
   familieId:'',
   titel:'', ondertitel:'Productsheet',
   voettekst:'Distrilight · distrilight.nl · prijzen op aanvraag',
-  thema:'distrilight',
+  thema:'pragmalux',
   toon:{specs:true, badges:true, assortiment:true, artikelcodes:true, teksten:true},
   specs:SPECS_STANDAARD.slice(),
   intro:'',
@@ -506,7 +506,7 @@ function tekenPaneel(){
   kKop.append(tekstveld('Voettekst', S.voettekst, w=>{ S.voettekst=w; plan(); }));
   const th=el('label','veld'); th.append(el('span',null,'Huisstijl'));
   const thk=document.createElement('select');
-  thk.append(new Option('Distrilight','distrilight'), new Option('Pragmalux','pragmalux'));
+  thk.append(new Option('Pragmalux','pragmalux'), new Option('Distrilight','distrilight'));
   thk.value=S.thema;
   thk.onchange=()=>{ S.thema=thk.value; plan(); };
   th.append(thk); kKop.append(th);
@@ -733,11 +733,18 @@ async function bouwBlad(){
     logos:['dlLicht','dlDonker','pmLicht','pmDonker'],
     beelden:['ruitpatroon'],
     sectie:S.titel||fam.naam,
+    /* De voetregel zetten we na afloop op elke pagina in een keer, want pas dan is
+       het paginatotaal bekend. De tekenlaag hoeft er onderweg niets te zetten. */
+    voet:false,
   });
-  const {W,H,Mg,MB,BALK_H,C,BEELD,zetThema,text,meet,line,rect,poly,
+  const {W,H,Mg,MB,C,BEELD,zetThema,text,meet,line,rect,
          wrapBreedte,logo,logoBreedte,voet,flush,beginPage,need,
-         paginaKop,tableStart,tableRow,sluitBeeldIn,beeldPassend}=HS;
+         tableStart,tableRow,sluitBeeldIn,beeldPassend}=HS;
   zetThema(S.thema);
+  /* Het Pragmalux-woordmerk is veel breder dan het Distrilight-logo (1418x269 tegen
+     993x445) en verdraagt daarom een kleinere hoogte; kopHoogte uit het thema is
+     daar de maat voor. Op het kopvlak mag het wat groter. */
+  const KOP_LOGO = HS.thema.kopHoogte * 1.6;
 
   /* De beelden van de gebruiker insluiten. Gaat er een mis, dan gaat de rest
      gewoon door - liever een blad zonder foto dan geen blad. */
@@ -753,6 +760,9 @@ async function bouwBlad(){
   for(const uri of S.extra){ const i=await beeldUri(uri); if(i) extraImgs.push(i); }
 
   const mm = w => w*72/25.4;   /* de schuifknoppen staan in mm, de PDF in punten */
+  /* Pragmalux zet zijn tabelkoppen licht met donkere letters; Distrilight gebruikt
+     de dichte balk in de hoofdkleur, en dat is de standaard van de tekenlaag. */
+  const TABELKOP = S.thema==='pragmalux' ? {kopVulling:C.shade, kopTekst:C.hoofd} : undefined;
 
   /* --- voetregel: op elke pagina de eigen tekst plus het paginanummer. Het
          totaal weten we pas achteraf, dus dat wordt na afloop ingevuld. --- */
@@ -761,9 +771,14 @@ async function bouwBlad(){
     if(S.voettekst) text(Mg, H-MB+30, 7.5, S.voettekst, {color:C.grey});
   }
 
-  /* --- pagina 1 --- */
+  /* --- pagina 1 ---------------------------------------------------------------
+     Opzet overgenomen van de echte Pragmalux-presenters (presenters/ag14.js is die
+     van deze familie): een diep navy kopvlak met het woordmerk linksboven en de
+     naam in twee gewichten - het soort armatuur dun, de serienaam vet - met een
+     dunne streep eronder. Het ruitpatroon dat Pragmalux daar overheen legt zit niet
+     in merk/ (het patroon daar is Distrilight-blauw), dus het vlak blijft egaal. */
   beginPage(true);
-  paginaKop(S.titel || fam.naam, S.ondertitel);
+  bladKop();
 
   /* kenmerk-balk: de opvallendste waarden op een rij, zoals op een productpagina */
   if(S.toon.badges){
@@ -833,7 +848,7 @@ async function bouwBlad(){
   /* specificaties */
   if(S.toon.specs && S.specs.length){
     kop2('Specificaties');
-    const T=tableStart([{w:160,h:'Kenmerk'},{w:W-2*Mg-160,h:'Waarde'}]);
+    const T=tableStart([{w:160,h:'Kenmerk'},{w:W-2*Mg-160,h:'Waarde'}], TABELKOP);
     S.specs.forEach(k=>{
       const s=SPECS.find(x=>x.k===k);
       if(!s) return;
@@ -849,7 +864,7 @@ async function bouwBlad(){
     const kolommen = S.toon.artikelcodes
       ? [{w:95,h:'Artikelcode'},{w:W-2*Mg-95-70,h:'Uitvoering'},{w:70,h:'Lichtstroom'}]
       : [{w:W-2*Mg-70,h:'Uitvoering'},{w:70,h:'Lichtstroom'}];
-    const T=tableStart(kolommen);
+    const T=tableStart(kolommen, TABELKOP);
     varianten.forEach(v=>{
       const rij = S.toon.artikelcodes
         ? [v.artikelcode, variantLabel(v), bereik(v.lichtstroom_lm,'lm')]
@@ -864,16 +879,45 @@ async function bouwBlad(){
   const orig=pg;
   paginas.forEach((p,i)=>{
     pg=p;
-    voet();
+    /* De grijze schuine vorm rechtsonder is een Distrilight-element; op een
+       Pragmalux-blad staat er een dunne streep. */
+    if(S.thema==='pragmalux') line(Mg, H-48, W-Mg, H-48, 0.6, C.line);
+    else voet();   /* de schuine vorm hoort bij Distrilight */
     if(S.voettekst) text(Mg, H-40, 7.5, S.voettekst, {color:C.grey});
     text(W-Mg, H-40, 7.5, (i+1)+' / '+paginas.length, {align:'right', color:C.grey});
   });
   pg=orig;
 
+  /* De naam in twee gewichten, zoals op de Pragmalux-bladen: "LED DOWNLIGHT" dun,
+     "ESSENCE G2" vet. De knip valt op de serienaam uit de data (lijn); staat die er
+     niet in, dan gaan de laatste twee woorden vet. */
+  function naamDelen(){
+    const naam=(S.titel||fam.naam).trim();
+    const lijn=fam.lijn;
+    if(lijn){
+      const i=naam.toLowerCase().indexOf(String(lijn).toLowerCase());
+      if(i>0) return {dun:naam.slice(0,i).trim(), vet:naam.slice(i).trim()};
+    }
+    const w=naam.split(/\s+/);
+    return w.length>2 ? {dun:w.slice(0,-2).join(' '), vet:w.slice(-2).join(' ')} : {dun:'', vet:naam};
+  }
+  function bladKop(){
+    const bh=150;
+    rect(0,0,W,bh,C.hoofd);
+    logo(Mg, 26, KOP_LOGO, true);
+    const d=naamDelen();
+    /* De dunne regel staat boven de vette; ontbreekt hij, dan zakt de vette naar
+       diens plaats zodat het blok tegen de streep aan blijft staan. */
+    if(d.dun) text(Mg,68,20,d.dun,{cond:true,bold:false,color:C.wit});
+    text(Mg, d.dun?90:78, 27, d.vet, {cond:true,bold:true,color:C.wit});
+    line(Mg,122,W*0.62,122,0.8,C.lt);
+    if(S.ondertitel) text(Mg,127,8.5,S.ondertitel,{color:C.lt});
+    y = bh+22;
+  }
   function kop2(t){
-    need(30); y+=6;
-    text(Mg,y,12.5,String(t).toUpperCase(),{bold:true,cond:true,color:C.hoofd});
-    y+=16; line(Mg,y-4,W-Mg,y-4,0.8,C.line);
+    need(30); y+=8;
+    text(Mg,y,13,String(t).toUpperCase(),{bold:true,cond:true,color:C.hoofd});
+    y+=18;
   }
   function alinea(t){
     String(t).split(/\n{2,}/).forEach(stuk=>{

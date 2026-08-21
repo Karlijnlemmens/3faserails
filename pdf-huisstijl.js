@@ -425,7 +425,10 @@ async function tekenaar(doc, opt){
     const afstand=vBreed-vSmal, onderX=Mg, bovenX=onderX+afstand;
     poly([[W,vTopY],[bovenX,vTopY],[onderX,H],[W,H]], C.voet);
   }
-  function flush(kaal){ if(!kaal) voet(); }
+  /* De schuine vorm is een Distrilight-element. Een tool die een ander merk zet geeft
+     via opt.voet een eigen voetregel mee, of false voor geen. */
+  const voetTekenen = opt.voet===undefined ? voet : opt.voet;
+  function flush(kaal){ if(!kaal && voetTekenen) voetTekenen(); }
   function contHeader(){
     let y=haalY();
     text(Mg,y,13,sectie.toUpperCase(),{bold:true,cond:true,color:C.hoofd});
@@ -532,10 +535,21 @@ async function tekenaar(doc, opt){
 
   /* ---------- tabellen ---------- */
 
-  function tableStart(cols){ const totW=cols.reduce((s,c)=>s+c.w,0);
-    need(20); let x=Mg; const y=haalY(); rect(Mg,y,totW,15,C.hoofd);
-    cols.forEach(c=>{ text(x+5,y+2.6,8.5,c.h,{bold:true,color:C.wit}); x+=c.w; });
-    zetY(y+15); return {cols,totW,i:0};
+  /* opt.kopVulling en opt.kopTekst maken een lichte tabelkop mogelijk in plaats van
+     de dichte balk in de hoofdkleur - de Pragmalux-bladen doen het zo. Zonder opt
+     blijft alles zoals het was. */
+  function tabelKop(T){
+    let x=Mg; const y=haalY();
+    rect(Mg,y,T.totW,15,T.kopVulling);
+    T.cols.forEach(c=>{ text(x+5,y+2.6,8.5,c.h,{bold:true,color:T.kopTekst}); x+=c.w; });
+    zetY(y+15);
+  }
+  function tableStart(cols, opt){ opt=opt||{};
+    const totW=cols.reduce((s,c)=>s+c.w,0);
+    need(20);
+    const T={cols, totW, i:0, kopVulling:opt.kopVulling||C.hoofd, kopTekst:opt.kopTekst||C.wit};
+    tabelKop(T);
+    return T;
   }
   function wrapCell(str,w){
     const words=String(str==null?'':str).split(' ');
@@ -554,9 +568,7 @@ async function tekenaar(doc, opt){
     const nLines=Math.max.apply(null,cellLines.map(l=>l.length));
     const rowH=13.5+(nLines-1)*lineH;
     let y=haalY();
-    if(y+rowH>H-MB){ flush(); beginPage(false); y=haalY();
-      let x=Mg; rect(Mg,y,T.totW,15,C.hoofd);
-      T.cols.forEach(c=>{ text(x+5,y+2.6,8.5,c.h,{bold:true,color:C.wit}); x+=c.w; }); y+=15; }
+    if(y+rowH>H-MB){ flush(); beginPage(false); tabelKop(T); y=haalY(); }
     if(T.i%2===0) rect(Mg,y,T.totW,rowH,C.shade);
     let x=Mg;
     T.cols.forEach((c,j)=>{ cellLines[j].forEach((ln,li)=>text(x+5,y+2.4+li*lineH,8.5,ln,{color:C.tekst})); x+=c.w; });
