@@ -358,8 +358,7 @@ function specBalk(spec, fam, varianten){
 const STANDAARD = () => ({
   familieId:'',
   titel:'', ondertitel:'Productsheet',
-  voettekst:'Distrilight · distrilight.nl · prijzen op aanvraag',
-  thema:'pragmalux',
+  voettekst:'',   /* wordt bij de familiekeuze uit het merk in de data gevuld */
   toon:{specs:true, badges:true, assortiment:true, artikelcodes:true, teksten:true},
   specs:SPECS_STANDAARD.slice(),
   intro:'',
@@ -504,12 +503,9 @@ function tekenPaneel(){
   kKop.append(tekstveld('Titel', S.titel, w=>{ S.titel=w; plan(); }));
   kKop.append(tekstveld('Ondertitel', S.ondertitel, w=>{ S.ondertitel=w; plan(); }));
   kKop.append(tekstveld('Voettekst', S.voettekst, w=>{ S.voettekst=w; plan(); }));
-  const th=el('label','veld'); th.append(el('span',null,'Huisstijl'));
-  const thk=document.createElement('select');
-  thk.append(new Option('Pragmalux','pragmalux'), new Option('Distrilight','distrilight'));
-  thk.value=S.thema;
-  thk.onchange=()=>{ S.thema=thk.value; plan(); };
-  th.append(thk); kKop.append(th);
+  kKop.append(el('p','hint',
+    'Het blad draagt de Pragmalux-huisstijl: de armaturen zijn Pragmalux-producten. '+
+    'De rest van de tools-suite is Distrilight.'));
   p.append(kKop);
 
   /* --- weergave --- */
@@ -698,6 +694,9 @@ function zetFamilie(id){
     const f = FAMILIES.find(x=>x.id===id);
     if(f){
       S.titel = f.naam;
+      /* Het merk komt uit de data; een blad over Pragmalux-armaturen zet geen
+         andere merknaam in de voet. */
+      S.voettekst = (f.merk ? f.merk+' · ' : '')+'wijzigingen voorbehouden';
       /* Alleen kenmerken waar deze familie ook echt iets voor invult. */
       const varianten = f.varianten;
       S.specs = SPECS_STANDAARD.filter(k=>{
@@ -729,18 +728,17 @@ async function bouwBlad(){
   const paginas=[];
   const HS=await PdfHuisstijl.tekenaar(doc, {
     haalY:()=>y, zetY:v=>{y=v;}, haalPg:()=>pg, zetPg:p=>{pg=p;},
-    paginas, fonts:'volledig',
-    logos:['dlLicht','dlDonker','pmLicht','pmDonker'],
-    beelden:['ruitpatroon'],
+    paginas, fonts:'pragmalux',
+    logos:['pmLicht','pmDonker'],
     sectie:S.titel||fam.naam,
     /* De voetregel zetten we na afloop op elke pagina in een keer, want pas dan is
        het paginatotaal bekend. De tekenlaag hoeft er onderweg niets te zetten. */
     voet:false,
   });
-  const {W,H,Mg,MB,C,BEELD,zetThema,text,meet,line,rect,
-         wrapBreedte,logo,logoBreedte,voet,flush,beginPage,need,
+  const {W,H,Mg,MB,C,zetThema,text,meet,line,rect,
+         wrapBreedte,logo,logoBreedte,flush,beginPage,need,
          tableStart,tableRow,sluitBeeldIn,beeldPassend}=HS;
-  zetThema(S.thema);
+  zetThema('pragmalux');
   /* Het Pragmalux-woordmerk is veel breder dan het Distrilight-logo (1418x269 tegen
      993x445) en verdraagt daarom een kleinere hoogte; kopHoogte uit het thema is
      daar de maat voor. Op het kopvlak mag het wat groter. */
@@ -760,9 +758,9 @@ async function bouwBlad(){
   for(const uri of S.extra){ const i=await beeldUri(uri); if(i) extraImgs.push(i); }
 
   const mm = w => w*72/25.4;   /* de schuifknoppen staan in mm, de PDF in punten */
-  /* Pragmalux zet zijn tabelkoppen licht met donkere letters; Distrilight gebruikt
-     de dichte balk in de hoofdkleur, en dat is de standaard van de tekenlaag. */
-  const TABELKOP = S.thema==='pragmalux' ? {kopVulling:C.shade, kopTekst:C.hoofd} : undefined;
+  /* Pragmalux zet zijn tabelkoppen licht met donkere letters, waar de tekenlaag
+     standaard een dichte balk in de hoofdkleur tekent. */
+  const TABELKOP = {kopVulling:C.shade, kopTekst:C.hoofd};
 
   /* --- voetregel: op elke pagina de eigen tekst plus het paginanummer. Het
          totaal weten we pas achteraf, dus dat wordt na afloop ingevuld. --- */
@@ -879,10 +877,9 @@ async function bouwBlad(){
   const orig=pg;
   paginas.forEach((p,i)=>{
     pg=p;
-    /* De grijze schuine vorm rechtsonder is een Distrilight-element; op een
-       Pragmalux-blad staat er een dunne streep. */
-    if(S.thema==='pragmalux') line(Mg, H-48, W-Mg, H-48, 0.6, C.line);
-    else voet();   /* de schuine vorm hoort bij Distrilight */
+    /* Een dunne streep; de schuine grijze vorm rechtsonder is een
+       Distrilight-element en hoort hier niet. */
+    line(Mg, H-48, W-Mg, H-48, 0.6, C.line);
     if(S.voettekst) text(Mg, H-40, 7.5, S.voettekst, {color:C.grey});
     text(W-Mg, H-40, 7.5, (i+1)+' / '+paginas.length, {align:'right', color:C.grey});
   });

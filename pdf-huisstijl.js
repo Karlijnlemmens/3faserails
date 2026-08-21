@@ -154,8 +154,9 @@ const THEMAS = {
    opt  haalY/zetY/haalPg/zetPg  toegang tot de schrijfpositie en de huidige pagina
                                  van de aanroepende tool (verplicht)
         paginas    de array waarin beginPage() nieuwe pagina's bijschrijft
-        fonts      'volledig' (beide kop-lettertypen) of 'distrilight' (alleen
-                   Poppins; scheelt twee ingesloten lettertypen in de PDF)
+        fonts      welk kop-lettertype ingesloten wordt: 'distrilight' (Poppins),
+                   'pragmalux' (Sofia Sans Extra Condensed) of 'volledig' (beide,
+                   voor een document dat van thema wisselt)
         logos      welke logo's ingesloten worden, bijv. ['dlLicht','dlDonker']
         beelden    welke merkbeelden ingesloten worden
         sectie     beginwaarde voor de kop op vervolgpagina's
@@ -182,7 +183,7 @@ async function tekenaar(doc, opt){
      dan valt alles terug op Helvetica; de PDF komt er dan uit, alleen minder mooi.
      eigenKop zegt of de koppen een echt smal lettertype hebben - zo ja, dan hoeft
      de kunstmatige versmalling van vroeger niet meer. */
-  const volledig = opt.fonts !== 'distrilight';
+  const profiel = opt.fonts || 'volledig';
   let FONT, eigenKop=false;
   try{
     if(!merk.fontkit || !merk.fonts.regular) throw new Error('huisstijllettertypen niet beschikbaar');
@@ -192,21 +193,27 @@ async function tekenaar(doc, opt){
       : doc.embedFont(terugval);
     const reg  = await laad('regular', PDFLib.StandardFonts.Helvetica);
     const bold = await laad('bold',    PDFLib.StandardFonts.HelveticaBold);
-    if(volledig){
+    /* Een document dat maar een van beide huisstijlen zet hoeft het kop-lettertype
+       van de ander niet in te sluiten. De ontbrekende helft wijst naar de aanwezige,
+       zodat kiesFont() nooit op undefined uitkomt als er toch van thema gewisseld
+       wordt. */
+    if(profiel==='distrilight'){
+      const dlVet   = await laad('dlKopVet',   PDFLib.StandardFonts.HelveticaBold);
+      const dlLicht = await laad('dlKopLicht', PDFLib.StandardFonts.Helvetica);
+      FONT = {reg, bold, kopVet:dlVet, kopLicht:dlLicht, dlKopVet:dlVet, dlKopLicht:dlLicht};
+      eigenKop = !!merk.fonts.dlKopVet;
+    } else if(profiel==='pragmalux'){
+      const kopVet   = await laad('kopVet',   PDFLib.StandardFonts.HelveticaBold);
+      const kopLicht = await laad('kopLicht', PDFLib.StandardFonts.Helvetica);
+      FONT = {reg, bold, kopVet, kopLicht, dlKopVet:kopVet, dlKopLicht:kopLicht};
+      eigenKop = !!merk.fonts.kopVet;
+    } else {
       const kopVet   = await laad('kopVet',     PDFLib.StandardFonts.HelveticaBold);
       const kopLicht = await laad('kopLicht',   PDFLib.StandardFonts.Helvetica);
       const dlVet    = await laad('dlKopVet',   PDFLib.StandardFonts.HelveticaBold);
       const dlLicht  = await laad('dlKopLicht', PDFLib.StandardFonts.Helvetica);
       FONT = {reg, bold, kopVet, kopLicht, dlKopVet:dlVet, dlKopLicht:dlLicht};
       eigenKop = !!merk.fonts.kopVet;
-    } else {
-      /* Alleen de Distrilight-koppen. kopVet/kopLicht wijzen naar dezelfde
-         lettertypen, zodat kiesFont() ook zonder Pragmalux-thema nooit op
-         undefined uitkomt. */
-      const dlVet   = await laad('dlKopVet',   PDFLib.StandardFonts.HelveticaBold);
-      const dlLicht = await laad('dlKopLicht', PDFLib.StandardFonts.Helvetica);
-      FONT = {reg, bold, kopVet:dlVet, kopLicht:dlLicht, dlKopVet:dlVet, dlKopLicht:dlLicht};
-      eigenKop = !!merk.fonts.dlKopVet;
     }
   }catch(err){
     console.warn('Huisstijllettertypen niet ingesloten, terugval op Helvetica:', err && err.message);
