@@ -347,11 +347,21 @@ async function tekenaar(doc, opt){
     tekenen();
     pg.pushOperators(PDFLib.popGraphicsState());
   }
-  /* schaalt het beeld zo dat het het vlak vult en snijdt de rest weg */
+  /* Schaalt het beeld zo dat het het vlak VULT; wat niet past valt buiten het
+     vlak. Let op: er wordt niet afgesneden - staat er iets naast, zet het dan
+     tussen metUitsnede(), anders tekent het beeld daaroverheen. */
   function beeldVullend(img, x, yt, w, h){
     const s=Math.max(w/img.width, h/img.height);
     const bw=img.width*s, bh=img.height*s;
     haalPg().drawImage(img, {x:x-(bw-w)/2, y:H-yt-h-(bh-h)/2, width:bw, height:bh});
+  }
+  /* Schaalt het beeld zo dat het BINNEN het vlak past, gecentreerd. Voor
+     productfoto's is dit meestal de juiste keuze: liever wat wit naast het
+     armatuur dan een armatuur waar de rand van af is. */
+  function beeldPassend(img, x, yt, w, h){
+    const s=Math.min(w/img.width, h/img.height);
+    const bw=img.width*s, bh=img.height*s;
+    haalPg().drawImage(img, {x:x+(w-bw)/2, y:H-yt-h+(h-bh)/2, width:bw, height:bh});
   }
   /* Twee kleuren mengen, t=0 geeft a, t=1 geeft b. */
   function meng(a,b,t){
@@ -561,7 +571,7 @@ async function tekenaar(doc, opt){
     C, FONT, LOGO, BEELD, THEMAS, zetThema, get thema(){ return thema; }, get eigenKop(){ return eigenKop; },
     /* primitieven */
     col, kiesFont, text, meet, line, rect, circle, poly, dots,
-    metUitsnede, beeldVullend, meng, sluitBeeldIn,
+    metUitsnede, beeldVullend, beeldPassend, meng, sluitBeeldIn,
     /* tekst */
     wrapBreedte, wrapTekens, pdfTxt, datumNL,
     /* pagina's */

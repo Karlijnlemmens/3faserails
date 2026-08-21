@@ -54,15 +54,109 @@
   .badge.active{background:var(--blue); border-color:var(--blue); color:#fff;}
   .tagline{color:var(--slate); font-size:13px; margin-top:2px; max-width:640px; line-height:1.4;}
 
-  main{max-width:1400px; margin:0 auto; padding:16px 28px 60px;}
-  .lede{font-size:14px; color:var(--slate); max-width:760px; line-height:1.5; margin-bottom:12px;}
-  h2.section-title{font-size:20px; margin:0 0 4px; color:var(--navy-900);}
+  main{max-width:1600px; margin:0 auto; padding:16px 28px 60px;}
   .eyebrow{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--blue-dark); margin-bottom:4px; display:block; font-weight:600;}
-  .card{
-    background:var(--white); border:1px solid var(--border); border-radius:var(--radius);
-    padding:24px; max-width:560px;
+
+  /* ---------- werkblad: links de knoppen, rechts het blad ---------- */
+  .werkblad{display:grid; grid-template-columns:minmax(340px,420px) 1fr; gap:20px; align-items:start;}
+  @media (max-width:1100px){ .werkblad{grid-template-columns:1fr;} }
+
+  .paneel{display:flex; flex-direction:column; gap:12px;}
+  .kaart{background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px;}
+  .kaart > h3{
+    margin:0 0 10px; font-size:12px; font-weight:800; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--navy-900); display:flex; justify-content:space-between;
+    align-items:center; gap:8px;
   }
-  .card p{margin:0; color:var(--slate); font-size:14px; line-height:1.6;}
+  .kaart > h3 .tel{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--slate); font-weight:600;}
+  .hint{font-size:12px; color:var(--slate); line-height:1.45; margin:0 0 10px;}
+
+  label.veld{display:block; margin-bottom:9px;}
+  label.veld > span{display:block; font-size:11px; font-weight:700; color:var(--slate); margin-bottom:3px;}
+  input[type=text], textarea, select{
+    width:100%; font:inherit; font-size:13px; color:var(--ink);
+    border:1px solid var(--border); border-radius:8px; padding:7px 9px; background:var(--white);
+  }
+  textarea{min-height:78px; resize:vertical; line-height:1.5;}
+  input[type=text]:focus, textarea:focus, select:focus{outline:2px solid var(--blue); outline-offset:1px; border-color:var(--blue);}
+
+  .schakels{display:flex; flex-wrap:wrap; gap:6px;}
+  .schakel{
+    display:inline-flex; align-items:center; gap:6px; cursor:pointer; user-select:none;
+    border:1px solid var(--border); background:var(--white); border-radius:999px;
+    padding:4px 11px 4px 8px; font-size:12px; font-weight:600; color:var(--slate); transition:.12s;
+  }
+  .schakel:hover{border-color:var(--blue);}
+  .schakel input{margin:0; accent-color:var(--blue);}
+  .schakel.aan{background:var(--blue-light); border-color:var(--blue); color:var(--blue-dark);}
+
+  .knoppen{display:flex; gap:8px; flex-wrap:wrap;}
+  button.pil{
+    font:inherit; font-size:13px; font-weight:700; cursor:pointer;
+    border:1px solid var(--border); background:var(--white); color:var(--ink);
+    border-radius:999px; padding:7px 15px; transition:.12s;
+  }
+  button.pil:hover:not(:disabled){border-color:var(--blue); color:var(--blue-dark);}
+  button.pil.vol{background:var(--blue); border-color:var(--blue); color:#fff;}
+  button.pil.vol:hover:not(:disabled){background:var(--blue-dark); border-color:var(--blue-dark); color:#fff;}
+  button.pil:disabled{opacity:.45; cursor:default;}
+  button.mini{
+    font:inherit; font-size:11px; font-weight:700; cursor:pointer; color:var(--slate);
+    border:1px solid var(--border); background:var(--white); border-radius:7px; padding:2px 8px;
+  }
+  button.mini:hover{border-color:var(--blue); color:var(--blue-dark);}
+
+  /* beelden */
+  .beeldrooster{display:grid; grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:8px;}
+  .beeldvak{
+    position:relative; border:2px solid var(--border); border-radius:10px; overflow:hidden;
+    background:var(--white); aspect-ratio:1; display:grid; place-items:center; cursor:pointer; padding:0;
+  }
+  .beeldvak.gekozen{border-color:var(--blue);}
+  .beeldvak img{width:100%; height:100%; object-fit:contain; display:block;}
+  .beeldvak .leeg{font-size:11px; color:var(--slate); text-align:center; padding:6px; line-height:1.3;}
+  .beeldvak .weg{
+    position:absolute; top:3px; right:3px; border:none; background:rgba(28,37,52,.72); color:#fff;
+    border-radius:50%; width:19px; height:19px; font-size:12px; line-height:1; cursor:pointer; padding:0;
+  }
+  .schuif{display:flex; align-items:center; gap:9px; margin-top:9px;}
+  .schuif input[type=range]{flex:1; accent-color:var(--blue);}
+  .schuif .waarde{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--slate); min-width:44px; text-align:right;}
+
+  /* lijsten met aanvinkbare regels */
+  .lijst{max-height:230px; overflow:auto; border:1px solid var(--border); border-radius:9px;}
+  .lijst.hoog{max-height:330px;}
+  .regel{
+    display:flex; gap:8px; align-items:flex-start; padding:5px 9px; font-size:12px;
+    border-bottom:1px solid var(--border); cursor:pointer; line-height:1.35;
+  }
+  .regel:last-child{border-bottom:none;}
+  .regel:hover{background:var(--blue-light);}
+  .regel input{margin:2px 0 0; accent-color:var(--blue);}
+  .regel .code{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--slate); display:block;}
+  .regel.uit{opacity:.5;}
+
+  /* het blad */
+  .bladzij{position:sticky; top:150px;}
+  .bladkop{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap;}
+  .bladkop .stand{font-size:12px; color:var(--slate);}
+  .bladkop .stand b{color:var(--navy-900);}
+  .blad{
+    border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;
+    background:var(--white); box-shadow:0 2px 16px rgba(30,42,74,.08);
+  }
+  .blad iframe{width:100%; height:min(78vh,1000px); border:none; display:block; background:#525659;}
+  .bezig{
+    position:absolute; inset:auto 12px 12px auto; background:rgba(30,42,74,.9); color:#fff;
+    font-size:11px; font-weight:700; padding:5px 11px; border-radius:999px; pointer-events:none;
+  }
+  .bladwrap{position:relative;}
+  .melding{
+    background:#FFF6E5; border:1px solid #F0D9A8; color:#7A5B12; border-radius:9px;
+    padding:8px 11px; font-size:12px; line-height:1.45; margin-bottom:10px;
+  }
+  .melding.leeg{display:none;}
+  .melding ul{margin:4px 0 0; padding-left:17px;}
 </style>
 </head>
 <body>
@@ -86,16 +180,796 @@
   <div class="title-row">
     <h1>Presenters</h1>
   </div>
+  <p class="tagline">Kies een productfamilie en stel er een presenter van samen: teksten, specificaties,
+    beeld en het assortiment. Het voorbeeld rechts is de echte PDF.</p>
 </header>
 
 <main>
-  <span class="eyebrow">Binnenkort beschikbaar</span>
-  <h2 class="section-title">Presenters</h2>
-  <p class="lede">Deze tool wordt binnenkort toegevoegd aan de Distrilight tools-suite.</p>
-  <div class="card">
-    <p>Nog in ontwikkeling.</p>
+  <div class="werkblad">
+    <div class="paneel" id="paneel"></div>
+
+    <div class="bladzij">
+      <div class="bladkop">
+        <div class="stand" id="stand">Nog geen familie gekozen</div>
+        <div class="knoppen">
+          <button class="pil" id="btnHerstel">Standaardinstellingen</button>
+          <button class="pil vol" id="btnPdf">Download PDF</button>
+        </div>
+      </div>
+      <div class="melding leeg" id="melding"></div>
+      <div class="bladwrap">
+        <div class="blad"><iframe id="voorbeeld" title="Voorbeeld van de presenter"></iframe></div>
+        <div class="bezig" id="bezig" style="display:none">bezig…</div>
+      </div>
+    </div>
   </div>
 </main>
 
+<input type="file" id="beeldKiezer" accept="image/*" style="display:none">
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="pdf-huisstijl.js"></script>
+<script src="armaturen-data.js"></script>
+<script>
+/* ===================================================================
+   Presenters — stelt uit de productdata een presenter samen en tekent
+   die als PDF in de Distrilight-huisstijl.
+
+   Het voorbeeld rechts is niet nagebouwd in HTML maar de echte PDF, in een
+   iframe. Dat kost een halve seconde per wijziging (vandaar de vertraging in
+   plan()), maar het scheelt een tweede opmaak die na verloop van tijd toch
+   uit de pas gaat lopen met de PDF.
+
+   De tekenlaag komt uit pdf-huisstijl.js; zie de kop van dat bestand.
+   =================================================================== */
+const $ = id => document.getElementById(id);
+const DATA = window.ARMATUREN_DATA || null;
+const FAMILIES = (DATA && DATA.families) || [];
+
+/* ======================= opmaak van waarden ======================= */
+
+/* {min,max} -> "6-21W", "max. 1650lm", "15W". Dezelfde schrijfwijze als de
+   armatuurvergelijker, zodat de twee documenten elkaar niet tegenspreken. */
+function bereik(o, eh){
+  if(!o) return '';
+  const a=o.min, b=o.max;
+  if(a==null && b==null) return '';
+  if(a==null) return 'max. '+kort(b)+eh;
+  if(b==null || a===b) return kort(a)+eh;
+  return kort(a)+'-'+kort(b)+eh;
+}
+const kort = x => String(Number(x));
+const jaNee = w => w===true ? 'Ja' : w===false ? 'Nee' : '';
+
+/* Meerdere waarden samenvatten: uniek, in de volgorde waarin ze voorkomen, en
+   op getal gesorteerd als ze met een getal beginnen (6W hoort voor 15W, terwijl
+   alfabetisch 15W vooropgaat). */
+function samen(waarden){
+  const uniek=[];
+  waarden.forEach(w=>{ if(w!=='' && w!=null && uniek.indexOf(w)<0) uniek.push(w); });
+  if(uniek.length && uniek.every(w=>/^[\d.,]/.test(String(w))))
+    uniek.sort((a,b)=>parseFloat(a)-parseFloat(b));
+  return uniek;
+}
+
+/* Getalvelden horen niet naast elkaar maar samengevat: een familie met 6, 9, 15
+   en 21 W is "6-21W", niet "max. 15W · max. 21W · max. 6W · max. 9W". Bij een
+   enkele variant blijft de eigen schrijfwijze staan, anders zou "max. 15W"
+   verstillen tot "15W" en dat is iets anders. */
+function reeksSamen(varianten, haal, eh, voor){
+  const paren = varianten.map(haal).filter(o=>o && (o.min!=null || o.max!=null));
+  if(!paren.length) return '';
+  if(paren.length===1) return (voor||'')+bereik(paren[0],eh);
+  const getallen=[];
+  paren.forEach(o=>{ if(o.min!=null) getallen.push(+o.min); if(o.max!=null) getallen.push(+o.max); });
+  if(!getallen.length) return '';
+  const lo=Math.min.apply(null,getallen), hi=Math.max.apply(null,getallen);
+  return (voor||'') + (lo===hi ? kort(lo) : kort(lo)+'-'+kort(hi)) + eh;
+}
+/* Een los getal als reeks van één, zodat buitenmaat en zaagmaat op dezelfde
+   manier samengevat worden als vermogen en lichtstroom. */
+const alsReeks = w => w==null ? null : {min:w, max:w};
+
+/* Dimprotocollen staan in de data als sleutel; op een verkoopblad horen ze
+   leesbaar. Onbekende waarden gaan in kapitalen mee, zodat er nooit iets
+   wegvalt omdat deze lijst achterloopt. */
+const DIMNAMEN = {
+  'geen':'niet dimbaar', 'dali':'DALI', 'dali2':'DALI-2', 'casambi':'Casambi',
+  'dali2/1-10v/push-dim':'DALI-2 / 1-10V / push-dim', '1-10v':'1-10V', 'push-dim':'push-dim',
+};
+function dimTekst(p){
+  if(p==null) return '';
+  const k=String(p).toLowerCase();
+  return DIMNAMEN[k] || String(p).toUpperCase();
+}
+
+/* ======================= de specificatiecatalogus =======================
+   Elk kenmerk weet zelf waar het vandaan komt. 'fam' leest uit de familie en
+   geldt dus voor alle varianten; 'var' leest per variant en wordt over de
+   gekozen varianten samengevat - staan er twee wattages in de selectie, dan
+   komen ze allebei te staan. Zo hoeft niemand een specificatie over te typen. */
+const SPECS = [
+  {k:'vermogen',    l:'Vermogen',            bron:'var', reeks:v=>v.vermogen_w, eh:'W'},
+  {k:'lichtstroom', l:'Lichtstroom',         bron:'var', reeks:v=>v.lichtstroom_lm, eh:'lm'},
+  {k:'rendement',   l:'Rendement',           bron:'var', uit:v=>v.rendement_lm_w ? v.rendement_lm_w+' lm/W' : ''},
+  {k:'cct',         l:'Kleurtemperatuur',    bron:'fam', uit:f=>(f.cct||[]).join('-')+((f.cct||[]).length?'K':'')},
+  {k:'cri',         l:'Kleurweergave',       bron:'fam', uit:f=>f.cri_min ? 'Ra >'+f.cri_min : ''},
+  {k:'ugr',         l:'Verblinding (UGR)',   bron:'fam', uit:f=>f.ugr ? String(f.ugr).replace('<=','≤') : ''},
+  {k:'ip',          l:'Beschermingsgraad',   bron:'fam', uit:f=>f.ip ? String(f.ip) : '',
+                    /* de volledige zin is te lang voor de kenmerk-balk */
+                    balk:f=>((String(f.ip||'').match(/IP\d+/)||[''])[0])},
+  {k:'ik',          l:'Slagvastheid',        bron:'fam', uit:f=>f.ik ? String(f.ik) : ''},
+  {k:'dimbaar',     l:'Dimbaar',             bron:'var', uit:v=>dimTekst(v.dimprotocol)},
+  {k:'driver',      l:'Driver',              bron:'var', uit:v=>v.driver || ''},
+  {k:'driverbij',   l:'Driver inbegrepen',   bron:'var', uit:v=>jaNee(v.driver_inbegrepen)},
+  {k:'levensduur',  l:'Levensduur',          bron:'fam', uit:f=>f.levensduur || ''},
+  {k:'garantie',    l:'Garantie',            bron:'fam', uit:f=>f.garantie_jaar ? f.garantie_jaar+' jaar' : ''},
+  {k:'montage',     l:'Montagewijze',        bron:'fam', uit:f=>(f.montagewijzen||[]).join(', ')},
+  {k:'uitvoering',  l:'Uitvoering',          bron:'var', uit:v=>v.uitvoering || ''},
+  {k:'kleur',       l:'Kleur',               bron:'var', uit:v=>v.kleur || ''},
+  {k:'buitenmaat',  l:'Buitenmaat',          bron:'var', reeks:v=>alsReeks(v.buitenmaat_mm), eh:' mm', voor:'Ø'},
+  {k:'zaagmaat',    l:'Zaagmaat',            bron:'var', reeks:v=>alsReeks(v.zaagmaat_mm), eh:' mm', voor:'Ø'},
+  {k:'afmetingen',  l:'Afmetingen',          bron:'var', uit:v=>{
+      if(v.afmetingen_mm){ const a=v.afmetingen_mm;
+        return [a.l,a.b,a.h].filter(Boolean).join('×')+' mm'; }
+      if(v.maat) return v.maat+' cm';
+      if(v.lengte_cm) return v.lengte_cm+' cm';
+      return '';
+    }},
+  {k:'inbouwdiepte',l:'Inbouwdiepte',        bron:'fam', uit:f=>{
+      const d=f.inbouwdiepte_mm;
+      if(!d) return '';
+      if(typeof d==='number') return d+' mm';
+      const s=d.standaard!=null ? d.standaard+' mm' : '';
+      return s;
+    }},
+  {k:'sensor',      l:'Sensor',              bron:'var', uit:v=>v.sensor===true?'Ja':v.sensor===false?'Nee':''},
+  {k:'nood',        l:'Noodverlichting',     bron:'var', uit:v=>v.noodverlichting ? String(v.noodverlichting) : ''},
+  {k:'modulair',    l:'Modulair',            bron:'fam', uit:f=>jaNee(f.modulair)},
+  {k:'balvast',     l:'Balvast',             bron:'fam', uit:f=>jaNee(f.balvast)},
+];
+const SPEC_MAX = 10;
+/* Waar de meeste sheets mee beginnen; de gebruiker kan het per familie wijzigen. */
+const SPECS_STANDAARD = ['vermogen','lichtstroom','cct','cri','ip','dimbaar','garantie'];
+
+/* De waarde(n) van een kenmerk bij de huidige selectie. Levert een lijst, want
+   een familie met drie dimprotocollen heeft drie waarden; getalvelden worden
+   juist tot een enkel bereik samengevat (zie reeksSamen). */
+function specWaarden(spec, fam, varianten){
+  if(spec.bron==='fam'){ const w=spec.uit(fam); return w ? [w] : []; }
+  if(spec.reeks){ const w=reeksSamen(varianten, spec.reeks, spec.eh, spec.voor); return w ? [w] : []; }
+  return samen(varianten.map(v=>spec.uit(v)));
+}
+function specTekst(spec, fam, varianten){ return specWaarden(spec,fam,varianten).join(' · '); }
+
+/* Wat er in de kenmerk-balk bovenaan het blad komt: kort en zelfsprekend. Een
+   waarde die te lang is of uit te veel delen bestaat laten we weg - de balk is
+   voor de blik van drie seconden, de tabel eronder heeft het volledige verhaal. */
+function specBalk(spec, fam, varianten){
+  if(spec.balk && spec.bron==='fam'){ const w=spec.balk(fam); return w || ''; }
+  const w=specWaarden(spec,fam,varianten);
+  if(!w.length || w.length>3) return '';
+  const t=w.join(' / ');
+  return t.length<=28 ? t : '';
+}
+
+/* ======================= de staat ======================= */
+
+const STANDAARD = () => ({
+  familieId:'',
+  titel:'', ondertitel:'Productsheet',
+  voettekst:'Distrilight · distrilight.nl · prijzen op aanvraag',
+  thema:'distrilight',
+  toon:{specs:true, badges:true, assortiment:true, artikelcodes:true, teksten:true},
+  specs:SPECS_STANDAARD.slice(),
+  intro:'',
+  blokken:[],                 /* [{kop, tekst, aan}] */
+  hero:'', heroHoogte:70,     /* mm */
+  extra:[], extraGrootte:56,  /* data-URI's en mm */
+  uit:{},                     /* artikelcode -> true als hij NIET meedoet */
+});
+let S = STANDAARD();
+
+/* Instellingen blijven per familie hangen, zoals de gebruiker ze achterliet.
+   Beelden kunnen samen een paar MB zijn; localStorage geeft dan een fout terug
+   en dan slaan we de sheet zonder beeld op in plaats van niets. */
+const BEWAARSLEUTEL = 'distrilight-presenters-v1';
+function bewaar(){
+  if(!S.familieId) return;
+  let alles={};
+  try{ alles=JSON.parse(localStorage.getItem(BEWAARSLEUTEL)||'{}'); }catch(e){}
+  alles[S.familieId]=S;
+  try{ localStorage.setItem(BEWAARSLEUTEL, JSON.stringify(alles)); }
+  catch(err){
+    const zonder=Object.assign({},S,{hero:'',extra:[]});
+    alles[S.familieId]=zonder;
+    try{ localStorage.setItem(BEWAARSLEUTEL, JSON.stringify(alles)); }catch(e){}
+  }
+}
+function haalOp(familieId){
+  try{
+    const alles=JSON.parse(localStorage.getItem(BEWAARSLEUTEL)||'{}');
+    return alles[familieId] || null;
+  }catch(e){ return null; }
+}
+
+function familie(){ return FAMILIES.find(f=>f.id===S.familieId) || null; }
+/* De varianten die meedoen, in de volgorde van de data. */
+function gekozenVarianten(){
+  const f=familie();
+  if(!f) return [];
+  return f.varianten.filter(v=>!S.uit[v.artikelcode]);
+}
+
+/* ======================= beeld inlezen ======================= */
+
+/* Een gekozen of geplakte afbeelding verkleinen voor gebruik in de PDF. Zonder
+   verkleinen gaat een telefoonfoto van 4 MB ongewijzigd de PDF in en is het
+   bestand niet meer te mailen. Png blijft png (doorzichtige achtergrond bij
+   productfoto's), de rest wordt jpeg op wit. */
+const BEELD_MAX = 1400;
+function leesAfbeelding(bestand, klaar){
+  if(!bestand) return;
+  const lezer=new FileReader();
+  lezer.onerror=()=>alert('Deze afbeelding kan niet worden gelezen.');
+  lezer.onload=()=>{
+    const img=new Image();
+    img.onerror=()=>alert('Deze afbeelding kan niet worden getoond.');
+    img.onload=()=>{
+      const grootste=Math.max(img.width,img.height);
+      if(grootste<=BEELD_MAX && String(lezer.result).length<400000){ klaar(lezer.result); return; }
+      const schaal=Math.min(1,BEELD_MAX/grootste);
+      const c=document.createElement('canvas');
+      c.width=Math.max(1,Math.round(img.width*schaal));
+      c.height=Math.max(1,Math.round(img.height*schaal));
+      const ctx=c.getContext('2d');
+      const alsPng = bestand.type==='image/png';
+      if(!alsPng){ ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height); }
+      ctx.drawImage(img,0,0,c.width,c.height);
+      try{ klaar(alsPng ? c.toDataURL('image/png') : c.toDataURL('image/jpeg',0.82)); }
+      catch(err){ klaar(lezer.result); }
+    };
+    img.src=lezer.result;
+  };
+  lezer.readAsDataURL(bestand);
+}
+/* Waar Ctrl+V terechtkomt: het beeldvak waar je het laatst op klikte. */
+let plakDoel='hero';
+
+/* ======================= het bedieningspaneel ======================= */
+
+function el(tag, klasse, tekst){
+  const e=document.createElement(tag);
+  if(klasse) e.className=klasse;
+  if(tekst!=null) e.textContent=tekst;
+  return e;
+}
+function kaart(titel, tel){
+  const k=el('div','kaart');
+  const h=el('h3'); h.append(el('span',null,titel));
+  if(tel) h.append(el('span','tel',tel));
+  k.append(h);
+  return k;
+}
+function schakel(label, aan, bij){
+  const l=el('label','schakel'+(aan?' aan':''));
+  const i=document.createElement('input'); i.type='checkbox'; i.checked=aan;
+  i.onchange=()=>{ bij(i.checked); };
+  l.append(i, document.createTextNode(label));
+  return l;
+}
+function tekstveld(label, waarde, bij, meerregelig){
+  const l=el('label','veld');
+  l.append(el('span',null,label));
+  const i=meerregelig ? document.createElement('textarea') : document.createElement('input');
+  if(!meerregelig) i.type='text';
+  i.value=waarde||'';
+  i.oninput=()=>{ bij(i.value); };
+  l.append(i);
+  return l;
+}
+
+function tekenPaneel(){
+  const p=$('paneel');
+  p.innerHTML='';
+
+  /* --- familie --- */
+  const kFam=kaart('Productfamilie');
+  if(!FAMILIES.length){
+    kFam.append(el('p','hint',
+      'armaturen-data.js is niet geladen. Draai: python3 vergelijker/bouw-armaturen-data.py'));
+    p.append(kFam);
+    return;
+  }
+  const kies=document.createElement('select');
+  kies.append(new Option('— kies een familie —',''));
+  FAMILIES.forEach(f=> kies.append(new Option(f.naam+'  ('+f.varianten.length+' artikelen)', f.id)));
+  kies.value=S.familieId;
+  kies.onchange=()=>{ zetFamilie(kies.value); };
+  kFam.append(kies);
+  p.append(kFam);
+  if(!S.familieId){
+    const uitleg=el('div','kaart');
+    uitleg.append(el('p','hint',
+      'Kies hierboven een familie. De titel, specificaties en het assortiment worden dan '+
+      'uit de productdata gevuld; jij vult alleen aan wat er niet in staat: de verkooptekst en het beeld.'));
+    p.append(uitleg);
+    return;
+  }
+  const fam=familie();
+  const varianten=gekozenVarianten();
+
+  /* --- kop --- */
+  const kKop=kaart('Kop');
+  kKop.append(tekstveld('Titel', S.titel, w=>{ S.titel=w; plan(); }));
+  kKop.append(tekstveld('Ondertitel', S.ondertitel, w=>{ S.ondertitel=w; plan(); }));
+  kKop.append(tekstveld('Voettekst', S.voettekst, w=>{ S.voettekst=w; plan(); }));
+  const th=el('label','veld'); th.append(el('span',null,'Huisstijl'));
+  const thk=document.createElement('select');
+  thk.append(new Option('Distrilight','distrilight'), new Option('Pragmalux','pragmalux'));
+  thk.value=S.thema;
+  thk.onchange=()=>{ S.thema=thk.value; plan(); };
+  th.append(thk); kKop.append(th);
+  p.append(kKop);
+
+  /* --- weergave --- */
+  const kToon=kaart('Weergave');
+  const rij=el('div','schakels');
+  [['badges','Kenmerk-balk'],['teksten','Teksten'],['specs','Specificatietabel'],
+   ['assortiment','Assortiment'],['artikelcodes','Artikelcodes']].forEach(([k,l])=>{
+    rij.append(schakel(l, S.toon[k], w=>{ S.toon[k]=w; tekenPaneel(); plan(); }));
+  });
+  kToon.append(rij);
+  p.append(kToon);
+
+  /* --- specificaties --- */
+  const bruikbaar=SPECS.filter(s=>specWaarden(s,fam,varianten).length);
+  const kSpec=kaart('Specificaties', S.specs.length+'/'+SPEC_MAX);
+  kSpec.append(el('p','hint',
+    'Kies maximaal '+SPEC_MAX+' kenmerken. De waarden komen uit de productdata; kenmerken '+
+    'waarvoor deze familie niets invult staan er niet bij.'));
+  const lijst=el('div','lijst hoog');
+  bruikbaar.forEach(s=>{
+    const aan=S.specs.indexOf(s.k)>=0;
+    const vol=!aan && S.specs.length>=SPEC_MAX;
+    const r=el('label','regel'+(vol?' uit':''));
+    const i=document.createElement('input'); i.type='checkbox'; i.checked=aan; i.disabled=vol;
+    i.onchange=()=>{
+      if(i.checked){ if(S.specs.length<SPEC_MAX) S.specs.push(s.k); }
+      else S.specs=S.specs.filter(x=>x!==s.k);
+      tekenPaneel(); plan();
+    };
+    const t=el('span');
+    t.append(document.createTextNode(s.l));
+    t.append(el('span','code', specTekst(s,fam,varianten).slice(0,64)));
+    r.append(i,t);
+    lijst.append(r);
+  });
+  kSpec.append(lijst);
+  p.append(kSpec);
+
+  /* --- teksten --- */
+  if(S.toon.teksten){
+    const kTxt=kaart('Teksten', S.blokken.filter(b=>b.aan).length+' blokken');
+    kTxt.append(tekstveld('Introtekst', S.intro, w=>{ S.intro=w; plan(); }, true));
+    S.blokken.forEach((b,i)=>{
+      const vak=el('div');
+      vak.style.cssText='border-top:1px solid var(--border);padding-top:9px;margin-top:9px';
+      const bk=el('div'); bk.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:6px';
+      bk.append(schakel('toon', b.aan, w=>{ b.aan=w; tekenPaneel(); plan(); }));
+      const weg=el('button','mini','verwijder');
+      weg.onclick=()=>{ S.blokken.splice(i,1); tekenPaneel(); plan(); };
+      bk.append(weg);
+      vak.append(bk);
+      vak.append(tekstveld('Kop', b.kop, w=>{ b.kop=w; plan(); }));
+      vak.append(tekstveld('Tekst', b.tekst, w=>{ b.tekst=w; plan(); }, true));
+      kTxt.append(vak);
+    });
+    const bij=el('button','pil','Tekstblok toevoegen');
+    bij.style.marginTop='9px';
+    bij.onclick=()=>{ S.blokken.push({kop:'',tekst:'',aan:true}); tekenPaneel(); plan(); };
+    kTxt.append(bij);
+    p.append(kTxt);
+  }
+
+  /* --- beeld --- */
+  const kBeeld=kaart('Beeld');
+  kBeeld.append(el('p','hint',
+    'Klik een vak en plak met Ctrl+V, of klik om een bestand te kiezen. Het hoofdbeeld staat '+
+    'boven de tekst, de extra beelden eronder.'));
+  const heroVak=beeldVak(S.hero, 'hero', ()=>{ S.hero=''; tekenPaneel(); plan(); });
+  const rooster1=el('div','beeldrooster'); rooster1.append(heroVak);
+  kBeeld.append(el('p','hint','Hoofdbeeld'));
+  kBeeld.append(rooster1);
+  kBeeld.append(schuif('Hoogte', S.heroHoogte, 30, 120, 'mm', w=>{ S.heroHoogte=w; plan(); }));
+
+  kBeeld.append(el('p','hint','Extra beelden'));
+  const rooster2=el('div','beeldrooster');
+  S.extra.forEach((uri,i)=>{
+    rooster2.append(beeldVak(uri, 'extra'+i, ()=>{ S.extra.splice(i,1); tekenPaneel(); plan(); }));
+  });
+  rooster2.append(beeldVak('', 'extra-nieuw', null));
+  kBeeld.append(rooster2);
+  if(S.extra.length) kBeeld.append(schuif('Grootte', S.extraGrootte, 30, 90, 'mm', w=>{ S.extraGrootte=w; plan(); }));
+  p.append(kBeeld);
+
+  /* --- assortiment --- */
+  if(S.toon.assortiment){
+    const kArt=kaart('Assortiment', varianten.length+'/'+fam.varianten.length);
+    const knop=el('div','knoppen'); knop.style.marginBottom='9px';
+    const alles=el('button','mini','Alles');
+    alles.onclick=()=>{ S.uit={}; tekenPaneel(); plan(); };
+    const niets=el('button','mini','Niets');
+    niets.onclick=()=>{ fam.varianten.forEach(v=>S.uit[v.artikelcode]=true); tekenPaneel(); plan(); };
+    knop.append(alles,niets);
+    kArt.append(knop);
+    const l=el('div','lijst hoog');
+    fam.varianten.forEach(v=>{
+      const aan=!S.uit[v.artikelcode];
+      const r=el('label','regel');
+      const i=document.createElement('input'); i.type='checkbox'; i.checked=aan;
+      i.onchange=()=>{
+        if(i.checked) delete S.uit[v.artikelcode]; else S.uit[v.artikelcode]=true;
+        tekenPaneel(); plan();
+      };
+      const t=el('span');
+      t.append(document.createTextNode(variantLabel(v)));
+      t.append(el('span','code', v.artikelcode));
+      r.append(i,t);
+      l.append(r);
+    });
+    kArt.append(l);
+    p.append(kArt);
+  }
+}
+
+function schuif(label, waarde, min, max, eh, bij){
+  const d=el('div','schuif');
+  d.append(el('span',null,label));
+  const i=document.createElement('input');
+  i.type='range'; i.min=min; i.max=max; i.value=waarde;
+  const w=el('span','waarde', waarde+' '+eh);
+  i.oninput=()=>{ w.textContent=i.value+' '+eh; bij(+i.value); };
+  d.append(i,w);
+  return d;
+}
+function beeldVak(uri, sleutel, verwijder){
+  const b=el('button','beeldvak'+(plakDoel===sleutel?' gekozen':''));
+  b.type='button';
+  if(uri){
+    const i=document.createElement('img'); i.src=uri; i.alt='';
+    b.append(i);
+    if(verwijder){
+      const x=el('button','weg','×');
+      x.onclick=e=>{ e.stopPropagation(); verwijder(); };
+      b.append(x);
+    }
+  } else {
+    b.append(el('span','leeg', sleutel==='hero' ? 'hoofdbeeld' : 'toevoegen'));
+  }
+  b.onclick=()=>{
+    plakDoel=sleutel;
+    beeldDoel=sleutel;
+    $('beeldKiezer').click();
+    tekenPaneel();
+  };
+  return b;
+}
+let beeldDoel='hero';
+$('beeldKiezer').onchange=e=>{
+  const bestand=e.target.files[0];
+  $('beeldKiezer').value='';
+  leesAfbeelding(bestand, uri=>{ zetBeeld(beeldDoel, uri); });
+};
+function zetBeeld(sleutel, uri){
+  if(sleutel==='hero') S.hero=uri;
+  else if(sleutel==='extra-nieuw') S.extra.push(uri);
+  else if(/^extra(\d+)$/.test(sleutel)) S.extra[+RegExp.$1]=uri;
+  tekenPaneel(); plan();
+}
+document.addEventListener('paste', e=>{
+  if(!S.familieId) return;
+  const items=Array.from((e.clipboardData||window.clipboardData).items||[]);
+  const plaatje=items.find(i=>/^image\//.test(i.type));
+  if(!plaatje) return;
+  e.preventDefault();
+  leesAfbeelding(plaatje.getAsFile(), uri=>{ zetBeeld(plakDoel, uri); });
+});
+
+/* Een korte aanduiding per variant voor de keuzelijst en de assortimentstabel:
+   wat deze variant onderscheidt van zijn buren, niet de hele omschrijving. */
+function variantLabel(v){
+  const d=[bereik(v.vermogen_w,'W'), v.uitvoering, v.kleur,
+           v.dimprotocol && v.dimprotocol!=='geen' ? dimTekst(v.dimprotocol) : '',
+           v.buitenmaat_mm ? 'Ø'+v.buitenmaat_mm : (v.maat||'')];
+  const kort=d.filter(Boolean).join(' · ');
+  return kort || (v.omschrijving||v.artikelcode);
+}
+
+function zetFamilie(id){
+  const opgeslagen = id ? haalOp(id) : null;
+  if(opgeslagen){
+    S = Object.assign(STANDAARD(), opgeslagen);
+    S.toon = Object.assign(STANDAARD().toon, opgeslagen.toon||{});
+    hervat = true;
+  } else {
+    S = STANDAARD();
+    S.familieId = id;
+    const f = FAMILIES.find(x=>x.id===id);
+    if(f){
+      S.titel = f.naam;
+      /* Alleen kenmerken waar deze familie ook echt iets voor invult. */
+      const varianten = f.varianten;
+      S.specs = SPECS_STANDAARD.filter(k=>{
+        const s=SPECS.find(x=>x.k===k);
+        return s && specWaarden(s,f,varianten).length;
+      });
+    }
+    hervat = false;
+  }
+  S.familieId = id;
+  tekenPaneel(); plan();
+}
+let hervat=false;
+
+/* ======================= de PDF ======================= */
+
+/* Bouwt het blad. Levert de bytes en de meldingen die de gebruiker moet zien. */
+async function bouwBlad(){
+  const fam=familie();
+  const varianten=gekozenVarianten();
+  const meldingen=[];
+  if(!fam) return {bytes:null, meldingen:['Kies eerst een productfamilie.']};
+
+  const doc=await PDFLib.PDFDocument.create();
+  doc.setTitle((S.titel||fam.naam)+' — '+(S.ondertitel||'Productsheet'));
+  doc.setProducer('Distrilight Presenters');
+
+  let pg=null, y=40;
+  const paginas=[];
+  const HS=await PdfHuisstijl.tekenaar(doc, {
+    haalY:()=>y, zetY:v=>{y=v;}, haalPg:()=>pg, zetPg:p=>{pg=p;},
+    paginas, fonts:'volledig',
+    logos:['dlLicht','dlDonker','pmLicht','pmDonker'],
+    beelden:['ruitpatroon'],
+    sectie:S.titel||fam.naam,
+  });
+  const {W,H,Mg,MB,BALK_H,C,BEELD,zetThema,text,meet,line,rect,poly,
+         wrapBreedte,logo,logoBreedte,voet,flush,beginPage,need,
+         paginaKop,tableStart,tableRow,sluitBeeldIn,beeldPassend}=HS;
+  zetThema(S.thema);
+
+  /* De beelden van de gebruiker insluiten. Gaat er een mis, dan gaat de rest
+     gewoon door - liever een blad zonder foto dan geen blad. */
+  const beeldUri = async uri=>{
+    if(!uri) return null;
+    const komma=String(uri).indexOf(',');
+    if(komma<0) return null;
+    try{ return await sluitBeeldIn(PdfHuisstijl.b64Bytes(String(uri).slice(komma+1))); }
+    catch(err){ meldingen.push('Een afbeelding kon niet worden ingesloten.'); return null; }
+  };
+  const heroImg = await beeldUri(S.hero);
+  const extraImgs = [];
+  for(const uri of S.extra){ const i=await beeldUri(uri); if(i) extraImgs.push(i); }
+
+  const mm = w => w*72/25.4;   /* de schuifknoppen staan in mm, de PDF in punten */
+
+  /* --- voetregel: op elke pagina de eigen tekst plus het paginanummer. Het
+         totaal weten we pas achteraf, dus dat wordt na afloop ingevuld. --- */
+  function bladVoet(){
+    voet();
+    if(S.voettekst) text(Mg, H-MB+30, 7.5, S.voettekst, {color:C.grey});
+  }
+
+  /* --- pagina 1 --- */
+  beginPage(true);
+  paginaKop(S.titel || fam.naam, S.ondertitel);
+
+  /* kenmerk-balk: de opvallendste waarden op een rij, zoals op een productpagina */
+  if(S.toon.badges){
+    const balk=[];
+    S.specs.forEach(k=>{
+      const s=SPECS.find(x=>x.k===k);
+      if(!s) return;
+      const w=specBalk(s,fam,varianten);
+      if(w) balk.push(w);
+    });
+    if(balk.length){
+      let bx=Mg;
+      const bh=15;
+      balk.slice(0,7).forEach(t=>{
+        const bw=meet(t,8,{bold:true})+14;
+        if(bx+bw>W-Mg) return;
+        rect(bx,y,bw,bh,C.lt);
+        text(bx+7,y+3.4,8,t,{bold:true,color:C.hoofd});
+        bx+=bw+5;
+      });
+      y+=bh+12;
+    }
+  }
+
+  /* Hoofdbeeld. Passend geschaald en niet vullend: een productfoto waar de rand
+     van het armatuur af is gesneden is erger dan wat wit ernaast. */
+  if(heroImg){
+    const h=mm(S.heroHoogte), b=W-2*Mg;
+    need(h+10);
+    rect(Mg,y,b,h,C.shade);
+    beeldPassend(heroImg, Mg, y, b, h);
+    rect(Mg,y,b,h,null,C.line,0.7);
+    y+=h+12;
+  }
+
+  /* teksten */
+  if(S.toon.teksten){
+    if(S.intro.trim()){
+      kop2('Over '+(S.titel||fam.naam));
+      alinea(S.intro);
+    }
+    S.blokken.filter(b=>b.aan && (b.kop.trim()||b.tekst.trim())).forEach(b=>{
+      if(b.kop.trim()) kop2(b.kop);
+      if(b.tekst.trim()) alinea(b.tekst);
+    });
+  }
+
+  /* extra beelden, naast elkaar op de beschikbare breedte */
+  if(extraImgs.length){
+    const z=mm(S.extraGrootte);
+    const perRij=Math.max(1,Math.floor((W-2*Mg+8)/(z+8)));
+    for(let i=0;i<extraImgs.length;i+=perRij){
+      const rijBeelden=extraImgs.slice(i,i+perRij);
+      need(z+10);
+      let bx=Mg;
+      rijBeelden.forEach(img=>{
+        rect(bx,y,z,z,C.shade);
+        beeldPassend(img, bx, y, z, z);
+        rect(bx,y,z,z,null,C.line,0.7);
+        bx+=z+8;
+      });
+      y+=z+8;
+    }
+    y+=4;
+  }
+
+  /* specificaties */
+  if(S.toon.specs && S.specs.length){
+    kop2('Specificaties');
+    const T=tableStart([{w:160,h:'Kenmerk'},{w:W-2*Mg-160,h:'Waarde'}]);
+    S.specs.forEach(k=>{
+      const s=SPECS.find(x=>x.k===k);
+      if(!s) return;
+      const w=specTekst(s,fam,varianten);
+      if(w) tableRow(T,[s.l,w]);
+    });
+    y+=10;
+  }
+
+  /* assortiment */
+  if(S.toon.assortiment && varianten.length){
+    kop2('Assortiment');
+    const kolommen = S.toon.artikelcodes
+      ? [{w:95,h:'Artikelcode'},{w:W-2*Mg-95-70,h:'Uitvoering'},{w:70,h:'Lichtstroom'}]
+      : [{w:W-2*Mg-70,h:'Uitvoering'},{w:70,h:'Lichtstroom'}];
+    const T=tableStart(kolommen);
+    varianten.forEach(v=>{
+      const rij = S.toon.artikelcodes
+        ? [v.artikelcode, variantLabel(v), bereik(v.lichtstroom_lm,'lm')]
+        : [variantLabel(v), bereik(v.lichtstroom_lm,'lm')];
+      tableRow(T,rij);
+    });
+  }
+
+  flush();
+  /* Voetregels pas nu: beginPage() maakt de pagina aan en op dat moment is nog
+     niet bekend hoeveel het er worden. */
+  const orig=pg;
+  paginas.forEach((p,i)=>{
+    pg=p;
+    voet();
+    if(S.voettekst) text(Mg, H-40, 7.5, S.voettekst, {color:C.grey});
+    text(W-Mg, H-40, 7.5, (i+1)+' / '+paginas.length, {align:'right', color:C.grey});
+  });
+  pg=orig;
+
+  function kop2(t){
+    need(30); y+=6;
+    text(Mg,y,12.5,String(t).toUpperCase(),{bold:true,cond:true,color:C.hoofd});
+    y+=16; line(Mg,y-4,W-Mg,y-4,0.8,C.line);
+  }
+  function alinea(t){
+    String(t).split(/\n{2,}/).forEach(stuk=>{
+      wrapBreedte(stuk.replace(/\n/g,' '), W-2*Mg, 9, {}).forEach(r=>{
+        need(13); text(Mg,y,9,r,{color:C.tekst}); y+=12.5;
+      });
+      y+=5;
+    });
+  }
+
+  if(!varianten.length) meldingen.push('Er is geen enkel artikel aangevinkt in het assortiment.');
+  if(S.toon.teksten && !S.intro.trim() && !S.blokken.some(b=>b.aan&&b.tekst.trim()))
+    meldingen.push('Er staat nog geen verkooptekst in het blad.');
+  if(!S.hero) meldingen.push('Er is nog geen hoofdbeeld gekozen.');
+
+  return {bytes: await doc.save(), meldingen, paginas:paginas.length};
+}
+
+/* ======================= voorbeeld en download ======================= */
+
+let voorbeeldUrl=null, bezigNu=false, opnieuw=false, wachter=null;
+
+/* Elke wijziging vraagt een nieuw voorbeeld aan. Tekenen kost een halve seconde,
+   dus we wachten even af tot het typen stilvalt, en er loopt er nooit meer dan
+   een tegelijk - komt er tijdens het tekenen een nieuwe wijziging binnen, dan
+   volgt er direct daarna nog een ronde. */
+function plan(){
+  bewaar();
+  clearTimeout(wachter);
+  wachter=setTimeout(ververs, 350);
+}
+async function ververs(){
+  if(!S.familieId) return;
+  if(bezigNu){ opnieuw=true; return; }
+  bezigNu=true; $('bezig').style.display='';
+  try{
+    const {bytes, meldingen, paginas} = await bouwBlad();
+    toonMeldingen(meldingen);
+    if(bytes){
+      const url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+      /* #toolbar=0 haalt de balk van de ingebouwde pdf-viewer weg; niet elke
+         browser luistert ernaar, maar waar het werkt oogt het rustiger. */
+      $('voorbeeld').src=url+'#toolbar=0&navpanes=0';
+      if(voorbeeldUrl) URL.revokeObjectURL(voorbeeldUrl);
+      voorbeeldUrl=url;
+      const fam=familie();
+      $('stand').innerHTML='<b>'+(S.titel||fam.naam)+'</b> — '+paginas+
+        ' pagina\'s · '+gekozenVarianten().length+' artikelen'+
+        (hervat ? ' · instellingen van de vorige keer overgenomen' : '');
+    }
+  }catch(err){
+    console.error(err);
+    toonMeldingen(['Het blad kon niet worden getekend: '+(err&&err.message)]);
+  }finally{
+    bezigNu=false; $('bezig').style.display='none';
+    if(opnieuw){ opnieuw=false; ververs(); }
+  }
+}
+function toonMeldingen(lijst){
+  const m=$('melding');
+  if(!lijst || !lijst.length){ m.className='melding leeg'; m.innerHTML=''; return; }
+  m.className='melding';
+  m.innerHTML='<b>Nog aan te vullen</b><ul>'+
+    lijst.map(t=>'<li>'+t.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))+'</li>').join('')+'</ul>';
+}
+
+$('btnPdf').onclick=async()=>{
+  const knop=$('btnPdf'), oud=knop.textContent;
+  knop.disabled=true; knop.textContent='bezig…';
+  try{
+    const {bytes}=await bouwBlad();
+    if(!bytes) return;
+    const fam=familie();
+    const naam=(S.titel||fam.naam).toLowerCase().replace(/[^a-z0-9]+/g,'-')
+      .replace(/^-+|-+$/g,'') || 'presenter';
+    const url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    const a=document.createElement('a');
+    a.href=url; a.download=naam+'.pdf';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  }finally{ knop.disabled=false; knop.textContent=oud; }
+};
+$('btnHerstel').onclick=()=>{
+  if(!S.familieId) return;
+  if(!confirm('Alle instellingen van deze familie terugzetten op de standaard?')) return;
+  const id=S.familieId;
+  try{
+    const alles=JSON.parse(localStorage.getItem(BEWAARSLEUTEL)||'{}');
+    delete alles[id];
+    localStorage.setItem(BEWAARSLEUTEL, JSON.stringify(alles));
+  }catch(e){}
+  zetFamilie(id);
+};
+
+/* ======================= start ======================= */
+tekenPaneel();
+</script>
 </body>
 </html>

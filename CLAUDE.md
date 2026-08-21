@@ -14,6 +14,12 @@ There is no build system, package manager, or test suite. Everything — HTML, C
 
 `index.html` is one tab of a small suite of standalone pages that share a header: a Distrilight logo plus a row of `.badge` links (`armaturenboek.html`, `presenters.html`, `vergelijking.html`, `index.html`, and the still-empty `lichtlijn.html` / `intake.html` / `snoerenplan.html` / `bandrasters.html`). Each page carries its own copy of that markup with `class="badge active"` on itself, so **adding a page means editing the badge row in every other page** — there is no shared include.
 
+`presenters.html` is the **Presenters** tool: pick a product family and it composes a product sheet from the data — heading, an at-a-glance spec bar, sales text, images, a spec table and the assortment. Its live preview on the right is not an HTML mock-up of the sheet but **the real PDF** in an iframe, regenerated (debounced) on every change, so the preview cannot drift from the export. Settings are kept per family in `localStorage`.
+
+It reads `armaturen-data.js` in the repo root — the same product data the vergelijker uses, wrapped as `window.ARMATUREN_DATA` because `fetch()` is blocked over `file://` and this page, unlike `vergelijking.html`, is not generated. Regenerate it with `python3 vergelijker/bouw-armaturen-data.py` after every change to `vergelijker/data/armaturen.json`; the file is committed.
+
+What the tool can fill in by itself is limited by the data: there are no prices, no product photography and no accessories in `armaturen.json`, so images and sales copy are supplied by the user (paste with Ctrl+V or pick a file) and prices are left out entirely. The spec catalogue is the `SPECS` table in the page; numeric fields (`reeks`) are summarised into one range across the selected variants — a family with 6, 9, 15 and 21 W reads "6-21W", not four separate values.
+
 `vergelijking.html` is the **Armatuurvergelijker**: per bestekpositie it puts the installer's reference fixture next to the Distrilight alternative. Unlike the rest of the suite it is *generated*, so don't edit it by hand — the sources live in `vergelijker/` (see `vergelijker/README.md`):
 
 - `vergelijker/index-template.html` — the tool itself; this is what you change.
