@@ -51,6 +51,7 @@
             "min": null,
             "max": 1650
           },
+          "buitenmaat_mm": 150,
           "kleur": "wit",
           "uitvoering": "opbouw",
           "ip": 54,
