@@ -239,7 +239,7 @@ function armLabel(a){ return 'Armatuur '+a.id.replace('arm',''); }
 
 /* ---------- armatuurgroepen (= presenter-types) — zelfde tabel/herkenning als index.html ----------
    Bewust duplicaat, geen gedeelde module: bij toevoegingen aan index.html's ARM_GROEPEN moet deze
-   lijst met de hand worden bijgewerkt. Laatst gesynchroniseerd t/m ag43 + de lichtlijn-groepen. */
+   lijst met de hand worden bijgewerkt. Laatst gesynchroniseerd t/m ag44 + de lichtlijn-groepen. */
 const ARM_GROEPEN = [
   {id:'ag01', naam:'Punto', zoektermen:[]},
   {id:'ag02', naam:'Piccolo', zoektermen:[]},
@@ -284,6 +284,7 @@ const ARM_GROEPEN = [
   {id:'ag41', naam:'Noodverlichting Uni', zoektermen:['Uni']},
   {id:'ag42', naam:'Waterdicht Hermes', zoektermen:['Hermes']},
   {id:'ag43', naam:'Module Mico', zoektermen:['Mico']},
+  {id:'ag44', naam:'Neo', zoektermen:[]},
   {id:'lichtlijn-prxline', naam:'Lichtlijn PRX-Line', zoektermen:['Line']},
   {id:'lichtlijn-uniline', naam:'Lichtlijn PRX-Uniline', zoektermen:['Uniline']},
   {id:'lichtlijn-retroline', naam:'Lichtlijn Retroline PRX', zoektermen:['Retroline']},
@@ -504,9 +505,18 @@ async function assembleArmaturenboekPdf(){
   return eind;
 }
 
+function veiligBestandsdeel(s){
+  /* Filesystem-onveilige tekens eruit (als spatie, zodat woorden niet aan elkaar
+     plakken), spaties/hoofdletters verder intact - dit hoeft niet zo hard geslagen
+     te worden als een url-slug, het is voor eigen gebruik bij download. */
+  return String(s||'').replace(/[\\/:*?"<>|]/g,' ').replace(/\s+/g,' ').trim();
+}
 function pdfBestandsnaam(){
-  const nm=(st.proj||'armaturenboek').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'armaturenboek';
-  return nm+'-armaturenboek.pdf';
+  const nr = (st.projNr||'').trim().replace(/^p\.?\s*/i,''); // "P.11673LS" -> "11673LS"
+  const naam = veiligBestandsdeel(st.proj);
+  const inst = veiligBestandsdeel(st.installateur).split(/\s+/)[0] || ''; // alleen eerste woord
+  if(!nr && !naam && !inst) return 'armaturenboek.pdf';
+  return ['AB'+nr, inst, naam].filter(Boolean).join(' - ') + '.pdf';
 }
 
 async function maakPdfBytes(){

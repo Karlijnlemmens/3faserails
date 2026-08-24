@@ -51,6 +51,7 @@ const GROEPEN = [
   ['ag39', 'Lumio'], ['ag40', 'Noodverlichting Dot'], ['ag41', 'Noodverlichting Uni'],
   ['ag42', 'Waterdicht Hermes'],
   ['ag43', 'Module Mico'],
+  ['ag44', 'Neo'],
   ['achterpaginas', 'AB Achterpaginas'],
 ];
 const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
