@@ -1527,7 +1527,12 @@ const ARM_VOCAB = (()=>{ const s=new Set();
   return s; })();
 
 function armZinvolleTokens(txt){
-  return armTokens(txt).filter(t=>
+  /* "UGR<19" e.d. is een glare-index spec-waarde die op vrijwel elk paneel/downlight-
+     spec-blad staat, geen verwijzing naar het type "Essence Ugr" (ag18) - anders wint
+     dat type onterecht mee zodra iemand een volledige spec-tekst plakt die toevallig
+     ook een UGR-waarde bevat. Kaal "Ugr" (zonder </≤ + getal erachter) blijft intact. */
+  const schoon = String(txt||'').replace(/ugr\s*[<≤]\s*\d+/gi, ' ');
+  return armTokens(schoon).filter(t=>
     ARM_VOCAB.has(t) || !(ARM_STOPWOORDEN.has(t) || ARM_GETAL.test(t) || ARM_CODE.test(t)));
 }
 /* Herkent de groep in vrije tekst. Scoort per variant hoeveel van zijn woorden
