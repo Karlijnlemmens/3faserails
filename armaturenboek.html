@@ -693,53 +693,75 @@ async function previewPdf(){
 }
 
 /* ---------- armaturenlijst-UI (zelfde bouwstijl als buildArmList in index.html) ---------- */
+function maakArmRij(a){
+  const s=st.armaturen[a.id];
+  const row=document.createElement('div'); row.className='c2-armrow';
+  const codeNaamInp=document.createElement('input'); codeNaamInp.type='text';
+  codeNaamInp.className='c2-textinp c2-aanduiding';
+  codeNaamInp.placeholder='CODE'; codeNaamInp.value=s.aanduiding||'';
+  codeNaamInp.addEventListener('change', ()=>{ s.aanduiding=codeNaamInp.value; updateSummary(); });
+  const nameInp=document.createElement('input'); nameInp.type='text'; nameInp.className='c2-textinp c2-armnaam';
+  nameInp.placeholder='Volledige naam (bijv. Punto 15W wit)'; nameInp.value=s.name||'';
+  const badge=document.createElement('span'); badge.className='c2-armrecog';
+  function paintBadge(){
+    const g = armGroepVan(s);
+    if(g){
+      badge.textContent = (presenterAanwezig(g.id)?'✓ ':'⚠ ')+g.naam;
+      badge.className = 'c2-armrecog '+(presenterAanwezig(g.id)?'ok':'warn');
+      badge.title = presenterAanwezig(g.id)
+        ? 'Presenter '+g.naam+' wordt in het armaturenboek opgenomen.'
+        : 'Type herkend, maar de presenter-PDF van '+g.naam+' ontbreekt nog in presenters-data.js.';
+    } else if(!nameInp.value.trim()){
+      badge.textContent=''; badge.className='c2-armrecog'; badge.title='';
+    } else {
+      badge.textContent='Kies type'; badge.className='c2-armrecog miss';
+      badge.title='Type niet herkend uit de naam — pas de omschrijving aan zodat het type duidelijk wordt.';
+    }
+  }
+  paintBadge();
+  nameInp.addEventListener('input', paintBadge);
+  nameInp.addEventListener('change', ()=>{ s.name=nameInp.value; paintBadge(); updateSummary(); });
+  const codeInp=document.createElement('input'); codeInp.type='text'; codeInp.className='c2-textinp c2-armcode';
+  codeInp.placeholder='Artikelcode';
+  codeInp.value = s.code||'';
+  codeInp.addEventListener('change', ()=>{ s.code=codeInp.value; updateSummary(); });
+  [codeNaamInp,nameInp,codeInp].forEach(inp=>inp.addEventListener('keydown', e=>{ if(e.key==='Enter') inp.blur(); }));
+  const qty=document.createElement('input'); qty.type='text'; qty.inputMode='numeric'; qty.className='c2-qtyinp';
+  qty.value=String(s.qty);
+  function commitQty(){ const v=Math.max(0, parseInt(qty.value)||0); s.qty=v; qty.value=String(v); updateSummary(); }
+  qty.addEventListener('change', commitQty);
+  qty.addEventListener('keydown', e=>{ if(e.key==='Enter') qty.blur(); });
+  row.appendChild(codeNaamInp); row.appendChild(codeInp); row.appendChild(nameInp); row.appendChild(badge);
+  row.appendChild(qty);
+  return row;
+}
 function buildArmList(){
   const container=$('abArmList'); container.innerHTML='';
-  ARMATUREN.forEach(a=>{
-    const s=st.armaturen[a.id];
-    const row=document.createElement('div'); row.className='c2-armrow';
-    const codeNaamInp=document.createElement('input'); codeNaamInp.type='text';
-    codeNaamInp.className='c2-textinp c2-aanduiding';
-    codeNaamInp.placeholder='CODE'; codeNaamInp.value=s.aanduiding||'';
-    codeNaamInp.addEventListener('change', ()=>{ s.aanduiding=codeNaamInp.value; updateSummary(); });
-    const nameInp=document.createElement('input'); nameInp.type='text'; nameInp.className='c2-textinp c2-armnaam';
-    nameInp.placeholder='Volledige naam (bijv. Punto 15W wit)'; nameInp.value=s.name||'';
-    const badge=document.createElement('span'); badge.className='c2-armrecog';
-    function paintBadge(){
-      const g = armGroepVan(s);
-      if(g){
-        badge.textContent = (presenterAanwezig(g.id)?'✓ ':'⚠ ')+g.naam;
-        badge.className = 'c2-armrecog '+(presenterAanwezig(g.id)?'ok':'warn');
-        badge.title = presenterAanwezig(g.id)
-          ? 'Presenter '+g.naam+' wordt in het armaturenboek opgenomen.'
-          : 'Type herkend, maar de presenter-PDF van '+g.naam+' ontbreekt nog in presenters-data.js.';
-      } else if(!nameInp.value.trim()){
-        badge.textContent=''; badge.className='c2-armrecog'; badge.title='';
-      } else {
-        badge.textContent='Kies type'; badge.className='c2-armrecog miss';
-        badge.title='Type niet herkend uit de naam — pas de omschrijving aan zodat het type duidelijk wordt.';
-      }
-    }
-    paintBadge();
-    nameInp.addEventListener('input', paintBadge);
-    nameInp.addEventListener('change', ()=>{ s.name=nameInp.value; paintBadge(); updateSummary(); });
-    const codeInp=document.createElement('input'); codeInp.type='text'; codeInp.className='c2-textinp c2-armcode';
-    codeInp.placeholder='Artikelcode';
-    codeInp.value = s.code||'';
-    codeInp.addEventListener('change', ()=>{ s.code=codeInp.value; updateSummary(); });
-    [codeNaamInp,nameInp,codeInp].forEach(inp=>inp.addEventListener('keydown', e=>{ if(e.key==='Enter') inp.blur(); }));
-    const qty=document.createElement('input'); qty.type='text'; qty.inputMode='numeric'; qty.className='c2-qtyinp';
-    qty.value=String(s.qty);
-    function commitQty(){ const v=Math.max(0, parseInt(qty.value)||0); s.qty=v; qty.value=String(v); updateSummary(); }
-    qty.addEventListener('change', commitQty);
-    qty.addEventListener('keydown', e=>{ if(e.key==='Enter') qty.blur(); });
-    row.appendChild(codeNaamInp); row.appendChild(codeInp); row.appendChild(nameInp); row.appendChild(badge);
-    row.appendChild(qty);
-    container.appendChild(row);
-  });
+  ARMATUREN.forEach(a=>container.appendChild(maakArmRij(a)));
+}
+/* Geen vaste bovengrens aan het aantal regels: zodra de laatste rij niet meer helemaal
+   leeg is, komt er automatisch een nieuw leeg slot bij (zie updateSummary()). Na het
+   toevoegen is de nieuwe laatste rij weer leeg, dus er ontstaat nooit meer dan één
+   nieuwe rij per keer. */
+function armSlotLeeg(s){
+  return !s.aanduiding && !s.name && !s.code && !(s.qty>0);
+}
+function voegArmatuurSlotToe(){
+  const nieuw = {id:'arm'+String(ARMATUREN.length+1).padStart(2,'0')};
+  ARMATUREN.push(nieuw);
+  st.armaturen[nieuw.id] = st.armaturen[nieuw.id] || {aanduiding:'',name:'',code:'',groep:'',qty:0};
+  return nieuw;
+}
+function zorgVoorLegeSlot(){
+  const laatste = ARMATUREN[ARMATUREN.length-1];
+  if(!armSlotLeeg(st.armaturen[laatste.id])){
+    const nieuw = voegArmatuurSlotToe();
+    $('abArmList').appendChild(maakArmRij(nieuw));
+  }
 }
 
 function updateSummary(){
+  zorgVoorLegeSlot();
   const boek = armaturenboek();
   const totArm = ARMATUREN.reduce((s,a)=> s + (st.armaturen[a.id].qty||0), 0);
   $('abTotArm').textContent = String(totArm);
@@ -787,6 +809,13 @@ if(OPGESLAGEN_PROJECT){
       if(k==='armaturen'){ st[k] = Object.assign({}, st[k], s[k]); }
       else { st[k]=s[k]; }
     });
+    /* Geen vaste bovengrens meer aan het aantal regels (zie zorgVoorLegeSlot()): een
+       opgeslagen project kan dus meer sloten hebben dan de standaard 12 - die moeten
+       ook in ARMATUREN zelf staan, anders tekent buildArmList() ze nooit. */
+    Object.keys(st.armaturen).forEach(id=>{
+      if(!ARMATUREN.some(a=>a.id===id)) ARMATUREN.push({id});
+    });
+    ARMATUREN.sort((a,b)=> parseInt(a.id.slice(3),10) - parseInt(b.id.slice(3),10));
   }catch(err){
     console.error('Kon opgeslagen project niet laden:', err);
     alert('Het opgeslagen project kon niet worden geladen: '+(err&&err.message?err.message:err));
