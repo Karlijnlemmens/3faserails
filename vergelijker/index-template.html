@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="utf-8">
+<!--__BASE_HREF__--><!-- wordt bij "Project opslaan" een <base href> naar de installatiemap; blijft hier inert. -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Armatuurvergelijker — Distrilight</title>
 <!--SJABLOON--><!-- ==========================================================================
@@ -225,12 +226,10 @@ button,input,select,textarea{font:inherit;color:inherit}
   
   <div class="spacer"></div>
   <button class="pill ghost" id="btnLoadData">Productdata laden</button>
-  <button class="pill ghost" id="btnOpen">Project openen</button>
-  <button class="pill" id="btnSave">Project opslaan</button>
+  <button class="pill" id="btnSave" title="Slaat een kopie van deze tool op met het huidige project erin - dubbelklikken op dat bestand opent de tool weer precies zo ingevuld">Project opslaan</button>
   <button class="pill" id="btnPdf">PDF-voorbeeld</button>
   <button class="pill solid" id="btnPrint">Afdrukken</button>
   <input type="file" id="fileData" accept=".json" class="hidden">
-  <input type="file" id="fileProj" accept=".json" class="hidden">
 </div>
 
 <div class="projbar">
@@ -260,6 +259,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 let DATA = /*__ARMATUREN_DATA__*/ null;
 
 /* ======================= state ======================= */
+/* Wordt bij "Project opslaan" (zie slaProjectOp()) volgeschreven met het huidige
+   project - blijft null in de originele tool, net als bij index.html. */
+const OPGESLAGEN_PROJECT = /*__PROJECT_DATA_START__*/null/*__PROJECT_DATA_END__*/;
 const S = {
   project:{nr:'',naam:'',inst:'',datum:'',lagen:['BG'],type:'nieuwbouw'},
   posities:[], actief:0
@@ -1004,17 +1006,42 @@ document.getElementById('pType').addEventListener('change',e=>{S.project.type=e.
 document.getElementById('btnAdd').onclick=()=>{S.posities.push(nieuwePositie());S.actief=S.posities.length-1;render()};
 document.getElementById('btnPrint').onclick=()=>window.print();
 
-/* opslaan / openen */
-function download(naam,obj){
-  const b=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=naam; a.click();
+/* ---------- project opslaan (zelfde patroon als index.html se slaProjectOp) ----------
+   Bakt het huidige project in een zelfstandige kopie van deze tool: dubbelklikken op het
+   gedownloade bestand opent het project direct, zonder dat vergelijking.html al open
+   hoeft te staan. Geen "Openen"-knop nodig - dat is het hele punt van dit patroon. */
+function projectBestandsnaam(){
+  const nm=(S.project.nr||S.project.naam||'vergelijker').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'vergelijker';
+  return nm+'-vergelijker.html';
 }
-document.getElementById('btnSave').onclick=()=>
-  download((S.project.nr||'project')+'.json',{project:S.project,posities:S.posities});
-document.getElementById('btnOpen').onclick=()=>document.getElementById('fileProj').click();
-document.getElementById('fileProj').onchange=e=>leesJson(e.target.files[0],o=>{
-  S.project=o.project||S.project; S.posities=o.posities||[]; S.actief=0; vulProjectVelden(); render();
-});
+function slaProjectOp(){
+  const payload = { versie:1, S:JSON.parse(JSON.stringify({project:S.project, posities:S.posities, actief:S.actief})) };
+  let json = JSON.stringify(payload).replace(/<\/script/gi, '<\\/script');
+
+  /* document.baseURI is bij de originele tool gewoon zijn eigen map; bij een al
+     eerder opgeslagen projectbestand maakt de <base href> die er al in zit baseURI
+     gelijk aan de OORSPRONKELIJKE installatiemap, ongeacht waar dit bestand nu op
+     schijf staat - opnieuw opslaan geeft dus geen padverschuiving. */
+  const baseHref = new URL('.', document.baseURI).href;
+
+  const dataMarker = /\/\*__PROJECT_DATA_START__\*\/[\s\S]*?\/\*__PROJECT_DATA_END__\*\//;
+  const baseMarker = /<!--__BASE_HREF__-->|<base href="[^"]*">/;
+  let html = document.documentElement.outerHTML;
+  if(!dataMarker.test(html) || !baseMarker.test(html)){
+    alert('Opslaan mislukt: de opslag-plekken zijn niet gevonden in de broncode.');
+    return;
+  }
+  html = html.replace(dataMarker, '/*__PROJECT_DATA_START__*/'+json+'/*__PROJECT_DATA_END__*/');
+  html = html.replace(baseMarker, '<base href="'+baseHref.replace(/"/g,'&quot;')+'">');
+  html = '<!doctype html>\n' + html;   /* outerHTML bevat de <!DOCTYPE> zelf niet */
+
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download=projectBestandsnaam();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(_){ } }, 4000);
+}
+document.getElementById('btnSave').onclick=slaProjectOp;
 document.getElementById('btnLoadData').onclick=()=>document.getElementById('fileData').click();
 document.getElementById('fileData').onchange=e=>leesJson(e.target.files[0],o=>{
   if(!o.families){alert('Dit bestand bevat geen "families". Controleer of je armaturen.json hebt gekozen.');return}
@@ -1356,7 +1383,20 @@ document.addEventListener('paste',e=>{
 
 /* start */
 if(DATA) dataTag(DATA); else dataTag(null);
-S.posities.push(nieuwePositie('A'));
+/* Een opgeslagen project (dubbelgeklikt .html-bestand, zie slaProjectOp()) herstellen
+   i.p.v. een lege startpositie aan te maken. */
+if(OPGESLAGEN_PROJECT){
+  try{
+    const s = OPGESLAGEN_PROJECT.S || {};
+    if(s.project) S.project = Object.assign({}, S.project, s.project);
+    if(s.posities) S.posities = s.posities;
+    if(typeof s.actief==='number') S.actief = s.actief;
+  }catch(err){
+    console.error('Kon opgeslagen project niet laden:', err);
+    alert('Het opgeslagen project kon niet worden geladen: '+(err&&err.message?err.message:err));
+  }
+}
+if(!S.posities.length) S.posities.push(nieuwePositie('A'));
 vulProjectVelden(); render();
 </script>
 </body>

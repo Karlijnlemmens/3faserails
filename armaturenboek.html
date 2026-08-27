@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
+<!--__BASE_HREF__--><!-- wordt bij "Project opslaan" een <base href> naar de installatiemap; blijft hier inert. -->
 <title>Armaturenboek — Distrilight tools</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -204,6 +205,7 @@
       <div class="cfg-actions">
         <button id="abPdf">Download PDF</button>
         <button id="abPreview">Preview PDF</button>
+        <button id="abProjectOpslaan" title="Slaat een kopie van deze tool op met het huidige project erin - dubbelklikken op dat bestand opent de tool weer precies zo ingevuld">Project opslaan</button>
       </div>
     </div>
   </div>
@@ -228,6 +230,9 @@
 const $=id=>document.getElementById(id);
 
 /* ---------- projectstate ---------- */
+/* Wordt bij "Project opslaan" (zie slaProjectOp()) volgeschreven met het huidige
+   project - blijft null in de originele tool, net als bij index.html. */
+const OPGESLAGEN_PROJECT = /*__PROJECT_DATA_START__*/null/*__PROJECT_DATA_END__*/;
 const st = { proj:'', projNr:'', installateur:'', datum:'', armaturen:{} };
 
 /* ---------- armaturen: 12 vaste slots, zelfde opzet als de Railconfigurator ---------- */
@@ -618,6 +623,42 @@ async function metBezigKnop(id, fn){
   try{ return await fn(); }
   finally{ knop.disabled=false; knop.textContent=oud; }
 }
+
+/* ---------- project opslaan (zelfde patroon als index.html se slaProjectOp) ----------
+   Bakt het huidige project in een zelfstandige kopie van deze tool: dubbelklikken op het
+   gedownloade bestand opent het project direct, zonder dat armaturenboek.html al open
+   hoeft te staan. Geen "Openen"-knop nodig - dat is het hele punt van dit patroon. */
+function projectBestandsnaam(){
+  const nm=(st.proj||'armaturenboek').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'armaturenboek';
+  return nm+'-armaturenboek.html';
+}
+function slaProjectOp(){
+  const payload = { versie:1, st:JSON.parse(JSON.stringify(st)) };
+  let json = JSON.stringify(payload).replace(/<\/script/gi, '<\\/script');
+
+  /* document.baseURI is bij de originele tool gewoon zijn eigen map; bij een al
+     eerder opgeslagen projectbestand maakt de <base href> die er al in zit baseURI
+     gelijk aan de OORSPRONKELIJKE installatiemap, ongeacht waar dit bestand nu op
+     schijf staat - opnieuw opslaan geeft dus geen padverschuiving. */
+  const baseHref = new URL('.', document.baseURI).href;
+
+  const dataMarker = /\/\*__PROJECT_DATA_START__\*\/[\s\S]*?\/\*__PROJECT_DATA_END__\*\//;
+  const baseMarker = /<!--__BASE_HREF__-->|<base href="[^"]*">/;
+  let html = document.documentElement.outerHTML;
+  if(!dataMarker.test(html) || !baseMarker.test(html)){
+    alert('Opslaan mislukt: de opslag-plekken zijn niet gevonden in de broncode.');
+    return;
+  }
+  html = html.replace(dataMarker, '/*__PROJECT_DATA_START__*/'+json+'/*__PROJECT_DATA_END__*/');
+  html = html.replace(baseMarker, '<base href="'+baseHref.replace(/"/g,'&quot;')+'">');
+  html = '<!doctype html>\n' + html;   /* outerHTML bevat de <!DOCTYPE> zelf niet */
+
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download=projectBestandsnaam();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(_){ } }, 4000);
+}
 async function exportPdf(){
   return metBezigKnop('abPdf', async()=>{
     const bytes = await maakPdfBytes();
@@ -727,6 +768,25 @@ st.armaturen = ARMATUREN.reduce((o,a)=>{o[a.id]={aanduiding:'',name:'',code:'',g
 (function(){ const d=new Date();
   st.datum = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 })();
+/* Een opgeslagen project (dubbelgeklikt .html-bestand, zie slaProjectOp()) herstellen
+   over de zojuist gezette defaults heen - vóór buildArmList()/updateSummary() zodat
+   die de herstelde staat meteen goed tonen, zonder aparte resync-code. */
+if(OPGESLAGEN_PROJECT){
+  try{
+    const s = OPGESLAGEN_PROJECT.st || {};
+    /* armaturen is een sloten-map (arm01, arm02, ...): mergen i.p.v. vervangen, anders
+       vallen sloten die na het opslaan zijn toegevoegd terug op undefined i.p.v. hun
+       lege default, en crasht buildArmList(). */
+    Object.keys(st).forEach(k=>{
+      if(!Object.prototype.hasOwnProperty.call(s,k)) return;
+      if(k==='armaturen'){ st[k] = Object.assign({}, st[k], s[k]); }
+      else { st[k]=s[k]; }
+    });
+  }catch(err){
+    console.error('Kon opgeslagen project niet laden:', err);
+    alert('Het opgeslagen project kon niet worden geladen: '+(err&&err.message?err.message:err));
+  }
+}
 buildArmList();
 updateSummary();
 $('abProj').value=st.proj; $('abProjNr').value=st.projNr; $('abInst').value=st.installateur; $('abDatum').value=st.datum;
@@ -736,6 +796,7 @@ $('abInst').addEventListener('input', e=>{ st.installateur=e.target.value; });
 $('abDatum').addEventListener('input', e=>{ st.datum=e.target.value; });
 $('abPdf').addEventListener('click', exportPdf);
 $('abPreview').addEventListener('click', previewPdf);
+$('abProjectOpslaan').addEventListener('click', slaProjectOp);
 $('abPreviewClose').addEventListener('click', sluitVoorbeeld);
 $('abPreviewDl').addEventListener('click', exportPdf);
 $('abPreviewBg').addEventListener('click', e=>{ if(e.target.id==='abPreviewBg') sluitVoorbeeld(); });
