@@ -12,7 +12,7 @@ There is no build system, package manager, or test suite. Everything — HTML, C
 
 ### The rest of the suite
 
-`index.html` is one tab of a small suite of standalone pages that share a header: a Distrilight logo plus a row of `.badge` links (`armaturenboek.html`, `presenters.html`, `vergelijking.html`, `index.html`, and the still-empty `lichtlijn.html` / `intake.html` / `snoerenplan.html` / `bandrasters.html`). Each page carries its own copy of that markup with `class="badge active"` on itself, so **adding a page means editing the badge row in every other page** — there is no shared include.
+`index.html` is one tab of a small suite of standalone pages that share a header: a Distrilight logo plus a row of `.badge` links (`armaturenboek.html`, `presenters.html`, `dlc.html`, `vergelijking.html`, `index.html`, and the still-empty `lichtlijn.html` / `intake.html` / `snoerenplan.html` / `bandrasters.html`). Each page carries its own copy of that markup with `class="badge active"` on itself, so **adding a page means editing the badge row in every other page** — there is no shared include.
 
 `presenters.html` is the **Presenters** tool: pick a product family and it composes a product sheet from the data — heading, an at-a-glance spec bar, sales text, images, a spec table and the assortment. Its live preview on the right is not an HTML mock-up of the sheet but **the real PDF** in an iframe, regenerated (debounced) on every change, so the preview cannot drift from the export. Settings are kept per family in `localStorage`.
 
@@ -26,11 +26,17 @@ It reads `armaturen-data.js` in the repo root — the same product data the verg
 
 What the tool can fill in by itself is limited by the data: there are no prices, no product photography and no accessories in `armaturen.json`, so images and sales copy are supplied by the user (paste with Ctrl+V or pick a file) and prices are left out entirely. The spec catalogue is the `SPECS` table in the page; numeric fields (`reeks`) are summarised into one range across the selected variants — a family with 6, 9, 15 and 21 W reads "6-21W", not four separate values.
 
+`dlc.html` is the **DLC specials** tool: paste a supplier's specification text for a fixture that is *not* in the product data, add photos, and it produces a DLC product sheet. Unlike the rest of the suite this one carries the **DLC** house style, taken from the supplied design (`DLC Productblad.indd`, example Norma Track) — a black header band with the DLC wordmark, Poppins for the headings and Helvetica for the tables. Every measurement in the `M` table at the top of `bouwBlad()` was read out of that PDF rather than eyeballed, and `y` there is a **baseline**, not a box top (`tekst()` converts) — that is what keeps the measured numbers usable as-is.
+
+The header band is a JPEG lifted from the supplied PDF and baked in as `merk/dlc-kopbalk.jpg` → `MERK_BEELDEN.dlcKopbalk`. Field groups are fixed (that is what makes the sheet recognisable); within a group fields can be emptied, renamed or added. **An empty field is left off the sheet, and a group whose fields are all empty disappears with its heading.** A special is a one-off, so it saves to a small JSON file rather than to browser storage.
+
 `vergelijking.html` is the **Armatuurvergelijker**: per bestekpositie it puts the installer's reference fixture next to the Distrilight alternative. Unlike the rest of the suite it is *generated*, so don't edit it by hand — the sources live in `vergelijker/` (see `vergelijker/README.md`):
 
 - `vergelijker/index-template.html` — the tool itself; this is what you change.
 - `vergelijker/data/armaturen.json` — the product data, injected into the template at the `/*__ARMATUREN_DATA__*/ null` placeholder.
 - `python3 vergelijker/bouw-tool.py` regenerates `vergelijking.html` from those two. `bouw-data.py` only needs re-running when new Excel price-list exports land in the gitignored `vergelijker/data/bron/`; `armaturen.json` is committed, so the tool can be rebuilt without them.
+
+**`spec-lezer.js`** holds the paste-and-parse machinery shared by the vergelijker and the DLC tool (`SpecLezer.maak({veldmap, sectie, kop, eenheidUitLabel})` → `lees(tekst)` → `{uit, herkend, onbekend}`). It handles `Label: waarde`, a label with its value on the next line, `Groep: Label: waarde` from bestekteksten, comma-separated one-liners, HTML entities, and units carried in the label. It never guesses: anything it cannot place lands in `onbekend` so the tool can show it. `eenheidUitLabel:false` switches off the unit-append rule for sheets whose labels already carry the unit.
 
 Like everything else here it stays a single self-contained file that runs from `file://` — the Python scripts are data prep, not a build step for the suite.
 

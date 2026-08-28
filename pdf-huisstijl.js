@@ -154,6 +154,7 @@ const THEMAS = {
    opt  haalY/zetY/haalPg/zetPg  toegang tot de schrijfpositie en de huidige pagina
                                  van de aanroepende tool (verplicht)
         paginas    de array waarin beginPage() nieuwe pagina's bijschrijft
+        tekstFont  'helvetica' voor de lopende tekst in plaats van Open Sans
         fonts      welk kop-lettertype ingesloten wordt: 'distrilight' (Poppins),
                    'pragmalux' (Sofia Sans Extra Condensed) of 'volledig' (beide,
                    voor een document dat van thema wisselt)
@@ -191,8 +192,15 @@ async function tekenaar(doc, opt){
     const laad = async(sleutel, terugval)=> merk.fonts[sleutel]
       ? doc.embedFont(b64Bytes(merk.fonts[sleutel]), {subset:true})
       : doc.embedFont(terugval);
-    const reg  = await laad('regular', PDFLib.StandardFonts.Helvetica);
-    const bold = await laad('bold',    PDFLib.StandardFonts.HelveticaBold);
+    /* Open Sans is de lopende letter van de suite. Een blad dat een ander ontwerp
+       volgt kan om Helvetica vragen: die hoort bij de veertien standaardletters van
+       PDF, hoeft niet ingesloten te worden en heeft dezelfde breedtes als Arial -
+       tekst die in het origineel paste, past dan ook hier. */
+    const helvetica = opt.tekstFont === 'helvetica';
+    const reg  = helvetica ? await doc.embedFont(PDFLib.StandardFonts.Helvetica)
+                           : await laad('regular', PDFLib.StandardFonts.Helvetica);
+    const bold = helvetica ? await doc.embedFont(PDFLib.StandardFonts.HelveticaBold)
+                           : await laad('bold',    PDFLib.StandardFonts.HelveticaBold);
     /* Een document dat maar een van beide huisstijlen zet hoeft het kop-lettertype
        van de ander niet in te sluiten. De ontbrekende helft wijst naar de aanwezige,
        zodat kiesFont() nooit op undefined uitkomt als er toch van thema gewisseld

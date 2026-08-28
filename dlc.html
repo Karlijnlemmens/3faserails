@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>DLC specials — Distrilight tools</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,600;0,700;0,800;0,900;1,900&family=Caveat:wght@600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-900:#1E2A4A;
+    --blue:#3E8EDE;
+    --blue-dark:#2C72BA;
+    --blue-light:#EAF3FC;
+    --paper:#F3F7FC;
+    --white:#FFFFFF;
+    --ink:#1C2534;
+    --slate:#5A6B84;
+    --border:#DCE6F2;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Nunito Sans',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2{font-family:'Nunito Sans',sans-serif; font-weight:800; letter-spacing:0;}
+
+  header{
+    background:var(--white);
+    color:var(--ink);
+    padding:12px 28px 8px;
+    position:sticky; top:0; z-index:50;
+    border-top:5px solid var(--blue);
+    box-shadow:0 2px 20px rgba(30,42,74,.10);
+  }
+  .brandrow{display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  .brand{display:flex; flex-direction:column; gap:0; align-items:flex-start;}
+  .brand .logo{height:100px; width:auto; display:block; transform:translateX(-7.65%);}
+  .title-row{display:flex; align-items:center; gap:14px; margin-top:4px; flex-wrap:wrap;}
+  h1{font-size:20px; margin:0; font-weight:800; color:var(--navy-900);}
+  .badges{display:flex; gap:6px; flex-wrap:wrap;}
+  .badge{
+    border:1px solid var(--blue-light);
+    background:var(--blue-light);
+    color:var(--blue-dark); font-size:11px; padding:3px 10px; border-radius:999px;
+    font-family:'JetBrains Mono',monospace; letter-spacing:.03em; font-weight:600;
+    text-decoration:none; display:inline-block; cursor:pointer; transition:.12s;
+  }
+  .badge:hover{border-color:var(--blue);}
+  .badge.active{background:var(--blue); border-color:var(--blue); color:#fff;}
+  .tagline{color:var(--slate); font-size:13px; margin-top:2px; max-width:700px; line-height:1.4;}
+
+  main{max-width:1600px; margin:0 auto; padding:16px 28px 60px;}
+
+  .werkblad{display:grid; grid-template-columns:minmax(360px,460px) 1fr; gap:20px; align-items:start;}
+  @media (max-width:1100px){ .werkblad{grid-template-columns:1fr;} }
+
+  .paneel{display:flex; flex-direction:column; gap:12px;}
+  .kaart{background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px;}
+  .kaart > h3{
+    margin:0 0 10px; font-size:12px; font-weight:800; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--navy-900); display:flex; justify-content:space-between;
+    align-items:center; gap:8px;
+  }
+  .kaart > h3 .tel{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--slate); font-weight:600;}
+  .hint{font-size:12px; color:var(--slate); line-height:1.45; margin:0 0 10px;}
+
+  label.veld{display:block; margin-bottom:9px;}
+  label.veld > span{display:block; font-size:11px; font-weight:700; color:var(--slate); margin-bottom:3px;}
+  input[type=text], textarea{
+    width:100%; font:inherit; font-size:13px; color:var(--ink);
+    border:1px solid var(--border); border-radius:8px; padding:7px 9px; background:var(--white);
+  }
+  textarea{min-height:150px; resize:vertical; line-height:1.5; font-size:12px;}
+  input[type=text]:focus, textarea:focus{outline:2px solid var(--blue); outline-offset:1px; border-color:var(--blue);}
+
+  .knoppen{display:flex; gap:8px; flex-wrap:wrap;}
+  button.pil{
+    font:inherit; font-size:13px; font-weight:700; cursor:pointer;
+    border:1px solid var(--border); background:var(--white); color:var(--ink);
+    border-radius:999px; padding:7px 15px; transition:.12s;
+  }
+  button.pil:hover:not(:disabled){border-color:var(--blue); color:var(--blue-dark);}
+  button.pil.vol{background:var(--blue); border-color:var(--blue); color:#fff;}
+  button.pil.vol:hover:not(:disabled){background:var(--blue-dark); border-color:var(--blue-dark); color:#fff;}
+  button.pil:disabled{opacity:.45; cursor:default;}
+  button.mini{
+    font:inherit; font-size:11px; font-weight:700; cursor:pointer; color:var(--slate);
+    border:1px solid var(--border); background:var(--white); border-radius:7px; padding:2px 8px;
+  }
+  button.mini:hover{border-color:var(--blue); color:var(--blue-dark);}
+
+  /* velden per groep */
+  .groep{border-top:1px solid var(--border); padding-top:9px; margin-top:9px;}
+  .groep:first-of-type{border-top:none; padding-top:0; margin-top:0;}
+  .groep > b{display:block; font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+             color:var(--navy-900); margin-bottom:6px;}
+  .rij{display:grid; grid-template-columns:1fr 1fr auto; gap:5px; margin-bottom:4px; align-items:center;}
+  .rij input{font-size:12px; padding:4px 7px;}
+  .rij input.lab{color:var(--slate); font-weight:600;}
+  .rij .weg{
+    border:none; background:none; color:var(--slate); cursor:pointer; font-size:15px;
+    line-height:1; padding:2px 4px; border-radius:5px;
+  }
+  .rij .weg:hover{background:var(--blue-light); color:var(--blue-dark);}
+  .rij.leeg input.lab, .rij.leeg input:not(.lab){opacity:.55;}
+
+  /* plakvak */
+  .uitslag{margin-top:10px; border-top:1px solid var(--border); padding-top:9px;}
+  .uitslag b{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--navy-900);}
+  .herkend{font-size:11px; color:var(--slate); line-height:1.5; margin-top:4px;}
+  .herkend em{color:var(--blue-dark); font-style:normal; font-weight:700;}
+  .onbekend{
+    margin-top:8px; background:#FFF6E5; border:1px solid #F0D9A8; color:#7A5B12;
+    border-radius:8px; padding:7px 10px; font-size:11px; line-height:1.5;
+  }
+
+  /* beeld */
+  .beeldrooster{display:grid; grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:8px;}
+  .beeldvak{
+    position:relative; border:2px solid var(--border); border-radius:10px; overflow:hidden;
+    background:var(--white); aspect-ratio:1; display:grid; place-items:center; cursor:pointer; padding:0;
+  }
+  .beeldvak.gekozen{border-color:var(--blue);}
+  .beeldvak img{width:100%; height:100%; object-fit:contain; display:block;}
+  .beeldvak .leeg{font-size:11px; color:var(--slate); text-align:center; padding:6px; line-height:1.3;}
+  .beeldvak .weg{
+    position:absolute; top:3px; right:3px; border:none; background:rgba(28,37,52,.72); color:#fff;
+    border-radius:50%; width:19px; height:19px; font-size:12px; line-height:1; cursor:pointer; padding:0;
+  }
+
+  /* het blad */
+  .bladzij{position:sticky; top:150px;}
+  .bladkop{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap;}
+  .bladkop .stand{font-size:12px; color:var(--slate);}
+  .bladkop .stand b{color:var(--navy-900);}
+  .blad{
+    border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;
+    background:var(--white); box-shadow:0 2px 16px rgba(30,42,74,.08);
+  }
+  .blad iframe{width:100%; height:min(78vh,1000px); border:none; display:block; background:#525659;}
+  .bladwrap{position:relative;}
+  .bezig{
+    position:absolute; inset:auto 12px 12px auto; background:rgba(30,42,74,.9); color:#fff;
+    font-size:11px; font-weight:700; padding:5px 11px; border-radius:999px; pointer-events:none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brandrow">
+    <div class="brand">
+      <img class="logo" src="merk/Distrilight logo donker.png" alt="Distrilight">
+    </div>
+    <div class="badges">
+      <a class="badge" href="armaturenboek.html">Armaturenboek</a>
+      <a class="badge" href="presenters.html">Presenters</a>
+      <a class="badge active" href="dlc.html">DLC specials</a>
+      <a class="badge" href="vergelijking.html">Vergelijking</a>
+      <a class="badge" href="index.html">3 fase rail</a>
+      <a class="badge" href="lichtlijn.html">Lichtlijn</a>
+      <a class="badge" href="intake.html">Intake</a>
+      <a class="badge" href="snoerenplan.html">Snoerenplan</a>
+      <a class="badge" href="bandrasters.html">Bandrasters</a>
+    </div>
+  </div>
+  <div class="title-row">
+    <h1>DLC specials</h1>
+  </div>
+  <p class="tagline">Plak de specificaties van een armatuur van een ander merk, voeg de foto's toe,
+    en er rolt een DLC-productblad uit. Wat de tool niet uit de tekst haalt vul je zelf aan;
+    velden die leeg blijven komen niet op het blad.</p>
+</header>
+
+<main>
+  <div class="werkblad">
+    <div class="paneel" id="paneel"></div>
+
+    <div class="bladzij">
+      <div class="bladkop">
+        <div class="stand" id="stand">Leeg blad</div>
+        <div class="knoppen">
+          <button class="pil" id="btnOpen">Openen</button>
+          <button class="pil" id="btnBewaar">Opslaan</button>
+          <button class="pil vol" id="btnPdf">Download PDF</button>
+        </div>
+      </div>
+      <div class="bladwrap">
+        <div class="blad"><iframe id="voorbeeld" title="Voorbeeld van het productblad"></iframe></div>
+        <div class="bezig" id="bezig" style="display:none">bezig…</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<input type="file" id="beeldKiezer" accept="image/*" style="display:none">
+<input type="file" id="jsonKiezer" accept=".json" style="display:none">
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="pdf-huisstijl.js"></script>
+<script src="spec-lezer.js"></script>
+<script>
+/* ===================================================================
+   DLC specials — maakt een DLC-productblad van een armatuur dat niet in
+   de eigen productdata staat.
+
+   De opmaak is overgenomen uit het aangeleverde ontwerp (DLC Productblad.indd,
+   voorbeeld Norma Track). Alle maten hieronder zijn uit dat bestand gelezen,
+   niet geschat; ze staan bij de constanten met hun herkomst erbij.
+
+   Het voorbeeld rechts is de echte PDF in een iframe, net als bij de
+   presenters-tool: zo kan wat je ziet niet uit de pas lopen met wat je
+   downloadt.
+   =================================================================== */
+const $ = id => document.getElementById(id);
+
+/* ======================= het veldenschema =======================
+   De groepen liggen vast - dat is wat het blad herkenbaar maakt - maar binnen
+   een groep mag je velden leegmaken, hernoemen of er een bijzetten. Een veld
+   zonder waarde verdwijnt van het blad; is een hele groep leeg, dan verdwijnt
+   ook de groepskop. */
+const SCHEMA = [
+  {kop:'Elektrische gegevens', velden:[
+    {id:'volt',     l:'Ingangsspanning (V)'},
+    {id:'hz',       l:'Ingangsfrequentie (Hz)'},
+    {id:'wattage',  l:'Wattage'},
+    {id:'driver',   l:'Driver'},
+    {id:'dimbaar',  l:'Dimbaar'},
+  ]},
+  {kop:'Lichttechniek', velden:[
+    {id:'lumen',     l:'Lumen'},
+    {id:'kelvin',    l:'Kelvin'},
+    {id:'cri',       l:'Kleurweergave'},
+    {id:'bundel',    l:'Lichtbundel'},
+    {id:'batterij',  l:'Batterij'},
+    {id:'autonomie', l:'Autonomie (h)'},
+  ]},
+  {kop:'Certificaten & Normen', velden:[
+    {id:'certDriver',   l:'Driver certificaten'},
+    {id:'certArmatuur', l:'Armatuur certificaten'},
+    {id:'iecKlasse',    l:'IEC beschermingsklasse'},
+    {id:'ip',           l:'IP-classificatie'},
+    {id:'ik',           l:'IK-classificatie'},
+    {id:'lichtbron',    l:'Lichtbron vervangbaar'},
+    {id:'garantie',     l:'Garantie'},
+  ]},
+  {kop:'Kleuren & materialen', velden:[
+    {id:'matBehuizing', l:'Materiaal behuizing'},
+    {id:'matOptisch',   l:'Optisch-/Lens-/Reflectormateriaal'},
+    {id:'kleur',        l:'Kleur behuizing'},
+    {id:'afmetingen',   l:'Afmetingen'},
+  ]},
+];
+
+/* Labels van leveranciers naar onze velden. De volgorde telt: de eerste die
+   past wint, dus specifieke regels boven algemene. Wat hier niet in staat komt
+   in de meldingen terecht en kan handmatig ingevuld worden - liever dat dan
+   dat de tool iets verkeerd raadt. */
+const VELDMAP = [
+  {v:'artikelcode', l:/^(artikelcode|artikelnummer|bestelnummer|productcode|sku|item ?(no|number|code)|article ?(code|number))$/i},
+  {v:'volt',      l:/^(ingangsspanning|voedingsspanning|netspanning|spanning|input ?voltage|voltage|nominale spanning)$/i},
+  {v:'hz',        l:/^(ingangsfrequentie|frequentie|frequency|netfrequentie)$/i},
+  {v:'wattage',   l:/^(wattage|vermogen|systeem ?wattage|opgenomen vermogen|system ?power|power|watt)$/i},
+  {v:'driver',    l:/^(driver|voorschakelapparaat|ballast|driver ?type)$/i},
+  {v:'dimbaar',   l:/^(dimbaar|dimbaarheid|dimmable|dimmen|dimming|dim ?type)$/i},
+  {v:'lumen',     l:/^(lumen|lichtstroom|nuttige lichtstroom|armatuurlichtstroom|luminous ?flux|output|lichtopbrengst)$/i},
+  {v:'kelvin',    l:/^(kelvin|kleurtemperatuur|kleur ?temperatuur|colou?r ?temperature|cct)$/i},
+  {v:'cri',       l:/^(kleurweergave|kleurweergave-index|cri|ra|colou?r ?rendering)$/i},
+  {v:'bundel',    l:/^(lichtbundel|bundelhoek|stralingshoek|beam ?(angle)?|uitstralingshoek)$/i},
+  {v:'batterij',  l:/^(batterij|accu|battery|batterijtype)$/i},
+  {v:'autonomie', l:/^(autonomie|noodduur|branduren|autonomy|duration|noodtijd)$/i},
+  {v:'certDriver',   l:/^driver ?(certificaten|certificates|keurmerk)/i},
+  {v:'certArmatuur', l:/^(armatuur ?)?(certificaten|certificates|keurmerken|keurmerk)$/i},
+  {v:'iecKlasse',    l:/^(iec ?)?(beschermingsklasse|isolatieklasse|veiligheidsklasse|protection ?class|safety ?class|klasse|class)$/i},
+  {v:'ip',        l:/^(ip[- ]?(classificatie|klasse|class|rating|code|graad)?|beschermingsgraad)$/i},
+  {v:'ik',        l:/^(ik[- ]?(classificatie|klasse|class|rating)?|slagvastheid)$/i},
+  {v:'lichtbron', l:/^(lichtbron ?vervangbaar|vervangbare ?lichtbron|replaceable ?light ?source)$/i},
+  {v:'garantie',  l:/^(garantie|warranty|garantietermijn)$/i},
+  {v:'matBehuizing', l:/^(materiaal ?behuizing|behuizing ?materiaal|housing ?material|materiaal|behuizing)$/i},
+  {v:'matOptisch',   l:/^(optisch|optiek|lens|reflector|lensmateriaal|reflectormateriaal|afscherming)/i},
+  {v:'kleur',     l:/^(kleur ?behuizing|kleur|colou?r|finish)$/i},
+  {v:'afmetingen',l:/^(afmetingen|afmeting|dimensions|maten|formaat)$/i},
+];
+/* Kopregels van leveranciersbladen: ze geven context maar hebben zelf geen waarde. */
+const SECTIE = /^(elektrisch|licht|certificat|norm|kleur|materia|algemeen|afmeting|verpakking|overig|bescherming|optiek|montage|noodverlichting)/i;
+/* eenheidUitLabel uit: dit blad toont het label mét eenheid ("Ingangsspanning (V)"),
+   dus zou "230" anders als "230V" naast dat label komen te staan. */
+const LEZER = SpecLezer.maak({veldmap:VELDMAP, sectie:SECTIE, kop:true, eenheidUitLabel:false});
+
+/* ======================= de staat ======================= */
+
+function leegBlad(){
+  const velden={};
+  SCHEMA.forEach(g=>g.velden.forEach(v=>{ velden[v.id]={l:v.l, w:''}; }));
+  return {
+    titelDun:'LED Noodverlichting',
+    titelVet:'Special',
+    artikelcode:'Special',
+    omschrijving:'',
+    velden,                 /* id -> {l:label, w:waarde} */
+    extra:[],               /* [{kop, l, w}] handmatig bijgezette regels */
+    hoofdfoto:'',
+    beelden:[],
+    plaktekst:'',
+    uitslag:null,
+  };
+}
+let S = leegBlad();
+
+/* ======================= beeld inlezen ======================= */
+
+/* Zelfde aanpak als in de presenters-tool: verkleinen voordat het de PDF in
+   gaat, anders gaat een telefoonfoto van vier megabyte ongewijzigd mee. */
+const BEELD_MAX = 1400;
+function leesAfbeelding(bestand, klaar){
+  if(!bestand) return;
+  const lezer=new FileReader();
+  lezer.onerror=()=>alert('Deze afbeelding kan niet worden gelezen.');
+  lezer.onload=()=>{
+    const img=new Image();
+    img.onerror=()=>alert('Deze afbeelding kan niet worden getoond.');
+    img.onload=()=>{
+      const grootste=Math.max(img.width,img.height);
+      if(grootste<=BEELD_MAX && String(lezer.result).length<400000){ klaar(lezer.result); return; }
+      const schaal=Math.min(1,BEELD_MAX/grootste);
+      const c=document.createElement('canvas');
+      c.width=Math.max(1,Math.round(img.width*schaal));
+      c.height=Math.max(1,Math.round(img.height*schaal));
+      const ctx=c.getContext('2d');
+      const alsPng = bestand.type==='image/png';
+      if(!alsPng){ ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height); }
+      ctx.drawImage(img,0,0,c.width,c.height);
+      try{ klaar(alsPng ? c.toDataURL('image/png') : c.toDataURL('image/jpeg',0.85)); }
+      catch(err){ klaar(lezer.result); }
+    };
+    img.src=lezer.result;
+  };
+  lezer.readAsDataURL(bestand);
+}
+let plakDoel='hoofdfoto', beeldDoel='hoofdfoto';
+
+/* ======================= het paneel ======================= */
+
+function el(tag, klasse, tekst){
+  const e=document.createElement(tag);
+  if(klasse) e.className=klasse;
+  if(tekst!=null) e.textContent=tekst;
+  return e;
+}
+function kaart(titel, tel){
+  const k=el('div','kaart');
+  const h=el('h3'); h.append(el('span',null,titel));
+  if(tel) h.append(el('span','tel',tel));
+  k.append(h);
+  return k;
+}
+function tekstveld(label, waarde, bij, meerregelig){
+  const l=el('label','veld');
+  l.append(el('span',null,label));
+  const i=meerregelig ? document.createElement('textarea') : document.createElement('input');
+  if(!meerregelig) i.type='text';
+  i.value=waarde||'';
+  i.oninput=()=>bij(i.value);
+  l.append(i);
+  return l;
+}
+
+function tekenPaneel(){
+  const p=$('paneel');
+  p.innerHTML='';
+
+  /* --- plakken --- */
+  const kPlak=kaart('Specificaties plakken');
+  kPlak.append(el('p','hint',
+    'Plak hier de specificaties van de leverancier — uit een bestektekst, een webpagina '+
+    'of een datasheet. De tool vult wat hij herkent; de rest zet je er hieronder zelf bij.'));
+  const ta=document.createElement('textarea');
+  ta.value=S.plaktekst;
+  ta.placeholder='Wattage: 3,1W\nLichtstroom: 220lm\nIP klasse: IP40\n…';
+  ta.oninput=()=>{ S.plaktekst=ta.value; };
+  ta.addEventListener('paste', ()=> setTimeout(()=>{ S.plaktekst=ta.value; verwerk(); }, 0));
+  kPlak.append(ta);
+  const pk=el('div','knoppen'); pk.style.marginTop='9px';
+  const lees=el('button','pil vol','Uitlezen');
+  lees.onclick=verwerk;
+  const wis=el('button','pil','Leegmaken');
+  wis.onclick=()=>{ S.plaktekst=''; S.uitslag=null; tekenPaneel(); };
+  pk.append(lees,wis);
+  kPlak.append(pk);
+  if(S.uitslag){
+    const u=el('div','uitslag');
+    u.append(el('b',null,S.uitslag.herkend.length+' herkend'));
+    if(S.uitslag.herkend.length){
+      const h=el('div','herkend');
+      S.uitslag.herkend.forEach((r,i)=>{
+        if(i) h.append(document.createTextNode(' · '));
+        h.append(el('em',null,r.label));
+        h.append(document.createTextNode(' '+r.waarde));
+      });
+      u.append(h);
+    }
+    if(S.uitslag.onbekend.length){
+      const o=el('div','onbekend');
+      o.append(el('b',null,'Niet herkend, vul zelf aan:'));
+      o.append(document.createTextNode(' '+S.uitslag.onbekend.slice(0,18).join(' · ')));
+      if(S.uitslag.onbekend.length>18) o.append(document.createTextNode(' …'));
+      u.append(o);
+    }
+    kPlak.append(u);
+  }
+  p.append(kPlak);
+
+  /* --- kop --- */
+  const kKop=kaart('Kop');
+  kKop.append(el('p','hint',
+    'De titel staat in twee gewichten, zoals in het ontwerp: de bovenste regel dun, '+
+    'de onderste vet.'));
+  kKop.append(tekstveld('Bovenregel (dun)', S.titelDun, w=>{ S.titelDun=w; plan(); }));
+  kKop.append(tekstveld('Titel (vet)', S.titelVet, w=>{ S.titelVet=w; plan(); }));
+  p.append(kKop);
+
+  /* --- bestelgegevens --- */
+  const kBest=kaart('Bestelgegevens');
+  kBest.append(tekstveld('Artikelcode', S.artikelcode, w=>{ S.artikelcode=w; plan(); }));
+  kBest.append(tekstveld('Omschrijving', S.omschrijving, w=>{ S.omschrijving=w; plan(); }, true));
+  p.append(kBest);
+
+  /* --- productgegevens --- */
+  const gevuld=Object.values(S.velden).filter(v=>v.w.trim()).length + S.extra.filter(e=>e.w.trim()).length;
+  const totaal=Object.keys(S.velden).length + S.extra.length;
+  const kProd=kaart('Productgegevens', gevuld+'/'+totaal+' gevuld');
+  kProd.append(el('p','hint',
+    'Lege velden komen niet op het blad. Een groep waarvan alles leeg is verdwijnt '+
+    'in zijn geheel, kop en al.'));
+  SCHEMA.forEach(groep=>{
+    const g=el('div','groep');
+    g.append(el('b',null,groep.kop));
+    groep.velden.forEach(veld=>{
+      g.append(veldRij(S.velden[veld.id], null));
+    });
+    S.extra.forEach((e,i)=>{
+      if(e.kop!==groep.kop) return;
+      g.append(veldRij(e, ()=>{ S.extra.splice(i,1); tekenPaneel(); plan(); }));
+    });
+    const bij=el('button','mini','+ regel');
+    bij.onclick=()=>{ S.extra.push({kop:groep.kop, l:'', w:''}); tekenPaneel(); plan(); };
+    g.append(bij);
+    kProd.append(g);
+  });
+  p.append(kProd);
+
+  /* --- beeld --- */
+  const kBeeld=kaart('Beeld');
+  kBeeld.append(el('p','hint',
+    'De hoofdfoto komt rechtsboven. De overige beelden komen onderaan op een rij. '+
+    'Klik een vak om een bestand te kiezen, of klik en plak met Ctrl+V.'));
+  kBeeld.append(el('p','hint','Hoofdfoto'));
+  const r1=el('div','beeldrooster');
+  r1.append(beeldVak(S.hoofdfoto, 'hoofdfoto', ()=>{ S.hoofdfoto=''; tekenPaneel(); plan(); }));
+  kBeeld.append(r1);
+  kBeeld.append(el('p','hint','Beelden onderaan'));
+  const r2=el('div','beeldrooster');
+  S.beelden.forEach((uri,i)=>{
+    r2.append(beeldVak(uri, 'beeld'+i, ()=>{ S.beelden.splice(i,1); tekenPaneel(); plan(); }));
+  });
+  r2.append(beeldVak('', 'beeld-nieuw', null));
+  kBeeld.append(r2);
+  p.append(kBeeld);
+}
+
+function veldRij(veld, verwijder){
+  const r=el('div','rij'+(veld.w.trim()?'':' leeg'));
+  const lab=document.createElement('input');
+  lab.type='text'; lab.className='lab'; lab.value=veld.l; lab.placeholder='label';
+  lab.oninput=()=>{ veld.l=lab.value; plan(); };
+  const waarde=document.createElement('input');
+  waarde.type='text'; waarde.value=veld.w; waarde.placeholder='—';
+  waarde.oninput=()=>{ veld.w=waarde.value; r.classList.toggle('leeg', !waarde.value.trim()); plan(); };
+  r.append(lab, waarde);
+  if(verwijder){
+    const x=el('button','weg','×'); x.title='regel verwijderen';
+    x.onclick=verwijder; r.append(x);
+  } else r.append(el('span'));
+  return r;
+}
+
+function beeldVak(uri, sleutel, verwijder){
+  const b=el('button','beeldvak'+(plakDoel===sleutel?' gekozen':''));
+  b.type='button';
+  if(uri){
+    const i=document.createElement('img'); i.src=uri; i.alt=''; b.append(i);
+    if(verwijder){
+      const x=el('button','weg','×');
+      x.onclick=e=>{ e.stopPropagation(); verwijder(); };
+      b.append(x);
+    }
+  } else b.append(el('span','leeg', sleutel==='hoofdfoto' ? 'hoofdfoto' : 'toevoegen'));
+  b.onclick=()=>{ plakDoel=sleutel; beeldDoel=sleutel; $('beeldKiezer').click(); tekenPaneel(); };
+  return b;
+}
+function zetBeeld(sleutel, uri){
+  if(sleutel==='hoofdfoto') S.hoofdfoto=uri;
+  else if(sleutel==='beeld-nieuw') S.beelden.push(uri);
+  else if(/^beeld(\d+)$/.test(sleutel)) S.beelden[+RegExp.$1]=uri;
+  tekenPaneel(); plan();
+}
+$('beeldKiezer').onchange=e=>{
+  const b=e.target.files[0]; $('beeldKiezer').value='';
+  leesAfbeelding(b, uri=>zetBeeld(beeldDoel, uri));
+};
+document.addEventListener('paste', e=>{
+  const doel=e.target;
+  if(doel && (doel.tagName==='TEXTAREA' || doel.tagName==='INPUT')) return;  /* tekst plakken laten */
+  const items=Array.from((e.clipboardData||window.clipboardData).items||[]);
+  const plaatje=items.find(i=>/^image\//.test(i.type));
+  if(!plaatje) return;
+  e.preventDefault();
+  leesAfbeelding(plaatje.getAsFile(), uri=>zetBeeld(plakDoel, uri));
+});
+
+/* De geplakte tekst uitlezen en de velden vullen. Wat er al stond blijft staan:
+   je hebt het misschien met de hand gecorrigeerd, en dan is het zuur als een
+   tweede plakronde dat overschrijft. */
+function verwerk(){
+  const res=LEZER.lees(S.plaktekst);
+  S.uitslag=res;
+  Object.keys(res.uit).forEach(sleutel=>{
+    if(sleutel==='omschrijving'){ if(!S.omschrijving.trim()) S.omschrijving=res.uit[sleutel]; return; }
+    if(sleutel==='artikelcode'){ if(!S.artikelcode.trim() || S.artikelcode==='Special') S.artikelcode=res.uit[sleutel]; return; }
+    const veld=S.velden[sleutel];
+    if(veld && !veld.w.trim()) veld.w=res.uit[sleutel];
+  });
+  tekenPaneel(); plan();
+}
+
+/* ======================= het blad =======================
+   Alle maten komen uit het aangeleverde ontwerp; y telt vanaf de bovenkant.
+   text() zet de bovenkant van de regel, het ontwerp geeft basislijnen - vandaar
+   basis(), dat de ene in de andere omrekent. */
+const M = {
+  kopbalkH: 57.35,        /* hoogte van het zwarte kopvlak */
+  x: 36,                  /* linkermarge van de titels */
+  xLabel: 36.5,
+  xWaarde: 135.7,
+  lijnX: 35.4,  lijnLabelB: 99.3,   /* haarlijn onder de labelkolom */
+  lijnWaardeX: 134.9, lijnWaardeB: 153.5,
+  bestelLabelB: 47.4, bestelWaardeX: 83.1, bestelWaardeB: 205.4,
+  xBestelWaarde: 83.9,
+  titel1: 93.5, titel2: 120.5, titelPt: 20,   /* basislijnen van de twee titelregels */
+  sectiePt: 9, groepPt: 6, rijPt: 6,
+  sectiekop: 147.5,       /* basislijn van BESTELGEGEVENS */
+  naSectiekop: 13.6,      /* sectiekop -> eerste regel eronder */
+  naKoprij: 10.9,         /* kolomkoppen -> eerste gegevensregel */
+  naGroepskop: 10.3,
+  rij: 9.5,               /* regelafstand */
+  wikkel: 6.8,            /* tweede regel binnen een cel */
+  naBestel: 27.1,         /* laatste regel bestelgegevens -> PRODUCTGEGEVENS */
+  groepGat: 20.5,         /* laatste regel van een groep -> volgende groepskop */
+  lijnBoven: 7.1,         /* haarlijn staat zoveel boven de basislijn */
+  hoofdfoto: {x:323.5, y:171.9, b:230.6, h:163.3},
+  onder: {x:37.6, y:581.9, b:218.97, h:154.7},
+  voetY: 806.9, voetX1:28.3, voetX2:551.5,
+  tekst: '#231F20', lijn: '#BCBEC0',
+};
+
+async function bouwBlad(){
+  const doc=await PDFLib.PDFDocument.create();
+  doc.setTitle('DLC productblad '+(S.titelVet||''));
+  doc.setProducer('Distrilight DLC specials');
+
+  let pg=null, y=0;
+  const paginas=[];
+  const HS=await PdfHuisstijl.tekenaar(doc, {
+    haalY:()=>y, zetY:v=>{y=v;}, haalPg:()=>pg, zetPg:p=>{pg=p;},
+    paginas, fonts:'distrilight', tekstFont:'helvetica',
+    logos:[], beelden:['dlcKopbalk'],
+    voet:false,
+  });
+  const {W,H,BEELD,text,meet,rect,line,wrapBreedte,beginPage,sluitBeeldIn,beeldPassend}=HS;
+
+  const beeldUit = async uri=>{
+    if(!uri) return null;
+    const komma=String(uri).indexOf(',');
+    if(komma<0) return null;
+    try{ return await sluitBeeldIn(PdfHuisstijl.b64Bytes(String(uri).slice(komma+1))); }
+    catch(err){ return null; }
+  };
+  const hoofd = await beeldUit(S.hoofdfoto);
+  const onder = [];
+  for(const uri of S.beelden){ const i=await beeldUit(uri); if(i) onder.push(i); }
+
+  /* Het ontwerp geeft basislijnen; text() wil de bovenkant van de regel. Door hier
+     om te rekenen kunnen alle maten hierboven de gemeten basislijnen blijven, en
+     dat scheelt een hoop stille verschuivingen. y is dus de basislijn van de regel
+     die nu aan de beurt is. */
+  const tekst = (x, basislijn, pt, s, opt) => text(x, basislijn - pt*0.78, pt, s, opt);
+
+  function kopbalk(){
+    if(BEELD.dlcKopbalk){
+      const b=BEELD.dlcKopbalk;
+      pg.drawImage(b, {x:0, y:H-M.kopbalkH, width:W, height:M.kopbalkH});
+    } else {
+      /* Ontbreekt het kopbeeld, dan een egaal zwart vlak - liever ingetogen dan
+         een blad zonder kop. */
+      rect(0,0,W,M.kopbalkH,'#1A1A1A');
+    }
+  }
+  function nieuwePagina(eerste){
+    beginPage(true);
+    kopbalk();
+    line(M.voetX1, M.voetY, M.voetX2, M.voetY, 0.3, M.lijn);
+    y = eerste ? M.titel1 : M.kopbalkH+40;
+  }
+  /* Ruimte houden: past het niet meer, dan een nieuwe pagina met dezelfde kop. */
+  function ruimte(h){ if(y+h > M.voetY-20){ nieuwePagina(false); } }
+
+  function sectiekop(t){
+    ruimte(M.naSectiekop+M.rij);
+    tekst(M.x, y, M.sectiePt, String(t).toUpperCase(), {bold:true, cond:true, color:M.tekst});
+    y += M.naSectiekop;
+  }
+  function groepskop(t){
+    ruimte(M.naGroepskop+M.rij);
+    tekst(M.xLabel, y, M.groepPt, t, {bold:true, cond:true, color:M.tekst});
+    y += M.naGroepskop;
+  }
+  /* Haarlijn boven de regel, in twee stukken met een naad tussen de kolommen -
+     precies zoals in het ontwerp. */
+  function haarlijn(labelB, waardeX, waardeB, basislijn){
+    const yy = (basislijn==null?y:basislijn) - M.lijnBoven;
+    rect(M.lijnX, yy, labelB, 0.2, M.tekst);
+    rect(waardeX, yy, waardeB, 0.2, M.tekst);
+  }
+  function regel(label, waarde, kolommen){
+    const k = kolommen || {labelB:M.lijnLabelB, waardeX:M.lijnWaardeX, waardeB:M.lijnWaardeB,
+                           xWaarde:M.xWaarde, breedte:M.lijnWaardeB-5};
+    const regels = wrapBreedte(String(waarde), k.breedte, M.rijPt, {});
+    ruimte(M.rij + (regels.length-1)*M.wikkel);
+    haarlijn(k.labelB, k.waardeX, k.waardeB);
+    tekst(M.xLabel, y, M.rijPt, label, {color:M.tekst});
+    regels.forEach((r,i)=> tekst(k.xWaarde, y+i*M.wikkel, M.rijPt, r, {color:M.tekst}));
+    y += M.rij + (regels.length-1)*M.wikkel;
+  }
+  /* Sluit een groep af: dezelfde haarlijn, op de plek waar de volgende regel
+     gestaan zou hebben. */
+  function slotlijn(){ haarlijn(M.lijnLabelB, M.lijnWaardeX, M.lijnWaardeB); }
+
+  /* --- pagina 1 --- */
+  nieuwePagina(true);
+  if(S.titelDun) tekst(M.x, M.titel1, M.titelPt, S.titelDun, {cond:true, bold:false, color:M.tekst});
+  tekst(M.x, M.titel2, M.titelPt, S.titelVet||'Special', {cond:true, bold:true, color:M.tekst});
+  y = M.sectiekop;
+
+  /* bestelgegevens */
+  if(S.artikelcode.trim() || S.omschrijving.trim()){
+    sectiekop('Bestelgegevens');
+    const kol={labelB:M.bestelLabelB, waardeX:M.bestelWaardeX, waardeB:M.bestelWaardeB,
+               xWaarde:M.xBestelWaarde, breedte:M.bestelWaardeB-5};
+    /* kopregel van de tabel */
+    haarlijn(kol.labelB, kol.waardeX, kol.waardeB);
+    tekst(M.xLabel, y, M.rijPt, 'Artikelcode', {bold:true, cond:true, color:M.tekst});
+    tekst(kol.xWaarde, y, M.rijPt, 'Omschrijving', {bold:true, cond:true, color:M.tekst});
+    y += M.naKoprij;
+    const regels=wrapBreedte(S.omschrijving, kol.breedte, M.rijPt, {});
+    tekst(M.xLabel, y, M.rijPt, S.artikelcode, {color:M.tekst});
+    regels.forEach((r,i)=> tekst(kol.xWaarde, y+i*M.wikkel, M.rijPt, r, {color:M.tekst}));
+    y += (regels.length-1)*M.wikkel + M.naBestel;
+  }
+
+  /* productgegevens */
+  const groepen = SCHEMA.map(g=>{
+    const rijen=[];
+    g.velden.forEach(v=>{ const f=S.velden[v.id]; if(f && f.w.trim() && f.l.trim()) rijen.push(f); });
+    S.extra.forEach(e=>{ if(e.kop===g.kop && e.w.trim() && e.l.trim()) rijen.push(e); });
+    return {kop:g.kop, rijen};
+  }).filter(g=>g.rijen.length);
+
+  if(groepen.length){
+    sectiekop('Productgegevens');
+    groepen.forEach((g,i)=>{
+      if(i) y += M.groepGat - M.rij;
+      groepskop(g.kop);
+      g.rijen.forEach(r=> regel(r.l, r.w));
+      slotlijn();
+    });
+  }
+
+  /* --- beeld: hoofdfoto rechtsboven, de rest onderaan op een rij --- */
+  pg = paginas[0];
+  if(hoofd) beeldPassend(hoofd, M.hoofdfoto.x, M.hoofdfoto.y, M.hoofdfoto.b, M.hoofdfoto.h);
+  if(onder.length){
+    const perRij=Math.min(4, onder.length);
+    const tussen=12;
+    const b=Math.min(M.onder.b, (W-2*M.onder.x - (perRij-1)*tussen)/perRij);
+    const h=M.onder.h*(b/M.onder.b);
+    let bx=M.onder.x, by=M.onder.y;
+    onder.forEach((img,i)=>{
+      if(i && i%perRij===0){ bx=M.onder.x; by+=h+tussen; }
+      beeldPassend(img, bx, by, b, h);
+      bx+=b+tussen;
+    });
+  }
+  pg = paginas[paginas.length-1];
+
+  return {bytes: await doc.save(), paginas: paginas.length};
+}
+
+/* ======================= voorbeeld en download ======================= */
+
+let voorbeeldUrl=null, bezigNu=false, opnieuw=false, wachter=null;
+function plan(){
+  clearTimeout(wachter);
+  wachter=setTimeout(ververs, 300);
+}
+async function ververs(){
+  if(bezigNu){ opnieuw=true; return; }
+  bezigNu=true; $('bezig').style.display='';
+  try{
+    const {bytes, paginas}=await bouwBlad();
+    const url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    $('voorbeeld').src=url+'#toolbar=0&navpanes=0';
+    if(voorbeeldUrl) URL.revokeObjectURL(voorbeeldUrl);
+    voorbeeldUrl=url;
+    const gevuld=Object.values(S.velden).filter(v=>v.w.trim()).length+S.extra.filter(e=>e.w.trim()).length;
+    $('stand').innerHTML='<b>'+((S.titelDun?S.titelDun+' ':'')+(S.titelVet||''))+'</b> — '+
+      paginas+' pagina'+(paginas>1?'\'s':'')+' · '+gevuld+' gegevens · '+
+      (S.beelden.length+(S.hoofdfoto?1:0))+' beelden';
+  }catch(err){
+    console.error(err);
+    $('stand').textContent='Het blad kon niet worden getekend: '+(err&&err.message);
+  }finally{
+    bezigNu=false; $('bezig').style.display='none';
+    if(opnieuw){ opnieuw=false; ververs(); }
+  }
+}
+
+function download(naam, inhoud, type){
+  const url=URL.createObjectURL(new Blob([inhoud],{type}));
+  const a=document.createElement('a');
+  a.href=url; a.download=naam;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+function bestandsnaam(){
+  return ((S.titelDun+' '+S.titelVet).trim().toLowerCase()
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'dlc-productblad');
+}
+$('btnPdf').onclick=async()=>{
+  const knop=$('btnPdf'), oud=knop.textContent;
+  knop.disabled=true; knop.textContent='bezig…';
+  try{
+    const {bytes}=await bouwBlad();
+    download(bestandsnaam()+'.pdf', bytes, 'application/pdf');
+  }finally{ knop.disabled=false; knop.textContent=oud; }
+};
+/* Een special is eenmalig, dus geen browseropslag maar een bestandje dat je
+   bij het project kunt bewaren en later weer kunt openen. */
+$('btnBewaar').onclick=()=> download(bestandsnaam()+'.json', JSON.stringify(S,null,1), 'application/json');
+$('btnOpen').onclick=()=> $('jsonKiezer').click();
+$('jsonKiezer').onchange=e=>{
+  const bestand=e.target.files[0]; $('jsonKiezer').value='';
+  if(!bestand) return;
+  const lezer=new FileReader();
+  lezer.onload=()=>{
+    try{
+      const g=JSON.parse(lezer.result);
+      S=Object.assign(leegBlad(), g);
+      /* Velden die sinds het opslaan zijn bijgekomen aanvullen. */
+      SCHEMA.forEach(gr=>gr.velden.forEach(v=>{ if(!S.velden[v.id]) S.velden[v.id]={l:v.l, w:''}; }));
+      tekenPaneel(); plan();
+    }catch(err){ alert('Dit bestand kon niet gelezen worden: '+err.message); }
+  };
+  lezer.readAsText(bestand);
+};
+
+/* ======================= start ======================= */
+tekenPaneel();
+plan();
+</script>
+</body>
+</html>

@@ -22,6 +22,7 @@
  *     Pragmalux logo donker.png                idem, voor het armaturendeel
  *     Pragmalux logo licht.png
  *     ruitpatroonvoorblad.jpg                  bovenblok van het voorblad (optioneel)
+ *     dlc-kopbalk.jpg                          kopbalk van het DLC-productblad (optioneel)
  *
  * Ontbrekende bestanden worden overgeslagen; de tool valt dan terug op tekst in
  * plaats van een logo, of op een standaardlettertype.
@@ -58,6 +59,10 @@ const BEELDEN = {
   ruitpatroon:       'ruitpatroon.png',
   /* Foto op het voorblad van het armaturenhoofdstuk. */
   armaturenFoto:     'afbarmaturen.png',
+  /* Kopbalk van het DLC-productblad: zwart vlak met diagonale snede en het
+     DLC-woordmerk, over de volle paginabreedte. Komt uit het aangeleverde
+     ontwerp (DLC Productblad.indd). */
+  dlcKopbalk:        'dlc-kopbalk.jpg',
 };
 const LOGOS = {
   dlDonker:  'Distrilight logo donker.png',   /* voor op wit */

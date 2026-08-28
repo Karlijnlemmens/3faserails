@@ -33,7 +33,13 @@ function normaliseer(buf) {
 
 const ALLEEN = process.env.ALLEEN;
 const SCENARIOS = [
-  { naam: 'railconfigurator', url: 'index.html?demo=pdf', start: null },
+  /* Niet meteen ?demo=pdf: eerst de datum vastzetten, anders zet het voorblad die
+     van vandaag en verschilt elke vergelijking die op een andere dag gedraaid is. */
+  { naam: 'railconfigurator', url: 'index.html?demo', knop: '#c2Preview',
+    start: async (page) => page.evaluate(() => {
+      const d = document.getElementById('c2Datum');
+      d.value = '2026-01-15'; d.dispatchEvent(new Event('input', { bubbles: true }));
+    }) },
   { naam: 'armaturenboek', url: 'armaturenboek.html', knop: '#abPreview',
     start: async (page) => page.evaluate(() => {
       st.proj = 'Testproject'; st.projNr = 'P-001'; st.installateur = 'Installateur BV'; st.datum = '2026-08-20';

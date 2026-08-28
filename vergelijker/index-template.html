@@ -211,6 +211,7 @@ button,input,select,textarea{font:inherit;color:inherit}
   <div class="badges">
     <a class="badge" href="armaturenboek.html">Armaturenboek</a>
     <a class="badge" href="presenters.html">Presenters</a>
+    <a class="badge" href="dlc.html">DLC specials</a>
     <a class="badge active" href="vergelijking.html">Vergelijking</a>
     <a class="badge" href="index.html">3 fase rail</a>
     <a class="badge" href="lichtlijn.html">Lichtlijn</a>
@@ -255,6 +256,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 </div>
 
 <script src="pdf-huisstijl.js"></script>
+<script src="spec-lezer.js"></script>
 <script>
 /* ======================= productdata ======================= */
 let DATA = /*__ARMATUREN_DATA__*/ null;
@@ -400,76 +402,12 @@ const LABELS={_nood:'Noodlumen',_cri:'Kleurweergave',_ugr:'UGR',_ip:'IP-klasse',
   _kleur:'Kleur',_montage:'Montage',_bundel:'Lichtbundel',_optiek:'Optiek',_levensduur:'Levensduur',
   _klasse:'Isolatieklasse',_aansluiting:'Aansluiting',_diepte:'Inbouwdiepte',_cutout:'Cut-out'};
 
-/* Een regel met cijfers of vergelijkingstekens is een waarde, geen label —
-   anders wordt "UGR<19" voor het label "UGR" aangezien. */
-function lijktWaarde(s){return /[\d<>=]/.test(s)||/^(ja|nee|yes|no)$/i.test(s)}
-
-/* Labels komen in het wild met een eenheid of een vraagteken erachter:
-   "Maximum bulb wattage (W)", "Dimmable?", "Cut-out (mm)". Voor het opzoeken
-   halen we die eraf; de oorspronkelijke tekst blijft in de melding staan. */
-function schoonLabel(s){
-  return String(s||'').replace(/\s*\([^)]*\)\s*$/,'').replace(/[?:]+$/,'').trim();
-}
-function isLabel(s){const k=schoonLabel(s); return !lijktWaarde(k) && VELDMAP.some(x=>x.l.test(k))}
 function mm(s){const n=parseGetal(s);return n==null?null:Math.round(n)}
 
-/* Geplakte webpagina's brengen hun entiteiten mee: Ra&gt;90, UGR&lt;19. */
-function ontHtml(s){
-  return String(s||'')
-    .replace(/&(lt|gt|amp|quot|apos|nbsp|#39);/g,
-      m=>({'&lt;':'<','&gt;':'>','&amp;':'&','&quot;':'"','&apos;':"'",'&#39;':"'",'&nbsp;':' '}[m]))
-    .replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(+n));
-}
-
-function leesSpecs(tekst){
-  const regels=ontHtml(tekst).split(/\r?\n/)
-    /* Bestekteksten staan op één regel met komma's ertussen. Alleen knippen
-       waar na de komma een nieuw "Label:" begint, anders valt "Reflector, spot"
-       uit elkaar en wordt "L70/B50>50,000" halverwege afgekapt. */
-    .flatMap(r=>r.split(/,\s*(?=[^,:]{2,40}:)/))
-    .map(s=>s.trim()).filter(Boolean);
-  const uit={}, herkend=[], onbekend=[];
-  let sectie='';
-  for(let i=0;i<regels.length;i++){
-    let label=regels[i], waarde=null;
-
-    /* Kopregel van een bestektekst: de omschrijving van het armatuur zelf. */
-    if(i===0 && !label.includes(':') && label.length>15 && /[a-z]/i.test(label) && !SECTIE.test(label)){
-      uit.omschrijving=label; herkend.push({label:'Omschrijving',waarde:label,veld:'omschrijving',sectie});
-      continue;
-    }
-
-    /* "Groep: Veld: waarde" — de bestektekst zet de groepsnaam ervoor.
-       Groep onthouden en verder lezen alsof hij er niet stond. */
-    const groep=label.match(/^([^:]{2,40}):\s*(.+:.+)$/);
-    if(groep && SECTIE.test(groep[1].trim())){ sectie=groep[1].trim(); label=groep[2].trim(); }
-
-    /* "Label: waarde" op één regel — alleen splitsen als het linkerdeel echt een label is */
-    const d=label.indexOf(':');
-    if(d>0 && d<40 && isLabel(label.slice(0,d).trim())){
-      waarde=label.slice(d+1).trim(); label=label.slice(0,d).trim();
-    }
-    /* kopregel: onthouden en niets consumeren */
-    if(!waarde && SECTIE.test(label) && !/\d/.test(label) && label.length<40 && !isLabel(label)){
-      sectie=label; continue;
-    }
-    const m=(waarde!=null || !lijktWaarde(label))
-      ? VELDMAP.find(x=>x.l.test(schoonLabel(label)) && (!x.s || x.s.test(sectie))) : null;
-    if(!m){ onbekend.push(label); continue; }
-    if(waarde==null){
-      const volg=regels[i+1];
-      if(volg && !isLabel(volg) && !SECTIE.test(volg)){ waarde=volg; i++; }
-    }
-    if(waarde==null){ onbekend.push(label); continue; }
-    /* Staat de eenheid in het label en is de waarde een kaal getal, dan hoort
-       hij erbij: "Maximum bulb wattage (W)" met "60" wordt 60W. */
-    const eenheid=(label.match(/\(([^)]{1,4})\)\s*$/)||[])[1];
-    if(eenheid && /^[A-Za-z°%]+$/.test(eenheid) && /^-?\d+([.,]\d+)?$/.test(waarde.trim()))
-      waarde=waarde.trim()+eenheid;
-    if(uit[m.v]==null){ uit[m.v]=waarde; herkend.push({label,waarde,veld:m.v,sectie}); }
-  }
-  return {uit,herkend,onbekend};
-}
+/* De parser zelf staat in spec-lezer.js, met VELDMAP hierboven als kaart; de
+   DLC-tool gebruikt dezelfde lezer met een eigen kaart. */
+const LEZER = SpecLezer.maak({veldmap:VELDMAP, sectie:SECTIE, kop:true});
+const leesSpecs = t => LEZER.lees(t);
 
 /* Vertaal de uitgelezen waarden naar de velden van het vergelijkingsblad. */
 function naarBladvelden(u){
