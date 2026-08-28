@@ -91,9 +91,15 @@ function maak(opt){
   const eenheidErbij = opt.eenheidUitLabel !== false;
   const VRIJ = opt.vrijeTekst || [];
 
+  function pastLabel(s){
+    return VELDMAP.some(x=>x.l.test(schoonLabel(s)));
+  }
+  /* Een losse regel telt alleen als label als hij niet ook een waarde kan zijn,
+     anders wordt "UGR<19" voor het label "UGR" aangezien. In een tabelregel staat
+     het label links van de tab en is die voorzichtigheid niet nodig - zie daar. */
   function isLabel(s){
     const k=schoonLabel(s);
-    return !lijktWaarde(k) && VELDMAP.some(x=>x.l.test(k));
+    return !lijktWaarde(k) && pastLabel(k);
   }
 
   function lees(tekst){
@@ -132,8 +138,12 @@ function maak(opt){
         waarde=label.slice(d+1).trim(); label=label.slice(0,d).trim();
       }
       if(waarde==null){
-        const kolom=label.match(/^(.{2,60}?)(?:\t+| {2,}| {3,})(.+)$/);
-        if(kolom && isLabel(kolom[1].trim())){
+        /* Bij een tabelregel staat het label per definitie links van de tab, dus
+           daar mag een cijfer in zonder dat het meteen een waarde wordt: veel
+           normlabels dragen hun nummer mee ("Beschermingsklasse volgens IEC
+           61140", "... per leidingbeveiligingsschakelaar B16"). */
+        const kolom=label.match(/^(.{2,80}?)(?:\t+| {2,})(.+)$/);
+        if(kolom && pastLabel(kolom[1].trim())){
           waarde=kolom[2].trim(); label=kolom[1].trim();
         }
       }
