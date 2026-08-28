@@ -51,6 +51,12 @@ function ontHtml(s){
    opt.sectie   patroon dat een groepskop herkent ("Elektrische gegevens")
    opt.kop      true als de eerste regel de omschrijving van het armatuur is
                 (bestekteksten beginnen daarmee); levert veld 'omschrijving'
+   opt.vrijeTekst
+                [{v:'veldnaam', p:/patroon/, l:'label voor de melding', uit:(m)=>waarde}]
+                Tweede leesronde over de lopende tekst, voor leveranciers die geen
+                tabel aanleveren maar een verkooptekst met de gegevens erin
+                ("13w 4000k 1900lm; lengte 600mm"). Zie de toelichting bij die
+                ronde hieronder.
    opt.eenheidUitLabel
                 staat de eenheid in het label en is de waarde een kaal getal, dan
                 die eenheid erbij zetten: "Maximum bulb wattage (W)" met "60" wordt
@@ -67,6 +73,7 @@ function maak(opt){
   const SECTIE  = opt.sectie || /$^/;
   const kopregel = opt.kop !== false;
   const eenheidErbij = opt.eenheidUitLabel !== false;
+  const VRIJ = opt.vrijeTekst || [];
 
   function isLabel(s){
     const k=schoonLabel(s);
@@ -80,7 +87,7 @@ function maak(opt){
          uit elkaar en wordt "L70/B50>50,000" halverwege afgekapt. */
       .flatMap(r=>r.split(/,\s*(?=[^,:]{2,40}:)/))
       .map(s=>s.trim()).filter(Boolean);
-    const uit={}, herkend=[], onbekend=[];
+    const uit={}, herkend=[]; let onbekend=[];
     let sectie='';
     for(let i=0;i<regels.length;i++){
       let label=regels[i], waarde=null;
@@ -121,6 +128,40 @@ function maak(opt){
       if(eenheid && /^[A-Za-z\u00b0%]+$/.test(eenheid) && /^-?\d+([.,]\d+)?$/.test(waarde.trim()))
         waarde=waarde.trim()+eenheid;
       if(uit[m.v]==null){ uit[m.v]=waarde; herkend.push({label,waarde,veld:m.v,sectie}); }
+    }
+
+    /* Tweede ronde: lopende tekst.
+
+       Lang niet elke leverancier levert een tabel. Vaak is het een verkooptekst
+       met de gegevens erin verstopt, over meerdere regels afgebroken en met een
+       rijtje achteraan: "... Vijf jaar garantie. 13w 4000k 1900lm; lengte 600mm".
+       Splitsen op de dubbele punt helpt daar niet.
+
+       Wat wel werkt is de EENHEID als anker: "lm" kan alleen lichtstroom zijn,
+       "kg" alleen gewicht. Daarom staan hier patronen en geen labels, en daarom
+       blijft een kaal getal zonder eenheid liggen - dat zou raden zijn.
+
+       Deze ronde vult alleen wat de eerste ronde niet gevonden heeft: staat er
+       een net label in de tekst, dan wint dat altijd. De regeleindes gaan er
+       eerst uit, want de tekst is vaak midden in een zin afgebroken. */
+    if(VRIJ.length){
+      const vlak = ontHtml(tekst).replace(/\s*\n\s*/g,' ').replace(/\s{2,}/g,' ');
+      VRIJ.forEach(r=>{
+        if(uit[r.v]!=null) return;
+        const m = vlak.match(r.p);
+        if(!m) return;
+        let w = r.uit ? r.uit(m) : m[1];
+        if(w==null) return;
+        w = String(w).trim();
+        if(!w) return;
+        uit[r.v]=w;
+        herkend.push({label:r.l||r.v, waarde:w, veld:r.v, sectie:'uit de tekst'});
+      });
+      /* Bij een verkooptekst is bijna elke regel proza. Die allemaal als "niet
+         herkend" tonen is ruis; alleen regels met een dubbele punt zijn een
+         zichtbare poging tot een label, en die horen wel gemeld te worden. */
+      if(herkend.some(h=>h.sectie==='uit de tekst'))
+        onbekend = onbekend.filter(r=>r.includes(':'));
     }
     return {uit,herkend,onbekend};
   }

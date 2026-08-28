@@ -236,9 +236,12 @@ const SCHEMA = [
     {id:'lumen',     l:'Lumen'},
     {id:'kelvin',    l:'Kelvin'},
     {id:'cri',       l:'Kleurweergave'},
+    {id:'ugr',       l:'UGR'},
     {id:'bundel',    l:'Lichtbundel'},
-    {id:'batterij',  l:'Batterij'},
-    {id:'autonomie', l:'Autonomie (h)'},
+    {id:'batterij',   l:'Batterij'},
+    {id:'autonomie',  l:'Autonomie (h)'},
+    {id:'levensduur', l:'Levensduur'},
+    {id:'macadam',    l:'Kleurstabiliteit'},
   ]},
   {kop:'Certificaten & Normen', velden:[
     {id:'certDriver',   l:'Driver certificaten'},
@@ -254,6 +257,8 @@ const SCHEMA = [
     {id:'matOptisch',   l:'Optisch-/Lens-/Reflectormateriaal'},
     {id:'kleur',        l:'Kleur behuizing'},
     {id:'afmetingen',   l:'Afmetingen'},
+    {id:'inbouwdiepte', l:'Inbouwdiepte'},
+    {id:'gewicht',      l:'Gewicht'},
   ]},
 ];
 
@@ -271,6 +276,8 @@ const VELDMAP = [
   {v:'lumen',     l:/^(lumen|lichtstroom|nuttige lichtstroom|armatuurlichtstroom|luminous ?flux|output|lichtopbrengst)$/i},
   {v:'kelvin',    l:/^(kelvin|kleurtemperatuur|kleur ?temperatuur|colou?r ?temperature|cct)$/i},
   {v:'cri',       l:/^(kleurweergave|kleurweergave-index|cri|ra|colou?r ?rendering)$/i},
+  {v:'ugr',       l:/^(ugr|verblinding|glare|ugr-?waarde)$/i},
+  {v:'inbouwdiepte', l:/^(inbouwdiepte|inbouwhoogte|recess ?depth)$/i},
   {v:'bundel',    l:/^(lichtbundel|bundelhoek|stralingshoek|beam ?(angle)?|uitstralingshoek)$/i},
   {v:'batterij',  l:/^(batterij|accu|battery|batterijtype)$/i},
   {v:'autonomie', l:/^(autonomie|noodduur|branduren|autonomy|duration|noodtijd)$/i},
@@ -281,6 +288,9 @@ const VELDMAP = [
   {v:'ik',        l:/^(ik[- ]?(classificatie|klasse|class|rating)?|slagvastheid)$/i},
   {v:'lichtbron', l:/^(lichtbron ?vervangbaar|vervangbare ?lichtbron|replaceable ?light ?source)$/i},
   {v:'garantie',  l:/^(garantie|warranty|garantietermijn)$/i},
+  {v:'levensduur',l:/^(levensduur|levensduurverwachting|lifetime|branduren)$/i},
+  {v:'macadam',   l:/^(kleurstabiliteit|kleur ?stabiliteit|mac ?adam|sdcm|binning)$/i},
+  {v:'gewicht',   l:/^(gewicht|weight|massa)$/i},
   {v:'matBehuizing', l:/^(materiaal ?behuizing|behuizing ?materiaal|housing ?material|materiaal|behuizing)$/i},
   {v:'matOptisch',   l:/^(optisch|optiek|lens|reflector|lensmateriaal|reflectormateriaal|afscherming)/i},
   {v:'kleur',     l:/^(kleur ?behuizing|kleur|colou?r|finish)$/i},
@@ -288,9 +298,73 @@ const VELDMAP = [
 ];
 /* Kopregels van leveranciersbladen: ze geven context maar hebben zelf geen waarde. */
 const SECTIE = /^(elektrisch|licht|certificat|norm|kleur|materia|algemeen|afmeting|verpakking|overig|bescherming|optiek|montage|noodverlichting)/i;
+/* Tweede leesronde, voor leveranciers die geen tabel maar een verkooptekst
+   sturen. De eenheid is hier het anker: "lm" kan alleen lichtstroom zijn, "kg"
+   alleen gewicht. Een kaal getal blijft bewust liggen - dat zou raden zijn.
+
+   (?![a-z]) achter een eenheid voorkomt dat "13w" uit "13wandarmatuur" komt, en
+   (?<![\w.,]) ervoor dat we het staartje van een groter getal pakken. */
+const GETAL = '(\\d+(?:[.,]\\d+)?)';
+const JAREN = {een:1,twee:2,drie:3,vier:4,vijf:5,zes:6,zeven:7,acht:8,negen:9,tien:10};
+const VRIJE_TEKST = [
+  {v:'wattage', l:'Wattage', p:new RegExp('(?<![\\w.,])'+GETAL+'\\s*W(?![a-z])','i'),
+   uit:m=>m[1].replace('.',',')+'W'},
+  {v:'kelvin',  l:'Kelvin',  p:/(?<![\w.,])(\d{4})\s*K(?![a-z])/i, uit:m=>m[1]+'K'},
+  /* Netspanning met drie cijfers, zodat de 3,6V van een batterij hier niet
+     per ongeluk in belandt. */
+  {v:'volt', l:'Ingangsspanning',
+   p:/(?<![\w.,])(\d{3})\s*(?:[-–]\s*(\d{3}))?\s*V(?![a-z])/i,
+   uit:m=>m[2] ? m[1]+'-'+m[2] : m[1]},
+  {v:'hz', l:'Ingangsfrequentie', p:/(?<![\w.,])(\d{2})\s*(?:[-–\/]\s*(\d{2}))?\s*Hz\b/i,
+   uit:m=>m[2] ? m[1]+'/'+m[2] : m[1]},
+  {v:'lumen',   l:'Lumen',   p:/(?<![\w.,])(\d{2,6})\s*lm(?![a-z])/i, uit:m=>m[1]+'lm'},
+  {v:'cri',     l:'Kleurweergave', p:/\b(?:cri|ra)\s*[>≥]?\s*(\d{2})\b/i, uit:m=>'Ra >'+m[1]},
+  {v:'ugr',     l:'UGR',           p:/\bugr\s*[<≤]?\s*(\d{2})\b/i, uit:m=>'<'+m[1]},
+  {v:'bundel',  l:'Lichtbundel',   p:/(?<![\w.,])(\d{2,3})\s*°/, uit:m=>m[1]+'°'},
+  {v:'inbouwdiepte', l:'Inbouwdiepte',
+   p:/\binbouw(?:diepte|hoogte)\s*[:=]?\s*(\d+(?:[.,]\d+)?)\s*(mm|cm)?\b/i,
+   uit:m=>m[1]+(m[2]||'mm')},
+  {v:'ip',      l:'IP-classificatie', p:/\bIP\s?(\d{2})\b/i, uit:m=>'IP'+m[1]},
+  {v:'ik',      l:'IK-classificatie', p:/\bIK\s?(\d{2})\b/i, uit:m=>'IK'+m[1]},
+  {v:'gewicht', l:'Gewicht', p:new RegExp('(?<![\\w.,])'+GETAL+'\\s*kg(?![a-z])','i'),
+   uit:m=>m[1]+' kg'},
+  /* "Vijf jaar garantie" en "5 jaar garantie" komen allebei voor. */
+  {v:'garantie', l:'Garantie',
+   p:/\b(\d{1,2}|een|twee|drie|vier|vijf|zes|zeven|acht|negen|tien)\s*(?:jaar|jr)\s*garantie/i,
+   uit:m=>{ const w=m[1].toLowerCase(); return (JAREN[w]||m[1])+' jaar'; }},
+  /* "levensduurverwachting (50.000 uur L80B10)" - alles tot de sluitende haak. */
+  {v:'levensduur', l:'Levensduur',
+   p:/levensduur\w*\s*[:(]?\s*([\d.,]+\s*(?:uur|u|h)\b[^).;]*)/i, uit:m=>m[1].trim()},
+  {v:'macadam', l:'Kleurstabiliteit', p:/mac\s?adam\s*([<≤]?\s*\d+)/i,
+   uit:m=>'MacAdam '+m[1].replace(/\s+/g,'')},
+  /* "Behuizing gemaakt van geëxtrudeerd aluminium" */
+  {v:'matBehuizing', l:'Materiaal behuizing',
+   p:/behuizing\s+(?:is\s+)?(?:gemaakt\s+)?(?:van|uit)\s+([^.;]{3,60})/i, uit:m=>hoofdletter(m[1])},
+  /* "hoogwaardige opaal diffuser" - het zelfstandig naamwoord is het anker. */
+  {v:'matOptisch', l:'Optisch materiaal',
+   p:/([^.;()]{0,40}\b(?:diffuser|diffusor|lens|reflector|afscherming)\b)/i, uit:m=>hoofdletter(m[1])},
+  {v:'dimbaar', l:'Dimbaar',
+   p:/\b(dali[-\s]?2?|casambi|1\s*-\s*10\s?v|0\s*-\s*10\s?v|push[-\s]?dim|triac|fase\s?af|fase\s?aan|niet\s+dimbaar|dimbaar)\b/i,
+   uit:m=>/niet/i.test(m[1]) ? 'Nee' : m[1].toUpperCase().replace('DALI2','DALI-2')},
+  /* Maten los opvangen; verwerk() maakt er een regel Afmetingen van. */
+  {v:'_lengte',   p:/\blengte\s*[:=]?\s*/i.source ? new RegExp('\\blengte\\s*[:=]?\\s*'+GETAL+'\\s*(mm|cm|m)?\\b','i') : null,
+   uit:m=>m[1]+(m[2]||'mm')},
+  {v:'_breedte',  p:new RegExp('\\bbreedte\\s*[:=]?\\s*'+GETAL+'\\s*(mm|cm)?\\b','i'),
+   uit:m=>m[1]+(m[2]||'mm')},
+  {v:'_hoogte',   p:new RegExp('\\bhoogte\\s*[:=]?\\s*'+GETAL+'\\s*(mm|cm)?\\b','i'),
+   uit:m=>m[1]+(m[2]||'mm')},
+  {v:'_diameter', p:new RegExp('(?:\\bdiameter|\\u00f8)\\s*[:=]?\\s*'+GETAL+'\\s*(mm|cm)?\\b','i'),
+   uit:m=>m[1]+(m[2]||'mm')},
+];
+function hoofdletter(t){
+  t=String(t).trim().replace(/^[,;\-\s]+/,'');
+  return t.charAt(0).toUpperCase()+t.slice(1);
+}
+
 /* eenheidUitLabel uit: dit blad toont het label mét eenheid ("Ingangsspanning (V)"),
    dus zou "230" anders als "230V" naast dat label komen te staan. */
-const LEZER = SpecLezer.maak({veldmap:VELDMAP, sectie:SECTIE, kop:true, eenheidUitLabel:false});
+const LEZER = SpecLezer.maak({veldmap:VELDMAP, sectie:SECTIE, kop:true,
+                              eenheidUitLabel:false, vrijeTekst:VRIJE_TEKST});
 
 /* ======================= de staat ======================= */
 
@@ -529,13 +603,36 @@ document.addEventListener('paste', e=>{
 function verwerk(){
   const res=LEZER.lees(S.plaktekst);
   S.uitslag=res;
-  Object.keys(res.uit).forEach(sleutel=>{
-    if(sleutel==='omschrijving'){ if(!S.omschrijving.trim()) S.omschrijving=res.uit[sleutel]; return; }
-    if(sleutel==='artikelcode'){ if(!S.artikelcode.trim() || S.artikelcode==='Special') S.artikelcode=res.uit[sleutel]; return; }
+  const u=res.uit;
+
+  /* Losse maten samenvoegen tot een regel. Ze komen apart uit de tekst omdat ze
+     daar ook los staan ("lengte 600mm; Diameter 60"). */
+  if(u.afmetingen==null){
+    const delen=[];
+    if(u._lengte && u._breedte) delen.push(u._lengte+' x '+u._breedte);
+    else if(u._lengte) delen.push(u._lengte);
+    else if(u._breedte) delen.push('B'+u._breedte);
+    if(u._hoogte) delen.push('H'+u._hoogte);
+    if(u._diameter) delen.push('Ø'+u._diameter);
+    if(delen.length) u.afmetingen=delen.join(' x ');
+  }
+
+  Object.keys(u).forEach(sleutel=>{
+    if(sleutel.charAt(0)==='_') return;      /* hulpvelden komen niet op het blad */
+    if(sleutel==='omschrijving'){ if(!S.omschrijving.trim()) S.omschrijving=eersteZin(u[sleutel]); return; }
+    if(sleutel==='artikelcode'){ if(!S.artikelcode.trim() || S.artikelcode==='Special') S.artikelcode=u[sleutel]; return; }
     const veld=S.velden[sleutel];
-    if(veld && !veld.w.trim()) veld.w=res.uit[sleutel];
+    if(veld && !veld.w.trim()) veld.w=u[sleutel];
   });
   tekenPaneel(); plan();
+}
+/* Een verkooptekst is over meerdere regels afgebroken, dus de eerste REGEL is
+   vaak een halve zin. De eerste zin is een bruikbare omschrijving; de rest is
+   verkoopverhaal dat niet in de bestelregel thuishoort. */
+function eersteZin(t){
+  const vlak=String(t).replace(/\s*\n\s*/g,' ').replace(/\s{2,}/g,' ').trim();
+  const m=vlak.match(/^(.{10,120}?)\.\s/);
+  return (m ? m[1] : vlak).trim();
 }
 
 /* ======================= het blad =======================
