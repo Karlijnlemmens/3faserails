@@ -502,8 +502,13 @@ async function buildArmaturenboekPdf(){
     paginaKop('Armaturenlijst',
       (st.proj||'').trim() + ((st.proj||'').trim()? '  —  ':'') + datumNL(st.datum));
     let TB=tableStart([{w:75,h:'Code'},{w:290,h:'Omschrijving'},{w:90,h:'Artikelcode'},{w:60,h:'Aantal'}]);
-    boek.forEach(b=> b.rijen.forEach(r=>
-      tableRow(TB,[ (r.s.aanduiding||'').trim(), armOms(r), armCode(r), String(r.s.qty) ])));
+    /* Regels zonder CODE (bestekpositie) horen niet in deze tabel - ze tellen wel
+       gewoon mee in de totalen/hoofdstukindeling/presenters hieronder (via boek). */
+    boek.forEach(b=> b.rijen.forEach(r=>{
+      const code=(r.s.aanduiding||'').trim();
+      if(!code) return;
+      tableRow(TB,[ code, armOms(r), armCode(r), String(r.s.qty) ]);
+    }));
     y+=10;
     const ontbreekt = boek.filter(b=>!presenterAanwezig(b.g.id));
     if(ontbreekt.length){
