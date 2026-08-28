@@ -28,16 +28,29 @@
    anders wordt "UGR<19" voor het label "UGR" aangezien. */
 function lijktWaarde(s){ return /[\d<>=]/.test(s) || /^(ja|nee|yes|no)$/i.test(s); }
 
-/* Labels komen in het wild met een eenheid of een vraagteken erachter:
-   "Maximum bulb wattage (W)", "Dimmable?", "Cut-out (mm)". Voor het opzoeken
-   halen we die eraf; de oorspronkelijke tekst blijft in de melding staan. */
+/* Labels komen in het wild met van alles eromheen: "Maximum bulb wattage (W)",
+   "Dimmable?", "Hoogte (mm) H", "Kleurweergave (CRI)". Voor het OPZOEKEN halen we
+   die versiering eraf; de oorspronkelijke tekst blijft in de melding staan.
+
+   De losse hoofdletter aan het eind is een tekeningverwijzing (H voor hoogte, D
+   voor diameter) die op leveranciersbladen naast de maat staat. */
 function schoonLabel(s){
-  return String(s||'').replace(/\s*\([^)]*\)\s*$/,'').replace(/[?:]+$/,'').trim();
+  return String(s||'')
+    .replace(/\([^)]*\)/g,' ')      /* elke haakjesgroep, niet alleen die aan het eind */
+    .replace(/[?:]+$/,'')
+    .replace(/\s{2,}/g,' ')
+    .trim()
+    .replace(/\s+[A-Z]$/,'')        /* "Hoogte  H" -> "Hoogte" */
+    .trim();
 }
 
-/* Geplakte webpagina's brengen hun entiteiten mee: Ra&gt;90, UGR&lt;19. */
+/* Geplakte webpagina's brengen hun entiteiten mee (Ra&gt;90, UGR&lt;19) en soms
+   ook hun opmaak: een waarde kan als <span ...>24h</span> binnenkomen. De tags
+   gaan eruit, de tekst ertussen blijft staan. Eerst de tags, dan de entiteiten -
+   andersom zou &lt;b&gt; als een echte tag behandeld worden. */
 function ontHtml(s){
   return String(s||'')
+    .replace(/<[^>]{0,400}>/g,'')
     .replace(/&(lt|gt|amp|quot|apos|nbsp|#39);/g,
       m=>({'&lt;':'<','&gt;':'>','&amp;':'&','&quot;':'"','&apos;':"'",'&#39;':"'",'&nbsp;':' '}[m]))
     .replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(+n));
@@ -66,7 +79,10 @@ function ontHtml(s){
    lees(tekst) geeft {uit, herkend, onbekend}:
      uit       {veld: waarde} - de eerste waarde wint, latere herhalingen niet
      herkend   [{label, waarde, veld, sectie}] om aan de gebruiker te tonen
-     onbekend  [regels] die nergens onder vielen */
+     onbekend  [regels] die nergens onder vielen
+     bijgezet  [veldnamen] waar de eenheid uit het label van de leverancier aan de
+               waarde is geplakt; een blad dat die eenheid zelf al toont kan hem
+               daar weghalen zonder aan de rest te komen */
 function maak(opt){
   opt = opt || {};
   const VELDMAP = opt.veldmap || [];
@@ -87,14 +103,17 @@ function maak(opt){
          uit elkaar en wordt "L70/B50>50,000" halverwege afgekapt. */
       .flatMap(r=>r.split(/,\s*(?=[^,:]{2,40}:)/))
       .map(s=>s.trim()).filter(Boolean);
-    const uit={}, herkend=[]; let onbekend=[];
+    const uit={}, herkend=[], bijgezet=[]; let onbekend=[];
     let sectie='';
     for(let i=0;i<regels.length;i++){
       let label=regels[i], waarde=null;
 
-      /* Kopregel van een bestektekst: de omschrijving van het armatuur zelf. */
-      if(kopregel && i===0 && !label.includes(':') && label.length>15
-         && /[a-z]/i.test(label) && !SECTIE.test(label)){
+      /* Kopregel van een bestektekst: de omschrijving van het armatuur zelf.
+         Alleen als de regel echt uit een stuk bestaat - een regel met een tab of
+         een rij spaties is een tabelregel, en die hoort verderop gesplitst te
+         worden in label en waarde. */
+      if(kopregel && i===0 && !label.includes(':') && !/\t| {2,}/.test(label)
+         && label.length>15 && /[a-z]/i.test(label) && !SECTIE.test(label)){
         uit.omschrijving=label;
         herkend.push({label:'Omschrijving',waarde:label,veld:'omschrijving',sectie});
         continue;
@@ -105,13 +124,30 @@ function maak(opt){
       const groep=label.match(/^([^:]{2,40}):\s*(.+:.+)$/);
       if(groep && SECTIE.test(groep[1].trim())){ sectie=groep[1].trim(); label=groep[2].trim(); }
 
-      /* "Label: waarde" op een regel - alleen splitsen als het linkerdeel echt een label is */
+      /* "Label: waarde" op een regel - alleen splitsen als het linkerdeel echt een
+         label is. Een tab of een rij spaties doet hetzelfde werk als de dubbele
+         punt: uit een tabel geplakt komt "Vermogensbereik (W)\t1 - 4" binnen. */
       const d=label.indexOf(':');
       if(d>0 && d<40 && isLabel(label.slice(0,d).trim())){
         waarde=label.slice(d+1).trim(); label=label.slice(0,d).trim();
       }
-      /* kopregel: onthouden en niets consumeren */
-      if(!waarde && SECTIE.test(label) && !/\d/.test(label) && label.length<40 && !isLabel(label)){
+      if(waarde==null){
+        const kolom=label.match(/^(.{2,60}?)(?:\t+| {2,}| {3,})(.+)$/);
+        if(kolom && isLabel(kolom[1].trim())){
+          waarde=kolom[2].trim(); label=kolom[1].trim();
+        }
+      }
+      /* Kopregel: onthouden en niets consumeren.
+
+         Lastig geval: "Afmetingen" en "Optiek" kunnen allebei een kopje zijn en
+         een veldnaam. Wat het onderscheidt is wat eronder staat - onder een kopje
+         volgt een volgend label, onder een veldnaam een waarde. Daarom mag een
+         regel die zelf een label is toch als kop gelden zodra de regel eronder
+         ook een label of een kop is. */
+      const volgende = regels[i+1];
+      const volgtLabel = volgende!=null && (isLabel(volgende) || SECTIE.test(volgende));
+      if(!waarde && SECTIE.test(label) && !/\d/.test(label) && label.length<40
+         && (!isLabel(label) || volgtLabel)){
         sectie=label; continue;
       }
       const m=(waarde!=null || !lijktWaarde(label))
@@ -125,8 +161,13 @@ function maak(opt){
       /* Staat de eenheid in het label en is de waarde een kaal getal, dan hoort
          hij erbij: "Maximum bulb wattage (W)" met "60" wordt 60W. */
       const eenheid=eenheidErbij ? (label.match(/\(([^)]{1,4})\)\s*$/)||[])[1] : null;
-      if(eenheid && /^[A-Za-z\u00b0%]+$/.test(eenheid) && /^-?\d+([.,]\d+)?$/.test(waarde.trim()))
+      if(eenheid && /^[A-Za-z\u00b0%]+$/.test(eenheid) && /^-?\d+([.,]\d+)?$/.test(waarde.trim())){
         waarde=waarde.trim()+eenheid;
+        /* Onthouden dat WIJ die eenheid erbij zetten. Een blad dat de eenheid al in
+           zijn eigen label toont kan hem dan weghalen, zonder daarbij een eenheid
+           te raken die de leverancier zelf schreef. */
+        if(uit[m.v]==null) bijgezet.push(m.v);
+      }
       if(uit[m.v]==null){ uit[m.v]=waarde; herkend.push({label,waarde,veld:m.v,sectie}); }
     }
 
@@ -163,7 +204,7 @@ function maak(opt){
       if(herkend.some(h=>h.sectie==='uit de tekst'))
         onbekend = onbekend.filter(r=>r.includes(':'));
     }
-    return {uit,herkend,onbekend};
+    return {uit,herkend,onbekend,bijgezet};
   }
 
   return {lees, isLabel};

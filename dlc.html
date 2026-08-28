@@ -231,10 +231,16 @@ const SCHEMA = [
     {id:'wattage',  l:'Wattage'},
     {id:'driver',   l:'Driver'},
     {id:'dimbaar',  l:'Dimbaar'},
+    {id:'dimtechniek', l:'Dimtechniek'},
+    {id:'energieklasse', l:'Energieklasse'},
   ]},
   {kop:'Lichttechniek', velden:[
-    {id:'lumen',     l:'Lumen'},
-    {id:'kelvin',    l:'Kelvin'},
+    {id:'soortLichtbron', l:'Soort lichtbron'},
+    {id:'lumen',      l:'Lumen'},
+    {id:'kelvin',     l:'Kelvin'},
+    {id:'rendement',  l:'Efficiëntie'},
+    {id:'lichtverdeling', l:'Lichtverdeling'},
+    {id:'fotobiologisch', l:'Fotobiologische veiligheid'},
     {id:'cri',       l:'Kleurweergave'},
     {id:'ugr',       l:'UGR'},
     {id:'bundel',    l:'Lichtbundel'},
@@ -257,7 +263,10 @@ const SCHEMA = [
     {id:'matOptisch',   l:'Optisch-/Lens-/Reflectormateriaal'},
     {id:'kleur',        l:'Kleur behuizing'},
     {id:'afmetingen',   l:'Afmetingen'},
+    {id:'zaagmaat',     l:'Zaagmaat'},
     {id:'inbouwdiepte', l:'Inbouwdiepte'},
+    {id:'montage',      l:'Montage'},
+    {id:'aansluiting',  l:'Aansluiting'},
     {id:'gewicht',      l:'Gewicht'},
   ]},
 ];
@@ -268,36 +277,59 @@ const SCHEMA = [
    dat de tool iets verkeerd raadt. */
 const VELDMAP = [
   {v:'artikelcode', l:/^(artikelcode|artikelnummer|bestelnummer|productcode|sku|item ?(no|number|code)|article ?(code|number))$/i},
-  {v:'volt',      l:/^(ingangsspanning|voedingsspanning|netspanning|spanning|input ?voltage|voltage|nominale spanning)$/i},
+  {v:'volt',      l:/^(ingangsspanning|voedingsspanning|netspanning|spanning|input ?voltage|voltage|nominale spanning|primaire nominale spanning)$/i},
   {v:'hz',        l:/^(ingangsfrequentie|frequentie|frequency|netfrequentie)$/i},
-  {v:'wattage',   l:/^(wattage|vermogen|systeem ?wattage|opgenomen vermogen|system ?power|power|watt)$/i},
+  {v:'wattage',   l:/^(wattage|vermogen|vermogensbereik|systeem ?wattage|opgenomen vermogen|system ?power|power|watt|maximum bulb wattage|max\.? bulb wattage)$/i},
   {v:'driver',    l:/^(driver|voorschakelapparaat|ballast|driver ?type)$/i},
-  {v:'dimbaar',   l:/^(dimbaar|dimbaarheid|dimmable|dimmen|dimming|dim ?type)$/i},
+  /* "Type" onder een kopje over dimmen is de dimwijze; overal elders is het het
+     soort armatuur, en dan zou dit veld verkeerd gevuld worden. */
+  {v:'dimbaar',   l:/^(type|dimmen|dimming|besturing|sturing)$/i, s:/controle|dim/i},
+  {v:'dimbaar',   l:/^(dimbaar|dimbaarheid|dimmable|dim ?type)$/i},
   {v:'lumen',     l:/^(lumen|lichtstroom|nuttige lichtstroom|armatuurlichtstroom|luminous ?flux|output|lichtopbrengst)$/i},
-  {v:'kelvin',    l:/^(kelvin|kleurtemperatuur|kleur ?temperatuur|colou?r ?temperature|cct)$/i},
+  {v:'soortLichtbron', l:/^(soort ?lichtbron|lichtbron|light ?source|bulb ?base|fitting)$/i},
+  {v:'rendement', l:/^(armatuur ?effici[eë]ntie( led)?|effici[eë]ntie|rendement|luminaire ?efficacy|lm\/w)$/i},
+  {v:'lichtverdeling', l:/^(lichtverdeling|light ?distribution)$/i},
+  {v:'kelvin',    l:/^(kelvin|licht ?kleur ?temperatuur|kleurtemperatuur|kleur ?temperatuur|colou?r ?temperature|cct)$/i},
   {v:'cri',       l:/^(kleurweergave|kleurweergave-index|cri|ra|colou?r ?rendering)$/i},
   {v:'ugr',       l:/^(ugr|verblinding|glare|ugr-?waarde)$/i},
-  {v:'inbouwdiepte', l:/^(inbouwdiepte|inbouwhoogte|recess ?depth)$/i},
-  {v:'bundel',    l:/^(lichtbundel|bundelhoek|stralingshoek|beam ?(angle)?|uitstralingshoek)$/i},
+  {v:'inbouwdiepte', l:/^(inbouwdiepte|inbouwdiepte plafond|inbouwhoogte|recess ?depth)$/i},
+  /* Maten als label; de vrije-tekstronde vangt ze ook, maar met een net label
+     erbij hoeft die ronde niet te raden. */
+  {v:'_hoogte',   l:/^(hoogte|height)$/i},
+  {v:'_diameter', l:/^(diameter|\u00f8)$/i},
+  {v:'_breedte',  l:/^(breedte|width)$/i},
+  {v:'_lengte',   l:/^(lengte|length)$/i},
+  {v:'bundel',    l:/^(lichtbundel|bundelhoek|stralingshoek|beam ?(angle)?|uitstralingshoek|halve ?verstrooiingshoek|verstrooiingshoek)$/i},
   {v:'batterij',  l:/^(batterij|accu|battery|batterijtype)$/i},
   {v:'autonomie', l:/^(autonomie|noodduur|branduren|autonomy|duration|noodtijd)$/i},
   {v:'certDriver',   l:/^driver ?(certificaten|certificates|keurmerk)/i},
   {v:'certArmatuur', l:/^(armatuur ?)?(certificaten|certificates|keurmerken|keurmerk)$/i},
   {v:'iecKlasse',    l:/^(iec ?)?(beschermingsklasse|isolatieklasse|veiligheidsklasse|protection ?class|safety ?class|klasse|class)$/i},
   {v:'ip',        l:/^(ip[- ]?(classificatie|klasse|class|rating|code|graad)?|beschermingsgraad)$/i},
-  {v:'ik',        l:/^(ik[- ]?(classificatie|klasse|class|rating)?|slagvastheid)$/i},
+  {v:'ik',        l:/^(ik[- ]?(classificatie|klasse|class|rating)?|slagvastheid|slagvastheidsklasse)$/i},
   {v:'lichtbron', l:/^(lichtbron ?vervangbaar|vervangbare ?lichtbron|replaceable ?light ?source)$/i},
   {v:'garantie',  l:/^(garantie|warranty|garantietermijn)$/i},
   {v:'levensduur',l:/^(levensduur|levensduurverwachting|lifetime|branduren)$/i},
-  {v:'macadam',   l:/^(kleurstabiliteit|kleur ?stabiliteit|mac ?adam|sdcm|binning)$/i},
-  {v:'gewicht',   l:/^(gewicht|weight|massa)$/i},
-  {v:'matBehuizing', l:/^(materiaal ?behuizing|behuizing ?materiaal|housing ?material|materiaal|behuizing)$/i},
-  {v:'matOptisch',   l:/^(optisch|optiek|lens|reflector|lensmateriaal|reflectormateriaal|afscherming)/i},
+  {v:'macadam',   l:/^(kleurstabiliteit|kleur ?stabiliteit|mac ?adams? ?(factor|stap|stappen)?|sdcm|binning)$/i},
+  {v:'fotobiologisch', l:/^(fotobiologische veiligheid|risicogroep|photobiological ?safety|risk ?group)$/i},
+  {v:'gewicht',   l:/^(gewicht|gewicht bruto\/netto|nettogewicht|weight|product net weight|massa)$/i},
+  {v:'matBehuizing', l:/^(materiaal ?behuizing|behuizing ?materiaal|housing ?material|materiaal|material|behuizing)$/i},
+  /* Let op: geen kaal "reflector" of "lens" - dat zijn WAARDEN bij het label
+     Optiek, en als ze ook als label gelden slikt de lezer ze op. */
+  {v:'matOptisch',   l:/^(optisch[\w\-\/]*|optiek|lens ?materiaal|reflector ?materiaal|materiaal ?afdekking|afscherming|diffuser)$/i},
   {v:'kleur',     l:/^(kleur ?behuizing|kleur|colou?r|finish)$/i},
+  {v:'zaagmaat',  l:/^(zaagmaat|gatmaat|cut-?out|inbouwopening|inbouwdiameter|inbouwmaat|recess ?cut-?out)$/i},
+  {v:'montage',   l:/^(montage|montagewijze|mounting|installation)$/i},
+  {v:'aansluiting', l:/^(aansluiting|connection|klemmenblok)$/i},
+  {v:'dimtechniek', l:/^(dimtechniek|dimming ?technology|dimwijze)$/i},
+  {v:'energieklasse', l:/^(energie-?effici[eë]ntieklasse|energieklasse|bevat een lichtbron met energieclasse|energy ?class)$/i},
   {v:'afmetingen',l:/^(afmetingen|afmeting|dimensions|maten|formaat)$/i},
 ];
 /* Kopregels van leveranciersbladen: ze geven context maar hebben zelf geen waarde. */
-const SECTIE = /^(elektrisch|licht|certificat|norm|kleur|materia|algemeen|afmeting|verpakking|overig|bescherming|optiek|montage|noodverlichting)/i;
+/* Kopjes van leveranciersbladen. "optiek" en "montage" staan er bewust NIET in:
+   op deze bladen zijn dat veldnamen. Kopjes die ook een veldnaam kunnen zijn
+   ("Afmetingen") worden onderscheiden aan wat eronder staat - zie spec-lezer.js. */
+const SECTIE = /^(elektrisch|licht ?techniek|certificat|norm|kleuren|materiaal en|algemeen|afmeting|verpakking|overig|bescherming|energie en|controle|noodverlichting|montage\/)/i;
 /* Tweede leesronde, voor leveranciers die geen tabel maar een verkooptekst
    sturen. De eenheid is hier het anker: "lm" kan alleen lichtstroom zijn, "kg"
    alleen gewicht. Een kaal getal blijft bewust liggen - dat zou raden zijn.
@@ -344,7 +376,9 @@ const VRIJE_TEKST = [
   {v:'matOptisch', l:'Optisch materiaal',
    p:/([^.;()]{0,40}\b(?:diffuser|diffusor|lens|reflector|afscherming)\b)/i, uit:m=>hoofdletter(m[1])},
   {v:'dimbaar', l:'Dimbaar',
-   p:/\b(dali[-\s]?2?|casambi|1\s*-\s*10\s?v|0\s*-\s*10\s?v|push[-\s]?dim|triac|fase\s?af|fase\s?aan|niet\s+dimbaar|dimbaar)\b/i,
+   /* De woordgrens aan het eind is nodig: zonder die grens haalt dit patroon
+      "Dali-" uit "Dali-optie" en staat er onzin op het blad. */
+   p:/\b(dali[-\s]?2\b|dali\b|casambi\b|1\s*-\s*10\s?v\b|0\s*-\s*10\s?v\b|push[-\s]?dim\b|triac\b|fase[-\s]?afsnijding\b|niet\s+dimbaar\b|dimbaar\b)/i,
    uit:m=>/niet/i.test(m[1]) ? 'Nee' : m[1].toUpperCase().replace('DALI2','DALI-2')},
   /* Maten los opvangen; verwerk() maakt er een regel Afmetingen van. */
   {v:'_lengte',   p:/\blengte\s*[:=]?\s*/i.source ? new RegExp('\\blengte\\s*[:=]?\\s*'+GETAL+'\\s*(mm|cm|m)?\\b','i') : null,
@@ -361,10 +395,31 @@ function hoofdletter(t){
   return t.charAt(0).toUpperCase()+t.slice(1);
 }
 
-/* eenheidUitLabel uit: dit blad toont het label mét eenheid ("Ingangsspanning (V)"),
-   dus zou "230" anders als "230V" naast dat label komen te staan. */
+/* De eenheid uit het label van de LEVERANCIER hoort bij de waarde: "Maximum bulb
+   wattage (W)" met "60" is 60W. Draagt ONS label die eenheid ook, dan zou hij er
+   dubbel komen te staan; dat haalt zetVeld() er weer af. */
 const LEZER = SpecLezer.maak({veldmap:VELDMAP, sectie:SECTIE, kop:true,
-                              eenheidUitLabel:false, vrijeTekst:VRIJE_TEKST});
+                              vrijeTekst:VRIJE_TEKST});
+
+/* Vult een veld en haalt de eenheid weg die ons eigen label al toont: het blad
+   zet "Ingangsspanning (V)" met "230", niet met "230V".
+
+   Alleen bij een kale maat, want anders sneuvelt er meer dan de bedoeling is:
+   bij "Autonomie (h)" met "1h | 2h | 3h" zou de laatste h eraf gaan. */
+function zetVeld(veld, waarde, doorParserBijgezet){
+  if(!veld || veld.w.trim()) return;
+  let w=String(waarde).trim();
+  const eh=(veld.l.match(/\(([^)]{1,4})\)/)||[])[1];
+  /* Alleen weghalen wat de parser zelf uit het leverancierslabel bijzette. Wat de
+     leverancier zelf schreef blijft staan: het ontwerp toont bij "Autonomie (h)"
+     gewoon "1h". */
+  if(eh && doorParserBijgezet){
+    const vlucht=eh.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const m=w.match(new RegExp('^(.*?)\\s*'+vlucht+'$','i'));
+    if(m && m[1].trim()) w=m[1].trim();
+  }
+  veld.w=w;
+}
 
 /* ======================= de staat ======================= */
 
@@ -621,14 +676,19 @@ function verwerk(){
     if(sleutel.charAt(0)==='_') return;      /* hulpvelden komen niet op het blad */
     if(sleutel==='omschrijving'){ if(!S.omschrijving.trim()) S.omschrijving=eersteZin(u[sleutel]); return; }
     if(sleutel==='artikelcode'){ if(!S.artikelcode.trim() || S.artikelcode==='Special') S.artikelcode=u[sleutel]; return; }
-    const veld=S.velden[sleutel];
-    if(veld && !veld.w.trim()) veld.w=u[sleutel];
+    zetVeld(S.velden[sleutel], sleutel==='volt' ? kortSpanning(u[sleutel]) : u[sleutel],
+            (res.bijgezet||[]).indexOf(sleutel)>=0);
   });
   tekenPaneel(); plan();
 }
 /* Een verkooptekst is over meerdere regels afgebroken, dus de eerste REGEL is
    vaak een halve zin. De eerste zin is een bruikbare omschrijving; de rest is
    verkoopverhaal dat niet in de bestelregel thuishoort. */
+/* "220-240V V ~ 50/60Hz" is de spanning plus de frequentie in een veld. De
+   frequentie heeft zijn eigen regel, dus hier knippen we bij het scheidingsteken. */
+function kortSpanning(w){
+  return String(w).split(/\s*[~,;]\s*|\s{2,}/)[0].replace(/\s*V\s*V$/i,'V').trim();
+}
 function eersteZin(t){
   const vlak=String(t).replace(/\s*\n\s*/g,' ').replace(/\s{2,}/g,' ').trim();
   const m=vlak.match(/^(.{10,120}?)\.\s/);
