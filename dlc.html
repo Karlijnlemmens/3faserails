@@ -231,23 +231,12 @@ const SCHEMA = [
     {id:'wattage',  l:'Wattage'},
     {id:'driver',   l:'Driver'},
     {id:'dimbaar',  l:'Dimbaar'},
-    {id:'dimtechniek', l:'Dimtechniek'},
-    {id:'energieklasse', l:'Energieklasse'},
   ]},
   {kop:'Lichttechniek', velden:[
-    {id:'soortLichtbron', l:'Soort lichtbron'},
-    {id:'lumen',      l:'Lumen'},
-    {id:'kelvin',     l:'Kelvin'},
-    {id:'rendement',  l:'Efficiëntie'},
-    {id:'lichtverdeling', l:'Lichtverdeling'},
-    {id:'fotobiologisch', l:'Fotobiologische veiligheid'},
-    {id:'cri',       l:'Kleurweergave'},
-    {id:'ugr',       l:'UGR'},
-    {id:'bundel',    l:'Lichtbundel'},
-    {id:'batterij',   l:'Batterij'},
-    {id:'autonomie',  l:'Autonomie (h)'},
-    {id:'levensduur', l:'Levensduur'},
-    {id:'macadam',    l:'Kleurstabiliteit'},
+    {id:'lumen',     l:'Lumen'},
+    {id:'kelvin',    l:'Kelvin'},
+    {id:'batterij',  l:'Batterij'},
+    {id:'autonomie', l:'Autonomie (h)'},
   ]},
   {kop:'Certificaten & Normen', velden:[
     {id:'certDriver',   l:'Driver certificaten'},
@@ -262,12 +251,6 @@ const SCHEMA = [
     {id:'matBehuizing', l:'Materiaal behuizing'},
     {id:'matOptisch',   l:'Optisch-/Lens-/Reflectormateriaal'},
     {id:'kleur',        l:'Kleur behuizing'},
-    {id:'afmetingen',   l:'Afmetingen'},
-    {id:'zaagmaat',     l:'Zaagmaat'},
-    {id:'inbouwdiepte', l:'Inbouwdiepte'},
-    {id:'montage',      l:'Montage'},
-    {id:'aansluiting',  l:'Aansluiting'},
-    {id:'gewicht',      l:'Gewicht'},
   ]},
 ];
 
@@ -284,55 +267,33 @@ const VELDMAP = [
   /* "Type" onder een kopje over dimmen is de dimwijze; overal elders is het het
      soort armatuur, en dan zou dit veld verkeerd gevuld worden. */
   {v:'dimbaar',   l:/^(type|dimmen|dimming|besturing|sturing)$/i, s:/controle|dim/i},
-  {v:'dimbaar',   l:/^(dimbaar|dimbaarheid|dimmable|dim ?type)$/i},
+  {v:'dimbaar',   l:/^(dimbaar|dimbaarheid|dimmable|dim ?type|dimtechniek)$/i},
   {v:'lumen',     l:/^(lumen|lichtstroom|nuttige lichtstroom|armatuurlichtstroom|luminous ?flux|output|lichtopbrengst)$/i},
-  {v:'soortLichtbron', l:/^(soort ?lichtbron|lichtbron|light ?source|bulb ?base|fitting)$/i},
-  {v:'rendement', l:/^(armatuur ?effici[eë]ntie( led)?|effici[eë]ntie|rendement|luminaire ?efficacy|lm\/w)$/i},
-  {v:'lichtverdeling', l:/^(lichtverdeling|light ?distribution)$/i},
   {v:'kelvin',    l:/^(kelvin|licht ?kleur ?temperatuur|kleurtemperatuur|kleur ?temperatuur|colou?r ?temperature|cct)$/i},
-  {v:'cri',       l:/^(kleurweergave|kleurweergave-index|cri|ra|colou?r ?rendering)$/i},
-  {v:'ugr',       l:/^(ugr|verblinding|glare|ugr-?waarde)$/i},
-  {v:'inbouwdiepte', l:/^(inbouwdiepte|inbouwdiepte plafond|inbouwhoogte|recess ?depth)$/i},
-  /* Maten als label; de vrije-tekstronde vangt ze ook, maar met een net label
-     erbij hoeft die ronde niet te raden. */
-  {v:'_hoogte',   l:/^(hoogte|height)$/i},
-  {v:'_diameter', l:/^(diameter|\u00f8)$/i},
-  {v:'_breedte',  l:/^(breedte|width)$/i},
-  {v:'_lengte',   l:/^(lengte|length)$/i},
-  {v:'bundel',    l:/^(lichtbundel|bundelhoek|stralingshoek|beam ?(angle)?|uitstralingshoek|halve ?verstrooiingshoek|verstrooiingshoek)$/i},
   {v:'batterij',  l:/^(batterij|accu|battery|batterijtype)$/i},
-  {v:'autonomie', l:/^(autonomie|noodduur|branduren|autonomy|duration|noodtijd)$/i},
+  {v:'autonomie', l:/^(autonomie|noodduur|branduren|autonomy|duration|noodtijd|oplaadtijd)$/i},
   {v:'certDriver',   l:/^driver ?(certificaten|certificates|keurmerk)/i},
   {v:'certArmatuur', l:/^(armatuur ?)?(certificaten|certificates|keurmerken|keurmerk)$/i},
   {v:'iecKlasse',    l:/^(iec ?)?(beschermingsklasse|isolatieklasse|veiligheidsklasse|protection ?class|safety ?class|klasse|class)$/i},
-  {v:'ip',        l:/^(ip[- ]?(classificatie|klasse|class|rating|code|graad)?|beschermingsgraad)$/i},
+  {v:'ip',        l:/^(ip[- ]?(classificatie|klasse|class|rating|code|graad|degree)?|beschermingsgraad)$/i},
   {v:'ik',        l:/^(ik[- ]?(classificatie|klasse|class|rating)?|slagvastheid|slagvastheidsklasse)$/i},
   {v:'lichtbron', l:/^(lichtbron ?vervangbaar|vervangbare ?lichtbron|replaceable ?light ?source)$/i},
   {v:'garantie',  l:/^(garantie|warranty|garantietermijn)$/i},
-  {v:'levensduur',l:/^(levensduur|levensduurverwachting|lifetime|branduren)$/i},
-  {v:'macadam',   l:/^(kleurstabiliteit|kleur ?stabiliteit|mac ?adams? ?(factor|stap|stappen)?|sdcm|binning)$/i},
-  {v:'fotobiologisch', l:/^(fotobiologische veiligheid|risicogroep|photobiological ?safety|risk ?group)$/i},
-  {v:'gewicht',   l:/^(gewicht|gewicht bruto\/netto|nettogewicht|weight|product net weight|massa)$/i},
   {v:'matBehuizing', l:/^(materiaal ?behuizing|behuizing ?materiaal|housing ?material|materiaal|material|behuizing)$/i},
   /* Let op: geen kaal "reflector" of "lens" - dat zijn WAARDEN bij het label
      Optiek, en als ze ook als label gelden slikt de lezer ze op. */
   {v:'matOptisch',   l:/^(optisch[\w\-\/]*|optiek|lens ?materiaal|reflector ?materiaal|materiaal ?afdekking|afscherming|diffuser)$/i},
   {v:'kleur',     l:/^(kleur ?behuizing|kleur|colou?r|finish)$/i},
-  {v:'zaagmaat',  l:/^(zaagmaat|gatmaat|cut-?out|inbouwopening|inbouwdiameter|inbouwmaat|recess ?cut-?out)$/i},
-  {v:'montage',   l:/^(montage|montagewijze|mounting|installation)$/i},
-  {v:'aansluiting', l:/^(aansluiting|connection|klemmenblok)$/i},
-  {v:'dimtechniek', l:/^(dimtechniek|dimming ?technology|dimwijze)$/i},
-  {v:'energieklasse', l:/^(energie-?effici[eë]ntieklasse|energieklasse|bevat een lichtbron met energieclasse|energy ?class)$/i},
-  {v:'afmetingen',l:/^(afmetingen|afmeting|dimensions|maten|formaat)$/i},
 ];
-/* Kopregels van leveranciersbladen: ze geven context maar hebben zelf geen waarde. */
 /* Kopjes van leveranciersbladen. "optiek" en "montage" staan er bewust NIET in:
    op deze bladen zijn dat veldnamen. Kopjes die ook een veldnaam kunnen zijn
    ("Afmetingen") worden onderscheiden aan wat eronder staat - zie spec-lezer.js. */
 const SECTIE = /^(elektrisch|licht ?techniek|certificat|norm|kleuren|materiaal en|algemeen|afmeting|verpakking|overig|bescherming|energie en|controle|noodverlichting|montage\/)/i;
+
 /* Tweede leesronde, voor leveranciers die geen tabel maar een verkooptekst
-   sturen. De eenheid is hier het anker: "lm" kan alleen lichtstroom zijn, "kg"
-   alleen gewicht. Een kaal getal blijft bewust liggen - dat zou raden zijn.
+   sturen. De eenheid is hier het anker: "lm" kan alleen lichtstroom zijn. Een
+   kaal getal blijft bewust liggen - dat zou raden zijn. Er staan alleen patronen
+   voor velden die ook echt op het blad komen; de rest zou toch nergens landen.
 
    (?![a-z]) achter een eenheid voorkomt dat "13w" uit "13wandarmatuur" komt, en
    (?<![\w.,]) ervoor dat we het staartje van een groter getal pakken. */
@@ -342,6 +303,7 @@ const VRIJE_TEKST = [
   {v:'wattage', l:'Wattage', p:new RegExp('(?<![\\w.,])'+GETAL+'\\s*W(?![a-z])','i'),
    uit:m=>m[1].replace('.',',')+'W'},
   {v:'kelvin',  l:'Kelvin',  p:/(?<![\w.,])(\d{4})\s*K(?![a-z])/i, uit:m=>m[1]+'K'},
+  {v:'lumen',   l:'Lumen',   p:/(?<![\w.,])(\d{2,6})\s*lm(?![a-z])/i, uit:m=>m[1]+'lm'},
   /* Netspanning met drie cijfers, zodat de 3,6V van een batterij hier niet
      per ongeluk in belandt. */
   {v:'volt', l:'Ingangsspanning',
@@ -349,46 +311,23 @@ const VRIJE_TEKST = [
    uit:m=>m[2] ? m[1]+'-'+m[2] : m[1]},
   {v:'hz', l:'Ingangsfrequentie', p:/(?<![\w.,])(\d{2})\s*(?:[-–\/]\s*(\d{2}))?\s*Hz\b/i,
    uit:m=>m[2] ? m[1]+'/'+m[2] : m[1]},
-  {v:'lumen',   l:'Lumen',   p:/(?<![\w.,])(\d{2,6})\s*lm(?![a-z])/i, uit:m=>m[1]+'lm'},
-  {v:'cri',     l:'Kleurweergave', p:/\b(?:cri|ra)\s*[>≥]?\s*(\d{2})\b/i, uit:m=>'Ra >'+m[1]},
-  {v:'ugr',     l:'UGR',           p:/\bugr\s*[<≤]?\s*(\d{2})\b/i, uit:m=>'<'+m[1]},
-  {v:'bundel',  l:'Lichtbundel',   p:/(?<![\w.,])(\d{2,3})\s*°/, uit:m=>m[1]+'°'},
-  {v:'inbouwdiepte', l:'Inbouwdiepte',
-   p:/\binbouw(?:diepte|hoogte)\s*[:=]?\s*(\d+(?:[.,]\d+)?)\s*(mm|cm)?\b/i,
-   uit:m=>m[1]+(m[2]||'mm')},
   {v:'ip',      l:'IP-classificatie', p:/\bIP\s?(\d{2})\b/i, uit:m=>'IP'+m[1]},
   {v:'ik',      l:'IK-classificatie', p:/\bIK\s?(\d{2})\b/i, uit:m=>'IK'+m[1]},
-  {v:'gewicht', l:'Gewicht', p:new RegExp('(?<![\\w.,])'+GETAL+'\\s*kg(?![a-z])','i'),
-   uit:m=>m[1]+' kg'},
   /* "Vijf jaar garantie" en "5 jaar garantie" komen allebei voor. */
   {v:'garantie', l:'Garantie',
    p:/\b(\d{1,2}|een|twee|drie|vier|vijf|zes|zeven|acht|negen|tien)\s*(?:jaar|jr)\s*garantie/i,
    uit:m=>{ const w=m[1].toLowerCase(); return (JAREN[w]||m[1])+' jaar'; }},
-  /* "levensduurverwachting (50.000 uur L80B10)" - alles tot de sluitende haak. */
-  {v:'levensduur', l:'Levensduur',
-   p:/levensduur\w*\s*[:(]?\s*([\d.,]+\s*(?:uur|u|h)\b[^).;]*)/i, uit:m=>m[1].trim()},
-  {v:'macadam', l:'Kleurstabiliteit', p:/mac\s?adam\s*([<≤]?\s*\d+)/i,
-   uit:m=>'MacAdam '+m[1].replace(/\s+/g,'')},
   /* "Behuizing gemaakt van geëxtrudeerd aluminium" */
   {v:'matBehuizing', l:'Materiaal behuizing',
    p:/behuizing\s+(?:is\s+)?(?:gemaakt\s+)?(?:van|uit)\s+([^.;]{3,60})/i, uit:m=>hoofdletter(m[1])},
   /* "hoogwaardige opaal diffuser" - het zelfstandig naamwoord is het anker. */
   {v:'matOptisch', l:'Optisch materiaal',
    p:/([^.;()]{0,40}\b(?:diffuser|diffusor|lens|reflector|afscherming)\b)/i, uit:m=>hoofdletter(m[1])},
+  /* De woordgrens aan het eind is nodig: zonder die grens haalt dit patroon
+     "Dali-" uit "Dali-optie" en staat er onzin op het blad. */
   {v:'dimbaar', l:'Dimbaar',
-   /* De woordgrens aan het eind is nodig: zonder die grens haalt dit patroon
-      "Dali-" uit "Dali-optie" en staat er onzin op het blad. */
    p:/\b(dali[-\s]?2\b|dali\b|casambi\b|1\s*-\s*10\s?v\b|0\s*-\s*10\s?v\b|push[-\s]?dim\b|triac\b|fase[-\s]?afsnijding\b|niet\s+dimbaar\b|dimbaar\b)/i,
    uit:m=>/niet/i.test(m[1]) ? 'Nee' : m[1].toUpperCase().replace('DALI2','DALI-2')},
-  /* Maten los opvangen; verwerk() maakt er een regel Afmetingen van. */
-  {v:'_lengte',   p:/\blengte\s*[:=]?\s*/i.source ? new RegExp('\\blengte\\s*[:=]?\\s*'+GETAL+'\\s*(mm|cm|m)?\\b','i') : null,
-   uit:m=>m[1]+(m[2]||'mm')},
-  {v:'_breedte',  p:new RegExp('\\bbreedte\\s*[:=]?\\s*'+GETAL+'\\s*(mm|cm)?\\b','i'),
-   uit:m=>m[1]+(m[2]||'mm')},
-  {v:'_hoogte',   p:new RegExp('\\bhoogte\\s*[:=]?\\s*'+GETAL+'\\s*(mm|cm)?\\b','i'),
-   uit:m=>m[1]+(m[2]||'mm')},
-  {v:'_diameter', p:new RegExp('(?:\\bdiameter|\\u00f8)\\s*[:=]?\\s*'+GETAL+'\\s*(mm|cm)?\\b','i'),
-   uit:m=>m[1]+(m[2]||'mm')},
 ];
 function hoofdletter(t){
   t=String(t).trim().replace(/^[,;\-\s]+/,'');
@@ -660,20 +599,7 @@ function verwerk(){
   S.uitslag=res;
   const u=res.uit;
 
-  /* Losse maten samenvoegen tot een regel. Ze komen apart uit de tekst omdat ze
-     daar ook los staan ("lengte 600mm; Diameter 60"). */
-  if(u.afmetingen==null){
-    const delen=[];
-    if(u._lengte && u._breedte) delen.push(u._lengte+' x '+u._breedte);
-    else if(u._lengte) delen.push(u._lengte);
-    else if(u._breedte) delen.push('B'+u._breedte);
-    if(u._hoogte) delen.push('H'+u._hoogte);
-    if(u._diameter) delen.push('Ø'+u._diameter);
-    if(delen.length) u.afmetingen=delen.join(' x ');
-  }
-
   Object.keys(u).forEach(sleutel=>{
-    if(sleutel.charAt(0)==='_') return;      /* hulpvelden komen niet op het blad */
     if(sleutel==='omschrijving'){ if(!S.omschrijving.trim()) S.omschrijving=eersteZin(u[sleutel]); return; }
     if(sleutel==='artikelcode'){ if(!S.artikelcode.trim() || S.artikelcode==='Special') S.artikelcode=u[sleutel]; return; }
     zetVeld(S.velden[sleutel], sleutel==='volt' ? kortSpanning(u[sleutel]) : u[sleutel],
