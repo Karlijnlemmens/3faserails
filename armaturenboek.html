@@ -90,6 +90,14 @@
   .c2-armrecog.ok{background:var(--green-light); color:var(--green);}
   .c2-armrecog.miss{background:#FDECEC; color:#B0362B;}
   .c2-armrecog.warn{background:#FFF4E0; color:#95651A;}
+
+  .c2-armspecial{display:none; align-items:center; gap:4px;}
+  .c2-armspecial.show{display:inline-flex;}
+  .c2-armspecial .c2-specialbtn{font:inherit; font-size:11px; font-weight:700; white-space:nowrap;
+    padding:3px 8px; border-radius:20px; border:none; cursor:pointer;}
+  .c2-armspecial .c2-specialbtn.miss{background:#FDECEC; color:#B0362B;}
+  .c2-armspecial .c2-specialbtn.ok{background:var(--green-light); color:var(--green);}
+  .c2-armspecial .c2-specialx{font-size:14px; color:var(--slate); cursor:pointer; padding:0 3px; line-height:1;}
   .c2-qtyinp{width:48px; border:1.5px solid var(--border); border-radius:8px; padding:6px 4px; font-family:'JetBrains Mono',monospace; font-size:13px; text-align:center; color:var(--ink); background:#fff;}
 
   /* ---------- live overzicht ---------- */
@@ -417,8 +425,25 @@ function matchArmGroep(txt){
   });
   return gelijk ? null : best;
 }
-function armGroepVan(s){
+/* Een rij is 'Special': geen standaard Pragmalux-artikel, maar een eenmalig
+   armatuur waarvoor de gebruiker zelf een presenter-PDF aanlevert (zie
+   specialPresenterId/maakArmRij). Herkend aan de tekst 'special' in het
+   artikelcodeveld. */
+function isSpecial(s){
+  if(!s) return false;
+  return String(s.code||'').trim().toLowerCase()==='special';
+}
+/* De presenter van een Special-rij wordt niet gedeeld met andere rijen (elke
+   Special is een eenmalig armatuur), dus krijgt hij een eigen id per slot. */
+function specialPresenterId(armId){ return 'sp'+armId; }
+function armGroepVan(s, armId){
   if(!s) return null;
+  if(isSpecial(s)){
+    if(!armId) return null;
+    const id = specialPresenterId(armId);
+    if(!presenterAanwezig(id)) return null;
+    return {id, naam:(s.name&&s.name.trim()) || ('Special '+armId.replace('arm','')), zoektermen:[], special:true};
+  }
   if(s.groep==='-') return null;
   if(s.groep) return ARM_GROEPEN.find(g=>g.id===s.groep) || null;
   return matchArmGroep(s.name);
@@ -428,7 +453,7 @@ function armaturenboek(){
   ARMATUREN.forEach(a=>{
     const s=st.armaturen[a.id];
     if(!s || (s.qty||0)<=0) return;
-    const g=armGroepVan(s);
+    const g=armGroepVan(s, a.id);
     if(!g) return;
     let b=perGroep[g.id];
     if(!b){ b=perGroep[g.id]={g, rijen:[], totaal:0}; boek.push(b); }
@@ -439,7 +464,14 @@ function armaturenboek(){
 function armaturenZonderGroep(){
   return ARMATUREN.filter(a=>{
     const s=st.armaturen[a.id];
-    return (s.qty||0)>0 && s.groep!=='-' && !armGroepVan(s);
+    return (s.qty||0)>0 && s.groep!=='-' && !isSpecial(s) && !armGroepVan(s, a.id);
+  });
+}
+/* Special-rijen met een aantal waarvoor nog geen PDF is geüpload. */
+function armaturenSpecialZonderPdf(){
+  return ARMATUREN.filter(a=>{
+    const s=st.armaturen[a.id];
+    return (s.qty||0)>0 && isSpecial(s) && !armGroepVan(s, a.id);
   });
 }
 
@@ -614,7 +646,17 @@ async function maakPdfBytes(){
       + zonderGroep.map(a=>{ const sa=st.armaturen[a.id];
           const kop=(sa.aanduiding||'').trim() || armLabel(a);
           return '  • '+kop+(sa.name? ' — '+sa.name:' (nog geen naam ingevuld)'); }).join('\n')
-      + '\nPas de omschrijving aan zodat het type duidelijk wordt.');
+      + '\nPas de omschrijving aan zodat het type duidelijk wordt, of typ "special" in het '
+      + 'artikelcodeveld om zelf een presenter-PDF te uploaden.');
+  }
+  const specialZonderPdf = armaturenSpecialZonderPdf();
+  if(specialZonderPdf.length){
+    meldingen.push('Voor deze Special-armaturen is nog geen presenter-PDF geüpload, dus komt er geen '
+      + 'presenter in het armaturenboek:\n'
+      + specialZonderPdf.map(a=>{ const sa=st.armaturen[a.id];
+          const kop=(sa.aanduiding||'').trim() || armLabel(a);
+          return '  • '+kop+(sa.name? ' — '+sa.name:' (nog geen naam ingevuld)'); }).join('\n')
+      + '\nUpload de PDF bij de armatuurregel (knop naast het artikelcodeveld) om dit op te lossen.');
   }
   const zonderPresenter = armaturenboek().filter(b=>!presenterAanwezig(b.g.id));
   if(zonderPresenter.length){
@@ -643,8 +685,22 @@ function projectBestandsnaam(){
   const nm=(st.proj||'armaturenboek').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'armaturenboek';
   return nm+'-armaturenboek.html';
 }
+/* Alleen de sp<armId>-sleutels van momenteel actieve Special-armaturen, nooit het
+   hele PRESENTER_DATA-object (dat bevat ook de ingebakken presenters van de tool
+   zelf, zoals 'ag01'/'rail'). */
+function verzamelSpecialPresenters(){
+  const out={};
+  Object.keys(st.armaturen).forEach(id=>{
+    const s=st.armaturen[id];
+    if(!isSpecial(s)) return;
+    const pid=specialPresenterId(id);
+    const data=window.PRESENTER_DATA && window.PRESENTER_DATA[pid];
+    if(data) out[pid]=data;
+  });
+  return out;
+}
 function slaProjectOp(){
-  const payload = { versie:1, st:JSON.parse(JSON.stringify(st)) };
+  const payload = { versie:1, st:JSON.parse(JSON.stringify(st)), presenters:verzamelSpecialPresenters() };
   let json = JSON.stringify(payload).replace(/<\/script/gi, '<\\/script');
 
   /* document.baseURI is bij de originele tool gewoon zijn eigen map; bij een al
@@ -709,8 +765,50 @@ function maakArmRij(a){
   const nameInp=document.createElement('input'); nameInp.type='text'; nameInp.className='c2-textinp c2-armnaam';
   nameInp.placeholder='Volledige naam (bijv. Punto 15W wit)'; nameInp.value=s.name||'';
   const badge=document.createElement('span'); badge.className='c2-armrecog';
+  /* Special: geen standaard type, maar een zelf geüploade PDF (zie specialWrap
+     hieronder). Zolang die er niet is telt de rij als 'geen presenter'. */
+  const specialWrap=document.createElement('span'); specialWrap.className='c2-armspecial';
+  const specialFileInp=document.createElement('input'); specialFileInp.type='file'; specialFileInp.accept='application/pdf';
+  specialFileInp.style.display='none';
+  const specialBtn=document.createElement('button'); specialBtn.type='button'; specialBtn.className='c2-specialbtn';
+  const specialX=document.createElement('span'); specialX.className='c2-specialx'; specialX.textContent='✕';
+  specialX.title='Geüploade PDF verwijderen';
+  specialBtn.addEventListener('click', ()=>specialFileInp.click());
+  specialX.addEventListener('click', ()=>{
+    if(window.PRESENTER_DATA) delete window.PRESENTER_DATA[specialPresenterId(a.id)];
+    specialFileInp.value='';
+    updateSpecialUI(); paintBadge(); updateSummary();
+  });
+  specialFileInp.addEventListener('change', ()=>{
+    const file=specialFileInp.files && specialFileInp.files[0];
+    if(!file) return;
+    const rdr=new FileReader();
+    rdr.onload=()=>{
+      const bytes=new Uint8Array(rdr.result);
+      const kop=String.fromCharCode.apply(null, bytes.subarray(0,5));
+      if(kop!=='%PDF-'){ alert('Dit lijkt geen PDF-bestand.'); specialFileInp.value=''; return; }
+      window.PRESENTER_DATA = window.PRESENTER_DATA || {};
+      window.PRESENTER_DATA[specialPresenterId(a.id)] = bytesToB64(bytes);
+      updateSpecialUI(); paintBadge(); updateSummary();
+    };
+    rdr.readAsArrayBuffer(file);
+  });
+  function updateSpecialUI(){
+    const speciaal = isSpecial(s);
+    specialWrap.classList.toggle('show', speciaal);
+    if(!speciaal) return;
+    const geladen = presenterAanwezig(specialPresenterId(a.id));
+    specialBtn.textContent = geladen ? '✓ PDF geladen' : '⚠ PDF uploaden';
+    specialBtn.className = 'c2-specialbtn '+(geladen?'ok':'miss');
+    specialBtn.title = geladen
+      ? 'Klik om de geüploade presenter-PDF te vervangen.'
+      : 'Special: upload hier de presenter-PDF voor dit armatuur.';
+    specialX.style.display = geladen ? '' : 'none';
+  }
+  specialWrap.appendChild(specialBtn); specialWrap.appendChild(specialX); specialWrap.appendChild(specialFileInp);
   function paintBadge(){
-    const g = armGroepVan(s);
+    if(isSpecial(s)){ badge.textContent=''; badge.className='c2-armrecog'; badge.title=''; return; }
+    const g = armGroepVan(s, a.id);
     if(g){
       badge.textContent = (presenterAanwezig(g.id)?'✓ ':'⚠ ')+g.naam;
       badge.className = 'c2-armrecog '+(presenterAanwezig(g.id)?'ok':'warn');
@@ -721,16 +819,16 @@ function maakArmRij(a){
       badge.textContent=''; badge.className='c2-armrecog'; badge.title='';
     } else {
       badge.textContent='Kies type'; badge.className='c2-armrecog miss';
-      badge.title='Type niet herkend uit de naam — pas de omschrijving aan zodat het type duidelijk wordt.';
+      badge.title='Type niet herkend uit de naam — pas de omschrijving aan zodat het type duidelijk wordt, of typ "special" in het artikelcodeveld om zelf een PDF te uploaden.';
     }
   }
-  paintBadge();
+  paintBadge(); updateSpecialUI();
   nameInp.addEventListener('input', paintBadge);
   nameInp.addEventListener('change', ()=>{ s.name=nameInp.value; paintBadge(); updateSummary(); });
   const codeInp=document.createElement('input'); codeInp.type='text'; codeInp.className='c2-textinp c2-armcode';
-  codeInp.placeholder='Artikelcode';
+  codeInp.placeholder='Artikelcode — of "special"';
   codeInp.value = s.code||'';
-  codeInp.addEventListener('change', ()=>{ s.code=codeInp.value; updateSummary(); });
+  codeInp.addEventListener('change', ()=>{ s.code=codeInp.value; updateSpecialUI(); paintBadge(); updateSummary(); });
   [codeNaamInp,nameInp,codeInp].forEach(inp=>inp.addEventListener('keydown', e=>{ if(e.key==='Enter') inp.blur(); }));
   const qty=document.createElement('input'); qty.type='text'; qty.inputMode='numeric'; qty.className='c2-qtyinp';
   qty.value=String(s.qty);
@@ -738,7 +836,7 @@ function maakArmRij(a){
   qty.addEventListener('change', commitQty);
   qty.addEventListener('keydown', e=>{ if(e.key==='Enter') qty.blur(); });
   row.appendChild(codeNaamInp); row.appendChild(codeInp); row.appendChild(nameInp); row.appendChild(badge);
-  row.appendChild(qty);
+  row.appendChild(specialWrap); row.appendChild(qty);
   return row;
 }
 function buildArmList(){
@@ -794,6 +892,12 @@ function updateSummary(){
     w.textContent = 'Presenter ontbreekt nog voor: '+zonderPresenter.map(b=>b.g.naam).join(', ')+'.';
     warns.appendChild(w);
   }
+  const specialZonderPdf = armaturenSpecialZonderPdf();
+  if(specialZonderPdf.length){
+    const w=document.createElement('div'); w.className='cfg-warn';
+    w.textContent = specialZonderPdf.length+' special-armatu(u)r(en) missen nog een geüploade PDF.';
+    warns.appendChild(w);
+  }
 }
 
 /* ---------- init ---------- */
@@ -806,6 +910,10 @@ st.armaturen = ARMATUREN.reduce((o,a)=>{o[a.id]={aanduiding:'',name:'',code:'',g
    die de herstelde staat meteen goed tonen, zonder aparte resync-code. */
 if(OPGESLAGEN_PROJECT){
   try{
+    if(OPGESLAGEN_PROJECT.presenters){
+      window.PRESENTER_DATA = window.PRESENTER_DATA || {};
+      Object.assign(window.PRESENTER_DATA, OPGESLAGEN_PROJECT.presenters);
+    }
     const s = OPGESLAGEN_PROJECT.st || {};
     /* armaturen is een sloten-map (arm01, arm02, ...): mergen i.p.v. vervangen, anders
        vallen sloten die na het opslaan zijn toegevoegd terug op undefined i.p.v. hun
