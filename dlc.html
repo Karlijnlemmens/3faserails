@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
+<!--__BASE_HREF__--><!-- wordt bij "Special opslaan" een <base href> naar de installatiemap; blijft hier inert. -->
 <title>DLC specials — Distrilight tools</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -185,8 +186,7 @@
       <div class="bladkop">
         <div class="stand" id="stand">Leeg blad</div>
         <div class="knoppen">
-          <button class="pil" id="btnOpen">Openen</button>
-          <button class="pil" id="btnBewaar">Opslaan</button>
+          <button class="pil" id="btnBewaar" title="Slaat een kopie van deze tool op met de huidige special erin - dubbelklikken op dat bestand opent de tool weer precies zo ingevuld">Special opslaan</button>
           <button class="pil vol" id="btnPdf">Download PDF</button>
         </div>
       </div>
@@ -199,7 +199,6 @@
 </main>
 
 <input type="file" id="beeldKiezer" accept="image/*" style="display:none">
-<input type="file" id="jsonKiezer" accept=".json" style="display:none">
 
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="pdf-huisstijl.js"></script>
@@ -449,7 +448,22 @@ function leegBlad(){
     uitslag:null,
   };
 }
+/* Wordt bij "Special opslaan" (zie slaSpecialOp()) volgeschreven met de huidige
+   special - blijft null in de originele tool, net als bij armaturenboek.html. */
+const OPGESLAGEN_SPECIAL = /*__PROJECT_DATA_START__*/null/*__PROJECT_DATA_END__*/;
 let S = leegBlad();
+/* Een opgeslagen special (dubbelgeklikt .html-bestand, zie slaSpecialOp()) herstellen
+   over de zojuist gezette defaults heen - mergen i.p.v. vervangen zodat velden die
+   sinds het opslaan aan SCHEMA zijn toegevoegd niet undefined blijven. */
+if(OPGESLAGEN_SPECIAL){
+  try{
+    S = Object.assign(leegBlad(), OPGESLAGEN_SPECIAL.S);
+    SCHEMA.forEach(gr=>gr.velden.forEach(v=>{ if(!S.velden[v.id]) S.velden[v.id]={l:v.l, w:''}; }));
+  }catch(err){
+    console.error('Kon opgeslagen special niet laden:', err);
+    alert('De opgeslagen special kon niet worden geladen: '+(err&&err.message?err.message:err));
+  }
+}
 
 /* ======================= beeld inlezen ======================= */
 
@@ -912,25 +926,42 @@ $('btnPdf').onclick=async()=>{
     download(bestandsnaam()+'.pdf', bytes, 'application/pdf');
   }finally{ knop.disabled=false; knop.textContent=oud; }
 };
-/* Een special is eenmalig, dus geen browseropslag maar een bestandje dat je
-   bij het project kunt bewaren en later weer kunt openen. */
-$('btnBewaar').onclick=()=> download(bestandsnaam()+'.json', JSON.stringify(S,null,1), 'application/json');
-$('btnOpen').onclick=()=> $('jsonKiezer').click();
-$('jsonKiezer').onchange=e=>{
-  const bestand=e.target.files[0]; $('jsonKiezer').value='';
-  if(!bestand) return;
-  const lezer=new FileReader();
-  lezer.onload=()=>{
-    try{
-      const g=JSON.parse(lezer.result);
-      S=Object.assign(leegBlad(), g);
-      /* Velden die sinds het opslaan zijn bijgekomen aanvullen. */
-      SCHEMA.forEach(gr=>gr.velden.forEach(v=>{ if(!S.velden[v.id]) S.velden[v.id]={l:v.l, w:''}; }));
-      tekenPaneel(); plan();
-    }catch(err){ alert('Dit bestand kon niet gelezen worden: '+err.message); }
-  };
-  lezer.readAsText(bestand);
-};
+/* Een special is eenmalig, dus geen browseropslag: "Special opslaan" bakt de huidige
+   staat in een zelfstandige kopie van deze tool, zelfde patroon als armaturenboek.html
+   se slaProjectOp(). Dubbelklikken op het gedownloade bestand opent de special direct,
+   zonder dat dlc.html al open hoeft te staan. Geen "Openen"-knop nodig - dat is het
+   hele punt van dit patroon. */
+function specialBestandsnaam(){
+  return bestandsnaam()+'-special.html';
+}
+function slaSpecialOp(){
+  const payload = { versie:1, S:JSON.parse(JSON.stringify(S)) };
+  let json = JSON.stringify(payload).replace(/<\/script/gi, '<\\/script');
+
+  /* document.baseURI is bij de originele tool gewoon zijn eigen map; bij een al
+     eerder opgeslagen specialbestand maakt de <base href> die er al in zit baseURI
+     gelijk aan de OORSPRONKELIJKE installatiemap, ongeacht waar dit bestand nu op
+     schijf staat - opnieuw opslaan geeft dus geen padverschuiving. */
+  const baseHref = new URL('.', document.baseURI).href;
+
+  const dataMarker = /\/\*__PROJECT_DATA_START__\*\/[\s\S]*?\/\*__PROJECT_DATA_END__\*\//;
+  const baseMarker = /<!--__BASE_HREF__-->|<base href="[^"]*">/;
+  let html = document.documentElement.outerHTML;
+  if(!dataMarker.test(html) || !baseMarker.test(html)){
+    alert('Opslaan mislukt: de opslag-plekken zijn niet gevonden in de broncode.');
+    return;
+  }
+  html = html.replace(dataMarker, '/*__PROJECT_DATA_START__*/'+json+'/*__PROJECT_DATA_END__*/');
+  html = html.replace(baseMarker, '<base href="'+baseHref.replace(/"/g,'&quot;')+'">');
+  html = '<!doctype html>\n' + html;   /* outerHTML bevat de <!DOCTYPE> zelf niet */
+
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download=specialBestandsnaam();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(_){ } }, 4000);
+}
+$('btnBewaar').onclick=slaSpecialOp;
 
 /* ======================= start ======================= */
 tekenPaneel();
