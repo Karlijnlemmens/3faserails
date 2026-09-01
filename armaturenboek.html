@@ -96,6 +96,10 @@
   .ab-keuze input{accent-color:var(--blue); margin:0;}
   .ab-keuze input:checked + span{color:var(--blue-dark);}
   .ab-keuze label:has(input:checked){border-color:var(--blue); background:var(--blue-light);}
+  .ab-docveld{margin-top:12px;}
+  .ab-docveld > label{display:block; font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:3px;}
+  .ab-docveld .ongebruikt{font-weight:600; color:var(--slate);}
+  .ab-docveld.uit textarea{background:#F7F9FC; color:var(--slate);}
   .c2-prodlist{display:flex; flex-direction:column; gap:5px; max-height:640px; overflow-y:auto; padding:6px; border:1.5px solid var(--border); border-radius:8px;}
   .c2-armrow{display:flex; align-items:center; gap:8px; padding:6px 2px; flex-wrap:wrap;}
   .c2-armrow input.c2-textinp{flex:1 1 130px; min-width:100px; padding:5px 8px; font-size:12px;}
@@ -197,14 +201,8 @@
           <label><input type="radio" name="abSoort" value="lichtberekening" id="abSoortLicht"><span>Lichtberekening</span></label>
           <label><input type="radio" name="abSoort" value="vergelijking" id="abSoortVerg"><span>Vergelijking</span></label>
         </div>
-        <div style="margin-top:12px;">
-          <p class="hint" style="margin-bottom:6px;">Documenten (meestal het bestek) waar de opdracht op steunt — één per regel. De projectnaam wordt uit Projectgegevens overgenomen.</p>
-          <textarea id="abDocumenten" class="c2-textarea" placeholder="bijv. Bestek E-installaties 2024-11-03"></textarea>
-        </div>
-        <div id="abTekeningenVeld" style="margin-top:12px; display:none;">
-          <p class="hint" style="margin-bottom:6px;">Technische tekeningen waar het lichtontwerp op is gebaseerd — één per regel.</p>
-          <textarea id="abTekeningen" class="c2-textarea" placeholder="bijv. Tekening E-01 t/m E-04"></textarea>
-        </div>
+        <p class="hint" style="margin:14px 0 0;">Documenten voor op de briefingpagina — één naam per regel; meer namen worden een opsomming. De projectnaam komt uit Projectgegevens.</p>
+        <div id="abDocVelden"></div>
       </div>
 
       <div class="cfg-block">
@@ -276,11 +274,11 @@ const $=id=>document.getElementById(id);
    project - blijft null in de originele tool, net als bij index.html. */
 const OPGESLAGEN_PROJECT = /*__PROJECT_DATA_START__*/null/*__PROJECT_DATA_END__*/;
 /* soort: 'lichtberekening' of 'vergelijking'. Allebei krijgen de briefingpagina
-   achter het voorblad, met een eigen tekst. documenten is het bestek (komt in beide
-   teksten voor), tekeningen zijn de technische tekeningen (alleen in die van de
-   lichtberekening). Een naam per regel. */
+   achter het voorblad, met een eigen tekst. bestek/tekeningen/armaturenboek zijn de
+   drie documentvelden van die pagina (zie BRIEF_VELDEN): een naam per regel, meer
+   namen worden een opsomming. */
 const st = { proj:'', projNr:'', installateur:'', datum:'', soort:'lichtberekening',
-             documenten:'', tekeningen:'', armaturen:{} };
+             bestek:'', tekeningen:'', armaturenboek:'', armaturen:{} };
 
 /* ---------- briefingpagina "Introductie" ----------
    Maten uit het aangeleverde ontwerp (AB Briefing vergelijking), gemeten in plaats
@@ -312,80 +310,80 @@ const BRIEF = {
     naDisclaimer:9.7,    /* "DISCLAIMER:" -> de eerste regel eronder */
   },
 };
-/* De vetgedrukte stukken staan als eigen segment; rijkeRegels() breekt er dwars
-   doorheen af, zodat ze over een regelovergang heen heel blijven. */
-const BRIEF_DISCLAIMER = [
-  [{t:'Deze propositie is opgesteld op basis van de door de opdrachtgever aangeleverde documentatie '
-     +'en is bedoeld als '},
-   {t:'armaturenvergelijking en offertevoorstel', v:true},
-   {t:'. De voorgestelde armaturen kunnen op specificaties, prestaties, maatvoering of uitvoering '
-     +'afwijken van de in de referentiedocumentatie omschreven armaturen en/of van de meest actuele '
-     +'technische gegevens van de fabrikant.'}],
-  [{t:'Er is '},
-   {t:'geen lichtberekening of andere technische verificatie', v:true},
-   {t:' uitgevoerd om te controleren of de voorgestelde armaturen voldoen aan de vereiste '
-     +'verlichtingsniveaus, lichtkwaliteit of overige projectspecifieke eisen.'}],
-  [{t:'Aan deze vergelijking kunnen daarom '},
-   {t:'geen rechten worden ontleend ten aanzien van de uiteindelijke geschiktheid of toepassing', v:true},
-   {t:' van de voorgestelde armaturen. De verantwoordelijkheid voor de controle van de technische '
-     +'geschiktheid, de uiteindelijke armatuurkeuze en de toepassing binnen het project ligt bij de '
-     +'opdrachtgever.'}],
-  [{t:'Wij aanvaarden geen verantwoordelijkheid voor eventuele gevolgen van de gemaakte keuzes of voor '
-     +'de aanbieding richting de opdrachtgever op basis van deze armaturenvergelijking.'}],
-];
-
 function briefRegels(tekst){
   return String(tekst||'').split(/\r?\n/).map(r=>r.trim()).filter(Boolean);
 }
-/* "a", "a en b", "a, b en c" - voor de plek waar de documenten midden in een zin staan. */
+/* Meer namen in een veld worden een opsomming: "a", "a en b", "a, b en c". */
 function briefOpsomming(lijst){
   if(lijst.length<=1) return lijst[0]||'';
   return lijst.slice(0,-1).join(', ')+' en '+lijst[lijst.length-1];
 }
 
-/* Welke velden van de briefingpagina nog leeg zijn. Blijven ze leeg, dan komt de
-   plaatshouder uit het ontwerp in de PDF - prima zolang je bezig bent, niet in een
-   boek dat de deur uit gaat. */
+/* De drie documentvelden van de briefing, met de plaatshouder uit het ontwerp voor
+   het geval er niets is ingevuld. bestek komt in beide teksten voor, tekeningen
+   alleen in de lichtberekening en armaturenboek alleen in de disclaimer van de
+   vergelijking. */
+const BRIEF_VELDEN = [
+  {id:'bestek',        label:'Bestek',                 plaats:'[Bestek]',
+   bij:['lichtberekening','vergelijking'],
+   uitleg:'Waar de opdracht op steunt. Komt in beide teksten voor.'},
+  {id:'tekeningen',    label:'Technische tekeningen',  plaats:'[Technische tekening]',
+   bij:['lichtberekening'],
+   uitleg:'Waar het lichtontwerp op is gebaseerd. Alleen bij een lichtberekening.'},
+  {id:'armaturenboek', label:'Armaturenboek',          plaats:'[Armaturenboek]',
+   bij:['vergelijking'],
+   uitleg:'Het boek waar de referentiearmaturen in staan. Alleen in de disclaimer van een vergelijking.'},
+];
+
+/* Welke velden van de briefingpagina nog leeg zijn, gezien de gekozen soort. Blijven
+   ze leeg, dan komt de plaatshouder uit het ontwerp in de PDF - prima zolang je bezig
+   bent, niet in een boek dat de deur uit gaat. */
 function briefingOpenVelden(){
   const open=[];
   if(!(st.proj||'').trim()) open.push('projectnaam');
-  if(!briefRegels(st.documenten).length) open.push('documenten');
-  if(st.soort==='lichtberekening' && !briefRegels(st.tekeningen).length) open.push('tekeningen');
+  BRIEF_VELDEN.forEach(v=>{
+    if(v.bij.indexOf(st.soort)>=0 && !briefRegels(st[v.id]).length) open.push(v.label.toLowerCase());
+  });
   return open;
 }
 
 /* De inhoud van de briefingpagina per soort opdracht; de opmaak is voor beide
-   dezelfde. documenten is het bestek, tekeningen zijn de technische tekeningen.
-   Staan er meerdere in een lijst, dan wordt "het document" "de documenten" en
-   "de tekening" "de tekeningen" - anders loopt de zin niet.
+   dezelfde. Elk blok noemt zelf de afstand tot de vorige regel (zie BRIEF.gaten).
 
-   Elk blok noemt zelf de afstand tot de vorige regel (zie BRIEF.gaten). Zonder
-   ingevulde waarden blijven de plaatshouders uit het ontwerp staan. */
-function briefInhoud(soort, proj, documenten, tekeningen){
+   Staan er meerdere namen in een veld, dan wordt "het document" "de documenten" en
+   "de tekening" "de tekeningen" - anders loopt de zin niet. */
+function briefInhoud(soort, proj){
   const naam = (proj||'').trim() || '[projectnaam]';
-  const docs = documenten.length ? documenten : ['[naam documenten]'];
-  const tek  = tekeningen.length ? tekeningen : ['[naam tekeningen]'];
-  const hetDocument = docs.length>1 ? 'de documenten' : 'het document';
-  const deTekening  = tek.length>1  ? 'de tekeningen' : 'de tekening';
+  /* Per veld: de ingevulde namen aan elkaar, vetgedrukt, met de plaatshouder als
+     terugval. mv() kiest het juiste lidwoord bij dat aantal namen. */
+  const veld = {};
+  BRIEF_VELDEN.forEach(v=>{
+    const namen = briefRegels(st[v.id]);
+    veld[v.id] = {tekst: namen.length ? briefOpsomming(namen) : v.plaats, aantal: namen.length};
+  });
+  const mv = (id, ev, meer)=> veld[id].aantal>1 ? meer : ev;
+  const vet = id => ({t:veld[id].tekst, v:true});
 
   if(soort === 'lichtberekening'){
     return {
       vraag:[
         {t:'Het opstellen van een lichtplan voor '},
         {t:naam+'.', v:true},
-        {t:' Dit plan dient gebaseerd te zijn op de uitgangspunten zoals vastgelegd in '+hetDocument+':'},
+        {t:' Dit plan dient gebaseerd te zijn op de uitgangspunten zoals vastgelegd in '
+          +mv('bestek','het document','de documenten')+':'},
       ],
-      vraagLijst: docs,
+      vraagSlot:[vet('bestek')],
       blokken:[
-        {k:'kop',    t:'Wat wij bieden:',              voor:'naBlok'},
-        {k:'plat',   t:'Op basis van '+deTekening+':', voor:'naKop'},
-        {k:'regels', lijst:tek,                        voor:'regel'},
+        {k:'kop',    t:'Wat wij bieden:', voor:'naBlok'},
+        {k:'plat',   t:'Op basis van '+mv('tekeningen','de tekening','de tekeningen')+':', voor:'naKop'},
+        {k:'alinea', voor:'regel', s:[vet('tekeningen')]},
         {k:'alinea', voor:'regel', s:[
           {t:'ontwikkelen wij een lichtconcept dat aansluit op het gevraagde lichtplan. Dit concept is '
-            +'uitgewerkt volgens de uitgangspunten zoals omschreven in '+hetDocument+' '},
-          {t:briefOpsomming(docs), v:true},
+            +'uitgewerkt volgens de uitgangspunten zoals omschreven in '
+            +mv('bestek','het document','de documenten')+' '},
+          vet('bestek'),
           {t:', en voldoet aan de actuele norm NEN-EN 12464-1:2021.'}]},
-        {k:'plat',   t:'Wij leveren:',                 voor:'naWit'},
+        {k:'plat',   t:'Wij leveren:', voor:'naWit'},
         {k:'bullets', voor:'naLeveren', items:[
           'Een voorstel met verschillende armaturen, afgestemd op de diverse toepassingen',
           'Een lichtontwerp dat voldoet aan de lichtbehoeften zoals beschreven in de uitgangspunten',
@@ -399,21 +397,32 @@ function briefInhoud(soort, proj, documenten, tekeningen){
     vraag:[
       {t:'Het opstellen van een verlichtingsarmaturen/offerte voor '},
       {t:naam+'.', v:true},
-      {t:' Dit plan dient gebaseerd te zijn op de uitgangspunten zoals vastgelegd in '+hetDocument+':'},
+      {t:' Dit plan dient gebaseerd te zijn op de uitgangspunten zoals vastgelegd in '
+        +mv('bestek','het document','de documenten')+':'},
     ],
-    vraagLijst: docs,
+    vraagSlot:[vet('bestek')],
     blokken:[
       {k:'kop',    t:'Wat wij bieden:', voor:'naBlok'},
       {k:'alinea', voor:'naKop', s:[
-        {t:'Op basis van bovengenoemde documentatie stellen wij een armaturenpropositie op die '
-          +'aansluit bij de gevraagde uitgangspunten en het offertetraject.'}]},
-      {k:'plat',   t:'Wij leveren:',    voor:'naWit'},
-      {k:'bullets', voor:'naLeveren', items:[
-        'Een voorstel met verschillende armaturen en mogelijke alternatieven op basis van de '
-        +'beschikbare technische en productinformatie']},
-      {k:'kopklein', t:'DISCLAIMER:',  voor:'naWit'},
-    ].concat(BRIEF_DISCLAIMER.map((deel,i)=>
-      ({k:'alinea', s:deel, voor: i ? 'naWit' : 'naDisclaimer'}))),
+        {t:'Op basis van '+mv('bestek','het document','de documenten')+' '},
+        vet('bestek'),
+        {t:' maken wij een armaturenpropositie die aansluit op de gevraagde offerte.'}]},
+      {k:'plat',   t:'Wij leveren:', voor:'naWit'},
+      {k:'bullets', voor:'naLeveren', items:['Een voorstel met verschillende armaturen.']},
+      {k:'kopklein', t:'DISCLAIMER:', voor:'naWit'},
+      {k:'alinea', voor:'naDisclaimer', s:[
+        {t:'Deze propositie is gebaseerd op de informatie zoals opgenomen in '
+          +mv('bestek','het document','de documenten')+' '},
+        vet('bestek'),
+        {t:'. Houd er rekening mee dat specificaties van armaturen kunnen afwijken van de armaturen in '
+          +mv('armaturenboek','het document','de documenten')+' '},
+        vet('armaturenboek'),
+        {t:' of van de laatst geldende technische gegevens. Er is geen lichtberekening uitgevoerd ter '
+          +'controle van de gewenste verlichtingsniveaus. Wij zijn niet verantwoordelijk voor de gemaakte '
+          +'keuzes op basis van deze vergelijking, noch voor de gevolgen van de aanbieding richting de '
+          +'opdrachtgever. De verantwoordelijkheid voor de uiteindelijke selectie en toepassing van '
+          +'armaturen ligt bij de klant.'}]},
+    ],
   };
 }
 
@@ -745,8 +754,7 @@ async function buildArmaturenboekPdf(){
 
   {
     const B = BRIEF, G = B.gaten;
-    const inhoud = briefInhoud(st.soort, st.proj,
-      briefRegels(st.documenten), briefRegels(st.tekeningen));
+    const inhoud = briefInhoud(st.soort, st.proj);
 
     zetSectie('Introductie');
     beginPage(true);
@@ -755,8 +763,8 @@ async function buildArmaturenboekPdf(){
     text(B.kopX, B.kopY, B.kopPt, 'Briefing', {bold:true, color:C.hoofd});
 
     /* Eerst opmeten: staan er meer documentnamen, dan groeit het grijze vlak mee. */
-    const blokRegels = rijkeRegels(inhoud.vraag, B.blokBreedte, B.pt).concat(
-      inhoud.vraagLijst.reduce((uit,d)=> uit.concat(rijkeRegels([{t:d, v:true}], B.blokBreedte, B.pt)), []));
+    const blokRegels = rijkeRegels(inhoud.vraag, B.blokBreedte, B.pt)
+      .concat(rijkeRegels(inhoud.vraagSlot, B.blokBreedte, B.pt));
     const blokH = Math.max(B.blok.h,
       B.vraagTop + B.naVraag + (blokRegels.length-1)*B.blokRegel + B.pt + B.blokOnder);
 
@@ -787,9 +795,6 @@ async function buildArmaturenboekPdf(){
       else if(blok.k==='kopklein'){ naar(blok.voor); text(B.x, y, B.disclaimerPt, blok.t, {bold:true, color:C.tekst}); }
       else if(blok.k==='plat'){ naar(blok.voor); text(B.x, y, B.pt, blok.t, {color:C.tekst}); }
       else if(blok.k==='alinea'){ naar(blok.voor); schrijf(blok.s, B.x, B.breedte); }
-      else if(blok.k==='regels'){
-        blok.lijst.forEach((r,i)=>{ naar(i ? 'regel' : blok.voor); schrijf([{t:r, v:true}], B.x, B.breedte); });
-      }
       else if(blok.k==='bullets'){
         blok.items.forEach((it,i)=>{
           naar(i ? 'regel' : blok.voor);
@@ -1268,22 +1273,52 @@ buildArmList();
 updateSummary();
 $('abProj').value=st.proj; $('abProjNr').value=st.projNr; $('abInst').value=st.installateur; $('abDatum').value=st.datum;
 
-/* De documenten komen in beide teksten voor; de tekeningen alleen in die van de
-   lichtberekening, dus dat veld verdwijnt bij een vergelijking. Wat erin staat blijft
-   bewaard, zodat heen en weer schakelen niets weggooit. */
+/* De drie documentvelden staan er alle drie, ook als de gekozen soort er maar twee
+   van gebruikt: zo kun je alles alvast invullen en later van soort wisselen zonder
+   iets kwijt te raken. Het veld dat nu niet meetelt wordt wel als zodanig gemerkt. */
+const AB_DOCPLAATS = {
+  bestek:'bijv. Bestek E-installaties 2024-11-03',
+  tekeningen:'bijv. Tekening E-01 t/m E-04',
+  armaturenboek:'bijv. Armaturenboek Hoofdstraat 12',
+};
+/* Leegmaken voordat we bouwen: "Project opslaan" bakt de HTML mee zoals hij op dat
+   moment in het scherm staat, dus in een opgeslagen bestand staan deze velden er al.
+   Zonder dit zouden ze er bij het heropenen een tweede keer bij komen - en de eerste,
+   nog lege, zou dan degene zijn die getElementById() vindt. */
+$('abDocVelden').textContent = '';
+BRIEF_VELDEN.forEach(v=>{
+  const vak = document.createElement('div');
+  vak.className = 'ab-docveld'; vak.id = 'abVeld_'+v.id;
+  const label = document.createElement('label');
+  label.textContent = v.label;
+  const merk = document.createElement('span');
+  merk.className = 'ongebruikt'; merk.id = 'abOngebruikt_'+v.id;
+  label.appendChild(merk);
+  const ta = document.createElement('textarea');
+  ta.className = 'c2-textarea'; ta.id = 'abDoc_'+v.id;
+  ta.placeholder = AB_DOCPLAATS[v.id] || '';
+  ta.value = st[v.id] || '';
+  ta.addEventListener('input', ()=>{ st[v.id] = ta.value; updateSummary(); });
+  const uitleg = document.createElement('p');
+  uitleg.className = 'hint'; uitleg.style.margin = '4px 0 0'; uitleg.textContent = v.uitleg;
+  vak.appendChild(label); vak.appendChild(ta); vak.appendChild(uitleg);
+  $('abDocVelden').appendChild(vak);
+});
 function toonBriefingVelden(){
-  $('abTekeningenVeld').style.display = st.soort === 'lichtberekening' ? '' : 'none';
+  BRIEF_VELDEN.forEach(v=>{
+    const inGebruik = v.bij.indexOf(st.soort) >= 0;
+    $('abVeld_'+v.id).classList.toggle('uit', !inGebruik);
+    $('abOngebruikt_'+v.id).textContent = inGebruik ? '' : '  — niet in deze tekst';
+  });
 }
 $('abSoortLicht').checked = st.soort !== 'vergelijking';
 $('abSoortVerg').checked  = st.soort === 'vergelijking';
-$('abDocumenten').value = st.documenten || '';
-$('abTekeningen').value = st.tekeningen || '';
 toonBriefingVelden();
 [['abSoortLicht','lichtberekening'], ['abSoortVerg','vergelijking']].forEach(([id, waarde])=>{
-  $(id).addEventListener('change', ()=>{ if($(id).checked){ st.soort = waarde; toonBriefingVelden(); } });
+  $(id).addEventListener('change', ()=>{
+    if($(id).checked){ st.soort = waarde; toonBriefingVelden(); updateSummary(); }
+  });
 });
-$('abDocumenten').addEventListener('input', e=>{ st.documenten = e.target.value; });
-$('abTekeningen').addEventListener('input', e=>{ st.tekeningen = e.target.value; });
 $('abProj').addEventListener('input', e=>{ st.proj=e.target.value; updateSummary(); });
 $('abProjNr').addEventListener('input', e=>{ st.projNr=e.target.value; });
 $('abInst').addEventListener('input', e=>{ st.installateur=e.target.value; });
