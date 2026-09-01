@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
+<!--__BASE_HREF__--><!-- wordt bij "Project opslaan" een <base href> naar de installatiemap; blijft hier inert. -->
 <title>Bandrasters — Distrilight tools</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,7 +28,7 @@
     font-family:'Nunito Sans',sans-serif;
     -webkit-font-smoothing:antialiased;
   }
-  h1,h2,.disp{font-family:'Nunito Sans',sans-serif; font-weight:800; letter-spacing:0;}
+  h1,h2{font-family:'Nunito Sans',sans-serif; font-weight:800; letter-spacing:0;}
 
   header{
     background:var(--white);
@@ -52,17 +53,124 @@
   }
   .badge:hover{border-color:var(--blue);}
   .badge.active{background:var(--blue); border-color:var(--blue); color:#fff;}
-  .tagline{color:var(--slate); font-size:13px; margin-top:2px; max-width:640px; line-height:1.4;}
+  .tagline{color:var(--slate); font-size:13px; margin-top:2px; max-width:760px; line-height:1.4;}
 
-  main{max-width:1400px; margin:0 auto; padding:16px 28px 60px;}
-  .lede{font-size:14px; color:var(--slate); max-width:760px; line-height:1.5; margin-bottom:12px;}
-  h2.section-title{font-size:20px; margin:0 0 4px; color:var(--navy-900);}
-  .eyebrow{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--blue-dark); margin-bottom:4px; display:block; font-weight:600;}
-  .card{
-    background:var(--white); border:1px solid var(--border); border-radius:var(--radius);
-    padding:24px; max-width:560px;
+  main{max-width:1680px; margin:0 auto; padding:16px 28px 60px;}
+
+  /* --- knoppenbalk --- */
+  .balk{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:16px;}
+  .knop{
+    border:1px solid var(--border); background:var(--white); color:var(--navy-900);
+    font-family:'Nunito Sans',sans-serif; font-size:13px; font-weight:700;
+    padding:8px 14px; border-radius:9px; cursor:pointer; transition:.12s;
   }
-  .card p{margin:0; color:var(--slate); font-size:14px; line-height:1.6;}
+  .knop:hover{border-color:var(--blue); color:var(--blue-dark);}
+  .knop.primair{background:var(--blue); border-color:var(--blue); color:#fff;}
+  .knop.primair:hover{background:var(--blue-dark); border-color:var(--blue-dark); color:#fff;}
+  .knop:disabled{opacity:.45; cursor:default;}
+  .knop:disabled:hover{border-color:var(--border); color:var(--navy-900);}
+  .balk .rek{flex:1;}
+
+  /* --- kaarten --- */
+  .werkblad{display:grid; grid-template-columns:minmax(720px,1fr) minmax(300px,380px); gap:20px; align-items:start;}
+  @media (max-width:1180px){ .werkblad{grid-template-columns:1fr;} }
+  .kaart{
+    background:var(--white); border:1px solid var(--border); border-radius:var(--radius);
+    padding:18px 20px; margin-bottom:16px;
+  }
+  .kaart > h2{font-size:15px; margin:0 0 12px; color:var(--navy-900);}
+  .eyebrow{font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--blue-dark); font-weight:600; display:block; margin-bottom:3px;}
+  .zijkolom{position:sticky; top:150px;}
+
+  /* --- formulier --- */
+  label.vl{display:block; font-size:11px; font-weight:700; color:var(--slate); margin-bottom:3px;}
+  input[type=text], input[type=number], input[type=date], select, textarea{
+    width:100%; border:1px solid var(--border); border-radius:8px; padding:6px 8px;
+    font-family:'Nunito Sans',sans-serif; font-size:13px; color:var(--ink); background:var(--white);
+  }
+  input:focus, select:focus, textarea:focus{outline:none; border-color:var(--blue);}
+  textarea{resize:vertical; min-height:52px;}
+  .raster{display:grid; gap:10px 14px;}
+  .r3{grid-template-columns:repeat(3,1fr);}
+  .r2{grid-template-columns:repeat(2,1fr);}
+  @media (max-width:820px){ .r3,.r2{grid-template-columns:1fr;} }
+
+  /* --- intaketabel: bestaand | veld | alternatief --- */
+  .intake{display:grid; grid-template-columns:1fr 168px 1fr; gap:0 14px;}
+  .intake .kop{
+    font-size:12px; font-weight:800; color:var(--navy-900); padding:6px 0 8px;
+    border-bottom:2px solid var(--blue); margin-bottom:8px;
+  }
+  .intake .kop.mid{border-bottom-color:transparent;}
+  .intake .veldnaam{
+    font-size:12px; font-weight:700; color:var(--navy-900); text-align:center;
+    padding:11px 4px 8px; line-height:1.25;
+  }
+  .intake .cel{padding:4px 6px 8px;}
+  .intake .cel.leeg{opacity:0;}
+  .rij-even{background:#F8FBFE;}
+  .duo{display:grid; grid-template-columns:1fr 74px; gap:6px;}
+  .duo.smal{grid-template-columns:1fr 96px;}
+  .tweeling{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .duo.krap{grid-template-columns:1fr 24px;}
+  .met-reset{display:grid; grid-template-columns:1fr 26px; gap:4px; align-items:center;}
+  .reset{
+    border:1px solid var(--border); background:var(--white); color:var(--slate);
+    border-radius:7px; height:30px; font-size:12px; cursor:pointer; padding:0;
+  }
+  .reset:hover{border-color:var(--blue); color:var(--blue-dark);}
+  .reset.uit{visibility:hidden;}
+  .berekend{
+    border:1px dashed var(--border); border-radius:8px; padding:6px 8px; font-size:13px;
+    background:#FBFDFF; color:var(--ink); min-height:32px;
+  }
+  .berekend.mist{color:#B4472F; border-color:#F0C8BC; background:#FDF6F4;}
+  .eh{font-size:11px; color:var(--slate); align-self:center; padding-left:2px;}
+  .status{font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; display:inline-block;}
+  .status.ok{background:#E7F6EC; color:#1F7A3D;}
+  .status.mist{background:#FDF0EC; color:#B4472F;}
+
+  /* --- figuur --- */
+  #figuur{width:100%; height:auto; display:block; background:var(--white);
+    border:1px solid var(--border); border-radius:10px;}
+  .samenvat{list-style:none; margin:12px 0 0; padding:0; font-size:12px;}
+  .samenvat li{display:flex; justify-content:space-between; gap:10px; padding:4px 0;
+    border-bottom:1px solid var(--border);}
+  .samenvat li:last-child{border-bottom:0;}
+  .samenvat b{font-weight:800; color:var(--navy-900);}
+
+  /* --- RFQ-lijst --- */
+  table.rfq{width:100%; border-collapse:collapse; font-size:12px;}
+  table.rfq th{
+    text-align:left; font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--slate); border-bottom:1px solid var(--border); padding:6px 8px; font-weight:700;
+    white-space:nowrap;
+  }
+  table.rfq td{border-bottom:1px solid var(--border); padding:5px 8px; vertical-align:middle;}
+  table.rfq tr.bewerkt td{background:var(--blue-light);}
+  table.rfq input{padding:4px 6px; font-size:12px;}
+  table.rfq .num{text-align:right;}
+  .mini{
+    border:1px solid var(--border); background:var(--white); color:var(--slate);
+    border-radius:7px; padding:3px 8px; font-size:11px; font-weight:700; cursor:pointer;
+  }
+  .mini:hover{border-color:var(--blue); color:var(--blue-dark);}
+  .leegmelding{color:var(--slate); font-size:13px; margin:6px 0 0;}
+
+  /* --- PDF-voorbeeld --- */
+  #voorbeeldBg{
+    position:fixed; inset:0; background:rgba(28,37,52,.62); z-index:200;
+    display:none; align-items:center; justify-content:center; padding:24px;
+  }
+  #voorbeeldBg.aan{display:flex;}
+  .voorbeeldvak{
+    background:var(--white); border-radius:var(--radius); width:min(1000px,96vw); height:min(92vh,1200px);
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  .voorbeeldkop{display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--border);}
+  .voorbeeldkop h2{font-size:14px; margin:0; flex:1;}
+  .voorbeeldvak iframe{flex:1; border:0; width:100%;}
 </style>
 </head>
 <body>
@@ -87,16 +195,1623 @@
   <div class="title-row">
     <h1>Bandrasters</h1>
   </div>
+  <p class="tagline">Intake per bandrasterpositie: links het bestaande armatuur, rechts het Distrilight
+    alternatief. Levert een technisch productblad voor de klant en een RFQ-lijst voor de fabrikant.</p>
 </header>
 
 <main>
-  <span class="eyebrow">Binnenkort beschikbaar</span>
-  <h2 class="section-title">Bandrasters</h2>
-  <p class="lede">Deze tool wordt binnenkort toegevoegd aan de Distrilight tools-suite.</p>
-  <div class="card">
-    <p>Nog in ontwikkeling.</p>
+
+<div class="balk">
+  <button class="knop primair" id="knRfqToevoegen">Voeg toe aan RFQ-lijst</button>
+  <button class="knop" id="knProductblad">Creëer technisch productblad</button>
+  <span class="rek"></span>
+  <button class="knop" id="knNieuw">Nieuwe positie</button>
+  <button class="knop" id="knOpslaan">Project opslaan</button>
+</div>
+
+<div class="werkblad">
+  <div>
+
+    <div class="kaart">
+      <span class="eyebrow">Project</span>
+      <h2>Projectgegevens</h2>
+      <div class="raster r3">
+        <div><label class="vl" for="pNr">Projectnummer</label><input type="text" id="pNr"></div>
+        <div><label class="vl" for="pNaam">Projectnaam</label><input type="text" id="pNaam"></div>
+        <div><label class="vl" for="pType">Projecttype</label><select id="pType"></select></div>
+        <div><label class="vl" for="pInst">Installateur / calculator / engineer</label><input type="text" id="pInst"></div>
+        <div><label class="vl" for="pDatum">Datum</label><input type="date" id="pDatum"></div>
+        <div><label class="vl" for="pContact">Contactpersoon (RFQ)</label><input type="text" id="pContact"></div>
+        <div><label class="vl" for="pFabrikant">Fabrikant (RFQ &ldquo;To&rdquo;)</label><input type="text" id="pFabrikant"></div>
+        <div><label class="vl" for="pEff">Systeemrendement</label><div class="duo"><input type="number" id="pEff" min="1" step="1"><span class="eh">lm/W</span></div></div>
+        <div><label class="vl" for="pMaxW">Maximaal vermogen</label><div class="duo"><input type="number" id="pMaxW" min="1" step="1"><span class="eh">W</span></div></div>
+      </div>
+      <div style="margin-top:10px"><label class="vl" for="pOpm">Opmerkingen</label><textarea id="pOpm"></textarea></div>
+    </div>
+
+    <div class="kaart">
+      <span class="eyebrow">Intake</span>
+      <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span id="positieTitel">Positie</span>
+        <span class="status" id="statusOud"></span>
+        <span class="status" id="statusNieuw"></span>
+      </h2>
+      <div style="margin-bottom:12px"><label class="vl" for="cOmschrijving">Omschrijving positie (bijv. ruimte of bestekpositie)</label><input type="text" id="cOmschrijving" placeholder="bijv. Kantoren begane grond"></div>
+      <div class="intake" id="intake"></div>
+    </div>
+
   </div>
+
+  <div class="zijkolom">
+    <div class="kaart">
+      <span class="eyebrow">Afgeleid figuur</span>
+      <h2>Maatvoering alternatief</h2>
+      <svg id="figuur" viewBox="0 0 340 300" role="img" aria-label="Maatvoering van het alternatief"></svg>
+      <ul class="samenvat" id="samenvat"></ul>
+    </div>
+  </div>
+</div>
+
+<div class="kaart">
+  <span class="eyebrow">RFQ</span>
+  <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span>RFQ-lijst</span>
+    <span class="rek" style="flex:1"></span>
+    <button class="knop" id="knRfqXlsx">RFQ-lijst (.xlsx)</button>
+    <button class="knop" id="knRfqPdf">RFQ-lijst (PDF)</button>
+  </h2>
+  <div id="rfqVak"></div>
+</div>
+
 </main>
 
+<div id="voorbeeldBg">
+  <div class="voorbeeldvak">
+    <div class="voorbeeldkop">
+      <h2 id="voorbeeldTitel">Voorbeeld</h2>
+      <button class="knop" id="knDownload">Downloaden</button>
+      <button class="knop" id="knSluitVoorbeeld">Sluiten</button>
+    </div>
+    <iframe id="voorbeeldFrame" title="PDF-voorbeeld"></iframe>
+  </div>
+</div>
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="pdf-huisstijl.js"></script>
+<script>
+/* ===================================================================
+   Bandrasters — intake, technisch productblad en RFQ-lijst.
+
+   Overgenomen uit Bandraster_Intake_Nieuw_V3.xlsx: de keuzelijsten en de
+   lumentabel stonden daar op het verborgen blad "Datasheet", de rekenregels
+   in de formules van "Formulier" en de Engelse RFQ-kolommen op
+   "Bestelformulier". De Excel had drie vaste formulieren; hier is het aantal
+   posities vrij.
+
+   Drie dingen wijken bewust af van de Excel:
+   - 5000K staat niet in de lijst. De lumentabel heeft per CRI alleen kolommen
+     voor 2700/3000/4000/6500K, dus 5000K liep daar altijd vast op
+     "Gegevens Ontbreken". Zodra de lumenwaarden er zijn kan hij erbij.
+   - De sturingslijst schreef "Aan-uit" en "Aan-Uit+Dipswitch", terwijl de
+     formules op "Aan-Uit" en "Aan-Uit-Dipswitch" testten - waardoor de
+     aansluitlijst voor die twee leeg bleef. Hier bepaalt een expliciet veld
+     (groep) welke aansluitlijst geldt, zodat schrijfwijze niet meer meetelt.
+   - De RFQ nam de kleur van het BESTAANDE armatuur over (Bestelformulier!P21
+     wees naar Formulier!B25). De fabrikant moet de kleur van het alternatief
+     weten, dus die gaat mee.
+   =================================================================== */
+
+const $ = id => document.getElementById(id);
+
+/* ======================= de gegevens uit de Excel ======================= */
+
+/* Lumen per TL-buis, gesleuteld op CRI+kleurtemperatuur zoals de Excel dat deed:
+   800/900 (CRI) + 27/30/40/65 (kleurtemperatuur). null = de leverancier voert
+   die combinatie niet ("n.a." in de Excel). */
+const LICHTBRON = [
+  {naam:'TL8-18W', lm:{827:1350, 830:1350, 840:1350, 865:1300, 927:null, 930:1100, 940:1200, 965:1150}},
+  {naam:'TL8-36W', lm:{827:3350, 830:3350, 840:3350, 865:3250, 927:null, 930:2800, 940:2800, 965:2800}},
+  {naam:'TL8-58W', lm:{827:5200, 830:5200, 840:5200, 865:5000, 927:null, 930:4350, 940:4600, 965:4550}},
+  {naam:'TL5-14W', lm:{827:1350, 830:1350, 840:1350, 865:1250, 927:null, 930:null, 940:null, 965:null}},
+  {naam:'TL5-21W', lm:{827:1900, 830:1900, 840:1900, 865:1750, 927:null, 930:null, 940:null, 965:null}},
+  {naam:'TL5-24W', lm:{827:1750, 830:1750, 840:1750, 865:1650, 927:null, 930:null, 940:1600, 965:1600}},
+  {naam:'TL5-28W', lm:{827:2600, 830:2600, 840:2600, 865:2400, 927:null, 930:null, 940:null, 965:null}},
+  {naam:'TL5-35W', lm:{827:3300, 830:3300, 840:3300, 865:3100, 927:null, 930:null, 940:null, 965:null}},
+  {naam:'TL5-39W', lm:{827:3100, 830:3100, 840:3100, 865:2900, 927:null, 930:null, 940:null, 965:null}},
+  {naam:'TL5-49W', lm:{827:4300, 830:4300, 840:4300, 865:4100, 927:null, 930:null, 940:4200, 965:4200}},
+  {naam:'TL5-54W', lm:{827:4450, 830:4450, 840:4450, 865:4150, 927:null, 930:null, 940:4300, 965:4300}},
+  {naam:'TL5-80W', lm:{827:6150, 830:6150, 840:6150, 865:5850, 927:null, 930:null, 940:null, 965:null}},
+];
+
+/* Optiekrendement: welk deel van de lampstroom het armatuur uit komt. De oude
+   optieken verschillen sterk, de nieuwe zitten op 0,95 - behalve de zwarte
+   lensoptiek, die 0,90 haalt. */
+const OPTIEK_OUD = [
+  {naam:'Opaal',                f:0.665},
+  {naam:'Prisma',               f:0.676},
+  {naam:'Reflector mat',        f:0.711},
+  {naam:'Reflector hoogglans',  f:0.835},
+  {naam:'A-symmetrisch',        f:0.766},
+];
+const OPTIEK_NIEUW = [
+  {naam:'Opaal UGR<22',                 f:0.95, en:'Diffuser'},
+  {naam:'Microprismatisch UGR<19',      f:0.95, en:'Microprismatic'},
+  {naam:'Reflector Mat UGR<19',         f:0.95, en:'Reflector Matt'},
+  {naam:'Reflector Hoogglans UGR<19',   f:0.95, en:'Reflector Gloss'},
+  {naam:'A-symmetrisch',                f:0.95, en:'Asymmetrical'},
+  {naam:'Lens Optiek Wit UGR<19',       f:0.95, en:'Lens White'},
+  {naam:'Lens Optiek Zwart UGR<19',     f:0.90, en:'Lens Black'},
+];
+
+/* Aansluitingen. Welke lijst geldt hangt af van de sturing: geschakeld en
+   pushdim lopen over drie aders, DALI en 1-10V hebben stuuraders erbij. */
+const AANSLUITING = {
+  aanuit:[
+    'Kaal',
+    'Eurosteker snoer 1m', 'Eurosteker snoer 2m', 'Eurosteker snoer 3m',
+    'RA-steker snoer 1m', 'RA-steker snoer 2m', 'RA-steker snoer 3m',
+    'GST18-3 male chassis', 'GST18-3 male chassis + splitter', 'GST18-3 male + female chassis',
+    'GST18-3 male snoer 1m', 'GST18-3 male snoer 2m', 'GST18-3 male snoer 3m',
+  ],
+  dali:[
+    'Kaal',
+    'Eurosteker snoer 1m + kaal', 'Eurosteker snoer 2m + kaal', 'Eurosteker snoer 3m + kaal',
+    'RA-steker snoer 1m + kaal', 'RA-steker snoer 2m + kaal', 'RA-steker snoer 3m + kaal',
+    'GST18-5 male chassis', 'GST18-5 male chassis + splitter', 'GST18-5 male + female chassis',
+    'GST18-5 male snoer 1m', 'GST18-5 male snoer 2m', 'GST18-5 male snoer 3m',
+    'GST18-3 male chassis + kaal', 'GST18-3 male chassis + splitter + kaal',
+    'GST18-3 male + female chassis + kaal',
+    'GST18-3 male snoer 1m + kaal', 'GST18-3 male snoer 2m + kaal', 'GST18-3 male snoer 3m + kaal',
+    'GST18-3 male + BST14 chassis',
+  ],
+};
+
+const STURING = [
+  {naam:'Aan-Uit',            groep:'aanuit', en:'On-Off'},
+  {naam:'Aan-Uit+Dipswitch',  groep:'aanuit', en:'On-Off + Dipswitch'},
+  {naam:'Pushdim-Switchdim',  groep:'aanuit', en:'Pushdim-Switchdim'},
+  {naam:'DALI',               groep:'dali',   en:'DALI'},
+  {naam:'1-10V',              groep:'dali',   en:'1-10V'},
+];
+
+const NOOD = [
+  {naam:'Geen Nood',                    en:'No'},
+  {naam:'Ja, 1 uur autotest',           en:'Yes, 1h Automatic'},
+  {naam:'Ja, 1 uur DALI autotest',      en:'Yes, 1h DALI Automatic'},
+  {naam:'Ja, 1 uur manuele test',       en:'Yes, 1h Manual'},
+  {naam:'Ja, 1 uur DALI manuele test',  en:'Yes, 1h DALI Manual'},
+  {naam:'Ja, 3 uur autotest',           en:'Yes, 3h Automatic'},
+  {naam:'Ja, 3 uur DALI autotest',      en:'Yes, 3h DALI Automatic'},
+  {naam:'Ja, 3 uur manuele test',       en:'Yes, 3h Manual'},
+  {naam:'Ja, 3 uur DALI manuele test',  en:'Yes, 3h DALI Manual'},
+];
+
+const MONTAGE = [
+  {naam:'Inbouw', en:'Recessed'},
+  {naam:'Inleg',  en:'Inlay'},
+  {naam:'Opbouw', en:'Surface-Mount'},
+  {naam:'Pendel', en:'Pendant'},
+];
+
+const SENSOR = [
+  {naam:'Geen Sensor',     en:'No'},
+  {naam:'Sensor Daglicht', en:'Daylight'},
+  {naam:'Sensor Beweging', en:'Movement'},
+];
+
+const LIJST = {
+  projecttype:  ['Renovatie', 'Nieuwbouw'],
+  plafondtype:  ['Systeemplafond', 'Bandrasterplafond', 'Klimaatplafond', 'Baffle Plafond', 'Anders:'],
+  montage:      MONTAGE.map(m=>m.naam),
+  kleurtemp:    ['2700K', '3000K', '4000K', '6500K'],
+  cri:          ['80+', '90+'],
+  aantalLb:     ['1', '2', '3', '4'],
+  lichtbron:    LICHTBRON.map(l=>l.naam),
+  optiekOud:    OPTIEK_OUD.map(o=>o.naam),
+  optiekNieuw:  OPTIEK_NIEUW.map(o=>o.naam),
+  armatuurkleur:['Wit (RAL 9016)', 'Zwart (RAL 9005)', 'Anders (RAL)'],
+  sturing:      STURING.map(s=>s.naam),
+  nood:         NOOD.map(n=>n.naam),
+  sensor:       SENSOR.map(s=>s.naam),
+  ventilatie:   ['Nee', 'Ja'],
+  basis:        ['Optic bandraster', 'Flexcore bandraster', 'Anders:'],
+};
+
+/* Vertaaltabellen voor de RFQ; die gaat naar de fabrikant en is Engelstalig,
+   net als het Bestelformulier in de Excel. */
+const zoekEn = (tabel, naam) => { const r = tabel.find(x=>x.naam===naam); return r ? r.en : (naam||''); };
+const EN_KLEURTEMP = k => k || '';
+const EN_CRI = c => c==='80+' ? 'CRI 80' : c==='90+' ? 'CRI 90' : '';
+const EN_JANEE = v => v==='Ja' ? 'Yes' : v==='Nee' ? 'No' : '';
+
+/* ======================= de staat =======================
+   Eén concept (het formulier waar je nu in werkt) en een lijst posities (de
+   RFQ-regels). "Voeg toe aan RFQ-lijst" schuift het concept de lijst in; een
+   regel terugklikken laadt hem weer in het formulier. */
+
+function leegConcept(){
+  return {
+    omschrijving:'',
+    oud:{
+      lengte:'', breedte:'', hoogte:'', plafondtype:'', plafondAnders:'', montage:'',
+      kleurtemp:'', cri:'', lichtbron:'', aantalLb:'1', optiek:'', kleur:'', kleurRal:'',
+      sturing:'', aansluiting:'', nood:'', sensor:'', ventilatie:'', extras:'', aantal:'',
+    },
+    nieuw:{
+      lengte:'', breedte:'', hoogte:'', plafondtype:'', plafondAnders:'', montage:'',
+      kleurtemp:'', cri:'', optiek:'', kleur:'', kleurRal:'',
+      sturing:'', aansluiting:'', nood:'', sensor:'', ventilatie:'', extras:'', aantal:'',
+      basis:'Optic bandraster', basisAnders:'', lichtvlakL:'', lichtvlakB:'',
+      productcode:'', prijs:'',
+    },
+    /* Per veld-id: staat false zodra de rechterkant bewust afwijkt van links.
+       Ontbreekt de sleutel, dan volgt rechts links - zoals de Excel dat met
+       =IF(ISBLANK(B14),"",B14) deed, maar hier te doorbreken. */
+    volgt:{},
+  };
+}
+
+function leegProject(){
+  return {
+    versie:1,
+    project:{nr:'', naam:'', type:'Renovatie', inst:'', datum:vandaag(), contact:'', fabrikant:'', opm:''},
+    instellingen:{efficacy:140, maxWatt:60},
+    concept:leegConcept(),
+    posities:[],
+    bewerkt:-1,     /* index in posities die het concept nu bewerkt, of -1 */
+  };
+}
+
+function vandaag(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+/* Wordt bij "Project opslaan" (zie slaProjectOp()) volgeschreven met het huidige
+   project - blijft null in de originele tool, net als bij dlc.html. */
+const OPGESLAGEN_PROJECT = /*__PROJECT_DATA_START__*/null/*__PROJECT_DATA_END__*/;
+
+let P = leegProject();
+if(OPGESLAGEN_PROJECT){
+  try{
+    P = Object.assign(leegProject(), OPGESLAGEN_PROJECT.P);
+    /* Mergen i.p.v. vervangen: velden die sinds het opslaan zijn bijgekomen
+       blijven anders undefined. */
+    P.project      = Object.assign(leegProject().project, P.project||{});
+    P.instellingen = Object.assign(leegProject().instellingen, P.instellingen||{});
+    P.concept      = herstelConcept(P.concept);
+    P.posities     = (P.posities||[]).map(herstelConcept);
+  }catch(err){
+    console.error('Kon opgeslagen project niet laden:', err);
+    alert('Het opgeslagen project kon niet worden geladen: '+(err&&err.message?err.message:err));
+    P = leegProject();
+  }
+}
+function herstelConcept(c){
+  const leeg = leegConcept();
+  if(!c) return leeg;
+  return {
+    omschrijving: c.omschrijving||'',
+    oud:   Object.assign(leeg.oud,   c.oud||{}),
+    nieuw: Object.assign(leeg.nieuw, c.nieuw||{}),
+    volgt: Object.assign({},         c.volgt||{}),
+  };
+}
+
+/* ======================= lezen en rekenen ======================= */
+
+function getal(v){
+  if(v===''||v==null) return null;
+  const n = parseFloat(String(v).replace(',','.'));
+  return isFinite(n) ? n : null;
+}
+
+/* Rechts volgt links tenzij het veld losgeknipt is. Eén functie, zodat er nergens
+   twee waarheden over dezelfde waarde ontstaan. */
+function volgtLinks(c, id){ return c.volgt[id] !== false; }
+function rechts(c, id){ return volgtLinks(c, id) ? c.oud[id] : c.nieuw[id]; }
+function zetRechts(c, id, waarde){ c.volgt[id] = false; c.nieuw[id] = waarde; }
+function koppelTerug(c, id){ delete c.volgt[id]; c.nieuw[id] = c.oud[id]; }
+
+/* Het lichtvlak is geen intakeveld maar volgt uit de buitenmaat; wie een andere
+   uitsnede wil typt hem over. RAND is de rand rondom, per zijde. */
+const RAND = 15;
+function lichtvlak(c){
+  const L = getal(rechts(c,'lengte')), B = getal(rechts(c,'breedte'));
+  const eigenL = getal(c.nieuw.lichtvlakL), eigenB = getal(c.nieuw.lichtvlakB);
+  return {
+    l: volgtLinks(c,'lichtvlakL') || eigenL==null ? (L==null?null:Math.max(10, L-2*RAND)) : eigenL,
+    b: volgtLinks(c,'lichtvlakB') || eigenB==null ? (B==null?null:Math.max(10, B-2*RAND)) : eigenB,
+  };
+}
+
+/* De sleutel waarop de Excel de lumentabel opzocht: CRI (800/900) plus de
+   kleurtemperatuur in tientallen (27/30/40/65). */
+function lumenSleutel(cri, kleurtemp){
+  const c = cri==='80+' ? 800 : cri==='90+' ? 900 : 0;
+  const k = {'2700K':27, '3000K':30, '4000K':40, '5000K':50, '6500K':65}[kleurtemp] || 0;
+  return (c && k) ? (c + k) : null;
+}
+
+function optiekFactor(tabel, naam){ const o = tabel.find(x=>x.naam===naam); return o ? o.f : null; }
+
+/* Lichtstroom van het bestaande armatuur: aantal buizen x lumen per buis x
+   het rendement van de oude optiek, afgerond op tientallen. */
+function lumenOud(c){
+  const bron = LICHTBRON.find(l=>l.naam===c.oud.lichtbron);
+  const sleutel = lumenSleutel(c.oud.cri, c.oud.kleurtemp);
+  const n = getal(c.oud.aantalLb);
+  const f = optiekFactor(OPTIEK_OUD, c.oud.optiek);
+  if(!bron || !sleutel || !n || f==null) return null;
+  const lm = bron.lm[sleutel];
+  if(lm==null) return null;
+  return Math.round(n*lm*f/10)*10;
+}
+
+/* Het alternatief moet minstens evenveel licht op de werkplek geven. Uit de
+   benodigde armatuurstroom volgt het vermogen bij het ingestelde
+   systeemrendement, naar beneden afgerond en afgetopt op het maximum. */
+function wattNieuw(c){
+  const lm = lumenOud(c);
+  const f  = optiekFactor(OPTIEK_NIEUW, c.nieuw.optiek);
+  const eff = getal(P.instellingen.efficacy) || 140;
+  const max = getal(P.instellingen.maxWatt)  || 60;
+  if(lm==null || f==null || !eff) return null;
+  return Math.min(max, Math.floor((lm/f)/eff));
+}
+function lumenNieuw(c){
+  const w = wattNieuw(c);
+  const f = optiekFactor(OPTIEK_NIEUW, c.nieuw.optiek);
+  const eff = getal(P.instellingen.efficacy) || 140;
+  if(w==null || f==null) return null;
+  return Math.round(w*eff*f/10)*10;
+}
+
+/* Welke aansluitlijst hoort bij de gekozen sturing. */
+function aansluitGroep(sturing){ const s = STURING.find(x=>x.naam===sturing); return s ? s.groep : null; }
+function aansluitLijst(sturing){ const g = aansluitGroep(sturing); return g ? AANSLUITING[g] : []; }
+
+const VERPLICHT_OUD   = ['lengte','breedte','hoogte','plafondtype','montage','kleurtemp','cri',
+                         'lichtbron','aantalLb','optiek','kleur','sturing','aansluiting',
+                         'nood','sensor','ventilatie','aantal'];
+const VERPLICHT_NIEUW = ['lengte','breedte','hoogte','plafondtype','montage','kleurtemp','cri',
+                         'optiek','kleur','sturing','aansluiting','nood','sensor','ventilatie',
+                         'aantal','basis'];
+
+/* De aansluitlijst hangt van de sturing af. Een aansluiting die niet in de lijst
+   van de gekozen sturing staat kan de fabrikant niet leveren; die telt daarom als
+   niet ingevuld, ook al staat er iets. Zo glipt hij niet stil de RFQ in nadat de
+   sturing is gewijzigd of een ouder project is heropend. */
+function aansluitingKlopt(sturing, aansluiting){
+  if(!aansluiting) return true;
+  return aansluitLijst(sturing).indexOf(aansluiting) >= 0;
+}
+function ontbreektOud(c){
+  const mist = VERPLICHT_OUD.filter(id => String(c.oud[id]||'').trim()==='');
+  if(lumenOud(c)==null) mist.push('lichtopbrengst');
+  if(!aansluitingKlopt(c.oud.sturing, c.oud.aansluiting)) mist.push('aansluiting past niet bij de sturing');
+  return mist;
+}
+function ontbreektNieuw(c){
+  const mist = VERPLICHT_NIEUW.filter(id => {
+    const v = (id==='basis' || id==='optiek') ? c.nieuw[id] : rechts(c, id);
+    return String(v||'').trim()==='';
+  });
+  if(lumenNieuw(c)==null) mist.push('lichtopbrengst');
+  if(!aansluitingKlopt(rechts(c,'sturing'), rechts(c,'aansluiting'))) mist.push('aansluiting past niet bij de sturing');
+  return mist;
+}
+function compleet(c){ return ontbreektOud(c).length===0 && ontbreektNieuw(c).length===0; }
+
+/* De naam van het alternatief zoals hij op het productblad en in de RFQ staat. */
+function basisNaam(c){
+  return c.nieuw.basis==='Anders:' ? (c.nieuw.basisAnders||'Bandrasterarmatuur') : (c.nieuw.basis||'Bandrasterarmatuur');
+}
+function kleurNaam(k, ral){ return k==='Anders (RAL)' ? ('RAL '+(ral||'').replace(/^RAL\s*/i,'')) : (k||''); }
+function ralNummer(k, ral){
+  if(k==='Wit (RAL 9016)') return '9016';
+  if(k==='Zwart (RAL 9005)') return '9005';
+  return String(ral||'').replace(/^RAL\s*/i,'').trim();
+}
+function plafondNaam(p, anders){ return p==='Anders:' ? (anders||'') : (p||''); }
+
+/* Eén regel die het alternatief samenvat; gebruikt als omschrijving in de RFQ en
+   als ondertitel op het productblad. */
+function omschrijving(c){
+  const L=rechts(c,'lengte'), B=rechts(c,'breedte'), Hh=rechts(c,'hoogte');
+  const delen=[basisNaam(c)];
+  if(L&&B&&Hh) delen.push(L+'x'+B+'x'+Hh+' mm');
+  const w=wattNieuw(c), lm=lumenNieuw(c);
+  if(w!=null) delen.push(w+'W');
+  if(lm!=null) delen.push(lm+'lm');
+  if(rechts(c,'kleurtemp')) delen.push(rechts(c,'kleurtemp'));
+  if(rechts(c,'cri')) delen.push('CRI '+rechts(c,'cri'));
+  if(c.nieuw.optiek) delen.push(c.nieuw.optiek);
+  if(rechts(c,'sturing')) delen.push(rechts(c,'sturing'));
+  const kl=kleurNaam(rechts(c,'kleur'), rechts(c,'kleurRal'));
+  if(kl) delen.push(kl);
+  return delen.join(' | ');
+}
+
+/* ======================= het intakeformulier =======================
+   De rijen staan in de volgorde van het Excel-formulier. Links het bestaande
+   armatuur, rechts het alternatief; de middenkolom is de veldnaam. */
+
+const RIJEN = [
+  {id:'lengte',      label:'Lengte',          soort:'maat'},
+  {id:'breedte',     label:'Breedte',         soort:'maat'},
+  {id:'hoogte',      label:'Hoogte',          soort:'maat'},
+  {id:'plafondtype', label:'Plafondtype',     soort:'keuze', lijst:'plafondtype',   anders:'plafondAnders', andersBij:'Anders:'},
+  {id:'montage',     label:'Installatie',     soort:'keuze', lijst:'montage'},
+  {id:'kleurtemp',   label:'Lichtkleur',      soort:'keuze', lijst:'kleurtemp'},
+  {id:'cri',         label:'CRI',             soort:'keuze', lijst:'cri'},
+  {id:'lamp',        label:'Bestaande lamp',  soort:'lamp'},
+  {id:'optiek',      label:'Optiek',          soort:'optiek'},
+  {id:'lumen',       label:'Lichtopbrengst',  soort:'lumen'},
+  {id:'kleur',       label:'Kleur armatuur',  soort:'keuze', lijst:'armatuurkleur', anders:'kleurRal',      andersBij:'Anders (RAL)'},
+  {id:'sturing',     label:'Sturing',         soort:'keuze', lijst:'sturing'},
+  {id:'aansluiting', label:'Aansluiting',     soort:'aansluiting'},
+  {id:'nood',        label:'Nood',            soort:'keuze', lijst:'nood'},
+  {id:'sensor',      label:'Sensor',          soort:'keuze', lijst:'sensor'},
+  {id:'ventilatie',  label:'Plenumafzuiging', soort:'keuze', lijst:'ventilatie'},
+  {id:'extras',      label:"Extra's",         soort:'tekst'},
+  {id:'aantal',      label:'Aantallen',       soort:'aantal'},
+  {id:'basis',       label:'Basisarmatuur',   soort:'rechtsKeuze', lijst:'basis', anders:'basisAnders', andersBij:'Anders:'},
+  {id:'lichtvlak',   label:'Lichtvlak (l×b)', soort:'lichtvlak'},
+  {id:'productcode', label:'Product code',    soort:'rechtsTekst', plaats:'wordt door de fabrikant bevestigd'},
+  {id:'prijs',       label:'Unit price',      soort:'rechtsTekst', plaats:'leeg laten = fabrikant vult in'},
+];
+
+function el(tag, klasse, tekst){
+  const e = document.createElement(tag);
+  if(klasse) e.className = klasse;
+  if(tekst!=null) e.textContent = tekst;
+  return e;
+}
+function keuzeveld(opties, waarde, bij){
+  const s = el('select');
+  s.appendChild(new Option('—', ''));
+  opties.forEach(o => s.appendChild(new Option(o, o)));
+  s.value = waarde==null ? '' : waarde;
+  /* Staat er een waarde in die niet (meer) in de lijst voorkomt - bijvoorbeeld
+     een aansluiting die bij de nieuwe sturing niet bestaat - dan laten we hem
+     zien in plaats van hem stilletjes leeg te maken. */
+  if(waarde && s.value!==waarde){
+    s.appendChild(new Option(waarde+'  (past niet bij de sturing)', waarde));
+    s.value = waarde;
+  }
+  s.addEventListener('change', ()=>bij(s.value));
+  return s;
+}
+function tekstveld(waarde, bij, opt){
+  opt = opt || {};
+  const i = el('input');
+  i.type = opt.getal ? 'number' : 'text';
+  if(opt.getal){ i.min = '0'; i.step = opt.step || '1'; }
+  if(opt.plaats) i.placeholder = opt.plaats;
+  i.value = waarde==null ? '' : waarde;
+  i.addEventListener('input', ()=>bij(i.value));
+  return i;
+}
+function metEenheid(veld, eenheid, krap){
+  const d = el('div', 'duo' + (krap ? ' krap' : ''));
+  d.appendChild(veld);
+  d.appendChild(el('span', 'eh', eenheid));
+  return d;
+}
+/* Rechterveld met het knopje dat het weer aan links koppelt. */
+function metReset(veld, c, id){
+  const d = el('div', 'met-reset');
+  d.appendChild(veld);
+  const k = el('button', 'reset' + (volgtLinks(c,id) ? ' uit' : ''), '↺');
+  k.type = 'button';
+  k.title = 'Weer gelijk aan het bestaande armatuur';
+  k.addEventListener('click', ()=>{ koppelTerug(c, id); tekenAlles(); });
+  d.appendChild(k);
+  return d;
+}
+function berekendVak(waarde, eenheid, mistTekst){
+  const d = el('div', 'berekend' + (waarde==null ? ' mist' : ''));
+  d.textContent = waarde==null ? (mistTekst || 'Gegevens ontbreken') : (waarde + (eenheid ? ' '+eenheid : ''));
+  return d;
+}
+
+/* Rechtervelden die links volgen, en de vakken met een uitgerekende waarde.
+   Ze worden hier bijgehouden zodat tikken in een veld links de rechterkant kan
+   bijwerken zonder het hele raster opnieuw te tekenen - dat zou de cursor uit
+   het veld halen waar iemand net in zit. */
+const SPIEGEL = {};
+const AFGELEID = {};
+function spiegel(id, veld){ SPIEGEL[id] = veld; return veld; }
+
+function tekenIntake(){
+  const c = P.concept;
+  const vak = $('intake');
+  vak.textContent = '';
+  Object.keys(SPIEGEL).forEach(k=>delete SPIEGEL[k]);
+  Object.keys(AFGELEID).forEach(k=>delete AFGELEID[k]);
+
+  const kop = (t, klasse) => { const d = el('div', 'kop'+(klasse?' '+klasse:''), t); vak.appendChild(d); };
+  kop('Bestaand armatuur');
+  kop('', 'mid');
+  kop('Distrilight alternatief');
+
+  RIJEN.forEach((rij, i) => {
+    const zebra = i % 2 === 1 ? ' rij-even' : '';
+    const links  = el('div', 'cel'+zebra);
+    const midden = el('div', 'veldnaam'+zebra, rij.label);
+    const rechtsCel = el('div', 'cel'+zebra);
+
+    /* --- linkerkant --- */
+    switch(rij.soort){
+      case 'maat':
+        links.appendChild(metEenheid(tekstveld(c.oud[rij.id], v=>zetLinks(rij, v), {getal:true}), 'mm'));
+        break;
+      case 'aantal':
+        links.appendChild(metEenheid(tekstveld(c.oud[rij.id], v=>zetLinks(rij, v), {getal:true}), 'stuks'));
+        break;
+      case 'keuze': {
+        links.appendChild(keuzeveld(LIJST[rij.lijst], c.oud[rij.id], v=>zetLinks(rij, v, true)));
+        if(rij.anders && c.oud[rij.id]===rij.andersBij){
+          links.appendChild(tekstveld(c.oud[rij.anders], v=>zetLinks({id:rij.anders}, v), {plaats:'Anders…'}));
+        }
+        break;
+      }
+      case 'lamp': {
+        const d = el('div', 'duo smal');
+        d.appendChild(keuzeveld(LIJST.lichtbron, c.oud.lichtbron, v=>{ c.oud.lichtbron=v; tekenAlles(); }));
+        d.appendChild(keuzeveld(LIJST.aantalLb, c.oud.aantalLb, v=>{ c.oud.aantalLb=v; tekenAlles(); }));
+        links.appendChild(d);
+        break;
+      }
+      case 'optiek':
+        links.appendChild(keuzeveld(LIJST.optiekOud, c.oud.optiek, v=>{ c.oud.optiek=v; tekenAlles(); }));
+        break;
+      case 'lumen':
+        AFGELEID.lumenOud = berekendVak(lumenOud(c), '', 'Gegevens ontbreken');
+        links.appendChild(metEenheid(AFGELEID.lumenOud, 'lm'));
+        break;
+      case 'aansluiting':
+        links.appendChild(keuzeveld(aansluitLijst(c.oud.sturing), c.oud.aansluiting,
+          v=>zetLinks({id:'aansluiting'}, v, true)));
+        if(!c.oud.sturing) links.appendChild(el('div', 'eh', 'kies eerst een sturing'));
+        break;
+      case 'tekst':
+        links.appendChild(tekstveld(c.oud[rij.id], v=>zetLinks(rij, v)));
+        break;
+      default:
+        links.className += ' leeg';
+    }
+
+    /* --- rechterkant --- */
+    switch(rij.soort){
+      case 'maat':
+        rechtsCel.appendChild(metReset(metEenheid(spiegel(rij.id,
+          tekstveld(rechts(c, rij.id), v=>{ zetRechts(c, rij.id, v); ververs(); }, {getal:true})), 'mm'), c, rij.id));
+        break;
+      case 'aantal':
+        rechtsCel.appendChild(metReset(metEenheid(spiegel(rij.id,
+          tekstveld(rechts(c, rij.id), v=>{ zetRechts(c, rij.id, v); ververs(); }, {getal:true})), 'stuks'), c, rij.id));
+        break;
+      case 'keuze': {
+        rechtsCel.appendChild(metReset(spiegel(rij.id,
+          keuzeveld(LIJST[rij.lijst], rechts(c, rij.id), v=>{ zetRechts(c, rij.id, v); naSturing(rij); tekenAlles(); })),
+          c, rij.id));
+        if(rij.anders && rechts(c, rij.id)===rij.andersBij){
+          rechtsCel.appendChild(spiegel(rij.anders, tekstveld(rechts(c, rij.anders),
+            v=>{ zetRechts(c, rij.anders, v); ververs(); }, {plaats:'Anders…'})));
+        }
+        break;
+      }
+      case 'lamp':
+        AFGELEID.watt = berekendVak(wattNieuw(c), '', 'Gegevens ontbreken');
+        rechtsCel.appendChild(metEenheid(AFGELEID.watt, 'W'));
+        break;
+      case 'optiek':
+        rechtsCel.appendChild(keuzeveld(LIJST.optiekNieuw, c.nieuw.optiek, v=>{ c.nieuw.optiek=v; tekenAlles(); }));
+        break;
+      case 'lumen':
+        AFGELEID.lumenNieuw = berekendVak(lumenNieuw(c), '', 'Gegevens ontbreken');
+        rechtsCel.appendChild(metEenheid(AFGELEID.lumenNieuw, 'lm'));
+        break;
+      case 'aansluiting':
+        rechtsCel.appendChild(metReset(
+          keuzeveld(aansluitLijst(rechts(c,'sturing')), rechts(c,'aansluiting'),
+            v=>{ zetRechts(c, 'aansluiting', v); tekenAlles(); }),
+          c, 'aansluiting'));
+        break;
+      case 'tekst':
+        rechtsCel.appendChild(metReset(
+          tekstveld(rechts(c, rij.id), v=>{ zetRechts(c, rij.id, v); ververs(); }), c, rij.id));
+        break;
+      case 'rechtsKeuze': {
+        rechtsCel.appendChild(keuzeveld(LIJST[rij.lijst], c.nieuw[rij.id], v=>{ c.nieuw[rij.id]=v; tekenAlles(); }));
+        if(rij.anders && c.nieuw[rij.id]===rij.andersBij){
+          rechtsCel.appendChild(tekstveld(c.nieuw[rij.anders], v=>{ c.nieuw[rij.anders]=v; ververs(); }, {plaats:'Anders…'}));
+        }
+        break;
+      }
+      case 'rechtsTekst':
+        rechtsCel.appendChild(tekstveld(c.nieuw[rij.id], v=>{ c.nieuw[rij.id]=v; ververs(); }, {plaats:rij.plaats}));
+        break;
+      case 'lichtvlak': {
+        const lv = lichtvlak(c);
+        const d = el('div', 'tweeling');
+        AFGELEID.lichtvlakL = tekstveld(lv.l==null?'':lv.l, v=>{ zetRechts(c,'lichtvlakL', v); ververs(); }, {getal:true});
+        AFGELEID.lichtvlakB = tekstveld(lv.b==null?'':lv.b, v=>{ zetRechts(c,'lichtvlakB', v); ververs(); }, {getal:true});
+        d.appendChild(metReset(metEenheid(AFGELEID.lichtvlakL, 'mm', true), c, 'lichtvlakL'));
+        d.appendChild(metReset(metEenheid(AFGELEID.lichtvlakB, 'mm', true), c, 'lichtvlakB'));
+        rechtsCel.appendChild(d);
+        break;
+      }
+      default:
+        rechtsCel.className += ' leeg';
+    }
+
+    vak.appendChild(links);
+    vak.appendChild(midden);
+    vak.appendChild(rechtsCel);
+  });
+}
+
+/* Links wijzigen; de rechterkant die nog meeloopt volgt vanzelf omdat rechts()
+   dan naar links kijkt. hertekenen=true voor keuzevelden, waar een andere keuze
+   de vervolgvelden kan wijzigen. */
+function zetLinks(rij, waarde, hertekenen){
+  const c = P.concept;
+  c.oud[rij.id] = waarde;
+  if(rij.id==='sturing') naSturingLinks();
+  if(hertekenen || rij.id==='sturing') tekenAlles();
+  else { spiegelNaarRechts(rij.id); ververs(); }
+}
+
+/* Wisselt de sturing van groep, dan bestaat de gekozen aansluiting misschien niet
+   meer. Hem laten staan zou een aansluiting de RFQ in sturen die de fabrikant
+   niet kan leveren, dus die maken we leeg. */
+function naSturingLinks(){
+  const c = P.concept;
+  if(c.oud.aansluiting && aansluitLijst(c.oud.sturing).indexOf(c.oud.aansluiting) < 0) c.oud.aansluiting = '';
+}
+function naSturing(rij){
+  if(rij.id!=='sturing') return;
+  const c = P.concept;
+  const huidig = rechts(c, 'aansluiting');
+  if(huidig && aansluitLijst(rechts(c,'sturing')).indexOf(huidig) < 0) zetRechts(c, 'aansluiting', '');
+}
+/* Bij tikken in een links tekstveld hoeft het hele raster niet opnieuw; alleen het
+   rechterveld dat meeloopt krijgt de nieuwe waarde. */
+function spiegelNaarRechts(id){
+  const c = P.concept;
+  if(!volgtLinks(c, id)) return;
+  const veld = SPIEGEL[id];
+  if(veld) veld.value = c.oud[id]==null ? '' : c.oud[id];
+}
+
+/* ======================= het afgeleide figuur =======================
+   Twee blokken in elkaar: de buitenmaat van het armatuur (l x b x h) met daarin
+   het lichtvlak (l x b). De vormen worden één keer uitgerekend en daarna zowel
+   als SVG in de pagina als met de PDF-primitieven getekend - zo kan het beeld op
+   het productblad niet gaan afwijken van wat je op het scherm ziet.
+
+   y telt van boven naar beneden, net als in pdf-huisstijl.js. */
+
+function figuurVormen(c, bx, by){
+  const L  = getal(rechts(c,'lengte'));
+  const B  = getal(rechts(c,'breedte'));
+  const Hg = getal(rechts(c,'hoogte'));
+  if(!L || !B || !Hg) return null;
+  const lv = lichtvlak(c);
+  const li = Math.min(lv.l==null ? L : lv.l, L);
+  const bi = Math.min(lv.b==null ? B : lv.b, B);
+
+  /* Boven het bovenaanzicht staat de aanzichtnaam, tussen de twee aanzichten de
+     maatlijn van het lichtvlak plus de naam van het zijaanzicht, en onderaan de
+     lengtemaat. Die drie stroken tellen mee in de hoogte, anders lopen tekst en
+     maatlijnen door elkaar bij een plat armatuur. */
+  const padL=10, padR=58, padT=16, padB=8, gat=44, onderMaat=30, pijl=3.4;
+  const breed = bx - padL - padR;
+  const hoog  = by - padT - padB - gat - onderMaat;
+  const s  = Math.min(breed/L, hoog/(B+Hg));
+  const bw = L*s, bh = B*s, zh = Hg*s;
+  /* Wat overblijft verdelen we boven en onder, zodat het figuur in zijn vak
+     gecentreerd staat in plaats van tegen de bovenrand te plakken. */
+  const over = (by - padT - padB) - (bh + gat + zh + onderMaat);
+  const x0 = padL, y0 = padT + Math.max(0, over/2);
+  const y1 = y0 + bh + gat;
+
+  const v = [];
+  const maat = (n) => String(Math.round(n));
+
+  /* bovenaanzicht met het lichtvlak erin */
+  v.push({t:'rect', x:x0, y:y0, w:bw, h:bh, rol:'omhulsel'});
+  const iw = li*s, ih = bi*s;
+  v.push({t:'rect', x:x0+(bw-iw)/2, y:y0+(bh-ih)/2, w:iw, h:ih, rol:'lichtvlak'});
+  /* zijaanzicht */
+  v.push({t:'rect', x:x0, y:y1, w:bw, h:zh, rol:'omhulsel'});
+
+  /* Maatlijnen. De pijlpunten raken de hulplijnen en wijzen naar buiten; is de
+     maat te kort om ze naast elkaar te zetten - een armatuur van 90 mm hoog is
+     op deze schaal maar een paar punten - dan gaan ze buiten de maat staan en
+     wijzen ze naar binnen, zoals dat op een tekening hoort. */
+  const kort = 5*pijl;
+  const horizontaal = (xa, xb, yy, vanaf, tekst) => {
+    v.push({t:'lijn', x1:xa, y1:vanaf, x2:xa, y2:yy+4, rol:'hulplijn'});
+    v.push({t:'lijn', x1:xb, y1:vanaf, x2:xb, y2:yy+4, rol:'hulplijn'});
+    const buiten = (xb - xa) < kort;
+    v.push({t:'lijn', x1:xa-(buiten?kort:0), y1:yy, x2:xb+(buiten?kort:0), y2:yy, rol:'maatlijn'});
+    v.push({t:'pijl', x:xa, y:yy, r:buiten?'r':'l', g:pijl});
+    v.push({t:'pijl', x:xb, y:yy, r:buiten?'l':'r', g:pijl});
+    v.push({t:'tekst', x:(xa+xb)/2, y:yy+3, s:tekst, anker:'m', rol:'maat'});
+  };
+  const vertikaal = (yb, yo, xx, vanaf, tekst) => {
+    v.push({t:'lijn', x1:vanaf, y1:yb, x2:xx+4, y2:yb, rol:'hulplijn'});
+    v.push({t:'lijn', x1:vanaf, y1:yo, x2:xx+4, y2:yo, rol:'hulplijn'});
+    const buiten = (yo - yb) < kort;
+    v.push({t:'lijn', x1:xx, y1:yb-(buiten?kort:0), x2:xx, y2:yo+(buiten?kort:0), rol:'maatlijn'});
+    v.push({t:'pijl', x:xx, y:yb, r:buiten?'b':'o', g:pijl});
+    v.push({t:'pijl', x:xx, y:yo, r:buiten?'o':'b', g:pijl});
+    v.push({t:'tekst', x:xx+7, y:(yb+yo)/2-4, s:tekst, anker:'l', rol:'maat'});
+  };
+
+  const ix = x0 + (bw-iw)/2;
+  horizontaal(ix, ix+iw, y0+bh+14, y0+bh, 'lichtvlak '+maat(li)+' × '+maat(bi)+' mm');
+  horizontaal(x0, x0+bw, y1+zh+16, y1+zh, maat(L)+' mm');
+  const xM = x0 + bw + 13;
+  vertikaal(y0, y0+bh, xM, x0+bw, maat(B)+' mm');
+  vertikaal(y1, y1+zh, xM, x0+bw, maat(Hg)+' mm');
+
+  /* aanzichtnamen */
+  v.push({t:'tekst', x:x0, y:y0-11, s:'bovenaanzicht', anker:'l', rol:'aanzicht'});
+  v.push({t:'tekst', x:x0, y:y1-11, s:'zijaanzicht',   anker:'l', rol:'aanzicht'});
+  return v;
+}
+
+/* Twee stijlsets voor dezelfde vormen: op het scherm in de blauwe huisstijl van
+   de tools, op het productblad in het zwart-grijs van het DLC-ontwerp. */
+const FIG_SCHERM = {omhulselVul:'#F3F7FC', omhulselLijn:'#1E2A4A', lichtvlakVul:'#FFFFFF',
+  lichtvlakLijn:'#3E8EDE', maatlijn:'#5A6B84', hulplijn:'#C3D2E4', tekst:'#1C2534', aanzicht:'#5A6B84'};
+const FIG_BLAD  = {omhulselVul:'#F2F2F2', omhulselLijn:'#231F20', lichtvlakVul:'#FFFFFF',
+  lichtvlakLijn:'#231F20', maatlijn:'#6D6E71', hulplijn:'#BCBEC0', tekst:'#231F20', aanzicht:'#6D6E71'};
+
+function pijlPunten(v){
+  const g = v.g;
+  if(v.r==='l') return [[v.x, v.y], [v.x+g*1.8, v.y-g*0.7], [v.x+g*1.8, v.y+g*0.7]];
+  if(v.r==='r') return [[v.x, v.y], [v.x-g*1.8, v.y-g*0.7], [v.x-g*1.8, v.y+g*0.7]];
+  if(v.r==='o') return [[v.x, v.y], [v.x-g*0.7, v.y+g*1.8], [v.x+g*0.7, v.y+g*1.8]];
+  return [[v.x, v.y], [v.x-g*0.7, v.y-g*1.8], [v.x+g*0.7, v.y-g*1.8]];
+}
+
+function figuurSvg(c, bx, by){
+  const vormen = figuurVormen(c, bx, by);
+  const K = FIG_SCHERM;
+  if(!vormen){
+    return '<text x="'+(bx/2)+'" y="'+(by/2)+'" text-anchor="middle" font-family="Nunito Sans, sans-serif" ' +
+           'font-size="12" fill="#5A6B84">Vul lengte, breedte en hoogte in</text>';
+  }
+  const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const anker = a => a==='m' ? 'middle' : a==='r' ? 'end' : 'start';
+  return vormen.map(v=>{
+    if(v.t==='rect'){
+      const vul  = v.rol==='lichtvlak' ? K.lichtvlakVul  : K.omhulselVul;
+      const lijn = v.rol==='lichtvlak' ? K.lichtvlakLijn : K.omhulselLijn;
+      return '<rect x="'+v.x+'" y="'+v.y+'" width="'+v.w+'" height="'+v.h+'" fill="'+vul+
+             '" stroke="'+lijn+'" stroke-width="1"/>';
+    }
+    if(v.t==='lijn'){
+      const kl = v.rol==='hulplijn' ? K.hulplijn : K.maatlijn;
+      return '<line x1="'+v.x1+'" y1="'+v.y1+'" x2="'+v.x2+'" y2="'+v.y2+'" stroke="'+kl+'" stroke-width="0.8"/>';
+    }
+    if(v.t==='pijl'){
+      return '<polygon points="'+pijlPunten(v).map(p=>p[0]+','+p[1]).join(' ')+'" fill="'+K.maatlijn+'"/>';
+    }
+    const kl = v.rol==='aanzicht' ? K.aanzicht : K.tekst;
+    const pt = v.rol==='aanzicht' ? 9 : 10;
+    return '<text x="'+v.x+'" y="'+(v.y+pt*0.82)+'" text-anchor="'+anker(v.anker)+
+           '" font-family="Nunito Sans, sans-serif" font-size="'+pt+'" fill="'+kl+'">'+esc(v.s)+'</text>';
+  }).join('');
+}
+
+/* Dezelfde vormen op het productblad. HS is de tekenlaag van pdf-huisstijl.js;
+   ox/oy verschuiven het figuur naar zijn plek op de pagina. */
+function figuurPdf(HS, c, ox, oy, bx, by){
+  const vormen = figuurVormen(c, bx, by);
+  if(!vormen) return false;
+  const K = FIG_BLAD;
+  vormen.forEach(v=>{
+    if(v.t==='rect'){
+      const vul  = v.rol==='lichtvlak' ? K.lichtvlakVul  : K.omhulselVul;
+      const lijn = v.rol==='lichtvlak' ? K.lichtvlakLijn : K.omhulselLijn;
+      HS.rect(ox+v.x, oy+v.y, v.w, v.h, vul, lijn, 0.7);
+    } else if(v.t==='lijn'){
+      HS.line(ox+v.x1, oy+v.y1, ox+v.x2, oy+v.y2, 0.5, v.rol==='hulplijn' ? K.hulplijn : K.maatlijn);
+    } else if(v.t==='pijl'){
+      HS.poly(pijlPunten(v).map(p=>[ox+p[0], oy+p[1]]), K.maatlijn);
+    } else {
+      const pt = v.rol==='aanzicht' ? 5.5 : 6;
+      HS.text(ox+v.x, oy+v.y, pt, v.s,
+        {color: v.rol==='aanzicht' ? K.aanzicht : K.tekst,
+         align: v.anker==='m' ? 'center' : v.anker==='r' ? 'right' : undefined});
+    }
+  });
+  return true;
+}
+
+/* ======================= verversen ======================= */
+
+function tekenAlles(){ tekenIntake(); ververs(); }
+
+/* Alles wat van de staat afhangt maar niet uit een invoerveld komt. Wordt na
+   elke wijziging aangeroepen; het intakeraster zelf blijft staan. */
+function ververs(){
+  const c = P.concept;
+
+  if(AFGELEID.lumenOud)   vulBerekend(AFGELEID.lumenOud,   lumenOud(c));
+  if(AFGELEID.lumenNieuw) vulBerekend(AFGELEID.lumenNieuw, lumenNieuw(c));
+  if(AFGELEID.watt)       vulBerekend(AFGELEID.watt,       wattNieuw(c));
+
+  const lv = lichtvlak(c);
+  if(AFGELEID.lichtvlakL && volgtLinks(c,'lichtvlakL')) AFGELEID.lichtvlakL.value = lv.l==null ? '' : lv.l;
+  if(AFGELEID.lichtvlakB && volgtLinks(c,'lichtvlakB')) AFGELEID.lichtvlakB.value = lv.b==null ? '' : lv.b;
+
+  const mistO = ontbreektOud(c), mistN = ontbreektNieuw(c);
+  zetStatus($('statusOud'),   mistO, 'Bestaand');
+  zetStatus($('statusNieuw'), mistN, 'Alternatief');
+
+  $('positieTitel').textContent = P.bewerkt >= 0
+    ? ('Positie ' + String(P.bewerkt+1).padStart(2,'0') + ' — bewerken')
+    : ('Positie ' + String(P.posities.length+1).padStart(2,'0') + ' — nieuw');
+
+  $('figuur').innerHTML = figuurSvg(c, 340, 300);
+  tekenSamenvatting();
+  tekenRfq();
+
+  $('knRfqToevoegen').textContent = P.bewerkt >= 0 ? 'Werk RFQ-regel bij' : 'Voeg toe aan RFQ-lijst';
+  $('knRfqXlsx').disabled = P.posities.length === 0;
+  $('knRfqPdf').disabled  = P.posities.length === 0;
+}
+
+function vulBerekend(vak, waarde){
+  vak.className = 'berekend' + (waarde==null ? ' mist' : '');
+  vak.textContent = waarde==null ? 'Gegevens ontbreken' : String(waarde);
+}
+function zetStatus(vak, mist, wat){
+  vak.className = 'status ' + (mist.length ? 'mist' : 'ok');
+  vak.textContent = mist.length
+    ? (wat + ': ' + mist.length + ' veld' + (mist.length===1?'':'en') + ' open')
+    : (wat + ': compleet');
+  vak.title = mist.length ? ('Nog invullen: ' + mist.join(', ')) : '';
+}
+
+function tekenSamenvatting(){
+  const c = P.concept, lijst = $('samenvat');
+  lijst.textContent = '';
+  const lmO = lumenOud(c), lmN = lumenNieuw(c), w = wattNieuw(c);
+  const oudW = (()=>{
+    /* Het vermogen van de bestaande situatie is niet ingevuld maar zit in de naam
+       van de buis (TL5-35W); met het aantal buizen erbij is dat de vergelijking
+       waar de klant om vraagt. Voorschakelverliezen laten we buiten beschouwing. */
+    const m = /-(\d+)W$/.exec(c.oud.lichtbron||'');
+    const n = getal(c.oud.aantalLb);
+    return (m && n) ? parseInt(m[1],10)*n : null;
+  })();
+  const regel = (label, waarde) => {
+    const li = el('li');
+    li.appendChild(el('span', null, label));
+    li.appendChild(el('b', null, waarde));
+    lijst.appendChild(li);
+  };
+  regel('Bestaand', oudW==null ? '—' : oudW+' W' + (lmO==null?'':' · '+lmO+' lm'));
+  regel('Alternatief', w==null ? '—' : w+' W' + (lmN==null?'':' · '+lmN+' lm'));
+  if(oudW!=null && w!=null && oudW>0){
+    regel('Besparing', Math.round((1 - w/oudW)*100) + '%');
+  }
+  const n = getal(rechts(c,'aantal'));
+  regel('Aantal', n==null ? '—' : n + ' stuks');
+  if(n!=null && oudW!=null && w!=null){
+    regel('Totaal geïnstalleerd', Math.round(oudW*n/10)/100 + ' kW → ' + Math.round(w*n/10)/100 + ' kW');
+  }
+}
+
+/* ======================= de RFQ-lijst ======================= */
+
+function tekenRfq(){
+  const vak = $('rfqVak');
+  vak.textContent = '';
+  if(!P.posities.length){
+    vak.appendChild(el('p', 'leegmelding',
+      'Nog geen regels. Vul een positie in en druk op "Voeg toe aan RFQ-lijst".'));
+    return;
+  }
+  const tab = el('table', 'rfq');
+  const thead = el('thead'), tr = el('tr');
+  ['Pos', 'Aantal', 'Product code', 'Unit price', 'Omschrijving', 'W', 'lm', ''].forEach(h=>{
+    tr.appendChild(el('th', null, h));
+  });
+  thead.appendChild(tr); tab.appendChild(thead);
+
+  const tbody = el('tbody');
+  P.posities.forEach((pos, i)=>{
+    const r = el('tr', P.bewerkt===i ? 'bewerkt' : null);
+    r.appendChild(el('td', null, String(i+1).padStart(2,'0')));
+    r.appendChild(el('td', 'num', String(rechts(pos,'aantal')||'')));
+
+    const tdCode = el('td');
+    tdCode.appendChild(tekstveld(pos.nieuw.productcode, v=>{ pos.nieuw.productcode=v; }));
+    r.appendChild(tdCode);
+
+    const tdPrijs = el('td');
+    tdPrijs.appendChild(tekstveld(pos.nieuw.prijs, v=>{ pos.nieuw.prijs=v; }));
+    r.appendChild(tdPrijs);
+
+    const tdOms = el('td');
+    tdOms.appendChild(el('div', null, pos.omschrijving || omschrijving(pos)));
+    r.appendChild(tdOms);
+
+    r.appendChild(el('td', 'num', wattNieuw(pos)==null ? '—' : String(wattNieuw(pos))));
+    r.appendChild(el('td', 'num', lumenNieuw(pos)==null ? '—' : String(lumenNieuw(pos))));
+
+    const tdKn = el('td');
+    const kBew = el('button', 'mini', P.bewerkt===i ? 'In bewerking' : 'Bewerk');
+    kBew.type = 'button';
+    kBew.addEventListener('click', ()=>laadPositie(i));
+    const kWeg = el('button', 'mini', 'Verwijder');
+    kWeg.type = 'button';
+    kWeg.style.marginLeft = '6px';
+    kWeg.addEventListener('click', ()=>verwijderPositie(i));
+    tdKn.appendChild(kBew); tdKn.appendChild(kWeg);
+    r.appendChild(tdKn);
+
+    tbody.appendChild(r);
+  });
+  tab.appendChild(tbody);
+  vak.appendChild(tab);
+}
+
+function kloon(c){ return JSON.parse(JSON.stringify(c)); }
+
+function naarRfq(){
+  const c = P.concept;
+  const mist = ontbreektOud(c).concat(ontbreektNieuw(c));
+  if(mist.length){
+    const door = confirm('Deze positie is nog niet compleet:\n\n' + mist.join(', ') +
+      '\n\nToch toevoegen aan de RFQ-lijst?');
+    if(!door) return;
+  }
+  const regel = kloon(c);
+  regel.omschrijving = c.omschrijving || omschrijving(c);
+  if(P.bewerkt >= 0){ P.posities[P.bewerkt] = regel; }
+  else { P.posities.push(regel); }
+  P.bewerkt = -1;
+  P.concept = leegConcept();
+  $('cOmschrijving').value = '';
+  tekenAlles();
+}
+
+function laadPositie(i){
+  P.concept = kloon(P.posities[i]);
+  P.bewerkt = i;
+  $('cOmschrijving').value = P.concept.omschrijving || '';
+  tekenAlles();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function verwijderPositie(i){
+  if(!confirm('Regel ' + String(i+1).padStart(2,'0') + ' uit de RFQ-lijst verwijderen?')) return;
+  P.posities.splice(i, 1);
+  if(P.bewerkt === i) P.bewerkt = -1;
+  else if(P.bewerkt > i) P.bewerkt--;
+  ververs();
+}
+function nieuwePositie(){
+  P.concept = leegConcept();
+  P.bewerkt = -1;
+  $('cOmschrijving').value = '';
+  tekenAlles();
+}
+
+/* ======================= het technisch productblad =======================
+   DLC-huisstijl, met veldgroepen op maat voor bandrasters. De maten komen uit
+   het aangeleverde DLC-ontwerp (zie dlc.html, waar dezelfde tabel staat); y is
+   daar een basislijn, text() wil de bovenkant van de regel - vandaar tekst().
+   Een veld zonder waarde valt weg, en een groep waarvan alle velden leeg zijn
+   verdwijnt met kop en al. */
+
+const M = {
+  kopbalkH: 57.35,
+  x: 36, xLabel: 36.5, xWaarde: 135.7,
+  lijnX: 35.4, lijnLabelB: 99.3,
+  lijnWaardeX: 134.9, lijnWaardeB: 153.5,
+  bestelLabelB: 47.4, bestelWaardeX: 83.1, bestelWaardeB: 205.4, xBestelWaarde: 83.9,
+  titel1: 93.5, titel2: 120.5, titelPt: 20,
+  sectiePt: 9, groepPt: 6, rijPt: 6,
+  sectiekop: 147.5, naSectiekop: 13.6, naKoprij: 10.9, naGroepskop: 10.3,
+  rij: 9.5, wikkel: 6.8, naBestel: 27.1, groepGat: 20.5, lijnBoven: 7.1,
+  figuur: {x:305, y:158, b:255, h:250},
+  voetY: 806.9, voetX1: 28.3, voetX2: 551.5,
+  tekst: '#231F20', lijn: '#BCBEC0',
+};
+
+function mm(v){ return v==='' || v==null ? '' : String(v) + ' mm'; }
+
+/* De groepen van het blad. Volgorde en indeling zijn het beginpunt; welke velden
+   er uiteindelijk op horen te staan wordt per specificatie nog doorgenomen. */
+function bladGroepen(c){
+  const lv = lichtvlak(c);
+  const eff = getal(P.instellingen.efficacy) || 140;
+  const w = wattNieuw(c), lmN = lumenNieuw(c), lmO = lumenOud(c);
+  const oudW = (()=>{
+    const m = /-(\d+)W$/.exec(c.oud.lichtbron||''); const n = getal(c.oud.aantalLb);
+    return (m && n) ? parseInt(m[1],10)*n : null;
+  })();
+  return [
+    {kop:'Algemeen', rijen:[
+      ['Uitvoering',       basisNaam(c)],
+      ['Plafondtype',      plafondNaam(rechts(c,'plafondtype'), rechts(c,'plafondAnders'))],
+      ['Installatie',      rechts(c,'montage')],
+      ['Kleur behuizing',  kleurNaam(rechts(c,'kleur'), rechts(c,'kleurRal'))],
+      ['Plenumafzuiging',  rechts(c,'ventilatie')],
+    ]},
+    {kop:'Afmetingen', rijen:[
+      ['Lengte',    mm(rechts(c,'lengte'))],
+      ['Breedte',   mm(rechts(c,'breedte'))],
+      ['Hoogte',    mm(rechts(c,'hoogte'))],
+      ['Lichtvlak', (lv.l==null||lv.b==null) ? '' : (Math.round(lv.l)+' × '+Math.round(lv.b)+' mm')],
+    ]},
+    {kop:'Lichttechniek', rijen:[
+      ['Lichtkleur',            rechts(c,'kleurtemp')],
+      ['Kleurweergave',         rechts(c,'cri') ? ('CRI '+rechts(c,'cri')) : ''],
+      ['Optiek',                c.nieuw.optiek],
+      ['Lichtstroom armatuur',  lmN==null ? '' : lmN+' lm'],
+      ['Vermogen',              w==null ? '' : w+' W'],
+      ['Systeemrendement',      w==null ? '' : eff+' lm/W'],
+    ]},
+    {kop:'Elektrisch', rijen:[
+      ['Sturing',          rechts(c,'sturing')],
+      ['Aansluiting',      rechts(c,'aansluiting')],
+      ['Noodverlichting',  rechts(c,'nood')],
+      ['Sensor',           rechts(c,'sensor')],
+      ["Extra's",          rechts(c,'extras')],
+    ]},
+    {kop:'Vervangt', rijen:[
+      ['Bestaand armatuur',    c.oud.lichtbron ? ((c.oud.aantalLb||'1')+' × '+c.oud.lichtbron) : ''],
+      ['Bestaande optiek',     c.oud.optiek],
+      ['Lichtstroom bestaand', lmO==null ? '' : lmO+' lm'],
+      ['Vermogen bestaand',    oudW==null ? '' : oudW+' W'],
+      ['Besparing',            (oudW && w!=null) ? (Math.round((1-w/oudW)*100)+' %') : ''],
+    ]},
+    {kop:'Project', rijen:[
+      ['Project',       [P.project.nr, P.project.naam].filter(Boolean).join(' — ')],
+      ['Positie',       c.omschrijving || ''],
+      ['Aantal',        rechts(c,'aantal') ? (rechts(c,'aantal')+' stuks') : ''],
+      ['Datum',         P.project.datum ? PdfHuisstijl.datumNL(P.project.datum) : ''],
+    ]},
+  ];
+}
+
+async function bouwProductblad(c){
+  const doc = await PDFLib.PDFDocument.create();
+  doc.setTitle('Technisch productblad ' + basisNaam(c));
+  doc.setProducer('Distrilight bandrasters');
+
+  let pg = null, y = 0;
+  const paginas = [];
+  const HS = await PdfHuisstijl.tekenaar(doc, {
+    haalY:()=>y, zetY:v=>{y=v;}, haalPg:()=>pg, zetPg:p=>{pg=p;},
+    paginas, fonts:'distrilight', tekstFont:'helvetica',
+    logos:[], beelden:['dlcKopbalk'], voet:false,
+  });
+  const {W, H, BEELD, text, rect, line, wrapBreedte, beginPage} = HS;
+  const tekst = (x, basislijn, pt, s, opt) => text(x, basislijn - pt*0.78, pt, s, opt);
+
+  function kopbalk(){
+    if(BEELD.dlcKopbalk){
+      pg.drawImage(BEELD.dlcKopbalk, {x:0, y:H-M.kopbalkH, width:W, height:M.kopbalkH});
+    } else {
+      rect(0, 0, W, M.kopbalkH, '#1A1A1A');
+    }
+  }
+  function nieuwePagina(eerste){
+    beginPage(true);
+    kopbalk();
+    line(M.voetX1, M.voetY, M.voetX2, M.voetY, 0.3, M.lijn);
+    y = eerste ? M.titel1 : M.kopbalkH + 40;
+  }
+  function ruimte(h){ if(y + h > M.voetY - 20) nieuwePagina(false); }
+  function sectiekop(t){
+    ruimte(M.naSectiekop + M.rij);
+    tekst(M.x, y, M.sectiePt, String(t).toUpperCase(), {bold:true, cond:true, color:M.tekst});
+    y += M.naSectiekop;
+  }
+  function groepskop(t){
+    ruimte(M.naGroepskop + M.rij);
+    tekst(M.xLabel, y, M.groepPt, t, {bold:true, cond:true, color:M.tekst});
+    y += M.naGroepskop;
+  }
+  function haarlijn(labelB, waardeX, waardeB){
+    const yy = y - M.lijnBoven;
+    rect(M.lijnX, yy, labelB, 0.2, M.tekst);
+    rect(waardeX, yy, waardeB, 0.2, M.tekst);
+  }
+  function regel(label, waarde, kol){
+    const k = kol || {labelB:M.lijnLabelB, waardeX:M.lijnWaardeX, waardeB:M.lijnWaardeB,
+                      xWaarde:M.xWaarde, breedte:M.lijnWaardeB-5};
+    const regels = wrapBreedte(String(waarde), k.breedte, M.rijPt, {});
+    ruimte(M.rij + (regels.length-1)*M.wikkel);
+    haarlijn(k.labelB, k.waardeX, k.waardeB);
+    tekst(M.xLabel, y, M.rijPt, label, {color:M.tekst});
+    regels.forEach((r,i)=> tekst(k.xWaarde, y + i*M.wikkel, M.rijPt, r, {color:M.tekst}));
+    y += M.rij + (regels.length-1)*M.wikkel;
+  }
+  function slotlijn(){ haarlijn(M.lijnLabelB, M.lijnWaardeX, M.lijnWaardeB); }
+
+  nieuwePagina(true);
+  tekst(M.x, M.titel1, M.titelPt, 'Bandrasterarmatuur', {cond:true, bold:false, color:M.tekst});
+  tekst(M.x, M.titel2, M.titelPt, basisNaam(c), {cond:true, bold:true, color:M.tekst});
+  y = M.sectiekop;
+
+  const code = (c.nieuw.productcode||'').trim();
+  const oms  = c.omschrijving || omschrijving(c);
+  if(code || oms){
+    sectiekop('Bestelgegevens');
+    const kol = {labelB:M.bestelLabelB, waardeX:M.bestelWaardeX, waardeB:M.bestelWaardeB,
+                 xWaarde:M.xBestelWaarde, breedte:M.bestelWaardeB-5};
+    haarlijn(kol.labelB, kol.waardeX, kol.waardeB);
+    tekst(M.xLabel, y, M.rijPt, 'Artikelcode', {bold:true, cond:true, color:M.tekst});
+    tekst(kol.xWaarde, y, M.rijPt, 'Omschrijving', {bold:true, cond:true, color:M.tekst});
+    y += M.naKoprij;
+    const regels = wrapBreedte(oms, kol.breedte, M.rijPt, {});
+    tekst(M.xLabel, y, M.rijPt, code || 'n.t.b.', {color:M.tekst});
+    regels.forEach((r,i)=> tekst(kol.xWaarde, y + i*M.wikkel, M.rijPt, r, {color:M.tekst}));
+    y += (regels.length-1)*M.wikkel + M.naBestel;
+  }
+
+  const groepen = bladGroepen(c)
+    .map(g => ({kop:g.kop, rijen:g.rijen.filter(r => String(r[1]||'').trim() !== '')}))
+    .filter(g => g.rijen.length);
+  if(groepen.length){
+    sectiekop('Productgegevens');
+    groepen.forEach((g, i) => {
+      if(i) y += M.groepGat - M.rij;
+      groepskop(g.kop);
+      g.rijen.forEach(r => regel(r[0], r[1]));
+      slotlijn();
+    });
+  }
+
+  /* Het figuur staat rechtsboven op de eerste pagina, waar in het DLC-ontwerp de
+     productfoto zit. */
+  pg = paginas[0];
+  figuurPdf(HS, c, M.figuur.x, M.figuur.y, M.figuur.b, M.figuur.h);
+  pg = paginas[paginas.length-1];
+
+  return await doc.save();
+}
+
+/* ======================= de RFQ =======================
+   Gaat naar de fabrikant en is daarom Engelstalig, met dezelfde velden als het
+   Bestelformulier in de Excel. De vertaaltabellen staan bij de gegevens
+   bovenaan; wat daar niet in staat gaat onvertaald mee (een RAL-nummer of een
+   connectorbenaming is in elke taal hetzelfde). */
+
+function rfqVelden(c){
+  const lv = lichtvlak(c);
+  return [
+    ['Type',                zoekEn(MONTAGE, rechts(c,'montage'))],
+    ['Base',                basisNaam(c)],
+    ['Length (mm)',         rechts(c,'lengte')],
+    ['Width (mm)',          rechts(c,'breedte')],
+    ['Height (mm)',         rechts(c,'hoogte')],
+    ['Light aperture (mm)', (lv.l==null||lv.b==null) ? '' : (Math.round(lv.l)+' x '+Math.round(lv.b))],
+    ['Watt',                wattNieuw(c)==null ? '' : wattNieuw(c)],
+    ['Lumens',              lumenNieuw(c)==null ? '' : lumenNieuw(c)],
+    ['Optics',              zoekEn(OPTIEK_NIEUW, c.nieuw.optiek)],
+    ['Kelvin colortemp',    EN_KLEURTEMP(rechts(c,'kleurtemp'))],
+    ['CRI (Ra)',            EN_CRI(rechts(c,'cri'))],
+    ['Dimming',             zoekEn(STURING, rechts(c,'sturing'))],
+    ['Emergency',           zoekEn(NOOD, rechts(c,'nood'))],
+    ['Connector',           rechts(c,'aansluiting')],
+    ['RAL color housing',   ralNummer(rechts(c,'kleur'), rechts(c,'kleurRal'))],
+    ['Air slot',            EN_JANEE(rechts(c,'ventilatie'))],
+    ['Sensor',              zoekEn(SENSOR, rechts(c,'sensor'))],
+    ['Remarks',             rechts(c,'extras')],
+  ];
+}
+function rfqKop(){
+  return {
+    to:   P.project.fabrikant || '',
+    date: P.project.datum ? PdfHuisstijl.datumNL(P.project.datum) : '',
+    ref:  [P.project.nr, P.project.naam].filter(Boolean).join(' - '),
+    persoon: P.project.contact || P.project.inst || '',
+  };
+}
+
+async function bouwRfqPdf(){
+  const doc = await PDFLib.PDFDocument.create();
+  doc.setTitle('RFQ ' + (P.project.naam || P.project.nr || ''));
+  doc.setProducer('Distrilight bandrasters');
+
+  let pg = null, y = 0;
+  const paginas = [];
+  const HS = await PdfHuisstijl.tekenaar(doc, {
+    haalY:()=>y, zetY:v=>{y=v;}, haalPg:()=>pg, zetPg:p=>{pg=p;},
+    paginas, fonts:'distrilight', logos:['donker','licht'], beelden:['ruitpatroon'],
+  });
+  const {Mg, C, text, need, paginaKop, zetSectie, tableStart, tableRow, flush, beginPage} = HS;
+
+  zetSectie('Request for quotation');
+  beginPage(true);
+  paginaKop('Request for quotation', 'Bandraster luminaires - Distrilight');
+
+  const kop = rfqKop();
+  [['To', kop.to], ['Date', kop.date], ['Reference', kop.ref], ['Person in charge', kop.persoon]]
+    .forEach(function(r){
+      need(14);
+      text(Mg, y, 9, r[0], {bold:true, color:C.hoofd});
+      text(Mg + 110, y, 9, r[1] || '-', {color:C.tekst});
+      y += 14;
+    });
+  y += 10;
+
+  const T = tableStart([
+    {h:'Pos',          w:32},
+    {h:'Qty',          w:42},
+    {h:'Product code', w:88},
+    {h:'Description',  w:233},
+    {h:'Unit price',   w:120},
+  ]);
+  P.posities.forEach(function(c, i){
+    tableRow(T, [
+      String(i+1).padStart(2,'0'),
+      String(rechts(c,'aantal') || ''),
+      c.nieuw.productcode || '',
+      c.omschrijving || omschrijving(c),
+      c.nieuw.prijs || '',
+    ]);
+  });
+  y += 22;
+
+  P.posities.forEach(function(c, i){
+    need(60);
+    text(Mg, y, 11, 'Position ' + String(i+1).padStart(2,'0') + ' - ' + basisNaam(c),
+      {bold:true, cond:true, color:C.hoofd});
+    y += 18;
+    const D = tableStart([{h:'Specification', w:170}, {h:'Value', w:345}]);
+    rfqVelden(c).forEach(function(r){
+      if(String(r[1]==null?'':r[1]).trim() !== '') tableRow(D, [r[0], String(r[1])]);
+    });
+    y += 20;
+  });
+
+  flush();
+  return await doc.save();
+}
+
+/* ======================= de RFQ als werkblad =======================
+   Een .xlsx is een zipbestand met een handvol XML-onderdelen. Er zit geen
+   spreadsheetlibrary in dit project en daar is ook geen reden voor: het bestand
+   is een blad zonder formules, en de zip mag ongecomprimeerd (methode 0), zodat
+   er niets meer nodig is dan een CRC32. */
+
+const CRC_TABEL = (function(){
+  const t = new Uint32Array(256);
+  for(let n=0; n<256; n++){
+    let c = n;
+    for(let k=0; k<8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+function crc32(bytes){
+  let c = 0xFFFFFFFF;
+  for(let i=0; i<bytes.length; i++) c = CRC_TABEL[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function utf8(s){ return new TextEncoder().encode(s); }
+
+function zipMaak(bestanden){
+  const nu = new Date();
+  const dosTijd  = ((nu.getHours() << 11) | (nu.getMinutes() << 5) | (nu.getSeconds() >> 1)) & 0xFFFF;
+  const dosDatum = (((nu.getFullYear() - 1980) << 9) | ((nu.getMonth() + 1) << 5) | nu.getDate()) & 0xFFFF;
+
+  const delen = [], centraal = [];
+  let offset = 0;
+  bestanden.forEach(function(b){
+    const naam = utf8(b.naam), data = b.data, som = crc32(data);
+    const lok = new DataView(new ArrayBuffer(30));
+    lok.setUint32(0, 0x04034B50, true); lok.setUint16(4, 20, true); lok.setUint16(6, 0x0800, true);
+    lok.setUint16(8, 0, true); lok.setUint16(10, dosTijd, true); lok.setUint16(12, dosDatum, true);
+    lok.setUint32(14, som, true); lok.setUint32(18, data.length, true); lok.setUint32(22, data.length, true);
+    lok.setUint16(26, naam.length, true); lok.setUint16(28, 0, true);
+    delen.push(new Uint8Array(lok.buffer), naam, data);
+
+    const cen = new DataView(new ArrayBuffer(46));
+    cen.setUint32(0, 0x02014B50, true); cen.setUint16(4, 20, true); cen.setUint16(6, 20, true);
+    cen.setUint16(8, 0x0800, true); cen.setUint16(10, 0, true);
+    cen.setUint16(12, dosTijd, true); cen.setUint16(14, dosDatum, true);
+    cen.setUint32(16, som, true); cen.setUint32(20, data.length, true); cen.setUint32(24, data.length, true);
+    cen.setUint16(28, naam.length, true); cen.setUint16(30, 0, true); cen.setUint16(32, 0, true);
+    cen.setUint16(34, 0, true); cen.setUint16(36, 0, true); cen.setUint32(38, 0, true);
+    cen.setUint32(42, offset, true);
+    centraal.push(new Uint8Array(cen.buffer), naam);
+
+    offset += 30 + naam.length + data.length;
+  });
+
+  const cenLengte = centraal.reduce(function(s, d){ return s + d.length; }, 0);
+  const eind = new DataView(new ArrayBuffer(22));
+  eind.setUint32(0, 0x06054B50, true);
+  eind.setUint16(8, bestanden.length, true); eind.setUint16(10, bestanden.length, true);
+  eind.setUint32(12, cenLengte, true); eind.setUint32(16, offset, true);
+
+  const alles = delen.concat(centraal, [new Uint8Array(eind.buffer)]);
+  const totaal = alles.reduce(function(s, d){ return s + d.length; }, 0);
+  const uit = new Uint8Array(totaal);
+  let p = 0;
+  alles.forEach(function(d){ uit.set(d, p); p += d.length; });
+  return uit;
+}
+
+/* Excel weigert een blad met stuurtekens erin, dus die gaan eruit voordat de
+   tekst de XML in gaat. */
+const STUURTEKENS = new RegExp('[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]', 'g');
+function xmlTekst(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+    .replace(STUURTEKENS, '');
+}
+function kolomLetter(n){    /* 1 -> A, 27 -> AA */
+  let s = '';
+  while(n > 0){ const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); }
+  return s;
+}
+/* Een cel is een getal als de waarde er echt een is; anders inline tekst, zodat
+   er geen aparte sharedStrings-tabel nodig is. */
+function cel(kol, rij, waarde, stijl){
+  const r = kolomLetter(kol) + rij;
+  const s = stijl ? ' s="' + stijl + '"' : '';
+  if(waarde === '' || waarde == null) return '<c r="' + r + '"' + s + '/>';
+  if(typeof waarde === 'number' && isFinite(waarde)) return '<c r="' + r + '"' + s + '><v>' + waarde + '</v></c>';
+  return '<c r="' + r + '"' + s + ' t="inlineStr"><is><t xml:space="preserve">' + xmlTekst(waarde) + '</t></is></c>';
+}
+
+const XLSX_KOLOMMEN = ['Quantity', 'Product Code', 'Unit Price', 'Description', 'Type', 'Base',
+  'Length (mm)', 'Width (mm)', 'Height (mm)', 'Light aperture (mm)', 'Watt', 'Lumens', 'Optics',
+  'Kelvin colortemp', 'CRI (Ra)', 'Dimming', 'Emergency', 'Connector', 'RAL color housing',
+  'Air slot', 'Sensor', 'Remarks'];
+
+function rfqXlsx(){
+  const kop = rfqKop();
+  const rijen = [];
+  const T = function(v, s){ return {v:v, s:s}; };
+  const push = function(nr, cellen){
+    rijen.push('<row r="' + nr + '">' +
+      cellen.map(function(w, i){ return cel(i + 1, nr, w.v, w.s); }).join('') + '</row>');
+  };
+
+  push(1, [T('To:', 1), T(kop.to)]);
+  push(2, [T('Date:', 1), T(kop.date)]);
+  push(3, [T('Reference:', 1), T(kop.ref)]);
+  push(4, [T('Person in charge:', 1), T(kop.persoon)]);
+  push(6, XLSX_KOLOMMEN.map(function(h){ return T(h, 2); }));
+
+  P.posities.forEach(function(c, i){
+    const velden = rfqVelden(c);
+    const zoek = function(naam){ const r = velden.find(function(v){ return v[0] === naam; }); return r ? r[1] : ''; };
+    const num  = function(v){ const n = getal(v); return n == null ? '' : n; };
+    push(7 + i, [
+      T(num(rechts(c, 'aantal'))),
+      T(c.nieuw.productcode || ''),
+      T(c.nieuw.prijs || ''),
+      T(c.omschrijving || omschrijving(c)),
+      T(zoek('Type')), T(zoek('Base')),
+      T(num(zoek('Length (mm)'))), T(num(zoek('Width (mm)'))), T(num(zoek('Height (mm)'))),
+      T(zoek('Light aperture (mm)')),
+      T(num(zoek('Watt'))), T(num(zoek('Lumens'))),
+      T(zoek('Optics')), T(zoek('Kelvin colortemp')), T(zoek('CRI (Ra)')), T(zoek('Dimming')),
+      T(zoek('Emergency')), T(zoek('Connector')), T(zoek('RAL color housing')),
+      T(zoek('Air slot')), T(zoek('Sensor')), T(zoek('Remarks')),
+    ]);
+  });
+
+  const breedtes = [10, 18, 12, 52, 14, 20, 12, 12, 12, 18, 8, 10, 26, 16, 10, 20, 22, 30, 18, 10, 16, 30];
+  const cols = '<cols>' + breedtes.map(function(w, i){
+    return '<col min="' + (i+1) + '" max="' + (i+1) + '" width="' + w + '" customWidth="1"/>';
+  }).join('') + '</cols>';
+
+  const sheet = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+    cols + '<sheetData>' + rijen.join('') + '</sheetData></worksheet>';
+
+  /* Twee opmaakjes: vet voor de kopvelden en vet-op-lichtblauw voor de kolomkoppen. */
+  const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+    '<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font>' +
+    '<font><b/><sz val="11"/><name val="Calibri"/></font></fonts>' +
+    '<fills count="3"><fill><patternFill patternType="none"/></fill>' +
+    '<fill><patternFill patternType="gray125"/></fill>' +
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFE6EEF7"/><bgColor indexed="64"/></patternFill></fill></fills>' +
+    '<borders count="1"><border/></borders>' +
+    '<cellStyleXfs count="1"><xf/></cellStyleXfs>' +
+    '<cellXfs count="3"><xf xfId="0"/>' +
+    '<xf xfId="0" fontId="1" applyFont="1"/>' +
+    '<xf xfId="0" fontId="1" fillId="2" applyFont="1" applyFill="1"/></cellXfs>' +
+    '</styleSheet>';
+
+  const NS = 'http://schemas.openxmlformats.org/';
+  const bestanden = [
+    {naam:'[Content_Types].xml', data:utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Types xmlns="' + NS + 'package/2006/content-types">' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+      '<Default Extension="xml" ContentType="application/xml"/>' +
+      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+      '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+      '</Types>')},
+    {naam:'_rels/.rels', data:utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Relationships xmlns="' + NS + 'package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="' + NS + 'officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
+      '</Relationships>')},
+    {naam:'xl/workbook.xml', data:utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<workbook xmlns="' + NS + 'spreadsheetml/2006/main" xmlns:r="' + NS + 'officeDocument/2006/relationships">' +
+      '<sheets><sheet name="RFQ" sheetId="1" r:id="rId1"/></sheets></workbook>')},
+    {naam:'xl/_rels/workbook.xml.rels', data:utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Relationships xmlns="' + NS + 'package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="' + NS + 'officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
+      '<Relationship Id="rId2" Type="' + NS + 'officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
+      '</Relationships>')},
+    {naam:'xl/worksheets/sheet1.xml', data:utf8(sheet)},
+    {naam:'xl/styles.xml', data:utf8(styles)},
+  ];
+  return zipMaak(bestanden);
+}
+
+/* ======================= voorbeeld, downloaden en opslaan ======================= */
+
+let voorbeeldUrl = null, voorbeeldBestand = null;
+
+function download(naam, inhoud, type){
+  const url = URL.createObjectURL(new Blob([inhoud], {type:type}));
+  const a = document.createElement('a');
+  a.href = url; a.download = naam;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+}
+
+/* De blobs zijn megabytes groot, dus de oude URL gaat weg voordat er een nieuwe
+   komt en bij het sluiten van het venster. */
+function toonVoorbeeld(bytes, titel, naam){
+  sluitVoorbeeld();
+  voorbeeldBestand = {naam:naam, bytes:bytes};
+  voorbeeldUrl = URL.createObjectURL(new Blob([bytes], {type:'application/pdf'}));
+  $('voorbeeldTitel').textContent = titel;
+  $('voorbeeldFrame').src = voorbeeldUrl;
+  $('voorbeeldBg').classList.add('aan');
+}
+function sluitVoorbeeld(){
+  $('voorbeeldBg').classList.remove('aan');
+  $('voorbeeldFrame').removeAttribute('src');
+  if(voorbeeldUrl){ URL.revokeObjectURL(voorbeeldUrl); voorbeeldUrl = null; }
+}
+
+function veiligeNaam(s){
+  return String(s || '').trim().toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+function projectNaamDeel(){
+  return veiligeNaam([P.project.nr, P.project.naam].filter(Boolean).join(' ')) || 'bandrasterproject';
+}
+
+async function metWachten(knop, werk){
+  const oud = knop.textContent;
+  knop.disabled = true; knop.textContent = 'bezig…';
+  try{ await werk(); }
+  catch(err){
+    console.error(err);
+    alert('Er ging iets mis: ' + (err && err.message ? err.message : err));
+  }
+  finally{ knop.disabled = false; knop.textContent = oud; }
+}
+
+function slaProjectOp(){
+  const payload = {versie:1, P:JSON.parse(JSON.stringify(P))};
+  const json = JSON.stringify(payload).replace(/<\/script/gi, '<\\/script');
+
+  /* document.baseURI is bij de originele tool gewoon zijn eigen map; bij een al
+     eerder opgeslagen projectbestand maakt de <base href> die er al in zit baseURI
+     gelijk aan de OORSPRONKELIJKE installatiemap, ongeacht waar dit bestand nu op
+     schijf staat - opnieuw opslaan geeft dus geen padverschuiving. */
+  const baseHref = new URL('.', document.baseURI).href;
+
+  const dataMarker = /\/\*__PROJECT_DATA_START__\*\/[\s\S]*?\/\*__PROJECT_DATA_END__\*\//;
+  const baseMarker = /<!--__BASE_HREF__-->|<base href="[^"]*">/;
+  let html = document.documentElement.outerHTML;
+  if(!dataMarker.test(html) || !baseMarker.test(html)){
+    alert('Opslaan mislukt: de opslag-plekken zijn niet gevonden in de broncode.');
+    return;
+  }
+  html = html.replace(dataMarker, '/*__PROJECT_DATA_START__*/' + json + '/*__PROJECT_DATA_END__*/');
+  html = html.replace(baseMarker, '<base href="' + baseHref.replace(/"/g, '&quot;') + '">');
+  html = '<!doctype html>\n' + html;   /* outerHTML bevat de <!DOCTYPE> zelf niet */
+
+  download(projectNaamDeel() + '-bandrasters.html', html, 'text/html');
+}
+
+/* ======================= koppelen ======================= */
+
+function bindProject(){
+  const koppel = function(id, sleutel, getal){
+    const veld = $(id);
+    veld.value = P.project[sleutel] == null ? '' : P.project[sleutel];
+    veld.addEventListener('input', function(){ P.project[sleutel] = veld.value; ververs(); });
+  };
+  ['pNr:nr', 'pNaam:naam', 'pInst:inst', 'pDatum:datum', 'pContact:contact',
+   'pFabrikant:fabrikant', 'pOpm:opm'].forEach(function(paar){
+    const d = paar.split(':'); koppel(d[0], d[1]);
+  });
+
+  const type = $('pType');
+  LIJST.projecttype.forEach(function(t){ type.appendChild(new Option(t, t)); });
+  type.value = P.project.type || 'Renovatie';
+  type.addEventListener('change', function(){ P.project.type = type.value; });
+
+  /* De rekeninstellingen sturen het vermogen en de lichtstroom van het
+     alternatief aan, dus na een wijziging moet het hele raster opnieuw: de
+     berekende vakken en het figuur hangen eraan. */
+  [['pEff', 'efficacy'], ['pMaxW', 'maxWatt']].forEach(function(paar){
+    const veld = $(paar[0]);
+    veld.value = P.instellingen[paar[1]];
+    veld.addEventListener('input', function(){
+      P.instellingen[paar[1]] = veld.value;
+      ververs();
+    });
+  });
+
+  const oms = $('cOmschrijving');
+  oms.value = P.concept.omschrijving || '';
+  oms.addEventListener('input', function(){ P.concept.omschrijving = oms.value; });
+}
+
+$('knNieuw').addEventListener('click', nieuwePositie);
+$('knOpslaan').addEventListener('click', slaProjectOp);
+$('knRfqToevoegen').addEventListener('click', naarRfq);
+$('knSluitVoorbeeld').addEventListener('click', sluitVoorbeeld);
+$('voorbeeldBg').addEventListener('click', function(e){ if(e.target === $('voorbeeldBg')) sluitVoorbeeld(); });
+$('knDownload').addEventListener('click', function(){
+  if(voorbeeldBestand) download(voorbeeldBestand.naam, voorbeeldBestand.bytes, 'application/pdf');
+});
+
+$('knProductblad').addEventListener('click', function(){
+  metWachten($('knProductblad'), async function(){
+    const c = P.concept;
+    const mist = ontbreektNieuw(c);
+    if(mist.length && !confirm('Het alternatief is nog niet compleet:\n\n' + mist.join(', ') +
+        '\n\nToch een productblad maken?')) return;
+    const bytes = await bouwProductblad(c);
+    toonVoorbeeld(bytes, 'Technisch productblad',
+      'productblad-' + (veiligeNaam(basisNaam(c)) || 'bandraster') + '.pdf');
+  });
+});
+
+$('knRfqPdf').addEventListener('click', function(){
+  metWachten($('knRfqPdf'), async function(){
+    if(!P.posities.length){ alert('De RFQ-lijst is nog leeg.'); return; }
+    const bytes = await bouwRfqPdf();
+    toonVoorbeeld(bytes, 'RFQ-lijst', 'rfq-' + projectNaamDeel() + '.pdf');
+  });
+});
+
+$('knRfqXlsx').addEventListener('click', function(){
+  if(!P.posities.length){ alert('De RFQ-lijst is nog leeg.'); return; }
+  download('rfq-' + projectNaamDeel() + '.xlsx', rfqXlsx(),
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+});
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && $('voorbeeldBg').classList.contains('aan')) sluitVoorbeeld();
+});
+
+/* ======================= start ======================= */
+bindProject();
+tekenAlles();
+</script>
 </body>
 </html>
