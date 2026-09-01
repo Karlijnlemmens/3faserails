@@ -879,7 +879,7 @@ async function buildArmaturenboekPdf(){
 
     boek.forEach(b=>{
       const codes=[...new Set(b.rijen.map(r=>(r.s.aanduiding||'').trim()).filter(Boolean))];
-      bookGroups.push({id:b.g.id, code:codes.join(' / '), kleur:b.g.stempelKleur||'#FFFFFF', special:!!b.g.special});
+      bookGroups.push({id:b.g.id, code:codes, kleur:b.g.stempelKleur||'#FFFFFF', special:!!b.g.special});
     });
   }
 
@@ -910,21 +910,28 @@ async function assembleArmaturenboekPdf(){
   }catch(err){
     stempelFont = await finalDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
   }
-  function stempelCode(pagina, tekst, kleur, laag){
-    if(!pagina || !tekst) return;
+  function stempelCode(pagina, codes, kleur, laag){
+    if(!pagina || !codes || !codes.length) return;
     /* Bij een zelf-geüploade Special-presenter is de koplay-out onbekend en
        kan de stempel over het merk/logo van de leverancier vallen; die komt
-       daarom lager te staan (47pt i.p.v. 17pt vanaf de bovenrand). */
-    const korps=11, marge=32, basislijn = laag ? 47 : 17;
+       daarom lager te staan. Bij de gewone presenters is 27pt gemeten als het
+       beste gemiddelde voor de bovenkant van het Pragmalux-logo (niet elke
+       presenter-PDF heeft het logo op exact dezelfde hoogte staan). */
+    const korps=11, marge=32+113.4 /* +4cm naar links t.o.v. de rechtermarge */,
+          regelhoogte=13, basislijn = laag ? 47 : 27;
     const {width, height} = pagina.getSize();
-    const tw = stempelFont.widthOfTextAtSize(tekst, korps);
     const c = kleur.charAt(0)==='#'
       ? PDFLib.rgb(parseInt(kleur.substr(1,2),16)/255, parseInt(kleur.substr(3,2),16)/255, parseInt(kleur.substr(5,2),16)/255)
       : PDFLib.rgb(1,1,1);
-    pagina.drawText(tekst, {x: width-marge-tw, y: height-basislijn-korps*0.78,
-      size: korps, font: stempelFont, color: c});
+    /* Meerdere bestekcodes voor hetzelfde armatuurtype komen onder elkaar te
+       staan, elk apart rechts uitgelijnd, i.p.v. samengevoegd op één regel. */
+    codes.forEach((tekst, i)=>{
+      const tw = stempelFont.widthOfTextAtSize(tekst, korps);
+      pagina.drawText(tekst, {x: width-marge-tw, y: height-basislijn-korps*0.78-i*regelhoogte,
+        size: korps, font: stempelFont, color: c});
+    });
   }
-  const appendPresenter = async(id, code, kleur, laag)=>{
+  const appendPresenter = async(id, codes, kleur, laag)=>{
     const b64 = await presenterData(id);
     if(!b64){ console.warn('Presenter "'+id+'" is nog niet toegevoegd (presenters/'+id+'.js) — overgeslagen.'); return 0; }
     try{
@@ -932,7 +939,7 @@ async function assembleArmaturenboekPdf(){
       const idx = d.getPageIndices();
       const pgs = await finalDoc.copyPages(d, idx);
       pgs.forEach(p=>finalDoc.addPage(p));
-      stempelCode(pgs[0], code, kleur||'#FFFFFF', laag);
+      stempelCode(pgs[0], codes, kleur||'#FFFFFF', laag);
       return pgs.length;
     }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); return 0; }
   };
