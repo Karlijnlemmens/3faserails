@@ -436,13 +436,20 @@ function isSpecial(s){
 /* De presenter van een Special-rij wordt niet gedeeld met andere rijen (elke
    Special is een eenmalig armatuur), dus krijgt hij een eigen id per slot. */
 function specialPresenterId(armId){ return 'sp'+armId; }
+/* Special sluit de gewone naam-herkenning niet uit: zolang er geen eigen PDF
+   is geüpload, valt een Special-rij terug op matchArmGroep(), precies als een
+   gewone rij - zo krijgt een Special met een herkenbare naam (bv. "Bandraster
+   ...") gewoon de bijbehorende standaardpresenter. Zodra er wél een PDF is
+   geüpload wint die altijd, ook als de naam toevallig een type raakt. */
 function armGroepVan(s, armId){
   if(!s) return null;
   if(isSpecial(s)){
     if(!armId) return null;
     const id = specialPresenterId(armId);
-    if(!presenterAanwezig(id)) return null;
-    return {id, naam:(s.name&&s.name.trim()) || ('Special '+armId.replace('arm','')), zoektermen:[], special:true};
+    if(presenterAanwezig(id)){
+      return {id, naam:(s.name&&s.name.trim()) || ('Special '+armId.replace('arm','')), zoektermen:[], special:true};
+    }
+    return matchArmGroep(s.name);
   }
   if(s.groep==='-') return null;
   if(s.groep) return ARM_GROEPEN.find(g=>g.id===s.groep) || null;
@@ -551,7 +558,7 @@ async function buildArmaturenboekPdf(){
 
     boek.forEach(b=>{
       const codes=[...new Set(b.rijen.map(r=>(r.s.aanduiding||'').trim()).filter(Boolean))];
-      bookGroups.push({id:b.g.id, code:codes.join(' / '), kleur:b.g.stempelKleur||'#FFFFFF'});
+      bookGroups.push({id:b.g.id, code:codes.join(' / '), kleur:b.g.stempelKleur||'#FFFFFF', special:!!b.g.special});
     });
   }
 
@@ -582,9 +589,12 @@ async function assembleArmaturenboekPdf(){
   }catch(err){
     stempelFont = await finalDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
   }
-  function stempelCode(pagina, tekst, kleur){
+  function stempelCode(pagina, tekst, kleur, laag){
     if(!pagina || !tekst) return;
-    const korps=11, marge=32, basislijn=17;
+    /* Bij een zelf-geüploade Special-presenter is de koplay-out onbekend en
+       kan de stempel over het merk/logo van de leverancier vallen; die komt
+       daarom lager te staan (47pt i.p.v. 17pt vanaf de bovenrand). */
+    const korps=11, marge=32, basislijn = laag ? 47 : 17;
     const {width, height} = pagina.getSize();
     const tw = stempelFont.widthOfTextAtSize(tekst, korps);
     const c = kleur.charAt(0)==='#'
@@ -593,7 +603,7 @@ async function assembleArmaturenboekPdf(){
     pagina.drawText(tekst, {x: width-marge-tw, y: height-basislijn-korps*0.78,
       size: korps, font: stempelFont, color: c});
   }
-  const appendPresenter = async(id, code, kleur)=>{
+  const appendPresenter = async(id, code, kleur, laag)=>{
     const b64 = await presenterData(id);
     if(!b64){ console.warn('Presenter "'+id+'" is nog niet toegevoegd (presenters/'+id+'.js) — overgeslagen.'); return 0; }
     try{
@@ -601,14 +611,14 @@ async function assembleArmaturenboekPdf(){
       const idx = d.getPageIndices();
       const pgs = await finalDoc.copyPages(d, idx);
       pgs.forEach(p=>finalDoc.addPage(p));
-      stempelCode(pgs[0], code, kleur||'#FFFFFF');
+      stempelCode(pgs[0], code, kleur||'#FFFFFF', laag);
       return pgs.length;
     }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); return 0; }
   };
 
   await copyRange(ownDoc, 0, ownDoc.getPageCount());
   let presenterTotaal = 0;
-  for(const g of bookGroups) presenterTotaal += await appendPresenter(g.id, g.code, g.kleur);
+  for(const g of bookGroups) presenterTotaal += await appendPresenter(g.id, g.code, g.kleur, g.special);
   presenterTotaal += await appendPresenter('achterpaginas'); /* AB Achterpaginas, helemaal achteraan */
 
   const eind = await finalDoc.save();
@@ -765,8 +775,10 @@ function maakArmRij(a){
   const nameInp=document.createElement('input'); nameInp.type='text'; nameInp.className='c2-textinp c2-armnaam';
   nameInp.placeholder='Volledige naam (bijv. Punto 15W wit)'; nameInp.value=s.name||'';
   const badge=document.createElement('span'); badge.className='c2-armrecog';
-  /* Special: geen standaard type, maar een zelf geüploade PDF (zie specialWrap
-     hieronder). Zolang die er niet is telt de rij als 'geen presenter'. */
+  /* Special: primair een zelf geüploade PDF (zie specialWrap hieronder), maar
+     zolang die er niet is valt de rij terug op de gewone naam-herkenning
+     (zie armGroepVan) - vandaar dat paintBadge() ook in Special-modus een
+     herkend type toont. */
   const specialWrap=document.createElement('span'); specialWrap.className='c2-armspecial';
   const specialFileInp=document.createElement('input'); specialFileInp.type='file'; specialFileInp.accept='application/pdf';
   specialFileInp.style.display='none';
@@ -807,7 +819,22 @@ function maakArmRij(a){
   }
   specialWrap.appendChild(specialBtn); specialWrap.appendChild(specialX); specialWrap.appendChild(specialFileInp);
   function paintBadge(){
-    if(isSpecial(s)){ badge.textContent=''; badge.className='c2-armrecog'; badge.title=''; return; }
+    if(isSpecial(s)){
+      /* g.special is alleen waar voor de synthetische upload-groep (er is dan
+         echt een PDF geüpload) - in dat geval verdwijnt de naam-herkenning uit
+         dit badge, want de special-knop hiernaast toont dan al "PDF geladen". */
+      const g = armGroepVan(s, a.id);
+      if(g && !g.special){
+        badge.textContent = (presenterAanwezig(g.id)?'✓ ':'⚠ ')+g.naam;
+        badge.className = 'c2-armrecog '+(presenterAanwezig(g.id)?'ok':'warn');
+        badge.title = presenterAanwezig(g.id)
+          ? 'Presenter '+g.naam+' wordt in het armaturenboek opgenomen (herkend uit de naam). Upload hiernaast een eigen PDF om dit te vervangen.'
+          : 'Type herkend uit de naam, maar de presenter-PDF van '+g.naam+' ontbreekt nog in presenters-data.js.';
+      } else {
+        badge.textContent=''; badge.className='c2-armrecog'; badge.title='';
+      }
+      return;
+    }
     const g = armGroepVan(s, a.id);
     if(g){
       badge.textContent = (presenterAanwezig(g.id)?'✓ ':'⚠ ')+g.naam;
