@@ -192,14 +192,18 @@
 
       <div class="cfg-block">
         <h4>Soort opdracht</h4>
-        <p class="hint">Bij een vergelijking komt de briefingpagina "Introductie" direct achter het voorblad; bij een lichtberekening blijft die weg.</p>
+        <p class="hint">Bepaalt de tekst van de briefingpagina "Introductie", die direct achter het voorblad komt.</p>
         <div class="ab-keuze">
           <label><input type="radio" name="abSoort" value="lichtberekening" id="abSoortLicht"><span>Lichtberekening</span></label>
           <label><input type="radio" name="abSoort" value="vergelijking" id="abSoortVerg"><span>Vergelijking</span></label>
         </div>
-        <div id="abBriefingVelden" style="margin-top:12px; display:none;">
-          <p class="hint" style="margin-bottom:6px;">Documentnamen waar de vergelijking op is gebaseerd — één per regel. Ze komen op de briefingpagina te staan; de projectnaam wordt daar uit Projectgegevens overgenomen.</p>
-          <textarea id="abDocumenten" class="c2-textarea" placeholder="bijv. Bestek E-installaties 2024-11-03&#10;Tekening E-01 t/m E-04"></textarea>
+        <div style="margin-top:12px;">
+          <p class="hint" style="margin-bottom:6px;">Documenten (meestal het bestek) waar de opdracht op steunt — één per regel. De projectnaam wordt uit Projectgegevens overgenomen.</p>
+          <textarea id="abDocumenten" class="c2-textarea" placeholder="bijv. Bestek E-installaties 2024-11-03"></textarea>
+        </div>
+        <div id="abTekeningenVeld" style="margin-top:12px; display:none;">
+          <p class="hint" style="margin-bottom:6px;">Technische tekeningen waar het lichtontwerp op is gebaseerd — één per regel.</p>
+          <textarea id="abTekeningen" class="c2-textarea" placeholder="bijv. Tekening E-01 t/m E-04"></textarea>
         </div>
       </div>
 
@@ -271,11 +275,12 @@ const $=id=>document.getElementById(id);
 /* Wordt bij "Project opslaan" (zie slaProjectOp()) volgeschreven met het huidige
    project - blijft null in de originele tool, net als bij index.html. */
 const OPGESLAGEN_PROJECT = /*__PROJECT_DATA_START__*/null/*__PROJECT_DATA_END__*/;
-/* soort: 'lichtberekening' of 'vergelijking'. Bij een vergelijking komt de
-   briefingpagina achter het voorblad; documenten is dan de opsomming van stukken
-   waar die vergelijking op steunt, een per regel. */
+/* soort: 'lichtberekening' of 'vergelijking'. Allebei krijgen de briefingpagina
+   achter het voorblad, met een eigen tekst. documenten is het bestek (komt in beide
+   teksten voor), tekeningen zijn de technische tekeningen (alleen in die van de
+   lichtberekening). Een naam per regel. */
 const st = { proj:'', projNr:'', installateur:'', datum:'', soort:'lichtberekening',
-             documenten:'', armaturen:{} };
+             documenten:'', tekeningen:'', armaturen:{} };
 
 /* ---------- briefingpagina "Introductie" ----------
    Maten uit het aangeleverde ontwerp (AB Briefing vergelijking), gemeten in plaats
@@ -293,15 +298,22 @@ const BRIEF = {
      rechtsonder even ver van de rechter- en onderrand. */
   quoteInX:20.6, quoteInY:9, quoteUitX:43, quoteUitY:36,
   quoteH:25.5, quoteBoven:10.9, quoteOnderL:-10.5, quoteOnderR:6.1, quoteGat:21.8,
-  naBlok:17.2,
-  x:38, breedte:507, pt:8.5, regel:10.3, naAlinea:10.3,
-  naKop:25.7, naLeveren:11.9, naDisclaimer:9.7,
+  x:38, breedte:507, pt:8.5, disclaimerPt:8,
   bulletX:56.3, bulletTekstX:74.7, bulletBreedte:470,
-  disclaimerPt:8,
+  /* Elke afstand is die tot de BOVENKANT van de vorige regel, precies zoals in het
+     ontwerp gemeten - zo staan de getallen er rechtstreeks in en hoeft er nergens
+     iets bij of af geteld te worden. */
+  gaten:{
+    regel:10.3,          /* volgende regel binnen dezelfde alinea */
+    naBlok:17.2,         /* onderkant grijs blok -> "Wat wij bieden:" */
+    naKop:25.7,          /* een kop -> de eerste regel eronder */
+    naWit:20.7,          /* witregel tussen twee alinea's */
+    naLeveren:11.9,      /* "Wij leveren:" -> de eerste opsommingsregel */
+    naDisclaimer:9.7,    /* "DISCLAIMER:" -> de eerste regel eronder */
+  },
 };
-
-/* De vetgedrukte stukken staan als eigen segment in de tekst; rijkeRegels() breekt
-   er dwars doorheen af. */
+/* De vetgedrukte stukken staan als eigen segment; rijkeRegels() breekt er dwars
+   doorheen af, zodat ze over een regelovergang heen heel blijven. */
 const BRIEF_DISCLAIMER = [
   [{t:'Deze propositie is opgesteld op basis van de door de opdrachtgever aangeleverde documentatie '
      +'en is bedoeld als '},
@@ -321,6 +333,89 @@ const BRIEF_DISCLAIMER = [
   [{t:'Wij aanvaarden geen verantwoordelijkheid voor eventuele gevolgen van de gemaakte keuzes of voor '
      +'de aanbieding richting de opdrachtgever op basis van deze armaturenvergelijking.'}],
 ];
+
+function briefRegels(tekst){
+  return String(tekst||'').split(/\r?\n/).map(r=>r.trim()).filter(Boolean);
+}
+/* "a", "a en b", "a, b en c" - voor de plek waar de documenten midden in een zin staan. */
+function briefOpsomming(lijst){
+  if(lijst.length<=1) return lijst[0]||'';
+  return lijst.slice(0,-1).join(', ')+' en '+lijst[lijst.length-1];
+}
+
+/* Welke velden van de briefingpagina nog leeg zijn. Blijven ze leeg, dan komt de
+   plaatshouder uit het ontwerp in de PDF - prima zolang je bezig bent, niet in een
+   boek dat de deur uit gaat. */
+function briefingOpenVelden(){
+  const open=[];
+  if(!(st.proj||'').trim()) open.push('projectnaam');
+  if(!briefRegels(st.documenten).length) open.push('documenten');
+  if(st.soort==='lichtberekening' && !briefRegels(st.tekeningen).length) open.push('tekeningen');
+  return open;
+}
+
+/* De inhoud van de briefingpagina per soort opdracht; de opmaak is voor beide
+   dezelfde. documenten is het bestek, tekeningen zijn de technische tekeningen.
+   Staan er meerdere in een lijst, dan wordt "het document" "de documenten" en
+   "de tekening" "de tekeningen" - anders loopt de zin niet.
+
+   Elk blok noemt zelf de afstand tot de vorige regel (zie BRIEF.gaten). Zonder
+   ingevulde waarden blijven de plaatshouders uit het ontwerp staan. */
+function briefInhoud(soort, proj, documenten, tekeningen){
+  const naam = (proj||'').trim() || '[projectnaam]';
+  const docs = documenten.length ? documenten : ['[naam documenten]'];
+  const tek  = tekeningen.length ? tekeningen : ['[naam tekeningen]'];
+  const hetDocument = docs.length>1 ? 'de documenten' : 'het document';
+  const deTekening  = tek.length>1  ? 'de tekeningen' : 'de tekening';
+
+  if(soort === 'lichtberekening'){
+    return {
+      vraag:[
+        {t:'Het opstellen van een lichtplan voor '},
+        {t:naam+'.', v:true},
+        {t:' Dit plan dient gebaseerd te zijn op de uitgangspunten zoals vastgelegd in '+hetDocument+':'},
+      ],
+      vraagLijst: docs,
+      blokken:[
+        {k:'kop',    t:'Wat wij bieden:',              voor:'naBlok'},
+        {k:'plat',   t:'Op basis van '+deTekening+':', voor:'naKop'},
+        {k:'regels', lijst:tek,                        voor:'regel'},
+        {k:'alinea', voor:'regel', s:[
+          {t:'ontwikkelen wij een lichtconcept dat aansluit op het gevraagde lichtplan. Dit concept is '
+            +'uitgewerkt volgens de uitgangspunten zoals omschreven in '+hetDocument+' '},
+          {t:briefOpsomming(docs), v:true},
+          {t:', en voldoet aan de actuele norm NEN-EN 12464-1:2021.'}]},
+        {k:'plat',   t:'Wij leveren:',                 voor:'naWit'},
+        {k:'bullets', voor:'naLeveren', items:[
+          'Een voorstel met verschillende armaturen, afgestemd op de diverse toepassingen',
+          'Een lichtontwerp dat voldoet aan de lichtbehoeften zoals beschreven in de uitgangspunten',
+          'Ondersteuning van dit voorstel met lichtberekeningen en een gedetailleerde armaturenlijst']},
+      ],
+    };
+  }
+
+  /* vergelijking */
+  return {
+    vraag:[
+      {t:'Het opstellen van een verlichtingsarmaturen/offerte voor '},
+      {t:naam+'.', v:true},
+      {t:' Dit plan dient gebaseerd te zijn op de uitgangspunten zoals vastgelegd in '+hetDocument+':'},
+    ],
+    vraagLijst: docs,
+    blokken:[
+      {k:'kop',    t:'Wat wij bieden:', voor:'naBlok'},
+      {k:'alinea', voor:'naKop', s:[
+        {t:'Op basis van bovengenoemde documentatie stellen wij een armaturenpropositie op die '
+          +'aansluit bij de gevraagde uitgangspunten en het offertetraject.'}]},
+      {k:'plat',   t:'Wij leveren:',    voor:'naWit'},
+      {k:'bullets', voor:'naLeveren', items:[
+        'Een voorstel met verschillende armaturen en mogelijke alternatieven op basis van de '
+        +'beschikbare technische en productinformatie']},
+      {k:'kopklein', t:'DISCLAIMER:',  voor:'naWit'},
+    ].concat(BRIEF_DISCLAIMER.map((deel,i)=>
+      ({k:'alinea', s:deel, voor: i ? 'naWit' : 'naDisclaimer'}))),
+  };
+}
 
 /* ---------- armaturen: 12 vaste slots, zelfde opzet als de Railconfigurator ---------- */
 const ARMATUREN = [
@@ -592,10 +687,11 @@ async function buildArmaturenboekPdf(){
 
   omslag({naam:st.proj, nr:st.projNr, inst:st.installateur, datum:datumNL(st.datum)});
 
-  /* --- briefingpagina, alleen bij een vergelijking ---
-     Natekening van het aangeleverde ontwerp; zie de BRIEF-tabel bovenaan. De blauwe
-     kopbalk en de schuine grijze voet komen uit pdf-huisstijl.js, zodat de pagina
-     bij de rest van het boek hoort. */
+  /* --- briefingpagina "Introductie", direct achter het voorblad ---
+     Natekening van het aangeleverde ontwerp; zie de BRIEF-tabel bovenaan voor de
+     maten en briefInhoud() voor de tekst, die per soort opdracht verschilt. De
+     blauwe kopbalk en de schuine grijze voet komen uit pdf-huisstijl.js, zodat de
+     pagina bij de rest van het boek hoort. */
 
   /* Woorden met hun vet-vlag; een woord dat zonder spatie op het vorige volgt (de
      punt achter een vetgedrukte projectnaam) blijft eraan vastzitten. */
@@ -647,8 +743,11 @@ async function buildArmaturenboekPdf(){
     });
   }
 
-  if(st.soort === 'vergelijking'){
-    const B = BRIEF;
+  {
+    const B = BRIEF, G = B.gaten;
+    const inhoud = briefInhoud(st.soort, st.proj,
+      briefRegels(st.documenten), briefRegels(st.tekeningen));
+
     zetSectie('Introductie');
     beginPage(true);
     paginaKop('Introductie',
@@ -656,17 +755,10 @@ async function buildArmaturenboekPdf(){
     text(B.kopX, B.kopY, B.kopPt, 'Briefing', {bold:true, color:C.hoofd});
 
     /* Eerst opmeten: staan er meer documentnamen, dan groeit het grijze vlak mee. */
-    const documenten = String(st.documenten||'').split(/\r?\n/).map(r=>r.trim()).filter(Boolean);
-    const vraagRegels = rijkeRegels([
-      {t:'Het opstellen van een verlichtingsarmaturen/offerte voor '},
-      {t:((st.proj||'').trim() || '[projectnaam]') + '.', v:true},
-      {t:' Dit plan dient gebaseerd te zijn op de uitgangspunten zoals vastgelegd in het document:'},
-    ], B.blokBreedte, B.pt);
-    const docRegels = (documenten.length ? documenten : ['[naam documenten]'])
-      .reduce((uit,d)=> uit.concat(rijkeRegels([{t:d, v:true}], B.blokBreedte, B.pt)), []);
-    const regels = vraagRegels.concat(docRegels);
+    const blokRegels = rijkeRegels(inhoud.vraag, B.blokBreedte, B.pt).concat(
+      inhoud.vraagLijst.reduce((uit,d)=> uit.concat(rijkeRegels([{t:d, v:true}], B.blokBreedte, B.pt)), []));
     const blokH = Math.max(B.blok.h,
-      B.vraagTop + B.naVraag + (regels.length-1)*B.blokRegel + B.pt + B.blokOnder);
+      B.vraagTop + B.naVraag + (blokRegels.length-1)*B.blokRegel + B.pt + B.blokOnder);
 
     rect(B.blok.x, B.blok.y, B.blok.b, blokH, C.voet);
     aanhalingsteken(B.blok.x + B.quoteInX, B.blok.y + B.quoteInY);
@@ -674,37 +766,40 @@ async function buildArmaturenboekPdf(){
 
     const blokX = B.blok.x + B.tekstIn;
     text(blokX, B.blok.y + B.vraagTop, B.pt, 'De vraag:', {bold:true, color:C.tekst});
-    regels.forEach((r,i)=> tekenRegel(r, blokX, B.blok.y + B.vraagTop + B.naVraag + i*B.blokRegel, B.pt));
+    blokRegels.forEach((r,i)=>
+      tekenRegel(r, blokX, B.blok.y + B.vraagTop + B.naVraag + i*B.blokRegel, B.pt));
 
-    /* --- alles onder het blok --- */
-    y = B.blok.y + blokH + B.naBlok;
-    const alinea = (segmenten, x, breedte)=>{
-      rijkeRegels(segmenten, breedte, B.pt).forEach(r=>{
-        need(B.regel); tekenRegel(r, x, y, B.pt); y += B.regel;
+    /* --- alles onder het blok ---
+       y wijst steeds naar de bovenkant van de laatst getekende regel; naar() zet hem
+       op de volgende plek. De onderrand van het blok geldt als "vorige regel", zodat
+       ook de eerste afstand gewoon uit BRIEF.gaten komt. */
+    y = B.blok.y + blokH;
+    const naar = (gat)=>{ y += G[gat]; need(G.regel); };
+    const schrijf = (segmenten, x, breedte, pt)=>{
+      rijkeRegels(segmenten, breedte, pt||B.pt).forEach((r,i)=>{
+        if(i){ y += G.regel; need(G.regel); }
+        tekenRegel(r, x, y, pt||B.pt);
       });
     };
 
-    text(B.x, y, B.pt, 'Wat wij bieden:', {bold:true, color:C.tekst});
-    y += B.naKop;
-    alinea([{t:'Op basis van bovengenoemde documentatie stellen wij een armaturenpropositie op die '
-             +'aansluit bij de gevraagde uitgangspunten en het offertetraject.'}], B.x, B.breedte);
-
-    y += B.naAlinea;
-    text(B.x, y, B.pt, 'Wij leveren:', {color:C.tekst});
-    y += B.naLeveren;
-    /* De opsommingsstip als vorm: pdfTxt() kent het bullet-teken niet en zou er een
-       vraagteken van maken. Een stip tekenen scheelt een uitbreiding van de
-       gedeelde tekstlaag voor dit ene teken. */
-    circle(B.bulletX + 2.2, y + B.pt*0.45, 1.5, C.tekst);
-    alinea([{t:'Een voorstel met verschillende armaturen en mogelijke alternatieven op basis van de '
-             +'beschikbare technische en productinformatie'}], B.bulletTekstX, B.bulletBreedte);
-
-    y += B.naAlinea;
-    text(B.x, y, B.disclaimerPt, 'DISCLAIMER:', {bold:true, color:C.tekst});
-    y += B.naDisclaimer;
-    BRIEF_DISCLAIMER.forEach((deel, i)=>{
-      if(i) y += B.naAlinea;
-      alinea(deel, B.x, B.breedte);
+    inhoud.blokken.forEach(blok=>{
+      if(blok.k==='kop'){       naar(blok.voor); text(B.x, y, B.pt, blok.t, {bold:true, color:C.tekst}); }
+      else if(blok.k==='kopklein'){ naar(blok.voor); text(B.x, y, B.disclaimerPt, blok.t, {bold:true, color:C.tekst}); }
+      else if(blok.k==='plat'){ naar(blok.voor); text(B.x, y, B.pt, blok.t, {color:C.tekst}); }
+      else if(blok.k==='alinea'){ naar(blok.voor); schrijf(blok.s, B.x, B.breedte); }
+      else if(blok.k==='regels'){
+        blok.lijst.forEach((r,i)=>{ naar(i ? 'regel' : blok.voor); schrijf([{t:r, v:true}], B.x, B.breedte); });
+      }
+      else if(blok.k==='bullets'){
+        blok.items.forEach((it,i)=>{
+          naar(i ? 'regel' : blok.voor);
+          /* De opsommingsstip als vorm: pdfTxt() kent het bullet-teken niet en zou er
+             een vraagteken van maken. Een stip tekenen scheelt een uitbreiding van de
+             gedeelde tekstlaag voor dit ene teken. */
+          circle(B.bulletX + 2.2, y + B.pt*0.45, 1.5, C.tekst);
+          schrijf([{t:it}], B.bulletTekstX, B.bulletBreedte);
+        });
+      }
     });
     flush();
   }
@@ -869,6 +964,11 @@ async function maakPdfBytes(){
       + zonderPresenter.map(b=>'  • '+b.g.naam+'  (presenters/'+b.g.id+'.js)').join('\n')
       + '\nHet tabblad komt wel in het boek, de productpagina’s ontbreken.\n'
       + 'Toevoegen: zet de PDF in presenters-bron/ en draai "node tools/maak-presenters.mjs".');
+  }
+  const briefingOpen = briefingOpenVelden();
+  if(briefingOpen.length){
+    meldingen.push('Op de briefingpagina is nog niet ingevuld: '+briefingOpen.join(', ')+'.\n'
+      + 'Daar komt nu de plaatshouder uit het ontwerp te staan ([projectnaam], [naam documenten]).');
   }
   if(meldingen.length) alert(meldingen.join('\n\n')+'\n\nDe PDF wordt verder gewoon gegenereerd.');
   try{ return await assembleArmaturenboekPdf(); }
@@ -1120,6 +1220,13 @@ function updateSummary(){
     w.textContent = specialZonderPdf.length+' special-armatu(u)r(en) missen nog een geüploade PDF.';
     warns.appendChild(w);
   }
+  const briefingOpen = briefingOpenVelden();
+  if(briefingOpen.length){
+    const w=document.createElement('div'); w.className='cfg-warn';
+    w.textContent = 'Briefingpagina: '+briefingOpen.join(', ')+' nog niet ingevuld — daar komt nu de '
+      +'plaatshouder uit het ontwerp te staan.';
+    warns.appendChild(w);
+  }
 }
 
 /* ---------- init ---------- */
@@ -1161,20 +1268,22 @@ buildArmList();
 updateSummary();
 $('abProj').value=st.proj; $('abProjNr').value=st.projNr; $('abInst').value=st.installateur; $('abDatum').value=st.datum;
 
-/* De documentnamen horen alleen bij een vergelijking; bij een lichtberekening is er
-   geen briefingpagina om ze op te zetten, dus verdwijnt het veld. Wat erin staat
-   blijft wel bewaard, zodat heen en weer schakelen niets weggooit. */
+/* De documenten komen in beide teksten voor; de tekeningen alleen in die van de
+   lichtberekening, dus dat veld verdwijnt bij een vergelijking. Wat erin staat blijft
+   bewaard, zodat heen en weer schakelen niets weggooit. */
 function toonBriefingVelden(){
-  $('abBriefingVelden').style.display = st.soort === 'vergelijking' ? '' : 'none';
+  $('abTekeningenVeld').style.display = st.soort === 'lichtberekening' ? '' : 'none';
 }
 $('abSoortLicht').checked = st.soort !== 'vergelijking';
 $('abSoortVerg').checked  = st.soort === 'vergelijking';
 $('abDocumenten').value = st.documenten || '';
+$('abTekeningen').value = st.tekeningen || '';
 toonBriefingVelden();
 [['abSoortLicht','lichtberekening'], ['abSoortVerg','vergelijking']].forEach(([id, waarde])=>{
   $(id).addEventListener('change', ()=>{ if($(id).checked){ st.soort = waarde; toonBriefingVelden(); } });
 });
 $('abDocumenten').addEventListener('input', e=>{ st.documenten = e.target.value; });
+$('abTekeningen').addEventListener('input', e=>{ st.tekeningen = e.target.value; });
 $('abProj').addEventListener('input', e=>{ st.proj=e.target.value; updateSummary(); });
 $('abProjNr').addEventListener('input', e=>{ st.projNr=e.target.value; });
 $('abInst').addEventListener('input', e=>{ st.installateur=e.target.value; });
