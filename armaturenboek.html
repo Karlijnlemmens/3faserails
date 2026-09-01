@@ -641,7 +641,7 @@ function armaturenboek(){
   const boek=[], perGroep={};
   ARMATUREN.forEach(a=>{
     const s=st.armaturen[a.id];
-    if(!s || (s.qty||0)<=0) return;
+    if(!s || armSlotLeeg(s)) return;
     const g=armGroepVan(s, a.id);
     if(!g) return;
     let b=perGroep[g.id];
@@ -653,14 +653,14 @@ function armaturenboek(){
 function armaturenZonderGroep(){
   return ARMATUREN.filter(a=>{
     const s=st.armaturen[a.id];
-    return (s.qty||0)>0 && s.groep!=='-' && !isSpecial(s) && !armGroepVan(s, a.id);
+    return !armSlotLeeg(s) && s.groep!=='-' && !isSpecial(s) && !armGroepVan(s, a.id);
   });
 }
-/* Special-rijen met een aantal waarvoor nog geen PDF is geüpload. */
+/* Ingevulde Special-rijen waarvoor nog geen PDF is geüpload. */
 function armaturenSpecialZonderPdf(){
   return ARMATUREN.filter(a=>{
     const s=st.armaturen[a.id];
-    return (s.qty||0)>0 && isSpecial(s) && !armGroepVan(s, a.id);
+    return !armSlotLeeg(s) && isSpecial(s) && !armGroepVan(s, a.id);
   });
 }
 
@@ -812,10 +812,17 @@ async function buildArmaturenboekPdf(){
   /* --- hoofdstukblad Armaturen + armaturenlijst; de presenters worden er in
          assembleArmaturenboekPdf achter geplakt, in de volgorde van bookGroups --- */
   const boek = armaturenboek();
+  /* Regels zonder herkend type (en zonder bruikbare Special-PDF) horen niet in
+     boek/bookGroups (geen hoofdstuk/presenter), maar moeten wel gewoon in de
+     Armaturenlijst-tabel blijven staan - anders lijken ze niet meegeteld. */
+  const onbekend = ARMATUREN.filter(a=>{
+    const s = st.armaturen[a.id];
+    return s && !armSlotLeeg(s) && !armGroepVan(s, a.id);
+  });
   const bookGroups = [];
   const armOms=(r)=> (r.s.name&&r.s.name.trim()) ? r.s.name.trim() : armLabel(r.a);
   const armCode=(r)=>{ const c = r.s.code; return (c&&c.trim()) ? c.trim() : 'volgt'; };
-  if(boek.length){
+  if(boek.length || onbekend.length){
     zetSectie('Armaturen');
     beginPage(true);
     if(BEELD.ruitpatroon) beeldVullend(BEELD.ruitpatroon, 0, 0, W, H);
@@ -835,14 +842,33 @@ async function buildArmaturenboekPdf(){
     beginPage(true);
     paginaKop('Armaturenlijst',
       (st.proj||'').trim() + ((st.proj||'').trim()? '  —  ':'') + datumNL(st.datum));
-    let TB=tableStart([{w:75,h:'Code'},{w:290,h:'Omschrijving'},{w:90,h:'Artikelcode'},{w:60,h:'Aantal'}]);
-    /* Regels zonder CODE (bestekpositie) horen niet in deze tabel - ze tellen wel
-       gewoon mee in de totalen/hoofdstukindeling/presenters hieronder (via boek). */
-    boek.forEach(b=> b.rijen.forEach(r=>{
-      const code=(r.s.aanduiding||'').trim();
-      if(!code) return;
-      tableRow(TB,[ code, armOms(r), armCode(r), String(r.s.qty) ]);
-    }));
+    /* Elke ingevulde rij komt in deze tabel. Een kolom (Code of Aantal) valt
+       helemaal weg als GEEN ENKELE regel er een waarde voor heeft - anders staat
+       hij zinloos leeg/vol nullen; de vrijgekomen breedte gaat naar Omschrijving. */
+    const rijenVoorTabel = [
+      ...boek.flatMap(b=>b.rijen),
+      ...onbekend.map(a=>({a, s:st.armaturen[a.id]}))
+    ];
+    const toonCode = rijenVoorTabel.some(r=> (r.s.aanduiding||'').trim());
+    const toonAantal = rijenVoorTabel.some(r=> (r.s.qty||0)>0);
+    let omschrijvingBreedte = 290;
+    if(!toonCode) omschrijvingBreedte += 75;
+    if(!toonAantal) omschrijvingBreedte += 60;
+    const cols = [];
+    if(toonCode) cols.push({w:75,h:'Code'});
+    cols.push({w:90,h:'Artikelcode'});
+    cols.push({w:omschrijvingBreedte,h:'Omschrijving'});
+    if(toonAantal) cols.push({w:60,h:'Aantal'});
+    let TB=tableStart(cols);
+    const rijWaarden=(r)=>{
+      const basis=[];
+      if(toonCode) basis.push((r.s.aanduiding||'').trim());
+      basis.push(armCode(r), armOms(r));
+      if(toonAantal) basis.push(String(r.s.qty||0));
+      return basis;
+    };
+    boek.forEach(b=> b.rijen.forEach(r=> tableRow(TB, rijWaarden(r))));
+    onbekend.forEach(a=> tableRow(TB, rijWaarden({a, s:st.armaturen[a.id]})));
     y+=10;
     const ontbreekt = boek.filter(b=>!presenterAanwezig(b.g.id));
     if(ontbreekt.length){
@@ -939,9 +965,9 @@ function pdfBestandsnaam(){
 }
 
 async function maakPdfBytes(){
-  const totQty = ARMATUREN.reduce((s,a)=> s + (st.armaturen[a.id].qty||0), 0);
-  if(totQty<=0){
-    alert('Vul eerst een aantal in bij minimaal één armatuur voordat de PDF gemaakt kan worden.');
+  const heeftArmaturen = ARMATUREN.some(a=> !armSlotLeeg(st.armaturen[a.id]));
+  if(!heeftArmaturen){
+    alert('Vul eerst minimaal één armatuur in voordat de PDF gemaakt kan worden.');
     return null;
   }
   const meldingen=[];
