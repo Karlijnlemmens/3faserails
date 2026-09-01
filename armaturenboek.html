@@ -80,6 +80,22 @@
     font-family:'Nunito Sans',sans-serif; font-size:12.5px; color:var(--ink); background:#fff;
   }
   .c2-textinp{min-width:200px;}
+  .c2-textarea{
+    border:1.5px solid var(--border); border-radius:8px; padding:7px 10px; width:100%;
+    font-family:'Nunito Sans',sans-serif; font-size:12.5px; color:var(--ink); background:#fff;
+    resize:vertical; min-height:58px;
+  }
+  .c2-textarea:focus{outline:none; border-color:var(--blue);}
+  .ab-keuze{display:flex; gap:8px; flex-wrap:wrap;}
+  .ab-keuze label{
+    display:flex; align-items:center; gap:7px; cursor:pointer;
+    border:1.5px solid var(--border); border-radius:8px; padding:7px 12px;
+    font-size:12.5px; font-weight:700; color:var(--ink); background:#fff; transition:.12s;
+  }
+  .ab-keuze label:hover{border-color:var(--blue);}
+  .ab-keuze input{accent-color:var(--blue); margin:0;}
+  .ab-keuze input:checked + span{color:var(--blue-dark);}
+  .ab-keuze label:has(input:checked){border-color:var(--blue); background:var(--blue-light);}
   .c2-prodlist{display:flex; flex-direction:column; gap:5px; max-height:640px; overflow-y:auto; padding:6px; border:1.5px solid var(--border); border-radius:8px;}
   .c2-armrow{display:flex; align-items:center; gap:8px; padding:6px 2px; flex-wrap:wrap;}
   .c2-armrow input.c2-textinp{flex:1 1 130px; min-width:100px; padding:5px 8px; font-size:12px;}
@@ -175,6 +191,19 @@
     <div class="cfg-panel">
 
       <div class="cfg-block">
+        <h4>Soort opdracht</h4>
+        <p class="hint">Bij een vergelijking komt de briefingpagina "Introductie" direct achter het voorblad; bij een lichtberekening blijft die weg.</p>
+        <div class="ab-keuze">
+          <label><input type="radio" name="abSoort" value="lichtberekening" id="abSoortLicht"><span>Lichtberekening</span></label>
+          <label><input type="radio" name="abSoort" value="vergelijking" id="abSoortVerg"><span>Vergelijking</span></label>
+        </div>
+        <div id="abBriefingVelden" style="margin-top:12px; display:none;">
+          <p class="hint" style="margin-bottom:6px;">Documentnamen waar de vergelijking op is gebaseerd — één per regel. Ze komen op de briefingpagina te staan; de projectnaam wordt daar uit Projectgegevens overgenomen.</p>
+          <textarea id="abDocumenten" class="c2-textarea" placeholder="bijv. Bestek E-installaties 2024-11-03&#10;Tekening E-01 t/m E-04"></textarea>
+        </div>
+      </div>
+
+      <div class="cfg-block">
         <h4>Projectgegevens</h4>
         <p class="hint">Deze komen op het voorblad van de PDF.</p>
         <div class="c2-adapterrow">
@@ -242,7 +271,56 @@ const $=id=>document.getElementById(id);
 /* Wordt bij "Project opslaan" (zie slaProjectOp()) volgeschreven met het huidige
    project - blijft null in de originele tool, net als bij index.html. */
 const OPGESLAGEN_PROJECT = /*__PROJECT_DATA_START__*/null/*__PROJECT_DATA_END__*/;
-const st = { proj:'', projNr:'', installateur:'', datum:'', armaturen:{} };
+/* soort: 'lichtberekening' of 'vergelijking'. Bij een vergelijking komt de
+   briefingpagina achter het voorblad; documenten is dan de opsomming van stukken
+   waar die vergelijking op steunt, een per regel. */
+const st = { proj:'', projNr:'', installateur:'', datum:'', soort:'lichtberekening',
+             documenten:'', armaturen:{} };
+
+/* ---------- briefingpagina "Introductie" ----------
+   Maten uit het aangeleverde ontwerp (AB Briefing vergelijking), gemeten in plaats
+   van geschat; y telt vanaf de bovenkant van de pagina, net als in pdf-huisstijl.js.
+   De regelafstand is 10,3 pt en een witregel tussen twee alinea's is er precies een
+   in dezelfde maat - vandaar dat naAlinea gelijk is aan regel. */
+const BRIEF = {
+  kopX:37, kopY:96.1, kopPt:12,
+  blok:{x:35, y:122, b:525, h:122},
+  tekstIn:27,            /* tekst begint 27 pt binnen de linkerrand van het blok */
+  blokBreedte:478, blokRegel:13,
+  vraagTop:19.8,         /* "De vraag:" t.o.v. de bovenkant van het blok */
+  naVraag:25.7, blokOnder:42,
+  /* Het aanhalingsteken linksboven zit op (+20,6, +9) vanaf de blokhoek; die
+     rechtsonder even ver van de rechter- en onderrand. */
+  quoteInX:20.6, quoteInY:9, quoteUitX:43, quoteUitY:36,
+  quoteH:25.5, quoteBoven:10.9, quoteOnderL:-10.5, quoteOnderR:6.1, quoteGat:21.8,
+  naBlok:17.2,
+  x:38, breedte:507, pt:8.5, regel:10.3, naAlinea:10.3,
+  naKop:25.7, naLeveren:11.9, naDisclaimer:9.7,
+  bulletX:56.3, bulletTekstX:74.7, bulletBreedte:470,
+  disclaimerPt:8,
+};
+
+/* De vetgedrukte stukken staan als eigen segment in de tekst; rijkeRegels() breekt
+   er dwars doorheen af. */
+const BRIEF_DISCLAIMER = [
+  [{t:'Deze propositie is opgesteld op basis van de door de opdrachtgever aangeleverde documentatie '
+     +'en is bedoeld als '},
+   {t:'armaturenvergelijking en offertevoorstel', v:true},
+   {t:'. De voorgestelde armaturen kunnen op specificaties, prestaties, maatvoering of uitvoering '
+     +'afwijken van de in de referentiedocumentatie omschreven armaturen en/of van de meest actuele '
+     +'technische gegevens van de fabrikant.'}],
+  [{t:'Er is '},
+   {t:'geen lichtberekening of andere technische verificatie', v:true},
+   {t:' uitgevoerd om te controleren of de voorgestelde armaturen voldoen aan de vereiste '
+     +'verlichtingsniveaus, lichtkwaliteit of overige projectspecifieke eisen.'}],
+  [{t:'Aan deze vergelijking kunnen daarom '},
+   {t:'geen rechten worden ontleend ten aanzien van de uiteindelijke geschiktheid of toepassing', v:true},
+   {t:' van de voorgestelde armaturen. De verantwoordelijkheid voor de controle van de technische '
+     +'geschiktheid, de uiteindelijke armatuurkeuze en de toepassing binnen het project ligt bij de '
+     +'opdrachtgever.'}],
+  [{t:'Wij aanvaarden geen verantwoordelijkheid voor eventuele gevolgen van de gemaakte keuzes of voor '
+     +'de aanbieding richting de opdrachtgever op basis van deze armaturenvergelijking.'}],
+];
 
 /* ---------- armaturen: 12 vaste slots, zelfde opzet als de Railconfigurator ---------- */
 const ARMATUREN = [
@@ -507,12 +585,129 @@ async function buildArmaturenboekPdf(){
     beelden:['omslagVolledig','omslagBoven','ruitpatroon','armaturenFoto'],
     sectie:'Armaturen',
   });
-  const {BALK_H, C, BEELD, col, text, meet, line, rect, poly, metUitsnede, beeldVullend,
+  const {BALK_H, C, BEELD, col, text, meet, line, rect, circle, poly, metUitsnede, beeldVullend,
          meng, logo, logoBreedte, flush, beginPage, need, para, paginaKop, omslag,
          zetSectie, tableStart, wrapCell, tableRow} = HS;
   const wrapBreedte = HS.wrapBreedte, wrap = HS.wrapTekens;
 
   omslag({naam:st.proj, nr:st.projNr, inst:st.installateur, datum:datumNL(st.datum)});
+
+  /* --- briefingpagina, alleen bij een vergelijking ---
+     Natekening van het aangeleverde ontwerp; zie de BRIEF-tabel bovenaan. De blauwe
+     kopbalk en de schuine grijze voet komen uit pdf-huisstijl.js, zodat de pagina
+     bij de rest van het boek hoort. */
+
+  /* Woorden met hun vet-vlag; een woord dat zonder spatie op het vorige volgt (de
+     punt achter een vetgedrukte projectnaam) blijft eraan vastzitten. */
+  function briefWoorden(segmenten){
+    const uit=[]; let naSpatie=true;
+    segmenten.forEach(seg=>{
+      String(seg.t).split(/(\s+)/).forEach(deel=>{
+        if(deel==='') return;
+        if(/^\s+$/.test(deel)){ naSpatie=true; return; }
+        const plak = !naSpatie && uit.length>0;
+        if(plak) uit[uit.length-1].push({t:deel, v:!!seg.v});
+        else uit.push([{t:deel, v:!!seg.v}]);
+        naSpatie=false;
+      });
+    });
+    return uit;
+  }
+  function briefBreedte(groep, pt){
+    return groep.reduce((b,d)=> b + meet(d.t, pt, {bold:d.v}), 0);
+  }
+  /* Breekt af op echte tekstbreedte, dwars door de vet/niet-vet-grenzen heen. */
+  function rijkeRegels(segmenten, maxB, pt){
+    const spatie = meet(' ', pt, {});
+    const regels=[]; let regel=[], breed=0;
+    briefWoorden(segmenten).forEach(groep=>{
+      const gb = briefBreedte(groep, pt);
+      if(regel.length && breed + spatie + gb > maxB){ regels.push(regel); regel=[]; breed=0; }
+      if(regel.length) breed += spatie;
+      regel.push(groep); breed += gb;
+    });
+    if(regel.length) regels.push(regel);
+    return regels.length ? regels : [[]];
+  }
+  function tekenRegel(regel, x, yy, pt){
+    const spatie = meet(' ', pt, {});
+    let cx = x;
+    regel.forEach((groep, i)=>{
+      if(i) cx += spatie;
+      groep.forEach(deel=>{ cx += text(cx, yy, pt, deel.t, {bold:deel.v, color:C.tekst}); });
+    });
+  }
+  /* Twee schuine balken, breder aan de onderkant - het aanhalingsteken uit het
+     ontwerp. x/y is de linkerbovenhoek van de eerste balk. */
+  function aanhalingsteken(x, yy){
+    const B=BRIEF;
+    [0, B.quoteGat].forEach(dx=>{
+      poly([[x+dx, yy], [x+dx+B.quoteBoven, yy],
+            [x+dx+B.quoteOnderR, yy+B.quoteH], [x+dx+B.quoteOnderL, yy+B.quoteH]], C.wit);
+    });
+  }
+
+  if(st.soort === 'vergelijking'){
+    const B = BRIEF;
+    zetSectie('Introductie');
+    beginPage(true);
+    paginaKop('Introductie',
+      (st.proj||'').trim() + ((st.proj||'').trim() ? '  \u2014  ' : '') + datumNL(st.datum));
+    text(B.kopX, B.kopY, B.kopPt, 'Briefing', {bold:true, color:C.hoofd});
+
+    /* Eerst opmeten: staan er meer documentnamen, dan groeit het grijze vlak mee. */
+    const documenten = String(st.documenten||'').split(/\r?\n/).map(r=>r.trim()).filter(Boolean);
+    const vraagRegels = rijkeRegels([
+      {t:'Het opstellen van een verlichtingsarmaturen/offerte voor '},
+      {t:((st.proj||'').trim() || '[projectnaam]') + '.', v:true},
+      {t:' Dit plan dient gebaseerd te zijn op de uitgangspunten zoals vastgelegd in het document:'},
+    ], B.blokBreedte, B.pt);
+    const docRegels = (documenten.length ? documenten : ['[naam documenten]'])
+      .reduce((uit,d)=> uit.concat(rijkeRegels([{t:d, v:true}], B.blokBreedte, B.pt)), []);
+    const regels = vraagRegels.concat(docRegels);
+    const blokH = Math.max(B.blok.h,
+      B.vraagTop + B.naVraag + (regels.length-1)*B.blokRegel + B.pt + B.blokOnder);
+
+    rect(B.blok.x, B.blok.y, B.blok.b, blokH, C.voet);
+    aanhalingsteken(B.blok.x + B.quoteInX, B.blok.y + B.quoteInY);
+    aanhalingsteken(B.blok.x + B.blok.b - B.quoteUitX, B.blok.y + blokH - B.quoteUitY);
+
+    const blokX = B.blok.x + B.tekstIn;
+    text(blokX, B.blok.y + B.vraagTop, B.pt, 'De vraag:', {bold:true, color:C.tekst});
+    regels.forEach((r,i)=> tekenRegel(r, blokX, B.blok.y + B.vraagTop + B.naVraag + i*B.blokRegel, B.pt));
+
+    /* --- alles onder het blok --- */
+    y = B.blok.y + blokH + B.naBlok;
+    const alinea = (segmenten, x, breedte)=>{
+      rijkeRegels(segmenten, breedte, B.pt).forEach(r=>{
+        need(B.regel); tekenRegel(r, x, y, B.pt); y += B.regel;
+      });
+    };
+
+    text(B.x, y, B.pt, 'Wat wij bieden:', {bold:true, color:C.tekst});
+    y += B.naKop;
+    alinea([{t:'Op basis van bovengenoemde documentatie stellen wij een armaturenpropositie op die '
+             +'aansluit bij de gevraagde uitgangspunten en het offertetraject.'}], B.x, B.breedte);
+
+    y += B.naAlinea;
+    text(B.x, y, B.pt, 'Wij leveren:', {color:C.tekst});
+    y += B.naLeveren;
+    /* De opsommingsstip als vorm: pdfTxt() kent het bullet-teken niet en zou er een
+       vraagteken van maken. Een stip tekenen scheelt een uitbreiding van de
+       gedeelde tekstlaag voor dit ene teken. */
+    circle(B.bulletX + 2.2, y + B.pt*0.45, 1.5, C.tekst);
+    alinea([{t:'Een voorstel met verschillende armaturen en mogelijke alternatieven op basis van de '
+             +'beschikbare technische en productinformatie'}], B.bulletTekstX, B.bulletBreedte);
+
+    y += B.naAlinea;
+    text(B.x, y, B.disclaimerPt, 'DISCLAIMER:', {bold:true, color:C.tekst});
+    y += B.naDisclaimer;
+    BRIEF_DISCLAIMER.forEach((deel, i)=>{
+      if(i) y += B.naAlinea;
+      alinea(deel, B.x, B.breedte);
+    });
+    flush();
+  }
 
   /* --- hoofdstukblad Armaturen + armaturenlijst; de presenters worden er in
          assembleArmaturenboekPdf achter geplakt, in de volgorde van bookGroups --- */
@@ -965,6 +1160,21 @@ if(OPGESLAGEN_PROJECT){
 buildArmList();
 updateSummary();
 $('abProj').value=st.proj; $('abProjNr').value=st.projNr; $('abInst').value=st.installateur; $('abDatum').value=st.datum;
+
+/* De documentnamen horen alleen bij een vergelijking; bij een lichtberekening is er
+   geen briefingpagina om ze op te zetten, dus verdwijnt het veld. Wat erin staat
+   blijft wel bewaard, zodat heen en weer schakelen niets weggooit. */
+function toonBriefingVelden(){
+  $('abBriefingVelden').style.display = st.soort === 'vergelijking' ? '' : 'none';
+}
+$('abSoortLicht').checked = st.soort !== 'vergelijking';
+$('abSoortVerg').checked  = st.soort === 'vergelijking';
+$('abDocumenten').value = st.documenten || '';
+toonBriefingVelden();
+[['abSoortLicht','lichtberekening'], ['abSoortVerg','vergelijking']].forEach(([id, waarde])=>{
+  $(id).addEventListener('change', ()=>{ if($(id).checked){ st.soort = waarde; toonBriefingVelden(); } });
+});
+$('abDocumenten').addEventListener('input', e=>{ st.documenten = e.target.value; });
 $('abProj').addEventListener('input', e=>{ st.proj=e.target.value; updateSummary(); });
 $('abProjNr').addEventListener('input', e=>{ st.projNr=e.target.value; });
 $('abInst').addEventListener('input', e=>{ st.installateur=e.target.value; });
