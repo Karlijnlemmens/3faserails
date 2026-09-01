@@ -919,16 +919,34 @@ async function assembleArmaturenboekPdf(){
        presenter-PDF heeft het logo op exact dezelfde hoogte staan). */
     const korps=11, marge=32+113.4 /* +4cm naar links t.o.v. de rechtermarge */,
           regelhoogte=13, basislijn = laag ? 47 : 27;
+    /* Veilige breedte: hoe ver een stempelregel maximaal naar links mag lopen
+       vanaf de rechtermarge voordat hij een wit element (garantieblokje,
+       Pragmalux-logo) zou kunnen raken - gemeten op meerdere presenter-PDF's
+       (krapste geval 282pt vrije ruimte). pdf-lib kan geen pixels van een
+       bestaande pagina uitlezen, dus dit is een vuistregel, geen echte
+       kleurdetectie: bij overschrijding krimpt het lettertype van die regel
+       i.p.v. dat de positie verschuift. */
+    const veiligeBreedte = 250, minKorps = 7;
     const {width, height} = pagina.getSize();
-    const c = kleur.charAt(0)==='#'
-      ? PDFLib.rgb(parseInt(kleur.substr(1,2),16)/255, parseInt(kleur.substr(3,2),16)/255, parseInt(kleur.substr(5,2),16)/255)
-      : PDFLib.rgb(1,1,1);
+    /* Special-presenters zijn zelf geüpload met een onbekende (vaak lichte)
+       achtergrond, dus krijgt de stempel daar altijd zwart i.p.v. de
+       groepskleur - die is afgestemd op de navy Pragmalux-huisstijl. */
+    const c = laag
+      ? PDFLib.rgb(0,0,0)
+      : kleur.charAt(0)==='#'
+        ? PDFLib.rgb(parseInt(kleur.substr(1,2),16)/255, parseInt(kleur.substr(3,2),16)/255, parseInt(kleur.substr(5,2),16)/255)
+        : PDFLib.rgb(1,1,1);
     /* Meerdere bestekcodes voor hetzelfde armatuurtype komen onder elkaar te
        staan, elk apart rechts uitgelijnd, i.p.v. samengevoegd op één regel. */
     codes.forEach((tekst, i)=>{
-      const tw = stempelFont.widthOfTextAtSize(tekst, korps);
+      let grootte = korps;
+      let tw = stempelFont.widthOfTextAtSize(tekst, grootte);
+      while(tw>veiligeBreedte && grootte>minKorps){
+        grootte -= 0.5;
+        tw = stempelFont.widthOfTextAtSize(tekst, grootte);
+      }
       pagina.drawText(tekst, {x: width-marge-tw, y: height-basislijn-korps*0.78-i*regelhoogte,
-        size: korps, font: stempelFont, color: c});
+        size: grootte, font: stempelFont, color: c});
     });
   }
   const appendPresenter = async(id, codes, kleur, laag)=>{
