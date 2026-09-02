@@ -1574,21 +1574,25 @@ function cel(kol, rij, waarde, stijl){
 }
 
 /* ======================= het RFQ-blad =======================
-   De opmaak is die van het Bestelformulier uit Bandraster_Intake_Nieuw_V3.xlsx,
-   uitgemeten in plaats van geschat: Distrilight-blauw #0F7ABE voor de labels en de
-   bovenste kopregel, #E7F1F8 voor de kolomkoppen, Aptos Narrow, een raster van
-   dunne lijnen over het hele blad (met de rasterlijnen van Excel zelf uit) en een
-   dikke lijn boven en onder de tabel. Gegevensregels staan gecentreerd en
-   teruglopend in hoge rijen, zoals daar.
+   De indeling en de tabelopmaak komen van het Bestelformulier uit
+   Bandraster_Intake_Nieuw_V3.xlsx, uitgemeten in plaats van geschat: To/Date/
+   Reference/Person in charge op rij 5-8, de begeleidende tekst eronder, de
+   tweeregelige tabelkop op rij 19-20 en de posities vanaf rij 21. Distrilight-blauw
+   #0F7ABE voor de labels en de bovenste kopregel, #E7F1F8 voor de kolomkoppen,
+   Aptos Narrow, en hoge gegevensregels met gecentreerde teruglopende tekst.
 
-   Twee dingen zijn bewust anders. De begeleidende tekst zat in de Excel in een
-   zwevend tekstvak; hier staat hij in samengevoegde cellen, zodat de fabrikant hem
-   gewoon kan aanpassen en er geen tekenlaag in het bestand hoeft. En de vier
-   waardevakken bij To/Date/Reference/Person in charge hadden daar twee
-   verschillende tinten (D9E1F2 en E7F1F8) en twee zonder vulling; dat is hier één
-   tint geworden. */
+   Daarbovenop de huisstijl van de suite: een kopbalk met het logo en de titel, met
+   daaronder de blauwe accentlijn die de tools ook boven hun scherm hebben. De
+   rasterlijnen van Excel staan uit; dunne lijnen staan alleen waar ze iets doen -
+   om het formulierblok en om de tabel. Het origineel had ze over het hele blad,
+   ook op lege rijen, en juist dat laat een blad er onaf uitzien.
 
-const RFQ_BLAUW = 'FF0F7ABE', RFQ_LICHT = 'FFE7F1F8';
+   Twee dingen wijken verder bewust af. De begeleidende tekst zat in een zwevend
+   tekstvak; hier staat hij in samengevoegde cellen, zodat de fabrikant hem gewoon
+   kan aanpassen. En de vier waardevakken bovenaan hadden twee verschillende tinten
+   plus twee zonder vulling; dat is hier een tint geworden. */
+
+const RFQ_BLAUW = 'FF0F7ABE', RFQ_LICHT = 'FFE7F1F8', RFQ_ACCENT = 'FF3E8EDE';
 
 /* Kolommen in de volgorde van het Bestelformulier. veld verwijst naar de naam die
    rfqVelden() teruggeeft; breedte 0 = de standaardbreedte van Excel. */
@@ -1631,43 +1635,63 @@ const RFQ_BEGELEIDING = [
   'PDL Lighting Group B.V.',
 ];
 
-/* Vaste rijnummers, net als in het Bestelformulier. */
-const RFQ_RIJ = {kop:5, notitie:9, notitieEind:16, rand:18, tabel:19, eenheid:20, eerste:21};
+/* Vaste rijnummers. De kopbalk beslaat rij 1-2 met de accentlijn op rij 3; vanaf
+   rij 5 volgt de indeling van het Bestelformulier. */
+const RFQ_RIJ = {titel:1, onderschrift:2, accent:3, kop:5,
+                 notitie:10, notitieEind:16, rand:18, tabel:19, eenheid:20, eerste:21};
+/* Hoogtes van de kopbalk in punten; het logo wordt daarin verticaal gecentreerd. */
+/* logoH x de beeldverhouding (993/445) moet binnen kolom A passen - anders schuift
+   het logo over de titel heen. Kolom A is 14,86 tekens breed, ruim 100 punten. */
+const RFQ_BALK = {titelH:54, onderH:24, accentH:5, logoH:40, logoLinks:12};
+const EMU = 12700;   /* een punt in de eenheid die tekeningen in een xlsx gebruiken */
 
-function rfqXlsx(){
+async function rfqXlsx(){
   const kop = rfqKop();
   const kolommen = RFQ_BESTEL.concat(RFQ_SPEC);
   const laatsteKol = kolommen.length;
   const laatsteRij = Math.max(RFQ_RIJ.eerste + P.posities.length - 1, RFQ_RIJ.eerste);
 
+  /* Het logo staat als data in merk-data.js; over file:// kan het niet als los
+     bestand ingelezen worden (zie de kop van pdf-huisstijl.js). Lukt het niet, dan
+     komt de merknaam als tekst in de balk - dan is er wel een balk, geen gat. */
+  let logo = null;
+  try{
+    const merk = await PdfHuisstijl.merkData();
+    if(merk && merk.logos && merk.logos.dlLicht) logo = PdfHuisstijl.b64Bytes(merk.logos.dlLicht);
+  }catch(err){ console.warn('Logo niet beschikbaar voor het RFQ-blad:', err && err.message); }
+  const logoRatio = PdfHuisstijl.THEMAS.distrilight.logoRatio;
+
   /* stijlnummers, in dezelfde volgorde als cellXfs hieronder */
-  const S = {raster:1, label:2, waarde:3, randOnder:4, tabelkop:5, kolomkop:6,
-             inkoop:7, data:8, dataSlot:9, notitie:10};
+  const S = {leeg:0, raster:1, label:2, waarde:3, randOnder:4, tabelkop:5, kolomkop:6,
+             inkoop:7, data:8, dataSlot:9, notitie:10, titel:11, onderschrift:12, accent:13};
 
-  const rijen = [];
-  const cellen = {};                 /* "rij,kol" -> xml, zodat het raster overal komt */
+  const cellen = {};
   const zet = (rij, kol, waarde, stijl)=>{ cellen[rij+','+kol] = cel(kol, rij, waarde, stijl); };
+  const vulRij = (rij, stijl)=>{ for(let k=1; k<=laatsteKol; k++) zet(rij, k, '', stijl); };
 
-  /* Eerst het hele blok als leeg raster; de gevulde cellen komen er daarna overheen. */
-  for(let r=1; r<=laatsteRij+1; r++){
-    for(let k=1; k<=laatsteKol; k++){
-      zet(r, k, '', r===RFQ_RIJ.rand ? S.randOnder : S.raster);
-    }
-  }
+  /* --- de kopbalk --- */
+  vulRij(RFQ_RIJ.titel, S.titel);
+  vulRij(RFQ_RIJ.onderschrift, S.onderschrift);
+  vulRij(RFQ_RIJ.accent, S.accent);
+  /* Kolom A blijft leeg: daar staat het logo overheen. Zonder logo komt de naam er. */
+  zet(RFQ_RIJ.titel, 1, logo ? '' : 'Distrilight', S.titel);
+  zet(RFQ_RIJ.titel, 2, 'REQUEST FOR QUOTATION', S.titel);
+  zet(RFQ_RIJ.onderschrift, 2,
+    ['Bandraster luminaires', kop.ref].filter(Boolean).join('   |   '), S.onderschrift);
 
-  /* de vier kopvelden */
+  /* --- het formulierblok --- */
   [['To:', kop.to], ['Date:', kop.date], ['Reference:', kop.ref], ['Person in charge:', kop.persoon]]
-    .forEach(([label, waarde], i)=>{
+    .forEach((paar, i)=>{
       const r = RFQ_RIJ.kop + i;
-      zet(r, 1, label, S.label);
-      zet(r, 2, waarde, S.waarde);
+      zet(r, 1, paar[0], S.label);
+      zet(r, 2, paar[1], S.waarde);
       zet(r, 3, '', S.waarde); zet(r, 4, '', S.waarde);   /* B..D is samengevoegd */
     });
 
-  /* de begeleidende tekst */
   zet(RFQ_RIJ.notitie, 1, RFQ_BEGELEIDING.join('\n'), S.notitie);
 
-  /* tabelkop: bovenste regel met de bestelkolommen, onderste met de specificaties */
+  /* --- de tabel --- */
+  vulRij(RFQ_RIJ.rand, S.randOnder);
   RFQ_BESTEL.forEach((k, i)=>{
     zet(RFQ_RIJ.tabel, i+1, k.kop, S.tabelkop);
     zet(RFQ_RIJ.eenheid, i+1, k.onder || '', k.onder ? S.inkoop : S.tabelkop);
@@ -1676,7 +1700,6 @@ function rfqXlsx(){
   for(let k=RFQ_BESTEL.length+2; k<=laatsteKol; k++) zet(RFQ_RIJ.tabel, k, '', S.tabelkop);
   RFQ_SPEC.forEach((k, i)=> zet(RFQ_RIJ.eenheid, RFQ_BESTEL.length+1+i, k.kop, S.kolomkop));
 
-  /* de posities */
   P.posities.forEach((c, i)=>{
     const r = RFQ_RIJ.eerste + i;
     const stijl = (i === P.posities.length-1) ? S.dataSlot : S.data;
@@ -1691,28 +1714,34 @@ function rfqXlsx(){
       zet(r, RFQ_BESTEL.length+1+j, k.getal ? nummer(w) : w, stijl);
     });
   });
-  /* Staat er nog niets in de lijst, dan krijgt de rand-rij toch de dikke onderlijn. */
-  if(!P.posities.length){
-    for(let k=1; k<=laatsteKol; k++) zet(laatsteRij, k, '', S.dataSlot);
-  }
+  /* Is de lijst leeg, dan sluit de rand-rij de tabel toch netjes af. */
+  if(!P.posities.length) vulRij(laatsteRij, S.dataSlot);
 
-  const hoogte = {1:75, 18:15.75, 20:22.5};
+  const hoogte = {};
+  hoogte[RFQ_RIJ.titel] = RFQ_BALK.titelH;
+  hoogte[RFQ_RIJ.onderschrift] = RFQ_BALK.onderH;
+  hoogte[RFQ_RIJ.accent] = RFQ_BALK.accentH;
+  hoogte[RFQ_RIJ.rand] = 15.75;
+  hoogte[RFQ_RIJ.eenheid] = 22.5;
+
+  const rijen = [];
   for(let r=1; r<=laatsteRij+1; r++){
     const inhoud = [];
     for(let k=1; k<=laatsteKol; k++) if(cellen[r+','+k]) inhoud.push(cellen[r+','+k]);
     if(!inhoud.length) continue;
-    const h = hoogte[r] || (r >= RFQ_RIJ.eerste && r <= laatsteRij ? 56.25
-                         : (r >= RFQ_RIJ.notitie && r <= RFQ_RIJ.notitieEind ? 15 : 0));
+    const h = hoogte[r] || (r >= RFQ_RIJ.eerste && r <= laatsteRij ? 56.25 : 0);
     const ht = h ? ' ht="' + h + '" customHeight="1"' : '';
     rijen.push('<row r="' + r + '"' + ht + '>' + inhoud.join('') + '</row>');
   }
 
-  const cols = '<cols>' + kolommen.map((k, i)=> k.breedte
-    ? '<col min="' + (i+1) + '" max="' + (i+1) + '" width="' + k.breedte + '" customWidth="1"/>'
-    : '<col min="' + (i+1) + '" max="' + (i+1) + '" width="8.43"/>').join('') + '</cols>';
+  const cols = '<cols>' + kolommen.map((k, i)=>
+    '<col min="' + (i+1) + '" max="' + (i+1) + '" width="' + (k.breedte || 8.43) + '"'
+    + (k.breedte ? ' customWidth="1"' : '') + '/>').join('') + '</cols>';
 
   const L = kolomLetter;
   const samen = [
+    'B' + RFQ_RIJ.titel + ':' + L(laatsteKol) + RFQ_RIJ.titel,
+    'B' + RFQ_RIJ.onderschrift + ':' + L(laatsteKol) + RFQ_RIJ.onderschrift,
     'B' + RFQ_RIJ.kop + ':D' + RFQ_RIJ.kop,
     'B' + (RFQ_RIJ.kop+1) + ':D' + (RFQ_RIJ.kop+1),
     'B' + (RFQ_RIJ.kop+2) + ':D' + (RFQ_RIJ.kop+2),
@@ -1722,18 +1751,20 @@ function rfqXlsx(){
     'B' + RFQ_RIJ.tabel + ':B' + RFQ_RIJ.eenheid,
     L(RFQ_BESTEL.length+1) + RFQ_RIJ.tabel + ':' + L(laatsteKol) + RFQ_RIJ.tabel,
   ];
-  const mergeXml = '<mergeCells count="' + samen.length + '">' +
-    samen.map(r=>'<mergeCell ref="' + r + '"/>').join('') + '</mergeCells>';
 
+  const NSR = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
   const sheet = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="' + NSR + '">' +
     '<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>' +
     '<dimension ref="A1:' + L(laatsteKol) + (laatsteRij+1) + '"/>' +
     '<sheetViews><sheetView showGridLines="0" tabSelected="1" workbookViewId="0"/></sheetViews>' +
     '<sheetFormatPr defaultRowHeight="15"/>' +
-    cols + '<sheetData>' + rijen.join('') + '</sheetData>' + mergeXml +
+    cols + '<sheetData>' + rijen.join('') + '</sheetData>' +
+    '<mergeCells count="' + samen.length + '">' +
+      samen.map(r=>'<mergeCell ref="' + r + '"/>').join('') + '</mergeCells>' +
     '<pageMargins left="0.25" right="0.25" top="0.5" bottom="0.5" header="0.3" footer="0.3"/>' +
     '<pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/>' +
+    (logo ? '<drawing r:id="rId1"/>' : '') +
     '</worksheet>';
 
   /* Een opmaakregel voor styles.xml. De apply-vlaggen moeten erbij staan, anders
@@ -1742,50 +1773,57 @@ function rfqXlsx(){
     const a = uitlijn
       ? '<alignment' + (uitlijn.h ? ' horizontal="' + uitlijn.h + '"' : '')
         + (uitlijn.v ? ' vertical="' + uitlijn.v + '"' : '')
-        + (uitlijn.wrap ? ' wrapText="1"' : '') + '/>'
+        + (uitlijn.wrap ? ' wrapText="1"' : '')
+        + (uitlijn.in_ ? ' indent="' + uitlijn.in_ + '"' : '') + '/>'
       : '';
     return '<xf numFmtId="0" fontId="' + font + '" fillId="' + vul + '" borderId="' + rand + '" xfId="0"'
       + (font ? ' applyFont="1"' : '') + (vul ? ' applyFill="1"' : '') + (rand ? ' applyBorder="1"' : '')
       + (a ? ' applyAlignment="1">' + a + '</xf>' : '/>');
   };
-
   const lt = 'Aptos Narrow';
   const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
-    '<fonts count="6">' +
-      '<font><sz val="11"/><name val="' + lt + '"/></font>' +                                  /* 0 gewoon */
-      '<font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="' + lt + '"/></font>' +       /* 1 wit vet */
-      '<font><b/><sz val="10"/><name val="' + lt + '"/></font>' +                              /* 2 zwart vet 10 */
-      '<font><b/><sz val="8"/><name val="' + lt + '"/></font>' +                               /* 3 zwart vet 8 */
-      '<font><b/><sz val="11"/><color rgb="FFFF0000"/><name val="' + lt + '"/></font>' +       /* 4 rood vet */
-      '<font><sz val="10"/><name val="' + lt + '"/></font>' +                                  /* 5 gewoon 10 */
+    '<fonts count="8">' +
+      '<font><sz val="11"/><name val="' + lt + '"/></font>' +                                /* 0 gewoon */
+      '<font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="' + lt + '"/></font>' +     /* 1 wit vet 10 */
+      '<font><b/><sz val="10"/><name val="' + lt + '"/></font>' +                            /* 2 zwart vet 10 */
+      '<font><b/><sz val="8"/><name val="' + lt + '"/></font>' +                             /* 3 zwart vet 8 */
+      '<font><b/><sz val="11"/><color rgb="FFFF0000"/><name val="' + lt + '"/></font>' +     /* 4 rood vet */
+      '<font><sz val="10"/><name val="' + lt + '"/></font>' +                                /* 5 gewoon 10 */
+      '<font><b/><sz val="20"/><color rgb="FFFFFFFF"/><name val="' + lt + '"/></font>' +     /* 6 titel */
+      '<font><sz val="10"/><color rgb="FFD6E9F7"/><name val="' + lt + '"/></font>' +         /* 7 onderschrift */
     '</fonts>' +
-    '<fills count="4">' +
+    '<fills count="5">' +
       '<fill><patternFill patternType="none"/></fill>' +
       '<fill><patternFill patternType="gray125"/></fill>' +
       '<fill><patternFill patternType="solid"><fgColor rgb="' + RFQ_BLAUW + '"/><bgColor indexed="64"/></patternFill></fill>' +
       '<fill><patternFill patternType="solid"><fgColor rgb="' + RFQ_LICHT + '"/><bgColor indexed="64"/></patternFill></fill>' +
+      '<fill><patternFill patternType="solid"><fgColor rgb="' + RFQ_ACCENT + '"/><bgColor indexed="64"/></patternFill></fill>' +
     '</fills>' +
-    '<borders count="3">' +
+    '<borders count="4">' +
       '<border><left/><right/><top/><bottom/><diagonal/></border>' +
       '<border><left style="thin"/><right style="thin"/><top style="thin"/><bottom style="thin"/><diagonal/></border>' +
       '<border><left style="thin"/><right style="thin"/><top style="thin"/><bottom style="medium"/><diagonal/></border>' +
+      '<border><left/><right/><top/><bottom style="medium"/><diagonal/></border>' +
     '</borders>' +
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
     /* Excel is hier strenger dan de meeste lezers: elke xf noemt zijn nummers
        voluit, ook de nullen, anders wordt het bestand als beschadigd gemeld. */
-    '<cellXfs count="11">' +
-      xf(0, 0, 0) +                                        /* 0 standaard */
+    '<cellXfs count="14">' +
+      xf(0, 0, 0) +                                        /* 0 leeg */
       xf(0, 0, 1) +                                        /* 1 raster */
       xf(1, 2, 1, {v:'center'}) +                          /* 2 label */
       xf(2, 3, 1, {h:'center', v:'center'}) +              /* 3 waarde */
-      xf(0, 0, 2) +                                        /* 4 dikke onderlijn */
+      xf(0, 0, 3) +                                        /* 4 de lijn boven de tabel */
       xf(1, 2, 1, {h:'center', v:'center', wrap:true}) +   /* 5 tabelkop */
       xf(3, 3, 1, {h:'center', v:'center', wrap:true}) +   /* 6 kolomkop */
       xf(4, 2, 1, {h:'center', v:'center'}) +              /* 7 Inkoop EXW */
       xf(3, 0, 1, {h:'center', v:'center', wrap:true}) +   /* 8 gegevens */
       xf(3, 0, 2, {h:'center', v:'center', wrap:true}) +   /* 9 laatste regel */
-      xf(5, 0, 1, {h:'left', v:'top', wrap:true}) +        /* 10 begeleiding */
+      xf(5, 0, 0, {h:'left', v:'top', wrap:true}) +        /* 10 begeleiding */
+      xf(6, 2, 0, {h:'left', v:'center', in_:1}) +         /* 11 titel in de balk */
+      xf(7, 2, 0, {h:'left', v:'top', in_:1}) +            /* 12 onderschrift */
+      xf(0, 4, 0) +                                        /* 13 accentlijn */
     '</cellXfs>' +
     '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
     '<dxfs count="0"/>' +
@@ -1797,25 +1835,55 @@ function rfqXlsx(){
       '<Types xmlns="' + NS + 'package/2006/content-types">' +
       '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
       '<Default Extension="xml" ContentType="application/xml"/>' +
+      (logo ? '<Default Extension="png" ContentType="image/png"/>' : '') +
       '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
       '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
       '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+      (logo ? '<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>' : '') +
       '</Types>')},
     {naam:'_rels/.rels', data:utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<Relationships xmlns="' + NS + 'package/2006/relationships">' +
-      '<Relationship Id="rId1" Type="' + NS + 'officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
+      '<Relationship Id="rId1" Type="' + NSR + '/officeDocument" Target="xl/workbook.xml"/>' +
       '</Relationships>')},
     {naam:'xl/workbook.xml', data:utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<workbook xmlns="' + NS + 'spreadsheetml/2006/main" xmlns:r="' + NS + 'officeDocument/2006/relationships">' +
+      '<workbook xmlns="' + NS + 'spreadsheetml/2006/main" xmlns:r="' + NSR + '">' +
       '<sheets><sheet name="Bestelformulier" sheetId="1" r:id="rId1"/></sheets></workbook>')},
     {naam:'xl/_rels/workbook.xml.rels', data:utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<Relationships xmlns="' + NS + 'package/2006/relationships">' +
-      '<Relationship Id="rId1" Type="' + NS + 'officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
-      '<Relationship Id="rId2" Type="' + NS + 'officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
+      '<Relationship Id="rId1" Type="' + NSR + '/worksheet" Target="worksheets/sheet1.xml"/>' +
+      '<Relationship Id="rId2" Type="' + NSR + '/styles" Target="styles.xml"/>' +
       '</Relationships>')},
     {naam:'xl/worksheets/sheet1.xml', data:utf8(sheet)},
     {naam:'xl/styles.xml', data:utf8(styles)},
   ];
+
+  if(logo){
+    const h = RFQ_BALK.logoH, b = h*logoRatio;
+    const balkH = RFQ_BALK.titelH + RFQ_BALK.onderH;
+    const tekening = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<xdr:wsDr xmlns:xdr="' + NS + 'drawingml/2006/spreadsheetDrawing" xmlns:a="' + NS + 'drawingml/2006/main">' +
+      '<xdr:oneCellAnchor>' +
+        '<xdr:from><xdr:col>0</xdr:col><xdr:colOff>' + Math.round(RFQ_BALK.logoLinks*EMU) + '</xdr:colOff>' +
+        '<xdr:row>0</xdr:row><xdr:rowOff>' + Math.round((balkH-h)/2*EMU) + '</xdr:rowOff></xdr:from>' +
+        '<xdr:ext cx="' + Math.round(b*EMU) + '" cy="' + Math.round(h*EMU) + '"/>' +
+        '<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="1" name="Distrilight"/><xdr:cNvPicPr/></xdr:nvPicPr>' +
+        '<xdr:blipFill><a:blip xmlns:r="' + NSR + '" r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>' +
+        '<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + Math.round(b*EMU) + '" cy="' + Math.round(h*EMU) + '"/></a:xfrm>' +
+        '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic>' +
+        '<xdr:clientData/>' +
+      '</xdr:oneCellAnchor></xdr:wsDr>';
+    bestanden.push(
+      {naam:'xl/worksheets/_rels/sheet1.xml.rels', data:utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<Relationships xmlns="' + NS + 'package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="' + NSR + '/drawing" Target="../drawings/drawing1.xml"/>' +
+        '</Relationships>')},
+      {naam:'xl/drawings/drawing1.xml', data:utf8(tekening)},
+      {naam:'xl/drawings/_rels/drawing1.xml.rels', data:utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<Relationships xmlns="' + NS + 'package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="' + NSR + '/image" Target="../media/image1.png"/>' +
+        '</Relationships>')},
+      {naam:'xl/media/image1.png', data:logo});
+  }
   return zipMaak(bestanden);
 }
 
@@ -1955,9 +2023,12 @@ $('knRfqPdf').addEventListener('click', function(){
 });
 
 $('knRfqXlsx').addEventListener('click', function(){
-  if(!P.posities.length){ alert('De RFQ-lijst is nog leeg.'); return; }
-  download('rfq-' + projectNaamDeel() + '.xlsx', rfqXlsx(),
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  metWachten($('knRfqXlsx'), async function(){
+    if(!P.posities.length){ alert('De RFQ-lijst is nog leeg.'); return; }
+    /* Wacht op het logo uit merk-data.js; dat wordt pas op dit moment ingeladen. */
+    download('rfq-' + projectNaamDeel() + '.xlsx', await rfqXlsx(),
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  });
 });
 
 document.addEventListener('keydown', function(e){
