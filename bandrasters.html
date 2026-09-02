@@ -1573,67 +1573,222 @@ function cel(kol, rij, waarde, stijl){
   return '<c r="' + r + '"' + s + ' t="inlineStr"><is><t xml:space="preserve">' + xmlTekst(waarde) + '</t></is></c>';
 }
 
-const XLSX_KOLOMMEN = ['Quantity', 'Product Code', 'Unit Price', 'Description', 'Type', 'Base',
-  'Length (mm)', 'Width (mm)', 'Height (mm)', 'Light aperture (mm)', 'Watt', 'Lumens', 'Optics',
-  'Kelvin colortemp', 'CRI (Ra)', 'Dimming', 'Emergency', 'Connector', 'RAL color housing',
-  'Air slot', 'Sensor', 'Remarks'];
+/* ======================= het RFQ-blad =======================
+   De opmaak is die van het Bestelformulier uit Bandraster_Intake_Nieuw_V3.xlsx,
+   uitgemeten in plaats van geschat: Distrilight-blauw #0F7ABE voor de labels en de
+   bovenste kopregel, #E7F1F8 voor de kolomkoppen, Aptos Narrow, een raster van
+   dunne lijnen over het hele blad (met de rasterlijnen van Excel zelf uit) en een
+   dikke lijn boven en onder de tabel. Gegevensregels staan gecentreerd en
+   teruglopend in hoge rijen, zoals daar.
+
+   Twee dingen zijn bewust anders. De begeleidende tekst zat in de Excel in een
+   zwevend tekstvak; hier staat hij in samengevoegde cellen, zodat de fabrikant hem
+   gewoon kan aanpassen en er geen tekenlaag in het bestand hoeft. En de vier
+   waardevakken bij To/Date/Reference/Person in charge hadden daar twee
+   verschillende tinten (D9E1F2 en E7F1F8) en twee zonder vulling; dat is hier één
+   tint geworden. */
+
+const RFQ_BLAUW = 'FF0F7ABE', RFQ_LICHT = 'FFE7F1F8';
+
+/* Kolommen in de volgorde van het Bestelformulier. veld verwijst naar de naam die
+   rfqVelden() teruggeeft; breedte 0 = de standaardbreedte van Excel. */
+const RFQ_BESTEL = [
+  {kop:'Quantity',     breedte:14.86},
+  {kop:'Product Code', breedte:14.43},
+  {kop:'Unit Price',   breedte:14.57, onder:'Inkoop EXW'},
+];
+const RFQ_SPEC = [
+  {kop:'Type',                veld:'Type',                breedte:10},
+  {kop:'Base',                veld:'Base',                breedte:16},
+  {kop:'Length (mm)',         veld:'Length (mm)',         breedte:0,  getal:true},
+  {kop:'Width (mm)',          veld:'Width (mm)',          breedte:0,  getal:true},
+  {kop:'Height (mm)',         veld:'Height (mm)',         breedte:0,  getal:true},
+  {kop:'Light aperture (mm)', veld:'Light aperture (mm)', breedte:12},
+  {kop:'Watt',                veld:'Watt',                breedte:0,  getal:true},
+  {kop:'Lumens',              veld:'Lumens',              breedte:0,  getal:true},
+  {kop:'Optics',              veld:'Optics',              breedte:12},
+  {kop:'Kelvin    colortemp', veld:'Kelvin colortemp',    breedte:10},
+  {kop:'CRI (Ra)',            veld:'CRI (Ra)',            breedte:0},
+  {kop:'Dimming',             veld:'Dimming',             breedte:0},
+  {kop:'Emergency',           veld:'Emergency',           breedte:12},
+  {kop:'Connector',           veld:'Connector',           breedte:20},
+  {kop:'Ral color Housing',   veld:'RAL color housing',   breedte:10},
+  {kop:'Air Slot',            veld:'Air slot',            breedte:0},
+  {kop:'Sensor',              veld:'Sensor',              breedte:0},
+  {kop:'remarks',             veld:'Remarks',             breedte:20},
+];
+
+/* De begeleidende tekst uit het tekstvak van het Bestelformulier. Drie tikfouten
+   uit het origineel ("collumns", "sson", "LIghting") staan hier goed. */
+const RFQ_BEGELEIDING = [
+  'Hereby you receive the Request For Quotation for tailormade lighting fixtures.',
+  'In the columns you will find the specifications for the requested types of lighting.',
+  'If there are any questions or uncertainties, please don\'t hesitate to contact us as soon as '
+    + 'possible, because of the due date we have to our client.',
+  'After acceptance of our client we will request you for 3D drawings for exact dimensions.',
+  '',
+  'Yours sincerely,',
+  'PDL Lighting Group B.V.',
+];
+
+/* Vaste rijnummers, net als in het Bestelformulier. */
+const RFQ_RIJ = {kop:5, notitie:9, notitieEind:16, rand:18, tabel:19, eenheid:20, eerste:21};
 
 function rfqXlsx(){
   const kop = rfqKop();
+  const kolommen = RFQ_BESTEL.concat(RFQ_SPEC);
+  const laatsteKol = kolommen.length;
+  const laatsteRij = Math.max(RFQ_RIJ.eerste + P.posities.length - 1, RFQ_RIJ.eerste);
+
+  /* stijlnummers, in dezelfde volgorde als cellXfs hieronder */
+  const S = {raster:1, label:2, waarde:3, randOnder:4, tabelkop:5, kolomkop:6,
+             inkoop:7, data:8, dataSlot:9, notitie:10};
+
   const rijen = [];
-  const T = function(v, s){ return {v:v, s:s}; };
-  const push = function(nr, cellen){
-    rijen.push('<row r="' + nr + '">' +
-      cellen.map(function(w, i){ return cel(i + 1, nr, w.v, w.s); }).join('') + '</row>');
-  };
+  const cellen = {};                 /* "rij,kol" -> xml, zodat het raster overal komt */
+  const zet = (rij, kol, waarde, stijl)=>{ cellen[rij+','+kol] = cel(kol, rij, waarde, stijl); };
 
-  push(1, [T('To:', 1), T(kop.to)]);
-  push(2, [T('Date:', 1), T(kop.date)]);
-  push(3, [T('Reference:', 1), T(kop.ref)]);
-  push(4, [T('Person in charge:', 1), T(kop.persoon)]);
-  push(6, XLSX_KOLOMMEN.map(function(h){ return T(h, 2); }));
+  /* Eerst het hele blok als leeg raster; de gevulde cellen komen er daarna overheen. */
+  for(let r=1; r<=laatsteRij+1; r++){
+    for(let k=1; k<=laatsteKol; k++){
+      zet(r, k, '', r===RFQ_RIJ.rand ? S.randOnder : S.raster);
+    }
+  }
 
-  P.posities.forEach(function(c, i){
-    const velden = rfqVelden(c);
-    const zoek = function(naam){ const r = velden.find(function(v){ return v[0] === naam; }); return r ? r[1] : ''; };
-    const num  = function(v){ const n = getal(v); return n == null ? '' : n; };
-    push(7 + i, [
-      T(num(rechts(c, 'aantal'))),
-      T(c.nieuw.productcode || ''),
-      T(c.nieuw.prijs || ''),
-      T(c.omschrijving || omschrijving(c)),
-      T(zoek('Type')), T(zoek('Base')),
-      T(num(zoek('Length (mm)'))), T(num(zoek('Width (mm)'))), T(num(zoek('Height (mm)'))),
-      T(zoek('Light aperture (mm)')),
-      T(num(zoek('Watt'))), T(num(zoek('Lumens'))),
-      T(zoek('Optics')), T(zoek('Kelvin colortemp')), T(zoek('CRI (Ra)')), T(zoek('Dimming')),
-      T(zoek('Emergency')), T(zoek('Connector')), T(zoek('RAL color housing')),
-      T(zoek('Air slot')), T(zoek('Sensor')), T(zoek('Remarks')),
-    ]);
+  /* de vier kopvelden */
+  [['To:', kop.to], ['Date:', kop.date], ['Reference:', kop.ref], ['Person in charge:', kop.persoon]]
+    .forEach(([label, waarde], i)=>{
+      const r = RFQ_RIJ.kop + i;
+      zet(r, 1, label, S.label);
+      zet(r, 2, waarde, S.waarde);
+      zet(r, 3, '', S.waarde); zet(r, 4, '', S.waarde);   /* B..D is samengevoegd */
+    });
+
+  /* de begeleidende tekst */
+  zet(RFQ_RIJ.notitie, 1, RFQ_BEGELEIDING.join('\n'), S.notitie);
+
+  /* tabelkop: bovenste regel met de bestelkolommen, onderste met de specificaties */
+  RFQ_BESTEL.forEach((k, i)=>{
+    zet(RFQ_RIJ.tabel, i+1, k.kop, S.tabelkop);
+    zet(RFQ_RIJ.eenheid, i+1, k.onder || '', k.onder ? S.inkoop : S.tabelkop);
   });
+  zet(RFQ_RIJ.tabel, RFQ_BESTEL.length+1, 'Description', S.tabelkop);
+  for(let k=RFQ_BESTEL.length+2; k<=laatsteKol; k++) zet(RFQ_RIJ.tabel, k, '', S.tabelkop);
+  RFQ_SPEC.forEach((k, i)=> zet(RFQ_RIJ.eenheid, RFQ_BESTEL.length+1+i, k.kop, S.kolomkop));
 
-  const breedtes = [10, 18, 12, 52, 14, 20, 12, 12, 12, 18, 8, 10, 26, 16, 10, 20, 22, 30, 18, 10, 16, 30];
-  const cols = '<cols>' + breedtes.map(function(w, i){
-    return '<col min="' + (i+1) + '" max="' + (i+1) + '" width="' + w + '" customWidth="1"/>';
-  }).join('') + '</cols>';
+  /* de posities */
+  P.posities.forEach((c, i)=>{
+    const r = RFQ_RIJ.eerste + i;
+    const stijl = (i === P.posities.length-1) ? S.dataSlot : S.data;
+    const velden = rfqVelden(c);
+    const zoek = naam => { const v = velden.find(x=>x[0] === naam); return v ? v[1] : ''; };
+    const nummer = v => { const n = getal(v); return n == null ? '' : n; };
+    zet(r, 1, nummer(rechts(c, 'aantal')), stijl);
+    zet(r, 2, c.nieuw.productcode || '', stijl);
+    zet(r, 3, c.nieuw.prijs || '', stijl);
+    RFQ_SPEC.forEach((k, j)=>{
+      const w = zoek(k.veld);
+      zet(r, RFQ_BESTEL.length+1+j, k.getal ? nummer(w) : w, stijl);
+    });
+  });
+  /* Staat er nog niets in de lijst, dan krijgt de rand-rij toch de dikke onderlijn. */
+  if(!P.posities.length){
+    for(let k=1; k<=laatsteKol; k++) zet(laatsteRij, k, '', S.dataSlot);
+  }
+
+  const hoogte = {1:75, 18:15.75, 20:22.5};
+  for(let r=1; r<=laatsteRij+1; r++){
+    const inhoud = [];
+    for(let k=1; k<=laatsteKol; k++) if(cellen[r+','+k]) inhoud.push(cellen[r+','+k]);
+    if(!inhoud.length) continue;
+    const h = hoogte[r] || (r >= RFQ_RIJ.eerste && r <= laatsteRij ? 56.25
+                         : (r >= RFQ_RIJ.notitie && r <= RFQ_RIJ.notitieEind ? 15 : 0));
+    const ht = h ? ' ht="' + h + '" customHeight="1"' : '';
+    rijen.push('<row r="' + r + '"' + ht + '>' + inhoud.join('') + '</row>');
+  }
+
+  const cols = '<cols>' + kolommen.map((k, i)=> k.breedte
+    ? '<col min="' + (i+1) + '" max="' + (i+1) + '" width="' + k.breedte + '" customWidth="1"/>'
+    : '<col min="' + (i+1) + '" max="' + (i+1) + '" width="8.43"/>').join('') + '</cols>';
+
+  const L = kolomLetter;
+  const samen = [
+    'B' + RFQ_RIJ.kop + ':D' + RFQ_RIJ.kop,
+    'B' + (RFQ_RIJ.kop+1) + ':D' + (RFQ_RIJ.kop+1),
+    'B' + (RFQ_RIJ.kop+2) + ':D' + (RFQ_RIJ.kop+2),
+    'B' + (RFQ_RIJ.kop+3) + ':D' + (RFQ_RIJ.kop+3),
+    'A' + RFQ_RIJ.notitie + ':' + L(Math.min(13, laatsteKol)) + RFQ_RIJ.notitieEind,
+    'A' + RFQ_RIJ.tabel + ':A' + RFQ_RIJ.eenheid,
+    'B' + RFQ_RIJ.tabel + ':B' + RFQ_RIJ.eenheid,
+    L(RFQ_BESTEL.length+1) + RFQ_RIJ.tabel + ':' + L(laatsteKol) + RFQ_RIJ.tabel,
+  ];
+  const mergeXml = '<mergeCells count="' + samen.length + '">' +
+    samen.map(r=>'<mergeCell ref="' + r + '"/>').join('') + '</mergeCells>';
 
   const sheet = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
-    cols + '<sheetData>' + rijen.join('') + '</sheetData></worksheet>';
+    '<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>' +
+    '<dimension ref="A1:' + L(laatsteKol) + (laatsteRij+1) + '"/>' +
+    '<sheetViews><sheetView showGridLines="0" tabSelected="1" workbookViewId="0"/></sheetViews>' +
+    '<sheetFormatPr defaultRowHeight="15"/>' +
+    cols + '<sheetData>' + rijen.join('') + '</sheetData>' + mergeXml +
+    '<pageMargins left="0.25" right="0.25" top="0.5" bottom="0.5" header="0.3" footer="0.3"/>' +
+    '<pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/>' +
+    '</worksheet>';
 
-  /* Twee opmaakjes: vet voor de kopvelden en vet-op-lichtblauw voor de kolomkoppen. */
+  /* Een opmaakregel voor styles.xml. De apply-vlaggen moeten erbij staan, anders
+     negeert Excel de instelling waar ze bij horen. */
+  const xf = (font, vul, rand, uitlijn)=>{
+    const a = uitlijn
+      ? '<alignment' + (uitlijn.h ? ' horizontal="' + uitlijn.h + '"' : '')
+        + (uitlijn.v ? ' vertical="' + uitlijn.v + '"' : '')
+        + (uitlijn.wrap ? ' wrapText="1"' : '') + '/>'
+      : '';
+    return '<xf numFmtId="0" fontId="' + font + '" fillId="' + vul + '" borderId="' + rand + '" xfId="0"'
+      + (font ? ' applyFont="1"' : '') + (vul ? ' applyFill="1"' : '') + (rand ? ' applyBorder="1"' : '')
+      + (a ? ' applyAlignment="1">' + a + '</xf>' : '/>');
+  };
+
+  const lt = 'Aptos Narrow';
   const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
-    '<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font>' +
-    '<font><b/><sz val="11"/><name val="Calibri"/></font></fonts>' +
-    '<fills count="3"><fill><patternFill patternType="none"/></fill>' +
-    '<fill><patternFill patternType="gray125"/></fill>' +
-    '<fill><patternFill patternType="solid"><fgColor rgb="FFE6EEF7"/><bgColor indexed="64"/></patternFill></fill></fills>' +
-    '<borders count="1"><border/></borders>' +
-    '<cellStyleXfs count="1"><xf/></cellStyleXfs>' +
-    '<cellXfs count="3"><xf xfId="0"/>' +
-    '<xf xfId="0" fontId="1" applyFont="1"/>' +
-    '<xf xfId="0" fontId="1" fillId="2" applyFont="1" applyFill="1"/></cellXfs>' +
+    '<fonts count="6">' +
+      '<font><sz val="11"/><name val="' + lt + '"/></font>' +                                  /* 0 gewoon */
+      '<font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="' + lt + '"/></font>' +       /* 1 wit vet */
+      '<font><b/><sz val="10"/><name val="' + lt + '"/></font>' +                              /* 2 zwart vet 10 */
+      '<font><b/><sz val="8"/><name val="' + lt + '"/></font>' +                               /* 3 zwart vet 8 */
+      '<font><b/><sz val="11"/><color rgb="FFFF0000"/><name val="' + lt + '"/></font>' +       /* 4 rood vet */
+      '<font><sz val="10"/><name val="' + lt + '"/></font>' +                                  /* 5 gewoon 10 */
+    '</fonts>' +
+    '<fills count="4">' +
+      '<fill><patternFill patternType="none"/></fill>' +
+      '<fill><patternFill patternType="gray125"/></fill>' +
+      '<fill><patternFill patternType="solid"><fgColor rgb="' + RFQ_BLAUW + '"/><bgColor indexed="64"/></patternFill></fill>' +
+      '<fill><patternFill patternType="solid"><fgColor rgb="' + RFQ_LICHT + '"/><bgColor indexed="64"/></patternFill></fill>' +
+    '</fills>' +
+    '<borders count="3">' +
+      '<border><left/><right/><top/><bottom/><diagonal/></border>' +
+      '<border><left style="thin"/><right style="thin"/><top style="thin"/><bottom style="thin"/><diagonal/></border>' +
+      '<border><left style="thin"/><right style="thin"/><top style="thin"/><bottom style="medium"/><diagonal/></border>' +
+    '</borders>' +
+    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+    /* Excel is hier strenger dan de meeste lezers: elke xf noemt zijn nummers
+       voluit, ook de nullen, anders wordt het bestand als beschadigd gemeld. */
+    '<cellXfs count="11">' +
+      xf(0, 0, 0) +                                        /* 0 standaard */
+      xf(0, 0, 1) +                                        /* 1 raster */
+      xf(1, 2, 1, {v:'center'}) +                          /* 2 label */
+      xf(2, 3, 1, {h:'center', v:'center'}) +              /* 3 waarde */
+      xf(0, 0, 2) +                                        /* 4 dikke onderlijn */
+      xf(1, 2, 1, {h:'center', v:'center', wrap:true}) +   /* 5 tabelkop */
+      xf(3, 3, 1, {h:'center', v:'center', wrap:true}) +   /* 6 kolomkop */
+      xf(4, 2, 1, {h:'center', v:'center'}) +              /* 7 Inkoop EXW */
+      xf(3, 0, 1, {h:'center', v:'center', wrap:true}) +   /* 8 gegevens */
+      xf(3, 0, 2, {h:'center', v:'center', wrap:true}) +   /* 9 laatste regel */
+      xf(5, 0, 1, {h:'left', v:'top', wrap:true}) +        /* 10 begeleiding */
+    '</cellXfs>' +
+    '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
+    '<dxfs count="0"/>' +
     '</styleSheet>';
 
   const NS = 'http://schemas.openxmlformats.org/';
@@ -1652,7 +1807,7 @@ function rfqXlsx(){
       '</Relationships>')},
     {naam:'xl/workbook.xml', data:utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<workbook xmlns="' + NS + 'spreadsheetml/2006/main" xmlns:r="' + NS + 'officeDocument/2006/relationships">' +
-      '<sheets><sheet name="RFQ" sheetId="1" r:id="rId1"/></sheets></workbook>')},
+      '<sheets><sheet name="Bestelformulier" sheetId="1" r:id="rId1"/></sheets></workbook>')},
     {naam:'xl/_rels/workbook.xml.rels', data:utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<Relationships xmlns="' + NS + 'package/2006/relationships">' +
       '<Relationship Id="rId1" Type="' + NS + 'officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
