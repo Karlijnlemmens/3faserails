@@ -1640,10 +1640,19 @@ const RFQ_BEGELEIDING = [
 const RFQ_RIJ = {titel:1, onderschrift:2, accent:3, kop:5,
                  notitie:10, notitieEind:16, rand:18, tabel:19, eenheid:20, eerste:21};
 /* Hoogtes van de kopbalk in punten; het logo wordt daarin verticaal gecentreerd. */
-/* logoH x de beeldverhouding (993/445) moet binnen kolom A passen - anders schuift
-   het logo over de titel heen. Kolom A is 14,86 tekens breed, ruim 100 punten. */
-const RFQ_BALK = {titelH:54, onderH:24, accentH:5, logoH:40, logoLinks:12};
+/* De kopbalk volgt die van het armaturenboek: het ruitpatroon over de volle
+   breedte met het logo eroverheen, en verder geen tekst - het logo is de kop. Wat
+   het document is staat in de bladnaam en in het formulierblok eronder. */
+const RFQ_BALK = {rij1H:60, rij2H:28, accentH:5, logoH:58, logoLinks:18};
 const EMU = 12700;   /* een punt in de eenheid die tekeningen in een xlsx gebruiken */
+
+/* Breedte en hoogte uit de IHDR van een PNG: de eerste acht bytes zijn de
+   handtekening, daarna lengte en "IHDR", en dan de twee getallen. Zo hoeft de
+   beeldverhouding nergens als vast getal in de code te staan. */
+function pngMaat(bytes){
+  const lees = i => (bytes[i]<<24 | bytes[i+1]<<16 | bytes[i+2]<<8 | bytes[i+3]) >>> 0;
+  return {b:lees(16), h:lees(20)};
+}
 
 async function rfqXlsx(){
   const kop = rfqKop();
@@ -1654,12 +1663,17 @@ async function rfqXlsx(){
   /* Het logo staat als data in merk-data.js; over file:// kan het niet als los
      bestand ingelezen worden (zie de kop van pdf-huisstijl.js). Lukt het niet, dan
      komt de merknaam als tekst in de balk - dan is er wel een balk, geen gat. */
-  let logo = null;
+  let logo = null, patroon = null;
   try{
     const merk = await PdfHuisstijl.merkData();
     if(merk && merk.logos && merk.logos.dlLicht) logo = PdfHuisstijl.b64Bytes(merk.logos.dlLicht);
-  }catch(err){ console.warn('Logo niet beschikbaar voor het RFQ-blad:', err && err.message); }
+    if(merk && merk.beelden && merk.beelden.ruitpatroon) patroon = PdfHuisstijl.b64Bytes(merk.beelden.ruitpatroon);
+  }catch(err){ console.warn('Merkbeeld niet beschikbaar voor het RFQ-blad:', err && err.message); }
   const logoRatio = PdfHuisstijl.THEMAS.distrilight.logoRatio;
+  /* De breedte van het blad in punten, uit de kolombreedtes zelf; het patroon moet
+     die volle breedte beslaan. Een tikje ruimer, zodat er rechts geen streepje
+     blauw naast valt. */
+  const bladBreedte = kolommen.reduce((b, k)=> b + (k.breedte || 8.43)*7 + 5, 0) * 1.02;
 
   /* stijlnummers, in dezelfde volgorde als cellXfs hieronder */
   const S = {leeg:0, raster:1, label:2, waarde:3, randOnder:4, tabelkop:5, kolomkop:6,
@@ -1669,15 +1683,13 @@ async function rfqXlsx(){
   const zet = (rij, kol, waarde, stijl)=>{ cellen[rij+','+kol] = cel(kol, rij, waarde, stijl); };
   const vulRij = (rij, stijl)=>{ for(let k=1; k<=laatsteKol; k++) zet(rij, k, '', stijl); };
 
-  /* --- de kopbalk --- */
+  /* --- de kopbalk ---
+     Effen blauw als ondergrond; het ruitpatroon en het logo komen er als tekening
+     overheen. Blijft dat beeld weg, dan staat de merknaam er in letters. */
   vulRij(RFQ_RIJ.titel, S.titel);
-  vulRij(RFQ_RIJ.onderschrift, S.onderschrift);
+  vulRij(RFQ_RIJ.onderschrift, S.titel);
   vulRij(RFQ_RIJ.accent, S.accent);
-  /* Kolom A blijft leeg: daar staat het logo overheen. Zonder logo komt de naam er. */
-  zet(RFQ_RIJ.titel, 1, logo ? '' : 'Distrilight', S.titel);
-  zet(RFQ_RIJ.titel, 2, 'REQUEST FOR QUOTATION', S.titel);
-  zet(RFQ_RIJ.onderschrift, 2,
-    ['Bandraster luminaires', kop.ref].filter(Boolean).join('   |   '), S.onderschrift);
+  if(!logo) zet(RFQ_RIJ.titel, 2, 'Distrilight', S.titel);
 
   /* --- het formulierblok --- */
   [['To:', kop.to], ['Date:', kop.date], ['Reference:', kop.ref], ['Person in charge:', kop.persoon]]
@@ -1718,8 +1730,8 @@ async function rfqXlsx(){
   if(!P.posities.length) vulRij(laatsteRij, S.dataSlot);
 
   const hoogte = {};
-  hoogte[RFQ_RIJ.titel] = RFQ_BALK.titelH;
-  hoogte[RFQ_RIJ.onderschrift] = RFQ_BALK.onderH;
+  hoogte[RFQ_RIJ.titel] = RFQ_BALK.rij1H;
+  hoogte[RFQ_RIJ.onderschrift] = RFQ_BALK.rij2H;
   hoogte[RFQ_RIJ.accent] = RFQ_BALK.accentH;
   hoogte[RFQ_RIJ.rand] = 15.75;
   hoogte[RFQ_RIJ.eenheid] = 22.5;
@@ -1740,8 +1752,6 @@ async function rfqXlsx(){
 
   const L = kolomLetter;
   const samen = [
-    'B' + RFQ_RIJ.titel + ':' + L(laatsteKol) + RFQ_RIJ.titel,
-    'B' + RFQ_RIJ.onderschrift + ':' + L(laatsteKol) + RFQ_RIJ.onderschrift,
     'B' + RFQ_RIJ.kop + ':D' + RFQ_RIJ.kop,
     'B' + (RFQ_RIJ.kop+1) + ':D' + (RFQ_RIJ.kop+1),
     'B' + (RFQ_RIJ.kop+2) + ':D' + (RFQ_RIJ.kop+2),
@@ -1764,7 +1774,7 @@ async function rfqXlsx(){
       samen.map(r=>'<mergeCell ref="' + r + '"/>').join('') + '</mergeCells>' +
     '<pageMargins left="0.25" right="0.25" top="0.5" bottom="0.5" header="0.3" footer="0.3"/>' +
     '<pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/>' +
-    (logo ? '<drawing r:id="rId1"/>' : '') +
+    ((logo || patroon) ? '<drawing r:id="rId1"/>' : '') +
     '</worksheet>';
 
   /* Een opmaakregel voor styles.xml. De apply-vlaggen moeten erbij staan, anders
@@ -1835,11 +1845,11 @@ async function rfqXlsx(){
       '<Types xmlns="' + NS + 'package/2006/content-types">' +
       '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
       '<Default Extension="xml" ContentType="application/xml"/>' +
-      (logo ? '<Default Extension="png" ContentType="image/png"/>' : '') +
+      ((logo || patroon) ? '<Default Extension="png" ContentType="image/png"/>' : '') +
       '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
       '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
       '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
-      (logo ? '<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>' : '') +
+      ((logo || patroon) ? '<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>' : '') +
       '</Types>')},
     {naam:'_rels/.rels', data:utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<Relationships xmlns="' + NS + 'package/2006/relationships">' +
@@ -1857,21 +1867,48 @@ async function rfqXlsx(){
     {naam:'xl/styles.xml', data:utf8(styles)},
   ];
 
-  if(logo){
-    const h = RFQ_BALK.logoH, b = h*logoRatio;
-    const balkH = RFQ_BALK.titelH + RFQ_BALK.onderH;
+  /* --- de tekeningen in de kopbalk: eerst het patroon, dan het logo erover ---
+     Ze zitten in een tekening; de volgorde daarin is de stapelvolgorde. */
+  const beelden = [];
+  if(patroon) beelden.push({naam:'image1.png', data:patroon});
+  if(logo)    beelden.push({naam:'image' + (beelden.length+1) + '.png', data:logo});
+
+  if(beelden.length){
+    const balkH = RFQ_BALK.rij1H + RFQ_BALK.rij2H;
+    const vormen = [];
+    let nr = 0;
+    const anker = (rel, links, boven, breed, hoog, srcRect)=>{
+      nr++;
+      return '<xdr:oneCellAnchor>' +
+        '<xdr:from><xdr:col>0</xdr:col><xdr:colOff>' + Math.round(links*EMU) + '</xdr:colOff>' +
+        '<xdr:row>0</xdr:row><xdr:rowOff>' + Math.round(boven*EMU) + '</xdr:rowOff></xdr:from>' +
+        '<xdr:ext cx="' + Math.round(breed*EMU) + '" cy="' + Math.round(hoog*EMU) + '"/>' +
+        '<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="' + nr + '" name="Distrilight ' + nr + '"/>' +
+        '<xdr:cNvPicPr/></xdr:nvPicPr>' +
+        '<xdr:blipFill><a:blip xmlns:r="' + NSR + '" r:embed="rId' + nr + '"/>' +
+        (srcRect || '') + '<a:stretch><a:fillRect/></a:stretch></xdr:blipFill>' +
+        '<xdr:spPr><a:xfrm><a:off x="0" y="0"/>' +
+        '<a:ext cx="' + Math.round(breed*EMU) + '" cy="' + Math.round(hoog*EMU) + '"/></a:xfrm>' +
+        '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic>' +
+        '<xdr:clientData/></xdr:oneCellAnchor>';
+    };
+    if(patroon){
+      /* Het vel is op A4-verhouding, net als in de PDF: op bladbreedte geschaald valt
+         alleen de bovenkant binnen de balk. De rest wordt niet weggedrukt door een wit
+         vlak zoals daar, maar met srcRect uit het beeld zelf gesneden. */
+      const m = pngMaat(patroon);
+      const volleHoogte = bladBreedte * m.h / m.b;
+      const houden = Math.max(0.02, Math.min(1, balkH / volleHoogte));
+      vormen.push(anker(1, 0, 0, bladBreedte, balkH,
+        '<a:srcRect b="' + Math.round((1-houden)*100000) + '"/>'));
+    }
+    if(logo){
+      const h = RFQ_BALK.logoH, b = h*logoRatio;
+      vormen.push(anker(2, RFQ_BALK.logoLinks, (balkH-h)/2, b, h));
+    }
     const tekening = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<xdr:wsDr xmlns:xdr="' + NS + 'drawingml/2006/spreadsheetDrawing" xmlns:a="' + NS + 'drawingml/2006/main">' +
-      '<xdr:oneCellAnchor>' +
-        '<xdr:from><xdr:col>0</xdr:col><xdr:colOff>' + Math.round(RFQ_BALK.logoLinks*EMU) + '</xdr:colOff>' +
-        '<xdr:row>0</xdr:row><xdr:rowOff>' + Math.round((balkH-h)/2*EMU) + '</xdr:rowOff></xdr:from>' +
-        '<xdr:ext cx="' + Math.round(b*EMU) + '" cy="' + Math.round(h*EMU) + '"/>' +
-        '<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="1" name="Distrilight"/><xdr:cNvPicPr/></xdr:nvPicPr>' +
-        '<xdr:blipFill><a:blip xmlns:r="' + NSR + '" r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>' +
-        '<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + Math.round(b*EMU) + '" cy="' + Math.round(h*EMU) + '"/></a:xfrm>' +
-        '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic>' +
-        '<xdr:clientData/>' +
-      '</xdr:oneCellAnchor></xdr:wsDr>';
+      vormen.join('') + '</xdr:wsDr>';
     bestanden.push(
       {naam:'xl/worksheets/_rels/sheet1.xml.rels', data:utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
         '<Relationships xmlns="' + NS + 'package/2006/relationships">' +
@@ -1880,9 +1917,9 @@ async function rfqXlsx(){
       {naam:'xl/drawings/drawing1.xml', data:utf8(tekening)},
       {naam:'xl/drawings/_rels/drawing1.xml.rels', data:utf8('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
         '<Relationships xmlns="' + NS + 'package/2006/relationships">' +
-        '<Relationship Id="rId1" Type="' + NSR + '/image" Target="../media/image1.png"/>' +
-        '</Relationships>')},
-      {naam:'xl/media/image1.png', data:logo});
+        beelden.map((b,i)=>'<Relationship Id="rId' + (i+1) + '" Type="' + NSR + '/image" Target="../media/' + b.naam + '"/>').join('') +
+        '</Relationships>')});
+    beelden.forEach(b=> bestanden.push({naam:'xl/media/' + b.naam, data:b.data}));
   }
   return zipMaak(bestanden);
 }
