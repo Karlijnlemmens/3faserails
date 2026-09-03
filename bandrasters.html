@@ -721,7 +721,7 @@ function leegConcept(){
       kleurtemp:'', cri:'', optiek:'', kleur:'', kleurRal:'',
       sturing:'', aansluiting:'', nood:'', sensor:'', ventilatie:'', extras:'', aantal:'',
       basis:'Optic bandraster', basisAnders:'', lichtvlakL:'', lichtvlakB:'',
-      productcode:'', prijs:'',
+      productcode:'', codering:'', prijs:'',
     },
     /* Per veld-id: staat false zodra de rechterkant bewust afwijkt van links.
        Ontbreekt de sleutel, dan volgt rechts links - zoals de Excel dat met
@@ -938,6 +938,7 @@ const RIJEN = [
   {id:'basis',       label:'Basisarmatuur',   soort:'rechtsKeuze', lijst:'basis', anders:'basisAnders', andersBij:'Anders:'},
   {id:'lichtvlak',   label:'Lichtvlak (l×b)', soort:'lichtvlak'},
   {id:'productcode', label:'Product code',    soort:'rechtsTekst', plaats:'wordt door de fabrikant bevestigd'},
+  {id:'codering',    label:'Codering',        soort:'rechtsTekst', plaats:'eigen code — komt als stempel op het productblad'},
   {id:'prijs',       label:'Unit price',      soort:'rechtsTekst', plaats:'leeg laten = fabrikant vult in'},
 ];
 
@@ -1510,6 +1511,13 @@ const M = {
   rij: 9.5, wikkel: 6.8, naBestel: 27.1, groepGat: 20.5, lijnBoven: 7.1,
   figuur: {x:305, y:158, b:255, h:250},
   foto: {h:104, gat:15, naBeeld:11, xNaam:56, onder:14},
+  /* De codestempel staat op dezelfde hoogte als die van het armaturenboek (27pt
+     onder de bovenrand, 11pt, rechts uitgelijnd, meerdere regels onder elkaar).
+     Alleen de rechterkant wijkt af: het armaturenboek eindigt op 145,4pt van de
+     rechterrand, maar daar loopt in de DLC-kopbalk de schuine rand van het witte
+     vlak - op deze hoogte zit die op x=445..453. De stempel eindigt daarom op
+     x=440, ruim binnen het witte deel, en is zwart in plaats van wit. */
+  stempel: {y:27, pt:11, marge:155, regel:13, breedte:300, minPt:7},
   voetY: 806.9, voetX1: 28.3, voetX2: 551.5,
   tekst: '#231F20', lijn: '#BCBEC0',
 };
@@ -1530,11 +1538,7 @@ function uriBytes(uri){
 function bladGroepen(c){
   const lv = lichtvlak(c);
   const eff = getal(P.instellingen.efficacy) || 140;
-  const w = wattNieuw(c), lmN = lumenNieuw(c), lmO = lumenOud(c);
-  const oudW = (()=>{
-    const m = /-(\d+)W$/.exec(c.oud.lichtbron||''); const n = getal(c.oud.aantalLb);
-    return (m && n) ? parseInt(m[1],10)*n : null;
-  })();
+  const w = wattNieuw(c), lmN = lumenNieuw(c);
   return [
     {kop:'Algemeen', rijen:[
       ['Uitvoering',       basisNaam(c)],
@@ -1563,19 +1567,6 @@ function bladGroepen(c){
       ['Noodverlichting',  rechts(c,'nood')],
       ['Sensor',           rechts(c,'sensor')],
       ["Extra's",          rechts(c,'extras')],
-    ]},
-    {kop:'Vervangt', rijen:[
-      ['Bestaand armatuur',    c.oud.lichtbron ? ((c.oud.aantalLb||'1')+' × '+c.oud.lichtbron) : ''],
-      ['Bestaande optiek',     c.oud.optiek],
-      ['Lichtstroom bestaand', lmO==null ? '' : lmO+' lm'],
-      ['Vermogen bestaand',    oudW==null ? '' : oudW+' W'],
-      ['Besparing',            (oudW && w!=null) ? (Math.round((1-w/oudW)*100)+' %') : ''],
-    ]},
-    {kop:'Project', rijen:[
-      ['Project',       [P.project.nr, P.project.naam].filter(Boolean).join(' — ')],
-      ['Positie',       c.omschrijving || ''],
-      ['Aantal',        rechts(c,'aantal') ? (rechts(c,'aantal')+' stuks') : ''],
-      ['Datum',         P.project.datum ? PdfHuisstijl.datumNL(P.project.datum) : ''],
     ]},
   ];
 }
@@ -1636,6 +1627,21 @@ async function bouwProductblad(c){
   }
   function slotlijn(){ haarlijn(M.lijnLabelB, M.lijnWaardeX, M.lijnWaardeB); }
 
+  /* De eigen codering, gestempeld zoals het armaturenboek dat op een presenter
+     doet: zelfde hoogte, zelfde korps, rechts uitgelijnd en meerdere codes onder
+     elkaar. Wordt een regel te breed, dan krimpt hij in plaats van dat hij
+     opschuift - zo blijft de stempel op zijn plek staan. */
+  function stempelCode(codering){
+    const codes = String(codering||'').split(/[\n;]+/).map(t=>t.trim()).filter(Boolean);
+    const S = M.stempel;
+    codes.forEach((code, i) => {
+      let pt = S.pt;
+      while(pt > S.minPt && HS.meet(code, pt, {bold:true, cond:true}) > S.breedte) pt -= 0.5;
+      tekst(W - S.marge, S.y + i*S.regel + S.pt*0.78, pt, code,
+        {bold:true, cond:true, align:'right', color:M.tekst});
+    });
+  }
+
   nieuwePagina(true);
   tekst(M.x, M.titel1, M.titelPt, 'Bandrasterarmatuur', {cond:true, bold:false, color:M.tekst});
   tekst(M.x, M.titel2, M.titelPt, basisNaam(c), {cond:true, bold:true, color:M.tekst});
@@ -1652,7 +1658,9 @@ async function bouwProductblad(c){
     tekst(kol.xWaarde, y, M.rijPt, 'Omschrijving', {bold:true, cond:true, color:M.tekst});
     y += M.naKoprij;
     const regels = wrapBreedte(oms, kol.breedte, M.rijPt, {});
-    tekst(M.xLabel, y, M.rijPt, code || 'n.t.b.', {color:M.tekst});
+    /* Een bandrasterarmatuur is een eenmalig product; zonder eigen artikelcode
+       staat er "Special", zoals het armaturenboek dat ook noemt. */
+    tekst(M.xLabel, y, M.rijPt, code || 'Special', {color:M.tekst});
     regels.forEach((r,i)=> tekst(kol.xWaarde, y + i*M.wikkel, M.rijPt, r, {color:M.tekst}));
     y += (regels.length-1)*M.wikkel + M.naBestel;
   }
@@ -1701,9 +1709,10 @@ async function bouwProductblad(c){
   }
 
   /* Het figuur staat rechtsboven op de eerste pagina, waar in het DLC-ontwerp de
-     productfoto zit. */
+     productfoto zit; de codestempel komt in de kopbalk erboven. */
   pg = paginas[0];
   figuurPdf(HS, c, M.figuur.x, M.figuur.y, M.figuur.b, M.figuur.h);
+  stempelCode(c.nieuw.codering);
   pg = paginas[paginas.length-1];
 
   return await doc.save();
