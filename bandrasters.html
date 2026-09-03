@@ -192,8 +192,11 @@
   .figuurhint.uit{display:none;}
   #figuur .sleepbaar{cursor:grab;}
   #figuur.sleept .sleepbaar{cursor:grabbing;}
-  #figuur .greep[data-as="x"]{cursor:ew-resize;}
-  #figuur .greep[data-as="y"]{cursor:ns-resize;}
+  #figuur .as{transform-box:fill-box; transform-origin:center; transition:transform .1s ease-out;}
+  #figuur .as:hover, #figuur .as.actief{transform:scale(1.5);}
+  #figuur .as:hover line, #figuur .as.actief line{stroke-width:1.4;}
+  #figuur [data-as="x"] .greep{cursor:ew-resize;}
+  #figuur [data-as="y"] .greep{cursor:ns-resize;}
   #figuur{width:100%; height:auto; display:block; background:var(--white); touch-action:none;
     border:1px solid var(--border); border-radius:10px;}
   .samenvat{list-style:none; margin:12px 0 0; padding:0; font-size:12px;}
@@ -311,6 +314,7 @@
       <h2>Maatvoering alternatief</h2>
       <svg id="figuur" viewBox="0 0 340 300" role="img" aria-label="Maatvoering van het alternatief"></svg>
       <p class="figuurhint" id="figuurhint">Sleep een pijl om een lichtvlak horizontaal of verticaal te verplaatsen.</p>
+      <div id="lichtvlakvelden"></div>
       <ul class="samenvat" id="samenvat"></ul>
     </div>
   </div>
@@ -1011,7 +1015,6 @@ const RIJEN = [
   {id:'extras',      label:"Extra's",         soort:'tekst'},
   {id:'aantal',      label:'Aantallen',       soort:'aantal'},
   {id:'basis',       label:'Basisarmatuur',   soort:'rechtsKeuze', lijst:'basis', anders:'basisAnders', andersBij:'Anders:'},
-  {id:'lichtvlak',   label:'Lichtvlakken',    soort:'lichtvlak'},
   {id:'productcode', label:'Product code',    soort:'rechtsTekst', plaats:'wordt door de fabrikant bevestigd'},
   {id:'prijs',       label:'Unit price',      soort:'rechtsTekst', plaats:'leeg laten = fabrikant vult in'},
 ];
@@ -1192,9 +1195,6 @@ function tekenIntake(){
       case 'rechtsTekst':
         rechtsCel.appendChild(tekstveld(c.nieuw[rij.id], v=>{ c.nieuw[rij.id]=v; ververs(); }, {plaats:rij.plaats}));
         break;
-      case 'lichtvlak':
-        rechtsCel.appendChild(lichtvlakVelden(c));
-        break;
       default:
         rechtsCel.className += ' leeg';
     }
@@ -1206,13 +1206,17 @@ function tekenIntake(){
 }
 
 /* Per lichtvlak de maat en de plek, met een knop om er een bij te zetten of weg te
-   halen. Een leeg veld betekent "reken maar uit"; de placeholder laat zien wat daar
-   dan uit komt, dus leeghalen is tegelijk de manier om een veld weer los te laten.
-   De placeholders worden in ververs() bijgewerkt, want ze hangen aan de buitenmaat
-   die links wordt ingetypt. */
-function lichtvlakVelden(c){
-  const lijst = c.nieuw.lichtvlakken;
-  const vak = el('div', 'lv');
+   halen. Ze staan onder het figuur en niet in het intakeraster: je typt hier maten
+   in van iets dat je ernaast ziet staan, en kunt hetzelfde vlak in de tekening
+   verslepen. Een leeg veld betekent "reken maar uit"; de placeholder laat zien wat
+   daar dan uit komt, dus leeghalen is tegelijk de manier om een veld weer los te
+   laten. De placeholders worden in ververs() bijgewerkt, want ze hangen aan de
+   buitenmaat die in het intakeraster wordt ingetypt. */
+function tekenLichtvlakken(){
+  const c = P.concept, lijst = c.nieuw.lichtvlakken;
+  const vak = $('lichtvlakvelden');
+  vak.textContent = '';
+  vak.className = 'lv';
   AFGELEID.lichtvlakken = [];
   lijst.forEach((vlak, i) => {
     const blok = el('div', 'lvblok');
@@ -1252,7 +1256,6 @@ function lichtvlakVelden(c){
   bij.type = 'button';
   bij.addEventListener('click', function(){ lijst.push(leegLichtvlak()); tekenAlles(); });
   vak.appendChild(bij);
-  return vak;
 }
 
 /* Links wijzigen; de rechterkant die nog meeloopt volgt vanzelf omdat rechts()
@@ -1466,21 +1469,26 @@ function figuurSvg(c, bx, by){
     const ax = klem2(v.w/2 - 3, 6, 16), ay = klem2(v.h/2 - 3, 5, 13);
     const pijl = (x, y, r) => '<polygon points="'+pijlPunten({x:x, y:y, r:r, g:3})
       .map(p=>p[0]+','+p[1]).join(' ')+'" fill="'+K.lichtvlakLijn+'"/>';
-    const greep = (as, x, y, w, h) =>
-      '<rect class="greep" data-vlak="'+v.i+'" data-as="'+as+'" x="'+x+'" y="'+y+'" width="'+w+
-      '" height="'+h+'" fill="rgba(0,0,0,0)"/>';
-    return '<g>' +
-      '<line x1="'+(cx-ax)+'" y1="'+cy+'" x2="'+(cx+ax)+'" y2="'+cy+'" stroke="'+K.lichtvlakLijn+'" stroke-width="0.9"/>' +
-      pijl(cx-ax, cy, 'l') + pijl(cx+ax, cy, 'r') +
-      '<line x1="'+cx+'" y1="'+(cy-ay)+'" x2="'+cx+'" y2="'+(cy+ay)+'" stroke="'+K.lichtvlakLijn+'" stroke-width="0.9"/>' +
-      pijl(cx, cy-ay, 'b') + pijl(cx, cy+ay, 'o') +
-      /* De greep voor de horizontale as is opgeknipt in twee armen; het midden waar
-         de twee pijlen elkaar kruisen hoort bij de verticale as. Eén vlakje voor
-         beide zou betekenen dat je in het midden nooit weet welke kant je op gaat. */
-      greep('x', cx-ax-4, cy-6, ax-2, 12) +
-      greep('x', cx+6, cy-6, ax-2, 12) +
-      greep('y', cx-6, cy-ay-4, 12, 2*ay+8) +
-      '</g>';
+    const greep = (x, y, w, h) =>
+      '<rect class="greep" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="rgba(0,0,0,0)"/>';
+    /* Elke as is een eigen groep: zo kan hij als geheel meegroeien zodra de muis
+       erop staat, en zie je aan welke kant je trekt voordat je begint. De as die op
+       dat moment gesleept wordt blijft groot - het figuur wordt tijdens het slepen
+       telkens opnieuw getekend, dus dat kan niet met een klasse achteraf. */
+    const as = (naam, binnenin) =>
+      '<g class="as'+(sleep && sleep.i===v.i && sleep.as===naam ? ' actief' : '')+
+      '" data-vlak="'+v.i+'" data-as="'+naam+'">' + binnenin + '</g>';
+    return as('x',
+        '<line x1="'+(cx-ax)+'" y1="'+cy+'" x2="'+(cx+ax)+'" y2="'+cy+'" stroke="'+K.lichtvlakLijn+'" stroke-width="0.9"/>' +
+        pijl(cx-ax, cy, 'l') + pijl(cx+ax, cy, 'r') +
+        /* Opgeknipt in twee armen; het midden waar de twee pijlen elkaar kruisen
+           hoort bij de verticale as. Eén vlakje voor beide zou betekenen dat je in
+           het midden nooit weet welke kant je op gaat. */
+        greep(cx-ax-4, cy-6, ax-2, 12) + greep(cx+6, cy-6, ax-2, 12)) +
+      as('y',
+        '<line x1="'+cx+'" y1="'+(cy-ay)+'" x2="'+cx+'" y2="'+(cy+ay)+'" stroke="'+K.lichtvlakLijn+'" stroke-width="0.9"/>' +
+        pijl(cx, cy-ay, 'b') + pijl(cx, cy+ay, 'o') +
+        greep(cx-6, cy-ay-4, 12, 2*ay+8));
   }).join('');
 
   return fig.vormen.map(v=>{
@@ -1534,7 +1542,7 @@ function figuurPdf(HS, c, ox, oy, bx, by){
 
 /* ======================= verversen ======================= */
 
-function tekenAlles(){ tekenIntake(); ververs(); }
+function tekenAlles(){ tekenIntake(); tekenLichtvlakken(); ververs(); }
 
 /* Alles wat van de staat afhangt maar niet uit een invoerveld komt. Wordt na
    elke wijziging aangeroepen; het intakeraster zelf blijft staan. */
@@ -2388,6 +2396,11 @@ $('knRfqXlsx').addEventListener('click', function(){
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 });
 
+/* Slepen gaat in stappen van 5 mm: fijner heeft geen zin voor een armatuur dat
+   gebouwd moet worden, en het scheelt dat je met de muis geen 3 mm hoeft te mikken.
+   Intypen mag wel op de millimeter.  */
+const SLEEPSTAP = 5;
+
 /* Een lichtvlak met de muis verplaatsen. Het figuur wordt bij elke wijziging
    opnieuw getekend, dus de afhandeling hangt aan de svg zelf en niet aan de
    rechthoeken; de pointer wordt gevangen zodat slepen buiten het vlak doorloopt.
@@ -2414,7 +2427,7 @@ $('figuur').addEventListener('pointerdown', function(e){
   /* Aan een pijl trekken zegt meteen welke kant op; pak je het vlak zelf, dan
      bepaalt de eerste beweging de as. Diagonaal schuiven kan niet - een vlak dat
      tegelijk opzij en omlaag glijdt is lastig terug te vinden. */
-  sleep = {vlak:vlak, maat:nu, punt:punt, as:doel.getAttribute('data-as') || null};
+  sleep = {vlak:vlak, maat:nu, punt:punt, i:i, as:doel.getAttribute('data-as') || null};
   $('figuur').classList.add('sleept');
   $('figuur').setPointerCapture(e.pointerId);
   e.preventDefault();
@@ -2429,12 +2442,15 @@ $('figuur').addEventListener('pointermove', function(e){
     sleep.as = Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
   }
   const k = figuurKader, m = sleep.maat;
+  /* Afronden op de stap, en daarna pas klemmen: anders kan een vlak niet meer tegen
+     de rand aan liggen als de rand zelf geen veelvoud van de stap is. */
+  const stap = w => Math.round(w / SLEEPSTAP) * SLEEPSTAP;
   if(sleep.as === 'x'){
     const x = (m.x==null ? 0 : m.x) + dx / k.s;
-    sleep.vlak.x = String(Math.round(klem(x, 0, k.L - (m.l||0))));
+    sleep.vlak.x = String(klem(stap(x), 0, k.L - (m.l||0)));
   } else {
     const y = (m.y==null ? 0 : m.y) + dy / k.s;
-    sleep.vlak.y = String(Math.round(klem(y, 0, k.B - (m.b||0))));
+    sleep.vlak.y = String(klem(stap(y), 0, k.B - (m.b||0)));
   }
   ververs();
 });
