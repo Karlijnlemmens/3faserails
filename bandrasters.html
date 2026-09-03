@@ -187,7 +187,11 @@
   #fotoBg figcaption{font-size:12px; color:var(--slate); text-align:center; margin-top:10px;}
 
   /* --- figuur --- */
-  #figuur{width:100%; height:auto; display:block; background:var(--white);
+  .figuurhint{font-size:11px; color:var(--slate); margin:6px 0 0; text-align:center;}
+  .figuurhint.uit{display:none;}
+  #figuur .sleepbaar{cursor:grab;}
+  #figuur.sleept .sleepbaar{cursor:grabbing;}
+  #figuur{width:100%; height:auto; display:block; background:var(--white); touch-action:none;
     border:1px solid var(--border); border-radius:10px;}
   .samenvat{list-style:none; margin:12px 0 0; padding:0; font-size:12px;}
   .samenvat li{display:flex; justify-content:space-between; gap:10px; padding:4px 0;
@@ -303,6 +307,7 @@
       <span class="eyebrow">Afgeleid figuur</span>
       <h2>Maatvoering alternatief</h2>
       <svg id="figuur" viewBox="0 0 340 300" role="img" aria-label="Maatvoering van het alternatief"></svg>
+      <p class="figuurhint" id="figuurhint">Sleep een lichtvlak om het te verplaatsen.</p>
       <ul class="samenvat" id="samenvat"></ul>
     </div>
   </div>
@@ -1325,8 +1330,8 @@ function figuurVormen(c, bx, by, korps){
 
   /* bovenaanzicht met de lichtvlakken erin, elk op zijn eigen plek */
   v.push({t:'rect', x:x0, y:y0, w:bw, h:bh, rol:'omhulsel'});
-  vlakken.forEach(function(f){
-    v.push({t:'rect', x:x0+f.x*s, y:y0+f.y*s, w:f.l*s, h:f.b*s, rol:'lichtvlak'});
+  vlakken.forEach(function(f, i){
+    v.push({t:'rect', x:x0+f.x*s, y:y0+f.y*s, w:f.l*s, h:f.b*s, rol:'lichtvlak', i:i});
   });
   /* zijaanzicht */
   v.push({t:'rect', x:x0, y:y1, w:bw, h:zh, rol:'omhulsel'});
@@ -1345,14 +1350,21 @@ function figuurVormen(c, bx, by, korps){
     v.push({t:'pijl', x:xb, y:yy, r:buiten?'l':'r', g:pijl});
     if(tekst) v.push({t:'tekst', x:(xa+xb)/2, y:yy+3, s:tekst, anker:'m', rol:'maat'});
   };
-  const vertikaal = (yb, yo, xx, vanaf, tekst) => {
+  /* opt.binnen houdt een korte maat binnen zijn eigen span: geen pijlen die naar
+     buiten steken en het getal onder de maat in plaats van ernaast. Nodig voor de
+     maat vanaf de bovenkant, want die begint op de rand van het aanzicht - naar
+     buiten uitsteken zou dwars door de aanzichtnaam lopen. */
+  const vertikaal = (yb, yo, xx, vanaf, tekst, opt) => {
+    opt = opt || {};
     v.push({t:'lijn', x1:vanaf, y1:yb, x2:xx+4, y2:yb, rol:'hulplijn'});
     v.push({t:'lijn', x1:vanaf, y1:yo, x2:xx+4, y2:yo, rol:'hulplijn'});
-    const buiten = (yo - yb) < kort;
+    const krap = (yo - yb) < kort, buiten = krap && !opt.binnen;
     v.push({t:'lijn', x1:xx, y1:yb-(buiten?kort:0), x2:xx, y2:yo+(buiten?kort:0), rol:'maatlijn'});
-    v.push({t:'pijl', x:xx, y:yb, r:buiten?'b':'o', g:pijl});
-    v.push({t:'pijl', x:xx, y:yo, r:buiten?'o':'b', g:pijl});
-    v.push({t:'tekst', x:xx+7, y:(yb+yo)/2-4, s:tekst, anker:'l', rol:'maat'});
+    if(!krap || buiten){
+      v.push({t:'pijl', x:xx, y:yb, r:buiten?'b':'o', g:pijl});
+      v.push({t:'pijl', x:xx, y:yo, r:buiten?'o':'b', g:pijl});
+    }
+    v.push({t:'tekst', x:xx+7, y:(opt.binnen && krap) ? yo+2 : (yb+yo)/2-4, s:tekst, anker:'l', rol:'maat'});
   };
 
   const yMaat = y0 + bh + 14;
@@ -1378,6 +1390,14 @@ function figuurVormen(c, bx, by, korps){
       horizontaal(x0+a*s, x0+b*s, yMaat, y0+bh,
         (b-a)*s >= 0.56*(korps||10)*label.length ? label : '');
     }
+    /* De plek vanaf de bovenkant: een korte maatlijn binnen het bovenaanzicht, bij
+       het vlak zelf. Elk vlak staat op zijn eigen x, dus die lijnen komen elkaar
+       niet tegen. Ligt een vlak tegen de bovenrand, dan valt er niets te maten. */
+    vlakken.forEach(function(f){
+      if(f.y < 0.5) return;
+      const xv = x0 + f.x*s + 7;
+      vertikaal(y0, y0 + f.y*s, xv, xv, maat(f.y), {binnen:true});
+    });
     v.push({t:'tekst', x:x0+bw/2, y:yMaat+15, s:'lichtvlak '+lichtvlakTekst(c, '×', ' mm'),
             anker:'m', rol:'maat'});
   }
@@ -1389,7 +1409,9 @@ function figuurVormen(c, bx, by, korps){
   /* aanzichtnamen */
   v.push({t:'tekst', x:x0, y:y0-11, s:'bovenaanzicht', anker:'l', rol:'aanzicht'});
   v.push({t:'tekst', x:x0, y:y1-11, s:'zijaanzicht',   anker:'l', rol:'aanzicht'});
-  return v;
+  /* Het kader is de omrekening tussen beeldpunten en millimeters in het
+     bovenaanzicht. De tekenaars hebben er niets aan, het slepen op het scherm wel. */
+  return {vormen:v, kader:{x0:x0, y0:y0, s:s, L:L, B:B}};
 }
 
 /* Twee stijlsets voor dezelfde vormen: op het scherm in de blauwe huisstijl van
@@ -1407,21 +1429,29 @@ function pijlPunten(v){
   return [[v.x, v.y], [v.x-g*0.7, v.y-g*1.8], [v.x+g*0.7, v.y-g*1.8]];
 }
 
+/* De laatst getekende omrekening beeldpunten <-> millimeters. Alleen het scherm
+   heeft hem nodig (voor het slepen), dus hij wordt hier gezet en niet in
+   figuurVormen zelf - anders zou een PDF-export hem overschrijven met de maten
+   van het productblad. */
+let figuurKader = null;
+
 function figuurSvg(c, bx, by){
-  const vormen = figuurVormen(c, bx, by);
+  const fig = figuurVormen(c, bx, by);
   const K = FIG_SCHERM;
-  if(!vormen){
+  figuurKader = fig ? fig.kader : null;
+  if(!fig){
     return '<text x="'+(bx/2)+'" y="'+(by/2)+'" text-anchor="middle" font-family="Nunito Sans, sans-serif" ' +
            'font-size="12" fill="#5A6B84">Vul lengte, breedte en hoogte in</text>';
   }
   const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const anker = a => a==='m' ? 'middle' : a==='r' ? 'end' : 'start';
-  return vormen.map(v=>{
+  return fig.vormen.map(v=>{
     if(v.t==='rect'){
       const vul  = v.rol==='lichtvlak' ? K.lichtvlakVul  : K.omhulselVul;
       const lijn = v.rol==='lichtvlak' ? K.lichtvlakLijn : K.omhulselLijn;
+      const sleep = v.rol==='lichtvlak' ? ' data-vlak="'+v.i+'" class="sleepbaar"' : '';
       return '<rect x="'+v.x+'" y="'+v.y+'" width="'+v.w+'" height="'+v.h+'" fill="'+vul+
-             '" stroke="'+lijn+'" stroke-width="1"/>';
+             '" stroke="'+lijn+'" stroke-width="1"'+sleep+'/>';
     }
     if(v.t==='lijn'){
       const kl = v.rol==='hulplijn' ? K.hulplijn : K.maatlijn;
@@ -1442,10 +1472,10 @@ function figuurSvg(c, bx, by){
 function figuurPdf(HS, c, ox, oy, bx, by){
   /* 6 punten is het korps waarmee de maten hieronder gezet worden; figuurVormen
      bepaalt daarmee of een getal in zijn segment past. */
-  const vormen = figuurVormen(c, bx, by, 6);
-  if(!vormen) return false;
+  const fig = figuurVormen(c, bx, by, 6);
+  if(!fig) return false;
   const K = FIG_BLAD;
-  vormen.forEach(v=>{
+  fig.vormen.forEach(v=>{
     if(v.t==='rect'){
       const vul  = v.rol==='lichtvlak' ? K.lichtvlakVul  : K.omhulselVul;
       const lijn = v.rol==='lichtvlak' ? K.lichtvlakLijn : K.omhulselLijn;
@@ -1478,12 +1508,15 @@ function ververs(){
   if(AFGELEID.watt)       vulBerekend(AFGELEID.watt,       wattNieuw(c));
 
   /* De placeholders van de lichtvlakvelden tonen wat de tool zelf uitrekent; die
-     verandert zodra de buitenmaat verandert. */
+     verandert zodra de buitenmaat verandert. De waarden zelf lopen mee met de
+     staat, want slepen in het figuur schrijft x en y - het raster wordt daarbij
+     niet opnieuw opgebouwd, anders zou je de cursor kwijtraken. */
   const vlakken = lichtvlakken(c);
   (AFGELEID.lichtvlakken || []).forEach(function(velden, i){
-    const berekend = vlakken[i] || {};
+    const berekend = vlakken[i] || {}, opgeslagen = c.nieuw.lichtvlakken[i] || {};
     ['l','b','x','y'].forEach(function(naam){
       velden[naam].placeholder = berekend[naam]==null ? 'auto' : String(Math.round(berekend[naam]));
+      if(velden[naam].value !== (opgeslagen[naam]||'')) velden[naam].value = opgeslagen[naam]||'';
     });
   });
 
@@ -1496,6 +1529,7 @@ function ververs(){
     : ('Positie ' + String(P.posities.length+1).padStart(2,'0') + ' — nieuw');
 
   $('figuur').innerHTML = figuurSvg(c, 340, 300);
+  $('figuurhint').classList.toggle('uit', !figuurKader);
   tekenSamenvatting();
   tekenRfq();
 
@@ -2314,6 +2348,52 @@ $('knRfqXlsx').addEventListener('click', function(){
   if(!P.posities.length){ alert('De RFQ-lijst is nog leeg.'); return; }
   download('rfq-' + projectNaamDeel() + '.xlsx', rfqXlsx(),
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+});
+
+/* Een lichtvlak met de muis verplaatsen. Het figuur wordt bij elke wijziging
+   opnieuw getekend, dus de afhandeling hangt aan de svg zelf en niet aan de
+   rechthoeken; de pointer wordt gevangen zodat slepen buiten het vlak doorloopt.
+   Wat je sleept komt als gewone waarde in de x- en y-velden terecht - daarmee is
+   het vlak dus losgemaakt van de automatische plek, en leeghalen zet dat terug. */
+let sleep = null;
+function svgPunt(e){
+  const svg = $('figuur');
+  const m = svg.getScreenCTM();
+  if(!m) return null;
+  const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
+  return {x:p.x, y:p.y};
+}
+function klem(w, laag, hoog){ return Math.min(Math.max(w, laag), Math.max(laag, hoog)); }
+
+$('figuur').addEventListener('pointerdown', function(e){
+  const doel = e.target.closest ? e.target.closest('[data-vlak]') : null;
+  if(!doel || !figuurKader) return;
+  const i = +doel.getAttribute('data-vlak');
+  const vlak = P.concept.nieuw.lichtvlakken[i];
+  const nu = lichtvlakken(P.concept)[i];
+  const punt = svgPunt(e);
+  if(!vlak || !nu || !punt) return;
+  sleep = {vlak:vlak, maat:nu, punt:punt};
+  $('figuur').classList.add('sleept');
+  $('figuur').setPointerCapture(e.pointerId);
+  e.preventDefault();
+});
+$('figuur').addEventListener('pointermove', function(e){
+  if(!sleep || !figuurKader) return;
+  const punt = svgPunt(e);
+  if(!punt) return;
+  const k = figuurKader, m = sleep.maat;
+  const x = (m.x==null ? 0 : m.x) + (punt.x - sleep.punt.x) / k.s;
+  const y = (m.y==null ? 0 : m.y) + (punt.y - sleep.punt.y) / k.s;
+  sleep.vlak.x = String(Math.round(klem(x, 0, k.L - (m.l||0))));
+  sleep.vlak.y = String(Math.round(klem(y, 0, k.B - (m.b||0))));
+  ververs();
+});
+['pointerup','pointercancel'].forEach(function(soort){
+  $('figuur').addEventListener(soort, function(){
+    sleep = null;
+    $('figuur').classList.remove('sleept');
+  });
 });
 
 document.addEventListener('keydown', function(e){
