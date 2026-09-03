@@ -132,7 +132,8 @@
     font-size:10px; font-weight:800; color:var(--slate); margin-bottom:5px;
     text-transform:uppercase; letter-spacing:.04em;
   }
-  .lvkop .mini{padding:0 6px; line-height:16px;}
+  .lvkop .mini{padding:0 6px; line-height:16px; text-transform:none; letter-spacing:0;}
+  .lvknoppen{display:flex; gap:4px; align-items:center;}
   .lvraster{display:grid; grid-template-columns:auto 1fr auto 1fr; gap:5px 7px; align-items:center;}
   .lvraster > label{font-size:11px; color:var(--slate); white-space:nowrap;}
   .lvraster input{padding:4px 6px; font-size:12px;}
@@ -191,6 +192,8 @@
   .figuurhint.uit{display:none;}
   #figuur .sleepbaar{cursor:grab;}
   #figuur.sleept .sleepbaar{cursor:grabbing;}
+  #figuur .greep[data-as="x"]{cursor:ew-resize;}
+  #figuur .greep[data-as="y"]{cursor:ns-resize;}
   #figuur{width:100%; height:auto; display:block; background:var(--white); touch-action:none;
     border:1px solid var(--border); border-radius:10px;}
   .samenvat{list-style:none; margin:12px 0 0; padding:0; font-size:12px;}
@@ -307,7 +310,7 @@
       <span class="eyebrow">Afgeleid figuur</span>
       <h2>Maatvoering alternatief</h2>
       <svg id="figuur" viewBox="0 0 340 300" role="img" aria-label="Maatvoering van het alternatief"></svg>
-      <p class="figuurhint" id="figuurhint">Sleep een lichtvlak om het te verplaatsen.</p>
+      <p class="figuurhint" id="figuurhint">Sleep een pijl om een lichtvlak horizontaal of verticaal te verplaatsen.</p>
       <ul class="samenvat" id="samenvat"></ul>
     </div>
   </div>
@@ -1215,13 +1218,20 @@ function lichtvlakVelden(c){
     const blok = el('div', 'lvblok');
     const kop = el('div', 'lvkop');
     kop.appendChild(el('span', null, 'Lichtvlak ' + (i+1)));
+    const knoppen = el('div', 'lvknoppen');
+    const midden = el('button', 'mini', 'centreren');
+    midden.type = 'button';
+    midden.title = 'Terug naar de plek die de tool zelf uitrekent';
+    midden.addEventListener('click', function(){ vlak.x = ''; vlak.y = ''; tekenAlles(); });
+    knoppen.appendChild(midden);
     if(lijst.length > 1){
       const weg = el('button', 'mini', '×');
       weg.type = 'button';
       weg.title = 'Dit lichtvlak weghalen';
       weg.addEventListener('click', function(){ lijst.splice(i, 1); tekenAlles(); });
-      kop.appendChild(weg);
+      knoppen.appendChild(weg);
     }
+    kop.appendChild(knoppen);
     blok.appendChild(kop);
 
     const raster = el('div', 'lvraster');
@@ -1445,6 +1455,34 @@ function figuurSvg(c, bx, by){
   }
   const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const anker = a => a==='m' ? 'middle' : a==='r' ? 'end' : 'start';
+
+  /* De assenkruisjes horen bij het bedienen, niet bij de tekening: ze worden hier
+     bijgetekend en niet in figuurVormen, zodat ze niet op het productblad
+     terechtkomen. Een pijl per as, met een onzichtbaar greepvlak eroverheen dat
+     zegt welke kant op er gesleept wordt. */
+  const klem2 = (w, laag, hoog) => Math.min(Math.max(w, laag), hoog);
+  const grepen = fig.vormen.filter(v => v.rol==='lichtvlak').map(v => {
+    const cx = v.x + v.w/2, cy = v.y + v.h/2;
+    const ax = klem2(v.w/2 - 3, 6, 16), ay = klem2(v.h/2 - 3, 5, 13);
+    const pijl = (x, y, r) => '<polygon points="'+pijlPunten({x:x, y:y, r:r, g:3})
+      .map(p=>p[0]+','+p[1]).join(' ')+'" fill="'+K.lichtvlakLijn+'"/>';
+    const greep = (as, x, y, w, h) =>
+      '<rect class="greep" data-vlak="'+v.i+'" data-as="'+as+'" x="'+x+'" y="'+y+'" width="'+w+
+      '" height="'+h+'" fill="rgba(0,0,0,0)"/>';
+    return '<g>' +
+      '<line x1="'+(cx-ax)+'" y1="'+cy+'" x2="'+(cx+ax)+'" y2="'+cy+'" stroke="'+K.lichtvlakLijn+'" stroke-width="0.9"/>' +
+      pijl(cx-ax, cy, 'l') + pijl(cx+ax, cy, 'r') +
+      '<line x1="'+cx+'" y1="'+(cy-ay)+'" x2="'+cx+'" y2="'+(cy+ay)+'" stroke="'+K.lichtvlakLijn+'" stroke-width="0.9"/>' +
+      pijl(cx, cy-ay, 'b') + pijl(cx, cy+ay, 'o') +
+      /* De greep voor de horizontale as is opgeknipt in twee armen; het midden waar
+         de twee pijlen elkaar kruisen hoort bij de verticale as. Eén vlakje voor
+         beide zou betekenen dat je in het midden nooit weet welke kant je op gaat. */
+      greep('x', cx-ax-4, cy-6, ax-2, 12) +
+      greep('x', cx+6, cy-6, ax-2, 12) +
+      greep('y', cx-6, cy-ay-4, 12, 2*ay+8) +
+      '</g>';
+  }).join('');
+
   return fig.vormen.map(v=>{
     if(v.t==='rect'){
       const vul  = v.rol==='lichtvlak' ? K.lichtvlakVul  : K.omhulselVul;
@@ -1464,7 +1502,7 @@ function figuurSvg(c, bx, by){
     const pt = v.rol==='aanzicht' ? 9 : 10;
     return '<text x="'+v.x+'" y="'+(v.y+pt*0.82)+'" text-anchor="'+anker(v.anker)+
            '" font-family="Nunito Sans, sans-serif" font-size="'+pt+'" fill="'+kl+'">'+esc(v.s)+'</text>';
-  }).join('');
+  }).join('') + grepen;
 }
 
 /* Dezelfde vormen op het productblad. HS is de tekenlaag van pdf-huisstijl.js;
@@ -2373,7 +2411,10 @@ $('figuur').addEventListener('pointerdown', function(e){
   const nu = lichtvlakken(P.concept)[i];
   const punt = svgPunt(e);
   if(!vlak || !nu || !punt) return;
-  sleep = {vlak:vlak, maat:nu, punt:punt};
+  /* Aan een pijl trekken zegt meteen welke kant op; pak je het vlak zelf, dan
+     bepaalt de eerste beweging de as. Diagonaal schuiven kan niet - een vlak dat
+     tegelijk opzij en omlaag glijdt is lastig terug te vinden. */
+  sleep = {vlak:vlak, maat:nu, punt:punt, as:doel.getAttribute('data-as') || null};
   $('figuur').classList.add('sleept');
   $('figuur').setPointerCapture(e.pointerId);
   e.preventDefault();
@@ -2382,11 +2423,19 @@ $('figuur').addEventListener('pointermove', function(e){
   if(!sleep || !figuurKader) return;
   const punt = svgPunt(e);
   if(!punt) return;
+  const dx = punt.x - sleep.punt.x, dy = punt.y - sleep.punt.y;
+  if(!sleep.as){
+    if(Math.max(Math.abs(dx), Math.abs(dy)) < 3) return;
+    sleep.as = Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
+  }
   const k = figuurKader, m = sleep.maat;
-  const x = (m.x==null ? 0 : m.x) + (punt.x - sleep.punt.x) / k.s;
-  const y = (m.y==null ? 0 : m.y) + (punt.y - sleep.punt.y) / k.s;
-  sleep.vlak.x = String(Math.round(klem(x, 0, k.L - (m.l||0))));
-  sleep.vlak.y = String(Math.round(klem(y, 0, k.B - (m.b||0))));
+  if(sleep.as === 'x'){
+    const x = (m.x==null ? 0 : m.x) + dx / k.s;
+    sleep.vlak.x = String(Math.round(klem(x, 0, k.L - (m.l||0))));
+  } else {
+    const y = (m.y==null ? 0 : m.y) + dy / k.s;
+    sleep.vlak.y = String(Math.round(klem(y, 0, k.B - (m.b||0))));
+  }
   ververs();
 });
 ['pointerup','pointercancel'].forEach(function(soort){
