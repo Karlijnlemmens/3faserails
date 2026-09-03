@@ -133,11 +133,11 @@
 
   /* --- foto's bij optiek en aansluiting --- */
   .fototip{
-    margin-top:6px; padding:0; width:100%; max-width:150px; display:block; overflow:hidden;
+    margin-top:6px; padding:0; width:100%; max-width:172px; display:block; overflow:hidden;
     border:1px solid var(--border); border-radius:9px; background:var(--white); cursor:zoom-in;
   }
   .fototip:hover{border-color:var(--blue);}
-  .fototip img{display:block; width:100%; height:62px; object-fit:contain;}
+  .fototip img{display:block; width:100%; height:78px; object-fit:contain;}
   .beeldrooster{display:grid; grid-template-columns:repeat(auto-fill,minmax(98px,1fr)); gap:10px;}
   .beeldvak{
     position:relative; border:2px solid var(--border); border-radius:10px; overflow:hidden;
@@ -501,20 +501,23 @@ const EN_JANEE = v => v==='Ja' ? 'Yes' : v==='Nee' ? 'No' : '';
    weigert de browser een plaatje in een canvas uit te lezen - "tainted canvas" -
    en dan komt het een PDF nooit in. Daarom staan ze, net als de productfoto's van
    presenters.html, als data-URI in een javascriptbestand: bandraster-beelden.js
-   in de hoofdmap. De kaart "Foto's" onderaan de pagina schrijft dat bestand zelf,
-   zodat iedereen dezelfde foto's ziet. Ontbreekt het bestand, dan werkt de tool
-   gewoon door en blijven de vakken leeg. */
+   in de hoofdmap. Dat bestand komt uit het werkboek zelf: draai
+   node tools/maak-bandraster-beelden.mjs. De kaart "Foto's" onderaan de pagina kan
+   het ook schrijven, voor een foto die niet in het werkboek staat. Ontbreekt het
+   bestand, dan werkt de tool gewoon door en blijven de vakken leeg. */
 const BEELDEN = {
   optiek:      Object.assign({}, (window.BANDRASTER_BEELDEN || {}).optiek      || {}),
   aansluiting: Object.assign({}, (window.BANDRASTER_BEELDEN || {}).aansluiting || {}),
 };
 let beeldenGewijzigd = false;
 
-/* De DALI-lijst herhaalt de aansluitingen van de aan-uitlijst met "+ kaal"
-   erachter: dezelfde steker, met losse stuuraders erbij. Dat is dus dezelfde
-   foto en die staart telt niet mee bij het zoeken - een foto onder de volledige
-   naam gaat er wel voor. */
-const fotoNaam    = naam => String(naam || '').replace(/\s*\+\s*kaal\s*$/i, '').trim();
+/* Gezocht wordt op de naam zelf. De DALI-lijst herhaalt de aansluitingen van de
+   aan-uitlijst met "+ kaal" erachter, maar dat is niet altijd dezelfde foto: bij de
+   Eurosteker en de RA-steker wel, bij de GST18-3-varianten staan de losse aders er
+   zichtbaar bij en heeft het werkboek een eigen render. Elke naam heeft dus zijn
+   eigen sleutel. De genormaliseerde vorm vangt alleen verschil in hoofdletters en
+   spaties op - het werkboek heeft er hier en daar een aan het eind staan. */
+const fotoNaam    = naam => String(naam || '').trim();
 const fotoSleutel = naam => fotoNaam(naam).toLowerCase().replace(/[^a-z0-9]+/g, '');
 
 function beeldVoor(soort, naam){
@@ -526,8 +529,8 @@ function beeldVoor(soort, naam){
   return sleutel ? tabel[sleutel] : '';
 }
 
-/* Namen die dezelfde foto delen vallen samen: "Kaal" en "A-symmetrisch" staan in
-   twee lijsten, en de "+ kaal"-varianten horen bij hun eigen steker. */
+/* Elke naam krijgt een vak. Alleen namen die in twee lijsten staan ("Kaal",
+   "A-symmetrisch") vallen samen. */
 function fotoNamen(namen){
   const uit = [], gezien = {};
   namen.forEach(function(n){
@@ -587,10 +590,12 @@ function tekenFotos(){
   teller.className = 'status ' + (gevuld === totaal ? 'ok' : 'mist');
   teller.textContent = gevuld + ' van ' + totaal;
   $('fotoUitleg').textContent = window.BANDRASTER_BEELDEN
-    ? 'Klik een vak om een afbeelding te kiezen, of klik het aan en plak met Ctrl+V. ' +
-      'De foto verschijnt daarna bij Optiek en Aansluiting in het formulier.'
-    : 'bandraster-beelden.js is niet geladen, dus er zijn nog geen foto’s. Vul de vakken ' +
-      'hieronder (klikken om te kiezen, of klikken en Ctrl+V) en sla het beeldbestand op in de hoofdmap.';
+    ? 'Deze foto’s komen uit de celafbeeldingen van Bandraster_Intake_Nieuw_V3.xlsx ' +
+      '(node tools/maak-bandraster-beelden.mjs). Klik een vak om er een te vervangen of ' +
+      'toe te voegen, of klik het aan en plak met Ctrl+V, en sla het beeldbestand daarna op.'
+    : 'bandraster-beelden.js is niet geladen, dus er zijn nog geen foto’s. Draai ' +
+      'node tools/maak-bandraster-beelden.mjs om ze uit het werkboek te halen, of vul de ' +
+      'vakken hieronder en sla het beeldbestand op in de hoofdmap.';
   $('fotoWaarschuwing').textContent = beeldenGewijzigd
     ? 'Er zijn foto’s bijgekomen of gewijzigd. Sla het beeldbestand op en zet ' +
       'bandraster-beelden.js in de hoofdmap, anders zijn ze na het herladen weg.'
@@ -664,24 +669,35 @@ function leesAfbeelding(bestand, klaar){
   lezer.readAsDataURL(bestand);
 }
 
-/* Schrijft de bibliotheek weg als javascriptbestand. Sleutels op alfabet, zodat
-   twee keer opslaan na dezelfde wijzigingen hetzelfde bestand geeft en git alleen
-   toont wat er echt veranderd is. */
+/* Schrijft de bibliotheek weg als javascriptbestand, in dezelfde vorm als
+   tools/maak-bandraster-beelden.mjs: elke foto een keer in b, de namen wijzen
+   ernaar. Drie snoerlengtes delen een render, dus zonder dat staat dezelfde foto
+   er drie keer in. Namen op alfabet, zodat twee keer opslaan na dezelfde
+   wijzigingen hetzelfde bestand geeft en git alleen toont wat er echt veranderd is. */
 function schrijfBeeldbestand(){
+  const uris = [], sleutel = new Map();
+  const nummer = function(uri){
+    if(!sleutel.has(uri)){ sleutel.set(uri, 'b' + (uris.length + 1)); uris.push(uri); }
+    return sleutel.get(uri);
+  };
   const blok = function(tabel){
     return Object.keys(tabel).sort()
-      .map(function(k){ return '    ' + JSON.stringify(k) + ': ' + JSON.stringify(tabel[k]); })
+      .map(function(k){ return '      ' + JSON.stringify(k) + ': b.' + nummer(tabel[k]); })
       .join(',\n');
   };
+  const optiek = blok(BEELDEN.optiek), aansluiting = blok(BEELDEN.aansluiting);
   const inhoud =
     "/* Foto's bij de optieken en de aansluitingen van bandrasters.html - geschreven\n" +
-    "   door de tool zelf (de kaart \"Foto's\" onderaan de pagina). Zet dit bestand in\n" +
-    "   de hoofdmap naast bandrasters.html. Losse beeldbestanden kunnen niet: vanaf\n" +
-    "   schijf mag de browser die niet uitlezen, en dan komen ze een PDF nooit in. */\n" +
-    "window.BANDRASTER_BEELDEN = {\n" +
-    "  optiek: {\n"      + blok(BEELDEN.optiek)      + "\n  },\n" +
-    "  aansluiting: {\n" + blok(BEELDEN.aansluiting) + "\n  }\n" +
-    "};\n";
+    " * door de tool zelf (de kaart \"Foto's\" onderaan de pagina). Zet dit bestand in\n" +
+    " * de hoofdmap naast bandrasters.html. Losse beeldbestanden kunnen niet: vanaf\n" +
+    " * schijf mag de browser die niet uitlezen, en dan komen ze een PDF nooit in. */\n" +
+    "(function(){\n  var b = {\n" +
+    uris.map(function(uri, i){ return '    b' + (i+1) + ': ' + JSON.stringify(uri); }).join(',\n') +
+    "\n  };\n" +
+    "  window.BANDRASTER_BEELDEN = {\n" +
+    "    optiek: {\n"      + optiek      + "\n    },\n" +
+    "    aansluiting: {\n" + aansluiting + "\n    }\n" +
+    "  };\n})();\n";
   download('bandraster-beelden.js', inhoud, 'text/javascript');
   beeldenGewijzigd = false;
   tekenFotos();
