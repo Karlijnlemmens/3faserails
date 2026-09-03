@@ -121,6 +121,21 @@
   }
   .reset:hover{border-color:var(--blue); color:var(--blue-dark);}
   .reset.uit{visibility:hidden;}
+  /* --- lichtvlakken: per vlak de maat en de plek --- */
+  .lv{display:flex; flex-direction:column; gap:7px; align-items:flex-start;}
+  .lvblok{
+    width:100%; border:1px solid var(--border); border-radius:9px;
+    background:#FBFDFF; padding:6px 8px 8px;
+  }
+  .lvkop{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    font-size:10px; font-weight:800; color:var(--slate); margin-bottom:5px;
+    text-transform:uppercase; letter-spacing:.04em;
+  }
+  .lvkop .mini{padding:0 6px; line-height:16px;}
+  .lvraster{display:grid; grid-template-columns:auto 1fr auto 1fr; gap:5px 7px; align-items:center;}
+  .lvraster > label{font-size:11px; color:var(--slate); white-space:nowrap;}
+  .lvraster input{padding:4px 6px; font-size:12px;}
   .berekend{
     border:1px dashed var(--border); border-radius:8px; padding:6px 8px; font-size:13px;
     background:#FBFDFF; color:var(--ink); min-height:32px;
@@ -722,7 +737,7 @@ function leegConcept(){
       lengte:'', breedte:'', hoogte:'', plafondtype:'', plafondAnders:'', montage:'',
       kleurtemp:'', cri:'', optiek:'', kleur:'', kleurRal:'',
       sturing:'', aansluiting:'', nood:'', sensor:'', ventilatie:'', extras:'', aantal:'',
-      basis:'Optic bandraster', basisAnders:'', lichtvlakL:'', lichtvlakB:'',
+      basis:'Optic bandraster', basisAnders:'', lichtvlakken:[leegLichtvlak()],
       productcode:'', prijs:'',
     },
     /* Per veld-id: staat false zodra de rechterkant bewust afwijkt van links.
@@ -771,11 +786,22 @@ if(OPGESLAGEN_PROJECT){
 function herstelConcept(c){
   const leeg = leegConcept();
   if(!c) return leeg;
+  const nieuw = Object.assign(leeg.nieuw, c.nieuw||{});
+  /* Een project van voor de meervoudige lichtvlakken heeft er een, als twee losse
+     velden. Die gaan over naar het eerste vlak in de lijst; hun oude sleutels
+     verdwijnen, zodat er niet twee waarheden over dezelfde maat blijven staan. */
+  if(!Array.isArray(c.nieuw && c.nieuw.lichtvlakken)){
+    nieuw.lichtvlakken = [{l:nieuw.lichtvlakL||'', b:nieuw.lichtvlakB||'', x:'', y:''}];
+  }
+  delete nieuw.lichtvlakL; delete nieuw.lichtvlakB;
+  nieuw.lichtvlakken = (nieuw.lichtvlakken||[])
+    .map(v => ({l:String(v&&v.l||''), b:String(v&&v.b||''), x:String(v&&v.x||''), y:String(v&&v.y||'')}));
+  if(!nieuw.lichtvlakken.length) nieuw.lichtvlakken = [leegLichtvlak()];
   return {
     omschrijving: c.omschrijving||'',
     bestekcode:   c.bestekcode||'',
     oud:   Object.assign(leeg.oud,   c.oud||{}),
-    nieuw: Object.assign(leeg.nieuw, c.nieuw||{}),
+    nieuw: nieuw,
     volgt: Object.assign({},         c.volgt||{}),
   };
 }
@@ -795,16 +821,54 @@ function rechts(c, id){ return volgtLinks(c, id) ? c.oud[id] : c.nieuw[id]; }
 function zetRechts(c, id, waarde){ c.volgt[id] = false; c.nieuw[id] = waarde; }
 function koppelTerug(c, id){ delete c.volgt[id]; c.nieuw[id] = c.oud[id]; }
 
-/* Het lichtvlak is geen intakeveld maar volgt uit de buitenmaat; wie een andere
-   uitsnede wil typt hem over. RAND is de rand rondom, per zijde. */
+/* De lichtvlakken zijn geen intakeveld maar volgen uit de buitenmaat. Een armatuur
+   kan er meer dan een hebben, en ze hoeven niet symmetrisch te liggen, dus het is
+   een lijst. Per vlak zijn vier velden in te vullen: de maat (l x b) en de plek
+   (x vanaf de linkerkant, y vanaf de bovenkant, in het bovenaanzicht). Wat leeg
+   blijft wordt uitgerekend: RAND rondom, en bij meer vlakken de overgebleven
+   lengte eerlijk over de gaten ervoor, ertussen en erna. Leeghalen is dus ook de
+   manier om een veld weer los te laten. */
 const RAND = 15;
-function lichtvlak(c){
+function leegLichtvlak(){ return {l:'', b:'', x:'', y:''}; }
+
+function lichtvlakken(c){
   const L = getal(rechts(c,'lengte')), B = getal(rechts(c,'breedte'));
-  const eigenL = getal(c.nieuw.lichtvlakL), eigenB = getal(c.nieuw.lichtvlakB);
-  return {
-    l: volgtLinks(c,'lichtvlakL') || eigenL==null ? (L==null?null:Math.max(10, L-2*RAND)) : eigenL,
-    b: volgtLinks(c,'lichtvlakB') || eigenB==null ? (B==null?null:Math.max(10, B-2*RAND)) : eigenB,
-  };
+  const lijst = (c.nieuw.lichtvlakken && c.nieuw.lichtvlakken.length)
+    ? c.nieuw.lichtvlakken : [leegLichtvlak()];
+  const n = lijst.length;
+  /* Hele millimeters: de fabrikant krijgt deze maat, geen 577,5. Wat er door het
+     afronden overblijft gaat vanzelf in de gaten zitten. */
+  const stdL = L==null ? null : Math.max(10, Math.floor((L - (n+1)*RAND) / n));
+  const stdB = B==null ? null : Math.max(10, Math.floor(B - 2*RAND));
+  const maten = lijst.map(v => ({
+    l: getal(v.l)!=null ? getal(v.l) : stdL,
+    b: getal(v.b)!=null ? getal(v.b) : stdB,
+  }));
+  /* Wat er na de vlakken aan lengte overblijft gaat gelijk over de n+1 gaten. */
+  const som = maten.reduce((t,m) => t + (m.l||0), 0);
+  const gat = (L==null) ? null : (L - som) / (n + 1);
+  const uit = [];
+  let loop = gat;
+  for(let i = 0; i < n; i++){
+    const m = maten[i], eigenX = getal(lijst[i].x), eigenY = getal(lijst[i].y);
+    uit.push({
+      l: m.l, b: m.b,
+      x: eigenX!=null ? eigenX : loop,
+      y: eigenY!=null ? eigenY : ((B==null || m.b==null) ? null : (B - m.b) / 2),
+    });
+    if(loop!=null) loop += (m.l||0) + gat;
+  }
+  return uit;
+}
+
+/* De maten als tekst, voor het productblad en de RFQ. Zijn alle vlakken gelijk,
+   dan "2x 585 x 270" in plaats van dezelfde maat twee keer. */
+function lichtvlakTekst(c, maal, eenheid){
+  const m = lichtvlakken(c).filter(v => v.l!=null && v.b!=null)
+    .map(v => Math.round(v.l) + ' ' + maal + ' ' + Math.round(v.b));
+  if(!m.length) return '';
+  const gelijk = m.every(t => t === m[0]);
+  return (gelijk && m.length > 1 ? m.length + maal + ' ' + m[0] : m.join(' + ')) + eenheid;
 }
 
 /* De sleutel waarop de Excel de lumentabel opzocht: CRI (800/900) plus de
@@ -939,7 +1003,7 @@ const RIJEN = [
   {id:'extras',      label:"Extra's",         soort:'tekst'},
   {id:'aantal',      label:'Aantallen',       soort:'aantal'},
   {id:'basis',       label:'Basisarmatuur',   soort:'rechtsKeuze', lijst:'basis', anders:'basisAnders', andersBij:'Anders:'},
-  {id:'lichtvlak',   label:'Lichtvlak (l×b)', soort:'lichtvlak'},
+  {id:'lichtvlak',   label:'Lichtvlakken',    soort:'lichtvlak'},
   {id:'productcode', label:'Product code',    soort:'rechtsTekst', plaats:'wordt door de fabrikant bevestigd'},
   {id:'prijs',       label:'Unit price',      soort:'rechtsTekst', plaats:'leeg laten = fabrikant vult in'},
 ];
@@ -1120,16 +1184,9 @@ function tekenIntake(){
       case 'rechtsTekst':
         rechtsCel.appendChild(tekstveld(c.nieuw[rij.id], v=>{ c.nieuw[rij.id]=v; ververs(); }, {plaats:rij.plaats}));
         break;
-      case 'lichtvlak': {
-        const lv = lichtvlak(c);
-        const d = el('div', 'tweeling');
-        AFGELEID.lichtvlakL = tekstveld(lv.l==null?'':lv.l, v=>{ zetRechts(c,'lichtvlakL', v); ververs(); }, {getal:true});
-        AFGELEID.lichtvlakB = tekstveld(lv.b==null?'':lv.b, v=>{ zetRechts(c,'lichtvlakB', v); ververs(); }, {getal:true});
-        d.appendChild(metReset(metEenheid(AFGELEID.lichtvlakL, 'mm', true), c, 'lichtvlakL'));
-        d.appendChild(metReset(metEenheid(AFGELEID.lichtvlakB, 'mm', true), c, 'lichtvlakB'));
-        rechtsCel.appendChild(d);
+      case 'lichtvlak':
+        rechtsCel.appendChild(lichtvlakVelden(c));
         break;
-      }
       default:
         rechtsCel.className += ' leeg';
     }
@@ -1138,6 +1195,49 @@ function tekenIntake(){
     vak.appendChild(midden);
     vak.appendChild(rechtsCel);
   });
+}
+
+/* Per lichtvlak de maat en de plek, met een knop om er een bij te zetten of weg te
+   halen. Een leeg veld betekent "reken maar uit"; de placeholder laat zien wat daar
+   dan uit komt, dus leeghalen is tegelijk de manier om een veld weer los te laten.
+   De placeholders worden in ververs() bijgewerkt, want ze hangen aan de buitenmaat
+   die links wordt ingetypt. */
+function lichtvlakVelden(c){
+  const lijst = c.nieuw.lichtvlakken;
+  const vak = el('div', 'lv');
+  AFGELEID.lichtvlakken = [];
+  lijst.forEach((vlak, i) => {
+    const blok = el('div', 'lvblok');
+    const kop = el('div', 'lvkop');
+    kop.appendChild(el('span', null, 'Lichtvlak ' + (i+1)));
+    if(lijst.length > 1){
+      const weg = el('button', 'mini', '×');
+      weg.type = 'button';
+      weg.title = 'Dit lichtvlak weghalen';
+      weg.addEventListener('click', function(){ lijst.splice(i, 1); tekenAlles(); });
+      kop.appendChild(weg);
+    }
+    blok.appendChild(kop);
+
+    const raster = el('div', 'lvraster');
+    const velden = {};
+    [['l','lengte'], ['b','breedte'], ['x','vanaf links'], ['y','vanaf boven']].forEach(function(paar){
+      const naam = paar[0];
+      raster.appendChild(el('label', null, paar[1]));
+      const veld = tekstveld(vlak[naam], function(w){ vlak[naam] = w; ververs(); }, {getal:true});
+      velden[naam] = veld;
+      raster.appendChild(metEenheid(veld, 'mm', true));
+    });
+    AFGELEID.lichtvlakken.push(velden);
+    blok.appendChild(raster);
+    vak.appendChild(blok);
+  });
+
+  const bij = el('button', 'mini', '+ lichtvlak');
+  bij.type = 'button';
+  bij.addEventListener('click', function(){ lijst.push(leegLichtvlak()); tekenAlles(); });
+  vak.appendChild(bij);
+  return vak;
 }
 
 /* Links wijzigen; de rechterkant die nog meeloopt volgt vanzelf omdat rechts()
@@ -1181,20 +1281,35 @@ function spiegelNaarRechts(id){
 
    y telt van boven naar beneden, net als in pdf-huisstijl.js. */
 
-function figuurVormen(c, bx, by){
+function figuurVormen(c, bx, by, korps){
   const L  = getal(rechts(c,'lengte'));
   const B  = getal(rechts(c,'breedte'));
   const Hg = getal(rechts(c,'hoogte'));
   if(!L || !B || !Hg) return null;
-  const lv = lichtvlak(c);
-  const li = Math.min(lv.l==null ? L : lv.l, L);
-  const bi = Math.min(lv.b==null ? B : lv.b, B);
+
+  /* Een getypte maat of plek kan buiten het armatuur vallen; voor de tekening
+     schuiven we hem naar binnen. De ingevulde waarde blijft staan - het veld
+     corrigeren is aan de gebruiker, de tekening moet ondertussen kloppen. */
+  const vlakken = lichtvlakken(c).map(function(v){
+    const l = Math.min(v.l==null ? L : v.l, L);
+    const b = Math.min(v.b==null ? B : v.b, B);
+    return {
+      l: l, b: b,
+      x: Math.min(Math.max(v.x==null ? (L-l)/2 : v.x, 0), L-l),
+      y: Math.min(Math.max(v.y==null ? (B-b)/2 : v.y, 0), B-b),
+    };
+  });
+  /* Eén vlak, netjes in het midden: dan blijft het bij de ene maatlijn die er
+     altijd stond. Zodra er meer vlakken zijn of er een uit het midden ligt wordt
+     het een maatketen, en die heeft een strook extra nodig. */
+  const middenIn = v => Math.abs(v.x - (L-v.l)/2) < 0.5 && Math.abs(v.y - (B-v.b)/2) < 0.5;
+  const simpel = vlakken.length === 1 && middenIn(vlakken[0]);
 
   /* Boven het bovenaanzicht staat de aanzichtnaam, tussen de twee aanzichten de
      maatlijn van het lichtvlak plus de naam van het zijaanzicht, en onderaan de
      lengtemaat. Die drie stroken tellen mee in de hoogte, anders lopen tekst en
      maatlijnen door elkaar bij een plat armatuur. */
-  const padL=10, padR=58, padT=16, padB=8, gat=44, onderMaat=30, pijl=3.4;
+  const padL=10, padR=58, padT=16, padB=8, gat=(simpel?44:58), onderMaat=30, pijl=3.4;
   const breed = bx - padL - padR;
   const hoog  = by - padT - padB - gat - onderMaat;
   const s  = Math.min(breed/L, hoog/(B+Hg));
@@ -1208,10 +1323,11 @@ function figuurVormen(c, bx, by){
   const v = [];
   const maat = (n) => String(Math.round(n));
 
-  /* bovenaanzicht met het lichtvlak erin */
+  /* bovenaanzicht met de lichtvlakken erin, elk op zijn eigen plek */
   v.push({t:'rect', x:x0, y:y0, w:bw, h:bh, rol:'omhulsel'});
-  const iw = li*s, ih = bi*s;
-  v.push({t:'rect', x:x0+(bw-iw)/2, y:y0+(bh-ih)/2, w:iw, h:ih, rol:'lichtvlak'});
+  vlakken.forEach(function(f){
+    v.push({t:'rect', x:x0+f.x*s, y:y0+f.y*s, w:f.l*s, h:f.b*s, rol:'lichtvlak'});
+  });
   /* zijaanzicht */
   v.push({t:'rect', x:x0, y:y1, w:bw, h:zh, rol:'omhulsel'});
 
@@ -1227,7 +1343,7 @@ function figuurVormen(c, bx, by){
     v.push({t:'lijn', x1:xa-(buiten?kort:0), y1:yy, x2:xb+(buiten?kort:0), y2:yy, rol:'maatlijn'});
     v.push({t:'pijl', x:xa, y:yy, r:buiten?'r':'l', g:pijl});
     v.push({t:'pijl', x:xb, y:yy, r:buiten?'l':'r', g:pijl});
-    v.push({t:'tekst', x:(xa+xb)/2, y:yy+3, s:tekst, anker:'m', rol:'maat'});
+    if(tekst) v.push({t:'tekst', x:(xa+xb)/2, y:yy+3, s:tekst, anker:'m', rol:'maat'});
   };
   const vertikaal = (yb, yo, xx, vanaf, tekst) => {
     v.push({t:'lijn', x1:vanaf, y1:yb, x2:xx+4, y2:yb, rol:'hulplijn'});
@@ -1239,8 +1355,32 @@ function figuurVormen(c, bx, by){
     v.push({t:'tekst', x:xx+7, y:(yb+yo)/2-4, s:tekst, anker:'l', rol:'maat'});
   };
 
-  const ix = x0 + (bw-iw)/2;
-  horizontaal(ix, ix+iw, y0+bh+14, y0+bh, 'lichtvlak '+maat(li)+' × '+maat(bi)+' mm');
+  const yMaat = y0 + bh + 14;
+  if(simpel){
+    const f = vlakken[0];
+    horizontaal(x0+f.x*s, x0+(f.x+f.l)*s, yMaat, y0+bh, 'lichtvlak '+maat(f.l)+' × '+maat(f.b)+' mm');
+  } else {
+    /* Een maatketen over de hele lengte: rand, vlak, tussenruimte, vlak, rand.
+       Zo staan de maten en de plekken in één lijn en telt alles op tot de lengte.
+       Een segment dat te smal is voor zijn getal krijgt alleen de pijlen - beter
+       geen getal dan twee getallen over elkaar. */
+    const grenzen = [0];
+    vlakken.slice().sort((a,b)=>a.x-b.x).forEach(f => grenzen.push(f.x, f.x+f.l));
+    grenzen.push(L);
+    for(let i=0; i+1<grenzen.length; i++){
+      const a = grenzen[i], b = grenzen[i+1];
+      if(b - a < 0.01) continue;
+      /* Het getal komt er alleen bij als het binnen zijn eigen segment past; dan
+         kunnen twee buren elkaar ook niet overlappen. Een cijfer is ongeveer
+         0,56 keer het korps breed, en het korps verschilt per tekenaar - vandaar
+         dat het meekomt in plaats van dat het hier vastligt. */
+      const label = maat(b-a);
+      horizontaal(x0+a*s, x0+b*s, yMaat, y0+bh,
+        (b-a)*s >= 0.56*(korps||10)*label.length ? label : '');
+    }
+    v.push({t:'tekst', x:x0+bw/2, y:yMaat+15, s:'lichtvlak '+lichtvlakTekst(c, '×', ' mm'),
+            anker:'m', rol:'maat'});
+  }
   horizontaal(x0, x0+bw, y1+zh+16, y1+zh, maat(L)+' mm');
   const xM = x0 + bw + 13;
   vertikaal(y0, y0+bh, xM, x0+bw, maat(B)+' mm');
@@ -1300,7 +1440,9 @@ function figuurSvg(c, bx, by){
 /* Dezelfde vormen op het productblad. HS is de tekenlaag van pdf-huisstijl.js;
    ox/oy verschuiven het figuur naar zijn plek op de pagina. */
 function figuurPdf(HS, c, ox, oy, bx, by){
-  const vormen = figuurVormen(c, bx, by);
+  /* 6 punten is het korps waarmee de maten hieronder gezet worden; figuurVormen
+     bepaalt daarmee of een getal in zijn segment past. */
+  const vormen = figuurVormen(c, bx, by, 6);
   if(!vormen) return false;
   const K = FIG_BLAD;
   vormen.forEach(v=>{
@@ -1335,9 +1477,15 @@ function ververs(){
   if(AFGELEID.lumenNieuw) vulBerekend(AFGELEID.lumenNieuw, lumenNieuw(c));
   if(AFGELEID.watt)       vulBerekend(AFGELEID.watt,       wattNieuw(c));
 
-  const lv = lichtvlak(c);
-  if(AFGELEID.lichtvlakL && volgtLinks(c,'lichtvlakL')) AFGELEID.lichtvlakL.value = lv.l==null ? '' : lv.l;
-  if(AFGELEID.lichtvlakB && volgtLinks(c,'lichtvlakB')) AFGELEID.lichtvlakB.value = lv.b==null ? '' : lv.b;
+  /* De placeholders van de lichtvlakvelden tonen wat de tool zelf uitrekent; die
+     verandert zodra de buitenmaat verandert. */
+  const vlakken = lichtvlakken(c);
+  (AFGELEID.lichtvlakken || []).forEach(function(velden, i){
+    const berekend = vlakken[i] || {};
+    ['l','b','x','y'].forEach(function(naam){
+      velden[naam].placeholder = berekend[naam]==null ? 'auto' : String(Math.round(berekend[naam]));
+    });
+  });
 
   const mistO = ontbreektOud(c), mistN = ontbreektNieuw(c);
   zetStatus($('statusOud'),   mistO, 'Bestaand');
@@ -1545,7 +1693,6 @@ function uriBytes(uri){
 /* De groepen van het blad. Volgorde en indeling zijn het beginpunt; welke velden
    er uiteindelijk op horen te staan wordt per specificatie nog doorgenomen. */
 function bladGroepen(c){
-  const lv = lichtvlak(c);
   const w = wattNieuw(c), lmN = lumenNieuw(c);
   return [
     {kop:'Algemeen', rijen:[
@@ -1559,7 +1706,7 @@ function bladGroepen(c){
       ['Lengte',    mm(rechts(c,'lengte'))],
       ['Breedte',   mm(rechts(c,'breedte'))],
       ['Hoogte',    mm(rechts(c,'hoogte'))],
-      ['Lichtvlak', (lv.l==null||lv.b==null) ? '' : (Math.round(lv.l)+' × '+Math.round(lv.b)+' mm')],
+      ['Lichtvlak', lichtvlakTekst(c, '×', ' mm')],
     ]},
     {kop:'Lichttechniek', rijen:[
       ['Lichtkleur',            rechts(c,'kleurtemp')],
@@ -1731,14 +1878,13 @@ async function bouwProductblad(c){
    connectorbenaming is in elke taal hetzelfde). */
 
 function rfqVelden(c){
-  const lv = lichtvlak(c);
   return [
     ['Type',                zoekEn(MONTAGE, rechts(c,'montage'))],
     ['Base',                basisNaam(c)],
     ['Length (mm)',         rechts(c,'lengte')],
     ['Width (mm)',          rechts(c,'breedte')],
     ['Height (mm)',         rechts(c,'hoogte')],
-    ['Light aperture (mm)', (lv.l==null||lv.b==null) ? '' : (Math.round(lv.l)+' x '+Math.round(lv.b))],
+    ['Light aperture (mm)', lichtvlakTekst(c, 'x', '')],
     ['Watt',                wattNieuw(c)==null ? '' : wattNieuw(c)],
     ['Lumens',              lumenNieuw(c)==null ? '' : lumenNieuw(c)],
     ['Optics',              zoekEn(OPTIEK_NIEUW, c.nieuw.optiek)],
