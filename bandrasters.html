@@ -721,7 +721,7 @@ function leegConcept(){
       kleurtemp:'', cri:'', optiek:'', kleur:'', kleurRal:'',
       sturing:'', aansluiting:'', nood:'', sensor:'', ventilatie:'', extras:'', aantal:'',
       basis:'Optic bandraster', basisAnders:'', lichtvlakL:'', lichtvlakB:'',
-      productcode:'', codering:'', prijs:'',
+      productcode:'', bestekcode:'', prijs:'',
     },
     /* Per veld-id: staat false zodra de rechterkant bewust afwijkt van links.
        Ontbreekt de sleutel, dan volgt rechts links - zoals de Excel dat met
@@ -938,7 +938,7 @@ const RIJEN = [
   {id:'basis',       label:'Basisarmatuur',   soort:'rechtsKeuze', lijst:'basis', anders:'basisAnders', andersBij:'Anders:'},
   {id:'lichtvlak',   label:'Lichtvlak (l×b)', soort:'lichtvlak'},
   {id:'productcode', label:'Product code',    soort:'rechtsTekst', plaats:'wordt door de fabrikant bevestigd'},
-  {id:'codering',    label:'Codering',        soort:'rechtsTekst', plaats:'eigen code — komt als stempel op het productblad'},
+  {id:'bestekcode',  label:'Bestekcode',      soort:'rechtsTekst', plaats:'eigen code — komt als stempel op het productblad'},
   {id:'prijs',       label:'Unit price',      soort:'rechtsTekst', plaats:'leeg laten = fabrikant vult in'},
 ];
 
@@ -1627,12 +1627,12 @@ async function bouwProductblad(c){
   }
   function slotlijn(){ haarlijn(M.lijnLabelB, M.lijnWaardeX, M.lijnWaardeB); }
 
-  /* De eigen codering, gestempeld zoals het armaturenboek dat op een presenter
-     doet: zelfde hoogte, zelfde korps, rechts uitgelijnd en meerdere codes onder
-     elkaar. Wordt een regel te breed, dan krimpt hij in plaats van dat hij
-     opschuift - zo blijft de stempel op zijn plek staan. */
-  function stempelCode(codering){
-    const codes = String(codering||'').split(/[\n;]+/).map(t=>t.trim()).filter(Boolean);
+  /* De bestekcode, gestempeld zoals het armaturenboek dat op een presenter doet:
+     zelfde hoogte, zelfde korps, rechts uitgelijnd en meerdere codes onder
+     elkaar (met een puntkomma ertussen). Wordt een regel te breed, dan krimpt hij
+     in plaats van dat hij opschuift - zo blijft de stempel op zijn plek staan. */
+  function stempelCode(bestekcode){
+    const codes = String(bestekcode||'').split(/[\n;]+/).map(t=>t.trim()).filter(Boolean);
     const S = M.stempel;
     codes.forEach((code, i) => {
       let pt = S.pt;
@@ -1712,7 +1712,7 @@ async function bouwProductblad(c){
      productfoto zit; de codestempel komt in de kopbalk erboven. */
   pg = paginas[0];
   figuurPdf(HS, c, M.figuur.x, M.figuur.y, M.figuur.b, M.figuur.h);
-  stempelCode(c.nieuw.codering);
+  stempelCode(c.nieuw.bestekcode);
   pg = paginas[paginas.length-1];
 
   return await doc.save();
