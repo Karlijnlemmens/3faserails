@@ -56,7 +56,9 @@ The **RFQ list** is Distrilight-branded and English, in two forms: a `.xlsx` wit
 
 "Project opslaan" uses the same self-baking pattern as `dlc.html`/`armaturenboek.html`: state is baked into a copy of `bandrasters.html` that reopens filled in.
 
-What the tool does **not** carry yet: the 22 in-cell images in the workbook (optic renders and connector photos, resolvable from `xl/richData`) are not baked in — they would be a ~2 MB `bandraster-beelden.js` alongside `armatuur-beelden.js`, for when the sheet layout is settled.
+The workbook also carried **in-cell images** at Optiek and Aansluiting — you cannot tell from a name alone which profile or which connector you are picking — so the tool shows a thumbnail under those four dropdowns (click to enlarge). They come from `window.BANDRASTER_BEELDEN` in `bandraster-beelden.js` in the repo root: `{optiek:{naam:dataURI}, aansluiting:{…}}`, data URIs for the same tainted-canvas reason as `armatuur-beelden.js`. The tool writes that file itself — fill the slots in the "Foto's" card at the bottom of the page (click one to pick a file, or click it and paste with Ctrl+V) and press **Beeldbestand opslaan**, then drop the download in the repo root. A missing file is not an error: the boxes simply stay empty. Keys match on the name, then on a normalised form that **ignores a trailing "+ kaal"** — the DALI list repeats the aan-uit connectors with bare control leads added, which is the same photo — so 31 slots cover the 12 optic and 33 connector names. Photos are stripped from the DOM before "Project opslaan" bakes it: they already live in `bandraster-beelden.js`, which the saved copy reaches through its `<base href>`.
+
+Still to do: the 22 in-cell images in the workbook (`xl/richData` resolves them) have not been extracted — `bandraster-beelden.js` does not exist yet, and the workbook itself was never committed.
 
 `vergelijking.html` is the **Armatuurvergelijker**: per bestekpositie it puts the installer's reference fixture next to the Distrilight alternative. Unlike the rest of the suite it is *generated*, so don't edit it by hand — the sources live in `vergelijker/` (see `vergelijker/README.md`):
 

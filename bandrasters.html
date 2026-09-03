@@ -131,6 +131,46 @@
   .status.ok{background:#E7F6EC; color:#1F7A3D;}
   .status.mist{background:#FDF0EC; color:#B4472F;}
 
+  /* --- foto's bij optiek en aansluiting --- */
+  .fototip{
+    margin-top:6px; padding:0; width:100%; max-width:150px; display:block; overflow:hidden;
+    border:1px solid var(--border); border-radius:9px; background:var(--white); cursor:zoom-in;
+  }
+  .fototip:hover{border-color:var(--blue);}
+  .fototip img{display:block; width:100%; height:62px; object-fit:contain;}
+  .beeldrooster{display:grid; grid-template-columns:repeat(auto-fill,minmax(98px,1fr)); gap:10px;}
+  .beeldvak{
+    position:relative; border:2px solid var(--border); border-radius:10px; overflow:hidden;
+    background:var(--white); aspect-ratio:1; display:grid; place-items:center; cursor:pointer;
+    padding:0; width:100%;   /* een knop krimpt anders naar zijn inhoud */
+  }
+  .beeldvak.gekozen{border-color:var(--blue);}
+  .beeldvak:hover{border-color:var(--blue);}
+  .beeldvak img{width:100%; height:100%; object-fit:contain; display:block;}
+  .beeldvak .leeg{font-size:17px; color:var(--slate); line-height:1;}
+  .beeldvak .weg{
+    position:absolute; top:3px; right:3px; border:none; background:rgba(28,37,52,.72); color:#fff;
+    border-radius:50%; width:19px; height:19px; font-size:12px; line-height:1; cursor:pointer; padding:0;
+  }
+  .beeldnaam{font-size:10px; color:var(--slate); text-align:center; margin-top:3px; line-height:1.25;}
+  .fotokop{cursor:pointer; list-style:none;}
+  .fotokop::-webkit-details-marker{display:none;}
+  .fotokop h2{font-size:15px; margin:0; color:var(--navy-900); display:flex; align-items:center; gap:10px;}
+  .fotokop h2::after{content:'\25BE'; color:var(--slate); font-size:12px;}
+  details[open] .fotokop h2::after{content:'\25B4';}
+  .fotogroep{font-size:12px; font-weight:800; color:var(--navy-900); margin:16px 0 8px;}
+  #fotoBg{
+    position:fixed; inset:0; background:rgba(28,37,52,.62); z-index:210;
+    display:none; align-items:center; justify-content:center; padding:32px; cursor:zoom-out;
+  }
+  #fotoBg.aan{display:flex;}
+  #fotoBg figure{
+    background:var(--white); border-radius:var(--radius); padding:16px; margin:0;
+    max-width:min(680px,92vw);
+  }
+  #fotoBg img{display:block; max-width:100%; max-height:70vh; margin:0 auto;}
+  #fotoBg figcaption{font-size:12px; color:var(--slate); text-align:center; margin-top:10px;}
+
   /* --- figuur --- */
   #figuur{width:100%; height:auto; display:block; background:var(--white);
     border:1px solid var(--border); border-radius:10px;}
@@ -263,6 +303,22 @@
   <div id="rfqVak"></div>
 </div>
 
+<details class="kaart" id="fotoKaart">
+  <summary class="fotokop">
+    <span class="eyebrow">Foto's</span>
+    <h2><span>Foto's bij optiek en aansluiting</span><span class="status" id="fotoTeller"></span></h2>
+  </summary>
+  <p class="leegmelding" id="fotoUitleg"></p>
+  <div class="fotogroep">Optieken</div>
+  <div class="beeldrooster" id="fotoOptiek"></div>
+  <div class="fotogroep">Aansluitingen</div>
+  <div class="beeldrooster" id="fotoAansluiting"></div>
+  <div class="balk" style="margin:16px 0 0">
+    <button class="knop" id="knBeeldOpslaan">Beeldbestand opslaan</button>
+    <span class="leegmelding" id="fotoWaarschuwing"></span>
+  </div>
+</details>
+
 </main>
 
 <div id="voorbeeldBg">
@@ -276,8 +332,20 @@
   </div>
 </div>
 
+<div id="fotoBg">
+  <figure>
+    <img id="fotoGroot" alt="">
+    <figcaption id="fotoBijschrift"></figcaption>
+  </figure>
+</div>
+
+<input type="file" id="fotoKiezer" accept="image/*" style="display:none">
+
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="pdf-huisstijl.js"></script>
+<!-- De foto's bij de optieken en de aansluitingen. Ontbreekt het bestand, dan
+     werkt de tool gewoon door; de fotokaart onderaan legt uit hoe je het maakt. -->
+<script src="bandraster-beelden.js"></script>
 <script>
 /* ===================================================================
    Bandrasters — intake, technisch productblad en RFQ-lijst.
@@ -423,6 +491,201 @@ const zoekEn = (tabel, naam) => { const r = tabel.find(x=>x.naam===naam); return
 const EN_KLEURTEMP = k => k || '';
 const EN_CRI = c => c==='80+' ? 'CRI 80' : c==='90+' ? 'CRI 90' : '';
 const EN_JANEE = v => v==='Ja' ? 'Yes' : v==='Nee' ? 'No' : '';
+
+/* ======================= foto's bij optiek en aansluiting =======================
+   In de Excel stonden bij de optieken en bij de aansluitingen kleine renders in
+   de cel. Die horen hier ook thuis: aan de naam alleen zie je niet welk profiel
+   of welke steker je kiest.
+
+   Ze kunnen niet als losse bestanden naast de tool staan. Vanaf schijf (file://)
+   weigert de browser een plaatje in een canvas uit te lezen - "tainted canvas" -
+   en dan komt het een PDF nooit in. Daarom staan ze, net als de productfoto's van
+   presenters.html, als data-URI in een javascriptbestand: bandraster-beelden.js
+   in de hoofdmap. De kaart "Foto's" onderaan de pagina schrijft dat bestand zelf,
+   zodat iedereen dezelfde foto's ziet. Ontbreekt het bestand, dan werkt de tool
+   gewoon door en blijven de vakken leeg. */
+const BEELDEN = {
+  optiek:      Object.assign({}, (window.BANDRASTER_BEELDEN || {}).optiek      || {}),
+  aansluiting: Object.assign({}, (window.BANDRASTER_BEELDEN || {}).aansluiting || {}),
+};
+let beeldenGewijzigd = false;
+
+/* De DALI-lijst herhaalt de aansluitingen van de aan-uitlijst met "+ kaal"
+   erachter: dezelfde steker, met losse stuuraders erbij. Dat is dus dezelfde
+   foto en die staart telt niet mee bij het zoeken - een foto onder de volledige
+   naam gaat er wel voor. */
+const fotoNaam    = naam => String(naam || '').replace(/\s*\+\s*kaal\s*$/i, '').trim();
+const fotoSleutel = naam => fotoNaam(naam).toLowerCase().replace(/[^a-z0-9]+/g, '');
+
+function beeldVoor(soort, naam){
+  if(!naam) return '';
+  const tabel = BEELDEN[soort] || {};
+  if(tabel[naam]) return tabel[naam];
+  const gezocht = fotoSleutel(naam);
+  const sleutel = Object.keys(tabel).find(k => fotoSleutel(k) === gezocht);
+  return sleutel ? tabel[sleutel] : '';
+}
+
+/* Namen die dezelfde foto delen vallen samen: "Kaal" en "A-symmetrisch" staan in
+   twee lijsten, en de "+ kaal"-varianten horen bij hun eigen steker. */
+function fotoNamen(namen){
+  const uit = [], gezien = {};
+  namen.forEach(function(n){
+    const naam = fotoNaam(n), sleutel = fotoSleutel(n);
+    if(naam && !gezien[sleutel]){ gezien[sleutel] = true; uit.push(naam); }
+  });
+  return uit;
+}
+const FOTO_GROEPEN = [
+  {soort:'optiek',      vak:'fotoOptiek',      namen: fotoNamen(LIJST.optiekOud.concat(LIJST.optiekNieuw))},
+  {soort:'aansluiting', vak:'fotoAansluiting', namen: fotoNamen(AANSLUITING.aanuit.concat(AANSLUITING.dali))},
+];
+
+/* Het duimnagelbeeld onder een keuzelijst in het intakeformulier. Is er geen
+   foto, dan komt er niets: een lege plek per rij maakt het formulier alleen
+   maar langer. */
+function fotoBij(cel, soort, naam){
+  const uri = beeldVoor(soort, naam);
+  if(!uri) return;
+  const k = el('button', 'fototip');
+  k.type = 'button';
+  k.title = naam + ' — klik om te vergroten';
+  const i = document.createElement('img');
+  i.src = uri; i.alt = naam;
+  k.appendChild(i);
+  k.addEventListener('click', function(){ toonFoto(uri, naam); });
+  cel.appendChild(k);
+}
+function toonFoto(uri, naam){
+  $('fotoGroot').src = uri;
+  $('fotoGroot').alt = naam;
+  $('fotoBijschrift').textContent = naam;
+  $('fotoBg').classList.add('aan');
+}
+function sluitFoto(){
+  $('fotoBg').classList.remove('aan');
+  $('fotoGroot').removeAttribute('src');
+}
+
+/* --- de fotokaart --- */
+
+/* Waar Ctrl+V terechtkomt: het vak waar je het laatst op klikte. */
+let plakDoel = null;
+
+function tekenFotos(){
+  let totaal = 0, gevuld = 0;
+  FOTO_GROEPEN.forEach(function(g){
+    const vak = $(g.vak);
+    vak.textContent = '';
+    g.namen.forEach(function(naam){
+      totaal++;
+      if(beeldVoor(g.soort, naam)) gevuld++;
+      vak.appendChild(fotoVak(g.soort, naam));
+    });
+  });
+  const teller = $('fotoTeller');
+  teller.className = 'status ' + (gevuld === totaal ? 'ok' : 'mist');
+  teller.textContent = gevuld + ' van ' + totaal;
+  $('fotoUitleg').textContent = window.BANDRASTER_BEELDEN
+    ? 'Klik een vak om een afbeelding te kiezen, of klik het aan en plak met Ctrl+V. ' +
+      'De foto verschijnt daarna bij Optiek en Aansluiting in het formulier.'
+    : 'bandraster-beelden.js is niet geladen, dus er zijn nog geen foto’s. Vul de vakken ' +
+      'hieronder (klikken om te kiezen, of klikken en Ctrl+V) en sla het beeldbestand op in de hoofdmap.';
+  $('fotoWaarschuwing').textContent = beeldenGewijzigd
+    ? 'Er zijn foto’s bijgekomen of gewijzigd. Sla het beeldbestand op en zet ' +
+      'bandraster-beelden.js in de hoofdmap, anders zijn ze na het herladen weg.'
+    : '';
+}
+
+function fotoVak(soort, naam){
+  const w = el('div');
+  const uri = beeldVoor(soort, naam);
+  const gekozen = plakDoel && plakDoel.soort === soort && plakDoel.naam === naam;
+  const b = el('button', 'beeldvak' + (gekozen ? ' gekozen' : ''));
+  b.type = 'button';
+  b.title = naam;
+  if(uri){
+    const i = document.createElement('img');
+    i.src = uri; i.alt = naam;
+    b.appendChild(i);
+    const x = el('button', 'weg', '×');
+    x.type = 'button';
+    x.title = 'Foto weghalen';
+    x.addEventListener('click', function(e){ e.stopPropagation(); zetFoto(soort, naam, ''); });
+    b.appendChild(x);
+  } else {
+    b.appendChild(el('span', 'leeg', '+'));
+  }
+  b.addEventListener('click', function(){
+    plakDoel = {soort:soort, naam:naam};
+    $('fotoKiezer').click();
+    tekenFotos();
+  });
+  w.appendChild(b);
+  w.appendChild(el('div', 'beeldnaam', naam));
+  return w;
+}
+
+function zetFoto(soort, naam, uri){
+  if(uri) BEELDEN[soort][naam] = uri;
+  else delete BEELDEN[soort][naam];
+  beeldenGewijzigd = true;
+  tekenAlles();   /* het formulier toont dezelfde foto's */
+  tekenFotos();
+}
+
+/* Een gekozen of geplakte afbeelding verkleinen. De renders uit de Excel zijn
+   klein, maar een telefoonfoto van 4 MB zou het beeldbestand onwerkbaar maken.
+   Png blijft png (doorzichtige achtergrond), de rest wordt jpeg op wit. */
+const BEELD_MAX = 900;
+function leesAfbeelding(bestand, klaar){
+  if(!bestand) return;
+  const lezer = new FileReader();
+  lezer.onerror = function(){ alert('Deze afbeelding kan niet worden gelezen.'); };
+  lezer.onload = function(){
+    const img = new Image();
+    img.onerror = function(){ alert('Deze afbeelding kan niet worden getoond.'); };
+    img.onload = function(){
+      const grootste = Math.max(img.width, img.height);
+      if(grootste <= BEELD_MAX && String(lezer.result).length < 200000){ klaar(lezer.result); return; }
+      const schaal = Math.min(1, BEELD_MAX / grootste);
+      const c = document.createElement('canvas');
+      c.width  = Math.max(1, Math.round(img.width  * schaal));
+      c.height = Math.max(1, Math.round(img.height * schaal));
+      const ctx = c.getContext('2d');
+      const alsPng = bestand.type === 'image/png';
+      if(!alsPng){ ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); }
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      try{ klaar(alsPng ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.86)); }
+      catch(err){ klaar(lezer.result); }
+    };
+    img.src = lezer.result;
+  };
+  lezer.readAsDataURL(bestand);
+}
+
+/* Schrijft de bibliotheek weg als javascriptbestand. Sleutels op alfabet, zodat
+   twee keer opslaan na dezelfde wijzigingen hetzelfde bestand geeft en git alleen
+   toont wat er echt veranderd is. */
+function schrijfBeeldbestand(){
+  const blok = function(tabel){
+    return Object.keys(tabel).sort()
+      .map(function(k){ return '    ' + JSON.stringify(k) + ': ' + JSON.stringify(tabel[k]); })
+      .join(',\n');
+  };
+  const inhoud =
+    "/* Foto's bij de optieken en de aansluitingen van bandrasters.html - geschreven\n" +
+    "   door de tool zelf (de kaart \"Foto's\" onderaan de pagina). Zet dit bestand in\n" +
+    "   de hoofdmap naast bandrasters.html. Losse beeldbestanden kunnen niet: vanaf\n" +
+    "   schijf mag de browser die niet uitlezen, en dan komen ze een PDF nooit in. */\n" +
+    "window.BANDRASTER_BEELDEN = {\n" +
+    "  optiek: {\n"      + blok(BEELDEN.optiek)      + "\n  },\n" +
+    "  aansluiting: {\n" + blok(BEELDEN.aansluiting) + "\n  }\n" +
+    "};\n";
+  download('bandraster-beelden.js', inhoud, 'text/javascript');
+  beeldenGewijzigd = false;
+  tekenFotos();
+}
 
 /* ======================= de staat =======================
    Eén concept (het formulier waar je nu in werkt) en een lijst posities (de
@@ -766,6 +1029,7 @@ function tekenIntake(){
       }
       case 'optiek':
         links.appendChild(keuzeveld(LIJST.optiekOud, c.oud.optiek, v=>{ c.oud.optiek=v; tekenAlles(); }));
+        fotoBij(links, 'optiek', c.oud.optiek);
         break;
       case 'lumen':
         AFGELEID.lumenOud = berekendVak(lumenOud(c), '', 'Gegevens ontbreken');
@@ -775,6 +1039,7 @@ function tekenIntake(){
         links.appendChild(keuzeveld(aansluitLijst(c.oud.sturing), c.oud.aansluiting,
           v=>zetLinks({id:'aansluiting'}, v, true)));
         if(!c.oud.sturing) links.appendChild(el('div', 'eh', 'kies eerst een sturing'));
+        fotoBij(links, 'aansluiting', c.oud.aansluiting);
         break;
       case 'tekst':
         links.appendChild(tekstveld(c.oud[rij.id], v=>zetLinks(rij, v)));
@@ -809,6 +1074,7 @@ function tekenIntake(){
         break;
       case 'optiek':
         rechtsCel.appendChild(keuzeveld(LIJST.optiekNieuw, c.nieuw.optiek, v=>{ c.nieuw.optiek=v; tekenAlles(); }));
+        fotoBij(rechtsCel, 'optiek', c.nieuw.optiek);
         break;
       case 'lumen':
         AFGELEID.lumenNieuw = berekendVak(lumenNieuw(c), '', 'Gegevens ontbreken');
@@ -819,6 +1085,7 @@ function tekenIntake(){
           keuzeveld(aansluitLijst(rechts(c,'sturing')), rechts(c,'aansluiting'),
             v=>{ zetRechts(c, 'aansluiting', v); tekenAlles(); }),
           c, 'aansluiting'));
+        fotoBij(rechtsCel, 'aansluiting', rechts(c, 'aansluiting'));
         break;
       case 'tekst':
         rechtsCel.appendChild(metReset(
@@ -1723,7 +1990,16 @@ function slaProjectOp(){
 
   const dataMarker = /\/\*__PROJECT_DATA_START__\*\/[\s\S]*?\/\*__PROJECT_DATA_END__\*\//;
   const baseMarker = /<!--__BASE_HREF__-->|<base href="[^"]*">/;
+
+  /* De foto's staan al in bandraster-beelden.js, dat via de <base href> ook vanuit
+     het projectbestand geladen wordt. Ze nog eens als data-URI mee bakken zou het
+     bestand megabytes groter maken, en het formulier en de fotokaart worden bij
+     het openen toch opnieuw getekend. Dus gaan ze er even uit. */
+  $('fotoOptiek').textContent = '';
+  $('fotoAansluiting').textContent = '';
+  Array.prototype.forEach.call(document.querySelectorAll('.fototip'), function(n){ n.remove(); });
   let html = document.documentElement.outerHTML;
+  tekenAlles(); tekenFotos();
   if(!dataMarker.test(html) || !baseMarker.test(html)){
     alert('Opslaan mislukt: de opslag-plekken zijn niet gevonden in de broncode.');
     return;
@@ -1771,6 +2047,26 @@ function bindProject(){
 }
 
 $('knNieuw').addEventListener('click', nieuwePositie);
+$('knBeeldOpslaan').addEventListener('click', schrijfBeeldbestand);
+$('fotoKiezer').addEventListener('change', function(e){
+  const bestand = e.target.files[0];
+  $('fotoKiezer').value = '';
+  if(!plakDoel) return;
+  const doel = plakDoel;
+  leesAfbeelding(bestand, function(uri){ zetFoto(doel.soort, doel.naam, uri); });
+});
+/* Plakken werkt alleen als er net een vak is aangeklikt; anders zou Ctrl+V in een
+   tekstveld ineens een foto ergens neerzetten. */
+document.addEventListener('paste', function(e){
+  if(!plakDoel) return;
+  const items = Array.prototype.slice.call((e.clipboardData || window.clipboardData || {}).items || []);
+  const plaatje = items.filter(function(i){ return /^image\//.test(i.type); })[0];
+  if(!plaatje) return;
+  e.preventDefault();
+  const doel = plakDoel;
+  leesAfbeelding(plaatje.getAsFile(), function(uri){ zetFoto(doel.soort, doel.naam, uri); });
+});
+$('fotoBg').addEventListener('click', sluitFoto);
 $('knOpslaan').addEventListener('click', slaProjectOp);
 $('knRfqToevoegen').addEventListener('click', naarRfq);
 $('knSluitVoorbeeld').addEventListener('click', sluitVoorbeeld);
@@ -1806,12 +2102,15 @@ $('knRfqXlsx').addEventListener('click', function(){
 });
 
 document.addEventListener('keydown', function(e){
-  if(e.key === 'Escape' && $('voorbeeldBg').classList.contains('aan')) sluitVoorbeeld();
+  if(e.key !== 'Escape') return;
+  if($('fotoBg').classList.contains('aan')) sluitFoto();
+  else if($('voorbeeldBg').classList.contains('aan')) sluitVoorbeeld();
 });
 
 /* ======================= start ======================= */
 bindProject();
 tekenAlles();
+tekenFotos();
 </script>
 </body>
 </html>
