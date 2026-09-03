@@ -263,8 +263,6 @@
         <div><label class="vl" for="pDatum">Datum</label><input type="date" id="pDatum"></div>
         <div><label class="vl" for="pContact">Contactpersoon (RFQ)</label><input type="text" id="pContact"></div>
         <div><label class="vl" for="pFabrikant">Fabrikant (RFQ &ldquo;To&rdquo;)</label><input type="text" id="pFabrikant"></div>
-        <div><label class="vl" for="pEff">Systeemrendement</label><div class="duo"><input type="number" id="pEff" min="1" step="1"><span class="eh">lm/W</span></div></div>
-        <div><label class="vl" for="pMaxW">Maximaal vermogen</label><div class="duo"><input type="number" id="pMaxW" min="1" step="1"><span class="eh">W</span></div></div>
       </div>
       <div style="margin-top:10px"><label class="vl" for="pOpm">Opmerkingen</label><textarea id="pOpm"></textarea></div>
     </div>
@@ -276,7 +274,10 @@
         <span class="status" id="statusOud"></span>
         <span class="status" id="statusNieuw"></span>
       </h2>
-      <div style="margin-bottom:12px"><label class="vl" for="cOmschrijving">Omschrijving positie (bijv. ruimte of bestekpositie)</label><input type="text" id="cOmschrijving" placeholder="bijv. Kantoren begane grond"></div>
+      <div class="raster r2" style="margin-bottom:12px">
+        <div><label class="vl" for="cOmschrijving">Omschrijving positie (bijv. ruimte of bestekpositie)</label><input type="text" id="cOmschrijving" placeholder="bijv. Kantoren begane grond"></div>
+        <div><label class="vl" for="cBestekcode">Bestekcode</label><input type="text" id="cBestekcode" placeholder="komt als stempel op het productblad"></div>
+      </div>
       <div class="intake" id="intake"></div>
     </div>
 
@@ -711,6 +712,7 @@ function schrijfBeeldbestand(){
 function leegConcept(){
   return {
     omschrijving:'',
+    bestekcode:'',
     oud:{
       lengte:'', breedte:'', hoogte:'', plafondtype:'', plafondAnders:'', montage:'',
       kleurtemp:'', cri:'', lichtbron:'', aantalLb:'1', optiek:'', kleur:'', kleurRal:'',
@@ -721,7 +723,7 @@ function leegConcept(){
       kleurtemp:'', cri:'', optiek:'', kleur:'', kleurRal:'',
       sturing:'', aansluiting:'', nood:'', sensor:'', ventilatie:'', extras:'', aantal:'',
       basis:'Optic bandraster', basisAnders:'', lichtvlakL:'', lichtvlakB:'',
-      productcode:'', bestekcode:'', prijs:'',
+      productcode:'', prijs:'',
     },
     /* Per veld-id: staat false zodra de rechterkant bewust afwijkt van links.
        Ontbreekt de sleutel, dan volgt rechts links - zoals de Excel dat met
@@ -771,6 +773,7 @@ function herstelConcept(c){
   if(!c) return leeg;
   return {
     omschrijving: c.omschrijving||'',
+    bestekcode:   c.bestekcode||'',
     oud:   Object.assign(leeg.oud,   c.oud||{}),
     nieuw: Object.assign(leeg.nieuw, c.nieuw||{}),
     volgt: Object.assign({},         c.volgt||{}),
@@ -938,7 +941,6 @@ const RIJEN = [
   {id:'basis',       label:'Basisarmatuur',   soort:'rechtsKeuze', lijst:'basis', anders:'basisAnders', andersBij:'Anders:'},
   {id:'lichtvlak',   label:'Lichtvlak (l×b)', soort:'lichtvlak'},
   {id:'productcode', label:'Product code',    soort:'rechtsTekst', plaats:'wordt door de fabrikant bevestigd'},
-  {id:'bestekcode',  label:'Bestekcode',      soort:'rechtsTekst', plaats:'eigen code — komt als stempel op het productblad'},
   {id:'prijs',       label:'Unit price',      soort:'rechtsTekst', plaats:'leeg laten = fabrikant vult in'},
 ];
 
@@ -1467,14 +1469,21 @@ function naarRfq(){
   else { P.posities.push(regel); }
   P.bewerkt = -1;
   P.concept = leegConcept();
-  $('cOmschrijving').value = '';
+  vulPositievelden();
   tekenAlles();
+}
+
+/* De twee velden boven het raster staan buiten tekenIntake(), dus na het wisselen
+   van positie moeten ze zelf bijgewerkt worden. */
+function vulPositievelden(){
+  $('cOmschrijving').value = P.concept.omschrijving || '';
+  $('cBestekcode').value   = P.concept.bestekcode   || '';
 }
 
 function laadPositie(i){
   P.concept = kloon(P.posities[i]);
   P.bewerkt = i;
-  $('cOmschrijving').value = P.concept.omschrijving || '';
+  vulPositievelden();
   tekenAlles();
   window.scrollTo({top:0, behavior:'smooth'});
 }
@@ -1488,7 +1497,7 @@ function verwijderPositie(i){
 function nieuwePositie(){
   P.concept = leegConcept();
   P.bewerkt = -1;
-  $('cOmschrijving').value = '';
+  vulPositievelden();
   tekenAlles();
 }
 
@@ -1537,7 +1546,6 @@ function uriBytes(uri){
    er uiteindelijk op horen te staan wordt per specificatie nog doorgenomen. */
 function bladGroepen(c){
   const lv = lichtvlak(c);
-  const eff = getal(P.instellingen.efficacy) || 140;
   const w = wattNieuw(c), lmN = lumenNieuw(c);
   return [
     {kop:'Algemeen', rijen:[
@@ -1559,7 +1567,6 @@ function bladGroepen(c){
       ['Optiek',                c.nieuw.optiek],
       ['Lichtstroom armatuur',  lmN==null ? '' : lmN+' lm'],
       ['Vermogen',              w==null ? '' : w+' W'],
-      ['Systeemrendement',      w==null ? '' : eff+' lm/W'],
     ]},
     {kop:'Elektrisch', rijen:[
       ['Sturing',          rechts(c,'sturing')],
@@ -1688,10 +1695,9 @@ async function bouwProductblad(c){
     ['Aansluiting', rechts(c, 'aansluiting'), beeldVoor('aansluiting', rechts(c, 'aansluiting'))],
   ].filter(f => f[2]);
   if(fotos.length){
-    const blokH = M.naSectiekop + M.foto.h + M.foto.naBeeld + M.rij;
+    const blokH = M.foto.h + M.foto.naBeeld + M.rij;
     if(y > M.voetY - M.foto.onder - blokH) nieuwePagina(false);
     y = M.voetY - M.foto.onder - blokH;
-    sectiekop('Afbeeldingen');
     const kolB = (M.voetX2 - M.x - M.foto.gat) / 2;
     for(let i = 0; i < fotos.length; i++){
       const [label, naam, uri] = fotos[i];
@@ -1712,7 +1718,7 @@ async function bouwProductblad(c){
      productfoto zit; de codestempel komt in de kopbalk erboven. */
   pg = paginas[0];
   figuurPdf(HS, c, M.figuur.x, M.figuur.y, M.figuur.b, M.figuur.h);
-  stempelCode(c.nieuw.bestekcode);
+  stempelCode(c.bestekcode);
   pg = paginas[paginas.length-1];
 
   return await doc.save();
@@ -2094,21 +2100,19 @@ function bindProject(){
   type.value = P.project.type || 'Renovatie';
   type.addEventListener('change', function(){ P.project.type = type.value; });
 
-  /* De rekeninstellingen sturen het vermogen en de lichtstroom van het
-     alternatief aan, dus na een wijziging moet het hele raster opnieuw: de
-     berekende vakken en het figuur hangen eraan. */
-  [['pEff', 'efficacy'], ['pMaxW', 'maxWatt']].forEach(function(paar){
-    const veld = $(paar[0]);
-    veld.value = P.instellingen[paar[1]];
-    veld.addEventListener('input', function(){
-      P.instellingen[paar[1]] = veld.value;
-      ververs();
-    });
-  });
+  /* Systeemrendement (lm/W) en maximaal vermogen staan niet meer in beeld, in de
+     tool niet en op het productblad niet. Ze rekenen gewoon door met wat er in
+     P.instellingen staat - standaard 140 lm/W en 60 W, of wat een opgeslagen
+     project meebrengt. Moeten ze weer instelbaar worden, dan zijn het twee velden
+     in de projectkaart die aan P.instellingen hangen. */
 
   const oms = $('cOmschrijving');
   oms.value = P.concept.omschrijving || '';
   oms.addEventListener('input', function(){ P.concept.omschrijving = oms.value; });
+
+  const bcode = $('cBestekcode');
+  bcode.value = P.concept.bestekcode || '';
+  bcode.addEventListener('input', function(){ P.concept.bestekcode = bcode.value; });
 }
 
 $('knNieuw').addEventListener('click', nieuwePositie);
