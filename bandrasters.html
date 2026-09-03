@@ -1509,11 +1509,21 @@ const M = {
   sectiekop: 147.5, naSectiekop: 13.6, naKoprij: 10.9, naGroepskop: 10.3,
   rij: 9.5, wikkel: 6.8, naBestel: 27.1, groepGat: 20.5, lijnBoven: 7.1,
   figuur: {x:305, y:158, b:255, h:250},
+  foto: {h:104, gat:15, naBeeld:11, xNaam:56, onder:14},
   voetY: 806.9, voetX1: 28.3, voetX2: 551.5,
   tekst: '#231F20', lijn: '#BCBEC0',
 };
 
 function mm(v){ return v==='' || v==null ? '' : String(v) + ' mm'; }
+
+/* Een data-URI uit het beeldbestand naar bytes; sluitBeeldIn() van de tekenlaag
+   ziet aan de eerste bytes zelf of het png of jpeg is. */
+function uriBytes(uri){
+  const bin = atob(String(uri).slice(String(uri).indexOf(',') + 1));
+  const uit = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) uit[i] = bin.charCodeAt(i);
+  return uit;
+}
 
 /* De groepen van het blad. Volgorde en indeling zijn het beginpunt; welke velden
    er uiteindelijk op horen te staan wordt per specificatie nog doorgenomen. */
@@ -1658,6 +1668,36 @@ async function bouwProductblad(c){
       g.rijen.forEach(r => regel(r[0], r[1]));
       slotlijn();
     });
+  }
+
+  /* De foto's van de optiek en de aansluiting, onderaan het blad. Ze horen bij het
+     alternatief, net als de rest van het blad. Het blok wordt tegen de voetlijn
+     gezet in plaats van direct onder de tabel; loopt de tabel tot in dat vlak, dan
+     komt er een pagina bij - liever een lege onderkant dan een foto over de
+     gegevens heen. */
+  const fotos = [
+    ['Optiek',      c.nieuw.optiek,           beeldVoor('optiek', c.nieuw.optiek)],
+    ['Aansluiting', rechts(c, 'aansluiting'), beeldVoor('aansluiting', rechts(c, 'aansluiting'))],
+  ].filter(f => f[2]);
+  if(fotos.length){
+    const blokH = M.naSectiekop + M.foto.h + M.foto.naBeeld + M.rij;
+    if(y > M.voetY - M.foto.onder - blokH) nieuwePagina(false);
+    y = M.voetY - M.foto.onder - blokH;
+    sectiekop('Afbeeldingen');
+    const kolB = (M.voetX2 - M.x - M.foto.gat) / 2;
+    for(let i = 0; i < fotos.length; i++){
+      const [label, naam, uri] = fotos[i];
+      const x = M.x + i * (kolB + M.foto.gat);
+      let img = null;
+      try{ img = await HS.sluitBeeldIn(uriBytes(uri)); }
+      catch(err){ console.warn('Foto bij ' + label + ' kon niet worden ingesloten:', err && err.message); }
+      if(img) HS.beeldPassend(img, x, y, kolB, M.foto.h);
+      const yy = y + M.foto.h + M.foto.naBeeld;
+      rect(x, yy - M.lijnBoven, kolB, 0.2, M.tekst);
+      tekst(x + 0.5, yy, M.rijPt, label, {bold:true, cond:true, color:M.tekst});
+      wrapBreedte(naam, kolB - M.foto.xNaam, M.rijPt, {})
+        .forEach((r, n) => tekst(x + M.foto.xNaam, yy + n*M.wikkel, M.rijPt, r, {color:M.tekst}));
+    }
   }
 
   /* Het figuur staat rechtsboven op de eerste pagina, waar in het DLC-ontwerp de
