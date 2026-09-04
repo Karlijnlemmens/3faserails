@@ -311,7 +311,7 @@
   <div class="zijkolom">
     <div class="kaart">
       <span class="eyebrow">Afgeleid figuur</span>
-      <h2>Maatvoering alternatief</h2>
+      <h2 id="figuurkop">Maatvoering alternatief</h2>
       <svg id="figuur" viewBox="0 0 340 300" role="img" aria-label="Maatvoering van het alternatief"></svg>
       <p class="figuurhint" id="figuurhint">Sleep een pijl om een lichtvlak horizontaal of verticaal te verplaatsen.</p>
       <div id="lichtvlakvelden"></div>
@@ -371,6 +371,7 @@
 
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="pdf-huisstijl.js"></script>
+<script src="info-teken.js"></script>
 <!-- De foto's bij de optieken en de aansluitingen. Ontbreekt het bestand, dan
      werkt de tool gewoon door; de fotokaart onderaan legt uit hoe je het maakt. -->
 <script src="bandraster-beelden.js"></script>
@@ -2468,6 +2469,23 @@ document.addEventListener('keydown', function(e){
 });
 
 /* ======================= start ======================= */
+
+/* Eerste gebruik van het gedeelde informatieteken (info-teken.js): de uitleg bij
+   de lichtvlakken hoort bij het figuur, niet in een losse handleiding. */
+InfoTeken.zet($('figuurkop'), {
+  titel: 'Lichtvlakken',
+  tekst: 'Het lichtvlak is de uitsnede waar het licht uit komt. Een positie kan er ' +
+         'meer dan een hebben, en ze hoeven niet in het midden te liggen.',
+  lijst: [
+    'Een veld leeg laten betekent: de tool rekent het uit — 15 mm rand rondom, en bij ' +
+      'meer vlakken de lengte gelijk verdeeld over de positie.',
+    'Wat er dan uit komt staat grijs in het lege veld.',
+    'In de tekening versleep je een vlak aan zijn pijlen: de horizontale verplaatst ' +
+      'vanaf links, de verticale vanaf boven, in stappen van 5 mm.',
+    '"centreren" maakt de twee plekvelden leeg - terug naar de berekende plek.',
+  ],
+});
+
 bindProject();
 tekenAlles();
 tekenFotos();
