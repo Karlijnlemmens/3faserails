@@ -1640,48 +1640,56 @@ function armaturenOverig(){
   });
 }
 /* Adapters & overig: 12 artikelen, wit/zwart/grijs, zelfde intern/extern-codescheiding.
-   `uitleg` is wat er achter het informatieteken in de lijst komt te staan: kort wat
-   het is en waar je het voor gebruikt. De tekening erbij komt uit rail-figuren.js,
-   uitgesneden uit de presenter (zie tools/maak-rail-figuren.mjs) - op id, dus een
-   artikel zonder tekening laat gewoon alleen de tekst zien. */
+   `uitleg` is wat er achter het informatieteken in de lijst komt te staan. De tekst
+   bevat alleen wat aantoonbaar is: wat de presenter letterlijk zegt (die geeft bij
+   de accessoires alleen namen, codes en één waarschuwing - geen toelichting), wat
+   de maatschets laat zien, en wat de tool zelf afdwingt. Waar de toepassing niet
+   uit een bron blijkt staat dat er met zoveel woorden bij, in plaats van een
+   aanname die als feit gelezen kan worden - deze lijst wordt aan installateurs
+   voorgelezen. Wordt zo'n punt bevestigd, dan vervangt de bevestigde tekst die
+   regel. De tekening erbij komt uit rail-figuren.js (zie tools/maak-rail-figuren.mjs)
+   en gaat op id, dus een artikel zonder tekening laat alleen de tekst zien. */
 const ADAPTERS_OVERIG = [
   {id:'ao01', name:'ON/OFF Rail Adapter GA-69 70mm', codes:{wit:{p:'2001404',l:'KKT30133'}, zwart:{p:'2001398',l:'KKT30132'}, grijs:{p:'2001381',l:'KKT30131'}},
-   uitleg:['Losse railadapter waarmee een armatuur dat er zelf geen heeft in de rail wordt gehangen; hij pakt één van de drie stroombanen.',
-           'Toepassing: een "gewoon" armatuur, een pendel of een eigen ophanging aan de rail. Onze 3-fase railspots hebben hun adapter al ingebouwd — de Punto met schuifklauw, de Dio is "standaard voorzien van Global adapter" — die hebben hem dus niet nodig.',
-           'Bestel je hem wel, dan hoort trekontlasting 2001947 er verplicht bij: zonder die brug kan de adapter uit de rail getrokken worden.']},
+   uitleg:['Losse railadapter waarmee een armatuur dat er zelf geen heeft in de rail wordt gehangen.',
+           'De presenter zet er een waarschuwing bij: "Deze railadapter dient altijd te worden besteld in combinatie met trekontlasting artikel 2001947 PRX trekontlasting brug met 2 schroefjes."',
+           'Onze eigen 3-fase railspots hebben hun adapter al ingebouwd — de Punto wordt geleverd "met schuifklauw", de Dio is "standaard voorzien van Global adapter" — die hebben er dus geen losse bij nodig.']},
   {id:'ao02', name:'multi-adapter 3-fase + 400V aftakking', codes:{wit:{p:'2001435',l:'KKT301348'}, zwart:{p:'2001428',l:'KKT301346'}, grijs:{p:'2001411',l:'KKT3013461'}},
-   uitleg:['Adapter met een extra 400V-aftakking op hetzelfde punt.',
-           'Toepassing: waar naast de verlichting nog een zwaardere of aparte belasting op de rail moet.']},
+   uitleg:['Adapter met een 400V-aftakking; de presenter voert hem voluit als "Multi-adapter 3-fase + 400V aftakking".',
+           'Nog te bevestigen: waarvoor hij in de praktijk wordt ingezet. De presenter geeft alleen de naam en de maatschets, geen toelichting.']},
   {id:'ao03', name:'Schuko adapter (stopcontact 230V)', codes:{wit:{p:'2001459',l:'KKT3013100'}, zwart:{p:'2001442',l:'KKT3013120'}},
-   uitleg:['Zet één stroombaan van de rail om naar een gewoon 230V-stopcontact.',
-           'Toepassing: een los apparaat of tijdelijke voeding aan de rail, zonder aparte wandcontactdoos.']},
+   uitleg:['Adapter met een schuko-stopcontact, zodat er een gewone stekker op de rail kan.',
+           'De rail zelf is volgens de presenter 230V/400V, 16A, IP20.',
+           'Nog te bevestigen: of er een maximale belasting per adapter geldt.']},
   {id:'ao04', name:'Monopoint voor 3-fase adaptor', codes:{wit:{p:'2001503',l:'KKT301322'}, zwart:{p:'2001497',l:'KKT301319'}, grijs:{p:'2001480',l:'KKT301318'}},
-   uitleg:['Enkelvoudig plafondpunt met een kort stukje rail erin, voor één adapter.',
-           'Toepassing: een losse spot op een plek waar een heel railtracé niet loont.']},
+   uitleg:['Rond plafondpunt met een kort stuk 3-fase rail erin, voor één adapter — de maatschets geeft de afmetingen.',
+           'Daarmee hangt één armatuur op een plek waar geen rail ligt.']},
   {id:'ao05', name:'Verstevigingsplaat 182mm', codes:{wit:{p:'2001350',l:'KKT301435'}, zwart:{p:'2001343',l:'KKT3014139'}, grijs:{p:'2001336',l:'KKT301429'}},
-   uitleg:['Plaat die over de naad van een koppeling schuift en de rail daar stijf houdt.',
-           'Toepassing: bij zwaardere belasting, of als de bevestigingspunten verder uit elkaar liggen dan de aanbevolen 1000 mm.']},
+   uitleg:['Verstevigingsplaat van 182 mm voor de rail.',
+           'Nog te bevestigen: de precieze toepassing. De presenter geeft alleen de naam; het tabblad Onderdelen noemt "extra ondersteuning ter plaatse van een koppeling, voor stevigheid bij zwaardere belasting".']},
   {id:'ao06', name:'Afdekplaat 2M', codes:{wit:{p:'2001206',l:'KKT30153'}, zwart:{p:'2001190',l:'KKT301522'}},
-   uitleg:['Dekt twee meter rail visueel af.',
-           'Toepassing: een sectie die (nog) niet gebruikt wordt netjes wegwerken.']},
+   uitleg:['Afdekplaat van 2 meter.',
+           'Nog te bevestigen: waarvoor jullie hem inzetten. Het tabblad Onderdelen noemt "een stuk rail visueel afdekken, bijvoorbeeld bij tijdelijk ongebruikte secties".']},
   {id:'ao07', name:'DALI Rail Adapter 103mm', codes:{wit:{p:'2001923',l:'KKT30693'}, zwart:{p:'2001916',l:'KKT30692'}, grijs:{p:'2001909',l:'KKT30691'}},
-   uitleg:['Adapter voor de DALI-uitvoering van de rail: naast de fase pakt hij ook de stuuraders.',
-           'Toepassing: dimbare installaties op DALI. Let op: hoort bij de PRX DALI rail, niet bij de gewone.']},
+   uitleg:['Railadapter van 103 mm voor DALI.',
+           'Geen maatschets: dit artikel staat niet in de PRX 3-fase rail presenter. Die noemt wel een aparte DALI-rail ("voorgeboorde montagegaten voor PRX & PRX DALI").',
+           'Nog te bevestigen: op welke rail deze adapter hoort en of hij op de gewone PRX 3-fase rail past.']},
   {id:'ao08', name:'Trekontlasting 70mm Universal Adapter (GA69/GAC69/GB67) — art. 2001947', codes:{wit:{p:'2001947',l:'2001947'}, zwart:{p:'2001947',l:'2001947'}},
-   uitleg:['Brugje met twee schroefjes dat de 70mm Universal adapter in de rail vastzet.',
-           'Toepassing: verplicht bij elke 70mm adapter (2001381 / 2001398 / 2001404). De tool waarschuwt als er minder trekontlastingen dan adapters in de lijst staan.']},
+   uitleg:['In de presenter: "Trekontlasting brug met 2 schroefjes".',
+           'Bij de Adapter 70mm staat: "Deze railadapter dient altijd te worden besteld in combinatie met trekontlasting artikel 2001947." Dat geldt dus voor 2001381 / 2001398 / 2001404.',
+           'De tool waarschuwt als er in de stuklijst minder trekontlastingen dan adapters staan; automatisch toevoegen doet hij niet.']},
   {id:'ao09', name:'Slot connection tool: GA69, GAC69', codes:{wit:{p:'2001930',l:'2001930'}, zwart:{p:'2001930',l:'2001930'}},
-   uitleg:['Hulpgereedschap om een adapter of koppelstuk te vergrendelen en weer los te maken.',
-           'Toepassing: montage en demontage van GA69- en GAC69-verbindingen; één stuks per monteur is genoeg.']},
+   uitleg:['Gereedschap, artikel 2001930; de presenter noemt het "Slot connection tool".',
+           'Nog te bevestigen: waarvoor het precies dient. Het tabblad Onderdelen noemt "koppelstukken en aansluitstukken correct vergrendelen".']},
   {id:'ao10', name:'trekontlasting', codes:{wit:{p:'2001473',l:'2001473'}, zwart:{p:'2001466',l:'2001466'}},
-   uitleg:['Trekontlasting die de kabel vastzet, zodat er geen trek op de aansluiting komt te staan.',
-           'Toepassing: bij pendelend of aan de kabel hangend materiaal.']},
+   uitleg:['De tweede trekontlasting in het assortiment (wit 2001473, zwart 2001466); de presenter noemt hem simpelweg "Trekontlasting".',
+           'Nog te bevestigen: waarin hij verschilt van de brug 2001947 en waarvoor hij gebruikt wordt.']},
   {id:'ao11', name:'nippel draaibaar M10 hoogte 12mm gat 7,4mm', codes:{alu:{p:'2012936',l:'KKT301617'}, zwart:{p:'2012943',l:'KKT301615'}},
-   uitleg:['Draaibare bevestigingsnippel M10; het armatuur hangt eraan en kan uitgericht worden.',
-           'Toepassing: pendel- en ophangmontage. Hoort samen met de M10-moer.']},
+   uitleg:['Draaibare nippel met M10-draad. De presenter voert hem samen met de moer als één set: "Nippel draaibaar M10 + moer".',
+           'Nog te bevestigen: de artikelnummers. Deze lijst voert 2012936 / 2012943; de presenter en het tabblad Onderdelen voeren 2029507 / 2029514.']},
   {id:'ao12', name:'adapter moer M10', codes:{alu:{p:'2013285',l:'KKT301632'}},
-   uitleg:['M10-moer die de draaibare nippel vastzet.',
-           'Toepassing: hoort bij de nippel hierboven; de presenter toont ze als één set.']},
+   uitleg:['M10-moer. In de presenter hoort hij bij de nippel hierboven — dat is één set, met één tekening.',
+           'Nog te bevestigen: het artikelnummer. Deze lijst voert 2013285; de presenter noemt de moer niet apart.']},
 ];
 
 const SHAPES = {
