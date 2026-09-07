@@ -111,6 +111,13 @@
   .c2-armrecog.miss{background:#FDECEC; color:#B0362B;}
   .c2-armrecog.warn{background:#FFF4E0; color:#95651A;}
 
+  .c2-stempelbtn{
+    font:inherit; font-size:11px; font-weight:700; white-space:nowrap;
+    padding:3px 8px; border-radius:20px; cursor:pointer;
+    border:1px solid var(--border); background:var(--white); color:var(--slate);
+  }
+  .c2-stempelbtn:hover{border-color:var(--blue); color:var(--blue-dark);}
+  .c2-stempelbtn.zwart{background:#232323; border-color:#232323; color:#fff;}
   .c2-armspecial{display:none; align-items:center; gap:4px;}
   .c2-armspecial.show{display:inline-flex;}
   .c2-armspecial .c2-specialbtn{font:inherit; font-size:11px; font-weight:700; white-space:nowrap;
@@ -619,6 +626,15 @@ function isSpecial(s){
 /* De presenter van een Special-rij wordt niet gedeeld met andere rijen (elke
    Special is een eenmalig armatuur), dus krijgt hij een eigen id per slot. */
 function specialPresenterId(armId){ return 'sp'+armId; }
+
+/* De twee stempelstijlen; zie stempelCode() voor wat ze op de pagina doen. Wit
+   is de standaard, dus een regel zonder keuze (en elk project van voor deze
+   keuze) valt daarop terug. */
+const STEMPELSTIJLEN = [
+  {id:'wit',   label:'Stempel wit'},
+  {id:'zwart', label:'Stempel zwart'},
+];
+function stempelZwart(s){ return !!s && s.stempel==='zwart'; }
 /* Een zelf geüploade PDF wint altijd, op elke rij - niet alleen op een rij met
    "special" in het artikelcodeveld. Uploaden is een bewuste handeling; wie dat
    doet wil die PDF in het boek, ook als de naam toevallig een type raakt. Weg
@@ -883,7 +899,12 @@ async function buildArmaturenboekPdf(){
 
     boek.forEach(b=>{
       const codes=[...new Set(b.rijen.map(r=>(r.s.aanduiding||'').trim()).filter(Boolean))];
-      bookGroups.push({id:b.g.id, code:codes, kleur:b.g.stempelKleur||'#FFFFFF', special:!!b.g.special});
+      /* De stempel staat op één presenterpagina, dus er kan er maar één stijl
+         gelden. Vraagt een van de regels in de groep om zwart, dan wordt hij
+         zwart: dat vraag je alleen als de kop van die pagina licht is, en dat is
+         een eigenschap van de pagina zelf. */
+      const zwart = b.rijen.some(r=>stempelZwart(r.s));
+      bookGroups.push({id:b.g.id, code:codes, kleur:b.g.stempelKleur||'#FFFFFF', zwart});
     });
   }
 
@@ -914,15 +935,23 @@ async function assembleArmaturenboekPdf(){
   }catch(err){
     stempelFont = await finalDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
   }
-  function stempelCode(pagina, codes, kleur, laag){
+  /* Twee stempelstijlen, per armatuurregel te kiezen (zie STEMPELSTIJLEN):
+
+       'wit'    de stempel van de Pragmalux-presenters: hoog in de donkere
+                kopbalk, in de kleur van de groep (wit, tenzij de groep een
+                eigen stempelKleur heeft). 27pt is gemeten als het beste
+                gemiddelde voor de bovenkant van het Pragmalux-logo - niet elke
+                presenter-PDF heeft dat logo op exact dezelfde hoogte staan.
+       'zwart'  de stempel van de DLC-bladen: zwart en 20pt lager, voor een
+                pagina waar de kop licht is of de indeling onbekend, zodat hij
+                niet over het merk of het logo van de leverancier valt.
+
+     Wit is de standaard, ook voor een zelf geüploade presenter: die komt
+     meestal uit de DLC-tool en die heeft een zwarte kopbalk. */
+  function stempelCode(pagina, codes, kleur, zwart){
     if(!pagina || !codes || !codes.length) return;
-    /* Bij een zelf-geüploade Special-presenter is de koplay-out onbekend en
-       kan de stempel over het merk/logo van de leverancier vallen; die komt
-       daarom lager te staan. Bij de gewone presenters is 27pt gemeten als het
-       beste gemiddelde voor de bovenkant van het Pragmalux-logo (niet elke
-       presenter-PDF heeft het logo op exact dezelfde hoogte staan). */
     const korps=11, marge=32+113.4 /* +4cm naar links t.o.v. de rechtermarge */,
-          regelhoogte=13, basislijn = laag ? 47 : 27;
+          regelhoogte=13, basislijn = zwart ? 47 : 27;
     /* Veilige breedte: hoe ver een stempelregel maximaal naar links mag lopen
        vanaf de rechtermarge voordat hij een wit element (garantieblokje,
        Pragmalux-logo) zou kunnen raken - gemeten op meerdere presenter-PDF's
@@ -932,10 +961,7 @@ async function assembleArmaturenboekPdf(){
        i.p.v. dat de positie verschuift. */
     const veiligeBreedte = 250, minKorps = 7;
     const {width, height} = pagina.getSize();
-    /* Special-presenters zijn zelf geüpload met een onbekende (vaak lichte)
-       achtergrond, dus krijgt de stempel daar altijd zwart i.p.v. de
-       groepskleur - die is afgestemd op de navy Pragmalux-huisstijl. */
-    const c = laag
+    const c = zwart
       ? PDFLib.rgb(0,0,0)
       : kleur.charAt(0)==='#'
         ? PDFLib.rgb(parseInt(kleur.substr(1,2),16)/255, parseInt(kleur.substr(3,2),16)/255, parseInt(kleur.substr(5,2),16)/255)
@@ -953,7 +979,7 @@ async function assembleArmaturenboekPdf(){
         size: grootte, font: stempelFont, color: c});
     });
   }
-  const appendPresenter = async(id, codes, kleur, laag)=>{
+  const appendPresenter = async(id, codes, kleur, zwart)=>{
     const b64 = await presenterData(id);
     if(!b64){ console.warn('Presenter "'+id+'" is nog niet toegevoegd (presenters/'+id+'.js) — overgeslagen.'); return 0; }
     try{
@@ -961,14 +987,14 @@ async function assembleArmaturenboekPdf(){
       const idx = d.getPageIndices();
       const pgs = await finalDoc.copyPages(d, idx);
       pgs.forEach(p=>finalDoc.addPage(p));
-      stempelCode(pgs[0], codes, kleur||'#FFFFFF', laag);
+      stempelCode(pgs[0], codes, kleur||'#FFFFFF', zwart);
       return pgs.length;
     }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); return 0; }
   };
 
   await copyRange(ownDoc, 0, ownDoc.getPageCount());
   let presenterTotaal = 0;
-  for(const g of bookGroups) presenterTotaal += await appendPresenter(g.id, g.code, g.kleur, g.special);
+  for(const g of bookGroups) presenterTotaal += await appendPresenter(g.id, g.code, g.kleur, g.zwart);
   presenterTotaal += await appendPresenter('achterpaginas'); /* AB Achterpaginas, helemaal achteraan */
 
   const eind = await finalDoc.save();
@@ -1125,7 +1151,8 @@ function maakArmRij(a){
   const codeNaamInp=document.createElement('input'); codeNaamInp.type='text';
   codeNaamInp.className='c2-textinp c2-aanduiding';
   codeNaamInp.placeholder='CODE'; codeNaamInp.value=s.aanduiding||'';
-  codeNaamInp.addEventListener('change', ()=>{ s.aanduiding=codeNaamInp.value; updateSummary(); });
+  codeNaamInp.addEventListener('input', updateStempelUI);
+  codeNaamInp.addEventListener('change', ()=>{ s.aanduiding=codeNaamInp.value; updateStempelUI(); updateSummary(); });
   const nameInp=document.createElement('input'); nameInp.type='text'; nameInp.className='c2-textinp c2-armnaam';
   nameInp.placeholder='Volledige naam (bijv. Punto 15W wit)'; nameInp.value=s.name||'';
   const badge=document.createElement('span'); badge.className='c2-armrecog';
@@ -1145,7 +1172,7 @@ function maakArmRij(a){
   specialX.addEventListener('click', ()=>{
     if(window.PRESENTER_DATA) delete window.PRESENTER_DATA[specialPresenterId(a.id)];
     specialFileInp.value='';
-    updateSpecialUI(); paintBadge(); updateSummary();
+    updateSpecialUI(); paintBadge(); updateStempelUI(); updateSummary();
   });
   specialFileInp.addEventListener('change', ()=>{
     const file=specialFileInp.files && specialFileInp.files[0];
@@ -1157,7 +1184,7 @@ function maakArmRij(a){
       if(kop!=='%PDF-'){ alert('Dit lijkt geen PDF-bestand.'); specialFileInp.value=''; return; }
       window.PRESENTER_DATA = window.PRESENTER_DATA || {};
       window.PRESENTER_DATA[specialPresenterId(a.id)] = bytesToB64(bytes);
-      updateSpecialUI(); paintBadge(); updateSummary();
+      updateSpecialUI(); paintBadge(); updateStempelUI(); updateSummary();
     };
     rdr.readAsArrayBuffer(file);
   });
@@ -1184,6 +1211,26 @@ function maakArmRij(a){
     specialX.style.display = geladen ? '' : 'none';
   }
   specialWrap.appendChild(specialBtn); specialWrap.appendChild(specialX); specialWrap.appendChild(specialFileInp);
+
+  /* Keuze tussen de twee stempelstijlen. Alleen te zien als deze regel ook echt
+     een stempel krijgt: er moet een presenter zijn en een code om te stempelen. */
+  const stempelBtn=document.createElement('button');
+  stempelBtn.type='button'; stempelBtn.className='c2-stempelbtn';
+  stempelBtn.addEventListener('click', ()=>{
+    s.stempel = stempelZwart(s) ? 'wit' : 'zwart';
+    updateStempelUI(); updateSummary();
+  });
+  function updateStempelUI(){
+    const toon = !!armGroepVan(s, a.id) && !!(codeNaamInp.value||'').trim();
+    stempelBtn.style.display = toon ? '' : 'none';
+    if(!toon) return;
+    const zwart = stempelZwart(s);
+    stempelBtn.textContent = zwart ? '● Stempel zwart' : '○ Stempel wit';
+    stempelBtn.className = 'c2-stempelbtn'+(zwart?' zwart':'');
+    stempelBtn.title = zwart
+      ? 'De code komt zwart en iets lager op de presenter — voor een pagina met een lichte kop. Klik voor wit.'
+      : 'De code komt wit boven in de kopbalk van de presenter. Klik voor zwart, als die kop licht is.';
+  }
   function paintBadge(){
     const g = armGroepVan(s, a.id);
     /* g.special is alleen waar voor de synthetische upload-groep - dan staat er
@@ -1204,13 +1251,13 @@ function maakArmRij(a){
       badge.title='Type niet herkend uit de naam — pas de omschrijving aan zodat het type duidelijk wordt, of upload hiernaast zelf een presenter-PDF.';
     }
   }
-  paintBadge(); updateSpecialUI();
-  nameInp.addEventListener('input', ()=>{ paintBadge(); updateSpecialUI(); });
-  nameInp.addEventListener('change', ()=>{ s.name=nameInp.value; paintBadge(); updateSpecialUI(); updateSummary(); });
+  paintBadge(); updateSpecialUI(); updateStempelUI();
+  nameInp.addEventListener('input', ()=>{ paintBadge(); updateSpecialUI(); updateStempelUI(); });
+  nameInp.addEventListener('change', ()=>{ s.name=nameInp.value; paintBadge(); updateSpecialUI(); updateStempelUI(); updateSummary(); });
   const codeInp=document.createElement('input'); codeInp.type='text'; codeInp.className='c2-textinp c2-armcode';
   codeInp.placeholder='Artikelcode — of "special"';
   codeInp.value = s.code||'';
-  codeInp.addEventListener('change', ()=>{ s.code=codeInp.value; updateSpecialUI(); paintBadge(); updateSummary(); });
+  codeInp.addEventListener('change', ()=>{ s.code=codeInp.value; updateSpecialUI(); paintBadge(); updateStempelUI(); updateSummary(); });
   [codeNaamInp,nameInp,codeInp].forEach(inp=>inp.addEventListener('keydown', e=>{ if(e.key==='Enter') inp.blur(); }));
   const qty=document.createElement('input'); qty.type='text'; qty.inputMode='numeric'; qty.className='c2-qtyinp';
   qty.value=String(s.qty);
@@ -1218,7 +1265,7 @@ function maakArmRij(a){
   qty.addEventListener('change', commitQty);
   qty.addEventListener('keydown', e=>{ if(e.key==='Enter') qty.blur(); });
   row.appendChild(codeNaamInp); row.appendChild(codeInp); row.appendChild(nameInp); row.appendChild(badge);
-  row.appendChild(specialWrap); row.appendChild(qty);
+  row.appendChild(specialWrap); row.appendChild(stempelBtn); row.appendChild(qty);
   return row;
 }
 function buildArmList(){
