@@ -937,21 +937,25 @@ async function assembleArmaturenboekPdf(){
   }
   /* Twee stempelstijlen, per armatuurregel te kiezen (zie STEMPELSTIJLEN):
 
-       'wit'    de stempel van de Pragmalux-presenters: hoog in de donkere
-                kopbalk, in de kleur van de groep (wit, tenzij de groep een
-                eigen stempelKleur heeft). 27pt is gemeten als het beste
-                gemiddelde voor de bovenkant van het Pragmalux-logo - niet elke
-                presenter-PDF heeft dat logo op exact dezelfde hoogte staan.
-       'zwart'  de stempel van de DLC-bladen: zwart en 20pt lager, voor een
-                pagina waar de kop licht is of de indeling onbekend, zodat hij
-                niet over het merk of het logo van de leverancier valt.
+       'wit'    de stempel van de Pragmalux-presenters: in de donkere kopbalk,
+                in de kleur van de groep (wit, tenzij de groep een eigen
+                stempelKleur heeft).
+       'zwart'  de stempel van de DLC-bladen: zwart en hoger, voor een pagina
+                waar de kop licht is of de indeling onbekend, zodat hij niet
+                over het merk of het logo van de leverancier valt.
 
      Wit is de standaard, ook voor een zelf geüploade presenter: die komt
-     meestal uit de DLC-tool en die heeft een zwarte kopbalk. */
+     meestal uit de DLC-tool en die heeft een zwarte kopbalk.
+
+     De basislijnen zijn op de afdruk beoordeeld. Eerst gemeten op 27 (het beste
+     gemiddelde voor de bovenkant van het Pragmalux-logo; niet elke presenter-PDF
+     heeft dat logo op exact dezelfde hoogte) en 47; daarna is de witte 3 mm naar
+     beneden gegaan en de zwarte 7 mm naar boven - 1 mm is 72/25,4 pt, dus
+     27 + 8,5 = 35,5 en 47 - 19,8 = 27,2. */
   function stempelCode(pagina, codes, kleur, zwart){
     if(!pagina || !codes || !codes.length) return;
     const korps=11, marge=32+113.4 /* +4cm naar links t.o.v. de rechtermarge */,
-          regelhoogte=13, basislijn = zwart ? 47 : 27;
+          regelhoogte=13, basislijn = zwart ? 27.2 : 35.5;
     /* Veilige breedte: hoe ver een stempelregel maximaal naar links mag lopen
        vanaf de rechtermarge voordat hij een wit element (garantieblokje,
        Pragmalux-logo) zou kunnen raken - gemeten op meerdere presenter-PDF's
