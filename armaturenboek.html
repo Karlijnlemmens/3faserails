@@ -619,21 +619,24 @@ function isSpecial(s){
 /* De presenter van een Special-rij wordt niet gedeeld met andere rijen (elke
    Special is een eenmalig armatuur), dus krijgt hij een eigen id per slot. */
 function specialPresenterId(armId){ return 'sp'+armId; }
-/* Special sluit de gewone naam-herkenning niet uit: zolang er geen eigen PDF
-   is geüpload, valt een Special-rij terug op matchArmGroep(), precies als een
-   gewone rij - zo krijgt een Special met een herkenbare naam (bv. "Bandraster
-   ...") gewoon de bijbehorende standaardpresenter. Zodra er wél een PDF is
-   geüpload wint die altijd, ook als de naam toevallig een type raakt. */
+/* Een zelf geüploade PDF wint altijd, op elke rij - niet alleen op een rij met
+   "special" in het artikelcodeveld. Uploaden is een bewuste handeling; wie dat
+   doet wil die PDF in het boek, ook als de naam toevallig een type raakt. Weg
+   ermee kan met het kruisje naast de knop.
+
+   Zonder eigen PDF is het de gewone herkenning: een handmatig gekozen type, en
+   anders matchArmGroep() op de naam. Dat geldt ook voor een Special-rij, zodat
+   een Special met een herkenbare naam (bv. "Bandraster ...") gewoon de
+   bijbehorende standaardpresenter krijgt zolang er niets is geüpload. */
 function armGroepVan(s, armId){
   if(!s) return null;
-  if(isSpecial(s)){
-    if(!armId) return null;
+  if(armId){
     const id = specialPresenterId(armId);
     if(presenterAanwezig(id)){
       return {id, naam:(s.name&&s.name.trim()) || ('Special '+armId.replace('arm','')), zoektermen:[], special:true};
     }
-    return matchArmGroep(s.name);
   }
+  if(isSpecial(s)) return matchArmGroep(s.name);
   if(s.groep==='-') return null;
   if(s.groep) return ARM_GROEPEN.find(g=>g.id===s.groep) || null;
   return matchArmGroep(s.name);
@@ -1003,8 +1006,8 @@ async function maakPdfBytes(){
       + zonderGroep.map(a=>{ const sa=st.armaturen[a.id];
           const kop=(sa.aanduiding||'').trim() || armLabel(a);
           return '  • '+kop+(sa.name? ' — '+sa.name:' (nog geen naam ingevuld)'); }).join('\n')
-      + '\nPas de omschrijving aan zodat het type duidelijk wordt, of typ "special" in het '
-      + 'artikelcodeveld om zelf een presenter-PDF te uploaden.');
+      + '\nPas de omschrijving aan zodat het type duidelijk wordt, of upload zelf een '
+      + 'presenter-PDF met de knop naast de armatuurregel.');
   }
   const specialZonderPdf = armaturenSpecialZonderPdf();
   if(specialZonderPdf.length){
@@ -1047,14 +1050,13 @@ function projectBestandsnaam(){
   const nm=(st.proj||'armaturenboek').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'armaturenboek';
   return nm+'-armaturenboek.html';
 }
-/* Alleen de sp<armId>-sleutels van momenteel actieve Special-armaturen, nooit het
-   hele PRESENTER_DATA-object (dat bevat ook de ingebakken presenters van de tool
-   zelf, zoals 'ag01'/'rail'). */
+/* Alleen de sp<armId>-sleutels van de armatuurregels zelf, nooit het hele
+   PRESENTER_DATA-object (dat bevat ook de ingebakken presenters van de tool zelf,
+   zoals 'ag01'/'rail'). Niet gefilterd op "special": een eigen PDF kan op elke
+   regel geüpload zijn, en wat je uploadt moet het opslaan overleven. */
 function verzamelSpecialPresenters(){
   const out={};
   Object.keys(st.armaturen).forEach(id=>{
-    const s=st.armaturen[id];
-    if(!isSpecial(s)) return;
     const pid=specialPresenterId(id);
     const data=window.PRESENTER_DATA && window.PRESENTER_DATA[pid];
     if(data) out[pid]=data;
@@ -1127,10 +1129,12 @@ function maakArmRij(a){
   const nameInp=document.createElement('input'); nameInp.type='text'; nameInp.className='c2-textinp c2-armnaam';
   nameInp.placeholder='Volledige naam (bijv. Punto 15W wit)'; nameInp.value=s.name||'';
   const badge=document.createElement('span'); badge.className='c2-armrecog';
-  /* Special: primair een zelf geüploade PDF (zie specialWrap hieronder), maar
-     zolang die er niet is valt de rij terug op de gewone naam-herkenning
-     (zie armGroepVan) - vandaar dat paintBadge() ook in Special-modus een
-     herkend type toont. */
+  /* De uploadknop staat er zodra de tool zelf geen presenter kan aanwijzen: bij
+     "special" in het artikelcodeveld, maar net zo goed bij een omschrijving die
+     niet herkend wordt terwijl er wel een artikelcode staat. Anders zou een
+     armatuur met een code en een onherkenbare naam nergens meer heen kunnen.
+     Zolang er geen eigen PDF is valt de rij terug op de naam-herkenning (zie
+     armGroepVan) - vandaar dat paintBadge() ook dan een herkend type toont. */
   const specialWrap=document.createElement('span'); specialWrap.className='c2-armspecial';
   const specialFileInp=document.createElement('input'); specialFileInp.type='file'; specialFileInp.accept='application/pdf';
   specialFileInp.style.display='none';
@@ -1157,53 +1161,52 @@ function maakArmRij(a){
     };
     rdr.readAsArrayBuffer(file);
   });
+  /* Of de tool zonder eigen PDF een presenter kan aanwijzen. De eigen PDF telt
+     hier bewust niet mee: anders zou de knop verdwijnen zodra je hem gebruikt
+     hebt, en kon je de upload niet meer vervangen. */
+  function typeOnbekend(){
+    if(isSpecial(s)) return true;
+    if(s.groep==='-') return false;
+    if(s.groep) return !ARM_GROEPEN.find(g=>g.id===s.groep);
+    return !matchArmGroep(nameInp.value);
+  }
   function updateSpecialUI(){
-    const speciaal = isSpecial(s);
-    specialWrap.classList.toggle('show', speciaal);
-    if(!speciaal) return;
     const geladen = presenterAanwezig(specialPresenterId(a.id));
+    /* Een lege regel krijgt de knop niet; die zou alleen maar in de weg staan. */
+    const toon = geladen || ((nameInp.value.trim() || isSpecial(s)) && typeOnbekend());
+    specialWrap.classList.toggle('show', toon);
+    if(!toon) return;
     specialBtn.textContent = geladen ? '✓ PDF geladen' : '⚠ PDF uploaden';
     specialBtn.className = 'c2-specialbtn '+(geladen?'ok':'miss');
     specialBtn.title = geladen
       ? 'Klik om de geüploade presenter-PDF te vervangen.'
-      : 'Special: upload hier de presenter-PDF voor dit armatuur.';
+      : 'Upload hier zelf de presenter-PDF voor dit armatuur.';
     specialX.style.display = geladen ? '' : 'none';
   }
   specialWrap.appendChild(specialBtn); specialWrap.appendChild(specialX); specialWrap.appendChild(specialFileInp);
   function paintBadge(){
-    if(isSpecial(s)){
-      /* g.special is alleen waar voor de synthetische upload-groep (er is dan
-         echt een PDF geüpload) - in dat geval verdwijnt de naam-herkenning uit
-         dit badge, want de special-knop hiernaast toont dan al "PDF geladen". */
-      const g = armGroepVan(s, a.id);
-      if(g && !g.special){
-        badge.textContent = (presenterAanwezig(g.id)?'✓ ':'⚠ ')+g.naam;
-        badge.className = 'c2-armrecog '+(presenterAanwezig(g.id)?'ok':'warn');
-        badge.title = presenterAanwezig(g.id)
-          ? 'Presenter '+g.naam+' wordt in het armaturenboek opgenomen (herkend uit de naam). Upload hiernaast een eigen PDF om dit te vervangen.'
-          : 'Type herkend uit de naam, maar de presenter-PDF van '+g.naam+' ontbreekt nog in presenters-data.js.';
-      } else {
-        badge.textContent=''; badge.className='c2-armrecog'; badge.title='';
-      }
-      return;
-    }
     const g = armGroepVan(s, a.id);
-    if(g){
+    /* g.special is alleen waar voor de synthetische upload-groep - dan staat er
+       een eigen PDF en toont de knop hiernaast al "PDF geladen"; een tweede
+       melding in dit badge zou daar niets aan toevoegen. */
+    if(g && g.special){
+      badge.textContent=''; badge.className='c2-armrecog'; badge.title='';
+    } else if(g){
       badge.textContent = (presenterAanwezig(g.id)?'✓ ':'⚠ ')+g.naam;
       badge.className = 'c2-armrecog '+(presenterAanwezig(g.id)?'ok':'warn');
       badge.title = presenterAanwezig(g.id)
-        ? 'Presenter '+g.naam+' wordt in het armaturenboek opgenomen.'
+        ? 'Presenter '+g.naam+' wordt in het armaturenboek opgenomen (herkend uit de naam). Upload hiernaast een eigen PDF om dit te vervangen.'
         : 'Type herkend, maar de presenter-PDF van '+g.naam+' ontbreekt nog in presenters-data.js.';
     } else if(!nameInp.value.trim()){
       badge.textContent=''; badge.className='c2-armrecog'; badge.title='';
     } else {
       badge.textContent='Kies type'; badge.className='c2-armrecog miss';
-      badge.title='Type niet herkend uit de naam — pas de omschrijving aan zodat het type duidelijk wordt, of typ "special" in het artikelcodeveld om zelf een PDF te uploaden.';
+      badge.title='Type niet herkend uit de naam — pas de omschrijving aan zodat het type duidelijk wordt, of upload hiernaast zelf een presenter-PDF.';
     }
   }
   paintBadge(); updateSpecialUI();
-  nameInp.addEventListener('input', paintBadge);
-  nameInp.addEventListener('change', ()=>{ s.name=nameInp.value; paintBadge(); updateSummary(); });
+  nameInp.addEventListener('input', ()=>{ paintBadge(); updateSpecialUI(); });
+  nameInp.addEventListener('change', ()=>{ s.name=nameInp.value; paintBadge(); updateSpecialUI(); updateSummary(); });
   const codeInp=document.createElement('input'); codeInp.type='text'; codeInp.className='c2-textinp c2-armcode';
   codeInp.placeholder='Artikelcode — of "special"';
   codeInp.value = s.code||'';
