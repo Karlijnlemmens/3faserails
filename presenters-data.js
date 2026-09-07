@@ -10,7 +10,10 @@
    index.html). Zo blijft de tool snel openen, ook met tientallen MB aan presenters.
 
    PRESENTER_DATA blijft bestaan voor presenters die je liever direct hier inplakt;
-   die worden bij het openen al meegeladen en gaan voor op het losse bestand. */
+   die worden bij het openen al meegeladen en gaan voor op het losse bestand.
+
+   Let op bij het opnieuw draaien van het script: 'ag44' (Neo) is hieronder met de
+   hand weggelaten omdat die presenter leeg is - zie de opmerking op zijn plek. */
 window.PRESENTER_FILES = [
   'achterpaginas',   /* AB Achterpaginas */
   'ag01',   /* Punto */
@@ -67,7 +70,10 @@ window.PRESENTER_FILES = [
   'ag41',   /* Noodverlichting Uni */
   'ag42',   /* Waterdicht Hermes */
   'ag43',   /* Module Mico */
-  'ag44',   /* Neo */
+  /* 'ag44' (Neo) staat er bewust NIET in: presenters/ag44.js is een lege export -
+     twee pagina's zonder tekenopdrachten - en zou als blanco pagina's in het
+     armaturenboek belanden. Nu waarschuwt de tool dat de presenter ontbreekt.
+     Terugzetten zodra het juiste familieblad is ingebakken. */
   'ag45',   /* Auva G2 */
   'ag46',   /* Auva G2 Anticorrosie */
   'ag47',   /* Breedstraler Auva G3 */
