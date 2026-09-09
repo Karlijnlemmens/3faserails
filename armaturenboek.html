@@ -232,6 +232,10 @@
       <div class="cfg-block">
         <h4>Armaturen</h4>
         <p class="hint">Vul de volledige naam en artikelcode in en typ het aantal per type. Het type (= welke presenter in het boek komt) wordt herkend uit de naam.</p>
+        <div class="ab-keuze" style="margin-bottom:12px;">
+          <label><input type="checkbox" id="abToonLijst" checked><span>Armaturenlijst in de PDF</span></label>
+        </div>
+        <p class="hint" style="margin:-6px 0 12px;">Uit betekent: geen overzichtstabel met alle armaturen in het boek. Het voorblad, de briefingpagina, het hoofdstukblad Armaturen en de presenters blijven staan.</p>
         <div class="c2-prodlist" id="abArmList"></div>
       </div>
 
@@ -284,9 +288,10 @@ const OPGESLAGEN_PROJECT = /*__PROJECT_DATA_START__*/null/*__PROJECT_DATA_END__*
 /* soort: 'lichtberekening' of 'vergelijking'. Allebei krijgen de briefingpagina
    achter het voorblad, met een eigen tekst. bestek/tekeningen/armaturenboek zijn de
    drie documentvelden van die pagina (zie BRIEF_VELDEN): een naam per regel, meer
-   namen worden een opsomming. */
+   namen worden een opsomming. toonLijst zet de overzichtstabel Armaturenlijst aan of
+   uit; de rest van het boek verandert er niet van. */
 const st = { proj:'', projNr:'', installateur:'', datum:'', soort:'lichtberekening',
-             bestek:'', tekeningen:'', armaturenboek:'', armaturen:{} };
+             bestek:'', tekeningen:'', armaturenboek:'', toonLijst:true, armaturen:{} };
 
 /* ---------- briefingpagina "Introductie" ----------
    Maten uit het aangeleverde ontwerp (AB Briefing vergelijking), gemeten in plaats
@@ -915,44 +920,50 @@ async function buildArmaturenboekPdf(){
       .forEach((r,i)=> text(27, 605+i*29.5-19.6*0.78, 19.6, r, {cond:true, bold:false, color:C.hoofd}));
     flush(true);
 
-    zetSectie('Armaturenlijst');
-    beginPage(true);
-    paginaKop('Armaturenlijst',
-      (st.proj||'').trim() + ((st.proj||'').trim()? '  —  ':'') + datumNL(st.datum));
-    /* Elke ingevulde rij komt in deze tabel. Een kolom (Code of Aantal) valt
-       helemaal weg als GEEN ENKELE regel er een waarde voor heeft - anders staat
-       hij zinloos leeg/vol nullen; de vrijgekomen breedte gaat naar Omschrijving. */
-    const rijenVoorTabel = [
-      ...boek.flatMap(b=>b.rijen),
-      ...onbekend.map(a=>({a, s:st.armaturen[a.id]}))
-    ];
-    const toonCode = rijenVoorTabel.some(r=> (r.s.aanduiding||'').trim());
-    const toonAantal = rijenVoorTabel.some(r=> (r.s.qty||0)>0);
-    let omschrijvingBreedte = 290;
-    if(!toonCode) omschrijvingBreedte += 75;
-    if(!toonAantal) omschrijvingBreedte += 60;
-    const cols = [];
-    if(toonCode) cols.push({w:75,h:'Code'});
-    cols.push({w:90,h:'Artikelcode'});
-    cols.push({w:omschrijvingBreedte,h:'Omschrijving'});
-    if(toonAantal) cols.push({w:60,h:'Aantal'});
-    let TB=tableStart(cols);
-    const rijWaarden=(r)=>{
-      const basis=[];
-      if(toonCode) basis.push((r.s.aanduiding||'').trim());
-      basis.push(armCode(r), armOms(r));
-      if(toonAantal) basis.push(String(r.s.qty||0));
-      return basis;
-    };
-    boek.forEach(b=> b.rijen.forEach(r=> tableRow(TB, rijWaarden(r))));
-    onbekend.forEach(a=> tableRow(TB, rijWaarden({a, s:st.armaturen[a.id]})));
-    y+=10;
-    const ontbreekt = boek.filter(b=>!presenterAanwezig(b.g.id));
-    if(ontbreekt.length){
-      para('Let op: van '+ontbreekt.map(b=>b.g.naam).join(', ')+' is de presenter nog niet in de '
-        +'tool geladen; die productpagina’s ontbreken.',8,C.red);
+    /* De overzichtstabel is optioneel (st.toonLijst): wie het boek alleen als
+       productdocumentatie meestuurt wil de armaturenlijst er soms niet bij. Alleen
+       deze pagina vervalt - het hoofdstukblad en de presenters blijven, en
+       bookGroups wordt hieronder los van de tabel gevuld. */
+    if(st.toonLijst){
+      zetSectie('Armaturenlijst');
+      beginPage(true);
+      paginaKop('Armaturenlijst',
+        (st.proj||'').trim() + ((st.proj||'').trim()? '  —  ':'') + datumNL(st.datum));
+      /* Elke ingevulde rij komt in deze tabel. Een kolom (Code of Aantal) valt
+         helemaal weg als GEEN ENKELE regel er een waarde voor heeft - anders staat
+         hij zinloos leeg/vol nullen; de vrijgekomen breedte gaat naar Omschrijving. */
+      const rijenVoorTabel = [
+        ...boek.flatMap(b=>b.rijen),
+        ...onbekend.map(a=>({a, s:st.armaturen[a.id]}))
+      ];
+      const toonCode = rijenVoorTabel.some(r=> (r.s.aanduiding||'').trim());
+      const toonAantal = rijenVoorTabel.some(r=> (r.s.qty||0)>0);
+      let omschrijvingBreedte = 290;
+      if(!toonCode) omschrijvingBreedte += 75;
+      if(!toonAantal) omschrijvingBreedte += 60;
+      const cols = [];
+      if(toonCode) cols.push({w:75,h:'Code'});
+      cols.push({w:90,h:'Artikelcode'});
+      cols.push({w:omschrijvingBreedte,h:'Omschrijving'});
+      if(toonAantal) cols.push({w:60,h:'Aantal'});
+      let TB=tableStart(cols);
+      const rijWaarden=(r)=>{
+        const basis=[];
+        if(toonCode) basis.push((r.s.aanduiding||'').trim());
+        basis.push(armCode(r), armOms(r));
+        if(toonAantal) basis.push(String(r.s.qty||0));
+        return basis;
+      };
+      boek.forEach(b=> b.rijen.forEach(r=> tableRow(TB, rijWaarden(r))));
+      onbekend.forEach(a=> tableRow(TB, rijWaarden({a, s:st.armaturen[a.id]})));
+      y+=10;
+      const ontbreekt = boek.filter(b=>!presenterAanwezig(b.g.id));
+      if(ontbreekt.length){
+        para('Let op: van '+ontbreekt.map(b=>b.g.naam).join(', ')+' is de presenter nog niet in de '
+          +'tool geladen; die productpagina’s ontbreken.',8,C.red);
+      }
+      flush();
     }
-    flush();
 
     boek.forEach(b=>{
       const codes=[...new Set(b.rijen.map(r=>(r.s.aanduiding||'').trim()).filter(Boolean))];
@@ -1482,6 +1493,10 @@ toonBriefingVelden();
     if($(id).checked){ st.soort = waarde; toonBriefingVelden(); updateSummary(); }
   });
 });
+/* Terugval op true: een project dat vóór deze optie is opgeslagen kent de sleutel
+   nog niet, en daar hoorde de armaturenlijst er gewoon bij. */
+$('abToonLijst').checked = st.toonLijst !== false;
+$('abToonLijst').addEventListener('change', e=>{ st.toonLijst = e.target.checked; });
 $('abProj').addEventListener('input', e=>{ st.proj=e.target.value; updateSummary(); });
 $('abProjNr').addEventListener('input', e=>{ st.projNr=e.target.value; });
 $('abInst').addEventListener('input', e=>{ st.installateur=e.target.value; });
