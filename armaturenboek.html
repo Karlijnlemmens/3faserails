@@ -75,6 +75,19 @@
   .cfg-block{background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px;}
   .cfg-block h4{margin:0 0 2px; font-size:13px;}
   .cfg-block .hint{font-size:11.5px; line-height:1.4; color:var(--slate); margin:0 0 8px;}
+  /* De briefingvelden zijn per project eenmalig werk; de armatuurregels zijn het werk
+     zelf. Vandaar dat dit blok onderaan staat en dicht kan - de regel in de kop zegt
+     wat erin staat, zodat je het niet hoeft open te klappen om dat te zien. */
+  .ab-vouw > summary{
+    cursor:pointer; list-style:none; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
+    font-size:13px; font-weight:800; color:var(--navy-900); margin-bottom:2px;
+  }
+  .ab-vouw > summary::-webkit-details-marker{display:none;}
+  .ab-vouw > summary::before{content:'\25B8'; color:var(--blue); font-size:11px; transition:transform .15s;}
+  .ab-vouw[open] > summary::before{transform:rotate(90deg);}
+  .ab-vouw > summary:hover{color:var(--blue-dark);}
+  .ab-vouw > summary .stand{font-weight:600; font-size:11.5px; color:var(--slate);}
+  .ab-vouw:not([open]) > summary{margin-bottom:0;}
 
   .c2-adapterrow{display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink); font-weight:600; margin-bottom:14px; flex-wrap:wrap;}
   .c2-select, .c2-textinp{
@@ -160,6 +173,27 @@
   .cfg-art-row .qty{color:#A9BBD8; font-family:'JetBrains Mono',monospace;}
   .cfg-warns{display:flex; flex-direction:column; gap:8px;}
   .cfg-warn{background:rgba(214,54,43,.18); border-left:3px solid var(--red); padding:8px 10px; border-radius:6px; font-size:11.5px; line-height:1.5; color:#FFE3E0;}
+  /* Onder 980px zakt het overzichtspaneel onder het formulier, en daarmee ook de
+     knoppen: op een laptop scroll je dan langs het hele formulier voor je iets kunt
+     downloaden. Deze balk blijft dan onderin staan. Boven 980px bestaat hij niet. */
+  .cfg-balk{display:none;}
+  @media(max-width:980px){
+    .cfg-balk{
+      display:flex; gap:8px; position:fixed; left:0; right:0; bottom:0; z-index:110;
+      padding:10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+      background:rgba(255,255,255,.94); backdrop-filter:blur(6px);
+      border-top:1px solid var(--border); box-shadow:0 -4px 14px rgba(30,42,74,.07);
+    }
+    .cfg-balk button{
+      flex:1; border:1.5px solid var(--border); background:#fff; color:var(--blue-dark);
+      border-radius:999px; padding:10px 8px; font-family:'Nunito Sans',sans-serif;
+      font-weight:800; font-size:12.5px; cursor:pointer; white-space:nowrap;
+    }
+    .cfg-balk button:hover{border-color:var(--blue);}
+    .cfg-balk button:disabled{opacity:.6; cursor:default;}
+    .cfg-balk button.hoofd{background:var(--orange); border-color:var(--orange); color:#fff;}
+    body{padding-bottom:72px;}   /* de balk mag de laatste regel niet afdekken */
+  }
   .cfg-actions{display:flex; gap:8px;}
   .cfg-actions button{
     flex:1; background:#fff; color:var(--blue-dark); border:none; border-radius:999px; padding:10px; font-weight:800; font-size:12.5px; cursor:pointer; font-family:'Nunito Sans',sans-serif;
@@ -217,14 +251,13 @@
     <div class="cfg-panel">
 
       <div class="cfg-block">
-        <h4>Soort opdracht</h4>
-        <p class="hint">Bepaalt de tekst van de briefingpagina "Introductie", die direct achter het voorblad komt.</p>
-        <div class="ab-keuze">
-          <label><input type="radio" name="abSoort" value="lichtberekening" id="abSoortLicht"><span>Lichtberekening</span></label>
-          <label><input type="radio" name="abSoort" value="vergelijking" id="abSoortVerg"><span>Vergelijking</span></label>
+        <h4>Armaturen</h4>
+        <p class="hint">Vul de volledige naam en artikelcode in en typ het aantal per type. Het type (= welke presenter in het boek komt) wordt herkend uit de naam.</p>
+        <div class="ab-keuze" style="margin-bottom:12px;">
+          <label><input type="checkbox" id="abToonLijst" checked><span>Armaturenlijst in de PDF</span></label>
         </div>
-        <p class="hint" style="margin:14px 0 0;">Documenten voor op de briefingpagina — één naam per regel; meer namen worden een opsomming. De projectnaam komt uit Projectgegevens.</p>
-        <div id="abDocVelden"></div>
+        <p class="hint" style="margin:-6px 0 12px;">Uit betekent: geen overzichtstabel met alle armaturen in het boek. Het voorblad, de briefingpagina, het hoofdstukblad Armaturen en de presenters blijven staan.</p>
+        <div class="c2-prodlist" id="abArmList"></div>
       </div>
 
       <div class="cfg-block">
@@ -244,15 +277,16 @@
         </div>
       </div>
 
-      <div class="cfg-block">
-        <h4>Armaturen</h4>
-        <p class="hint">Vul de volledige naam en artikelcode in en typ het aantal per type. Het type (= welke presenter in het boek komt) wordt herkend uit de naam.</p>
-        <div class="ab-keuze" style="margin-bottom:12px;">
-          <label><input type="checkbox" id="abToonLijst" checked><span>Armaturenlijst in de PDF</span></label>
+      <details class="cfg-block ab-vouw" id="abBriefBlok">
+        <summary>Soort opdracht &amp; briefingpagina<span class="stand" id="abBriefStand"></span></summary>
+        <p class="hint">Bepaalt de tekst van de briefingpagina "Introductie", die direct achter het voorblad komt.</p>
+        <div class="ab-keuze">
+          <label><input type="radio" name="abSoort" value="lichtberekening" id="abSoortLicht"><span>Lichtberekening</span></label>
+          <label><input type="radio" name="abSoort" value="vergelijking" id="abSoortVerg"><span>Vergelijking</span></label>
         </div>
-        <p class="hint" style="margin:-6px 0 12px;">Uit betekent: geen overzichtstabel met alle armaturen in het boek. Het voorblad, de briefingpagina, het hoofdstukblad Armaturen en de presenters blijven staan.</p>
-        <div class="c2-prodlist" id="abArmList"></div>
-      </div>
+        <p class="hint" style="margin:14px 0 0;">Documenten voor op de briefingpagina — één naam per regel; meer namen worden een opsomming. De projectnaam komt uit Projectgegevens.</p>
+        <div id="abDocVelden"></div>
+      </details>
 
     </div>
 
@@ -286,6 +320,11 @@
       </div>
       <iframe id="abPreviewFrame" title="Voorbeeld van de PDF"></iframe>
     </div>
+  </div>
+  <div class="cfg-balk">
+    <button type="button" class="hoofd" data-spiegel="abPdf">Download PDF</button>
+    <button type="button" data-spiegel="abPreview">Preview</button>
+    <button type="button" data-spiegel="abProjectOpslaan">Opslaan</button>
   </div>
 </main>
 
@@ -1536,7 +1575,7 @@ BRIEF_VELDEN.forEach(v=>{
   ta.className = 'c2-textarea'; ta.id = 'abDoc_'+v.id;
   ta.placeholder = AB_DOCPLAATS[v.id] || '';
   ta.value = st[v.id] || '';
-  ta.addEventListener('input', ()=>{ st[v.id] = ta.value; updateSummary(); });
+  ta.addEventListener('input', ()=>{ st[v.id] = ta.value; toonBriefingVelden(); updateSummary(); });
   const uitleg = document.createElement('p');
   uitleg.className = 'hint'; uitleg.style.margin = '4px 0 0'; uitleg.textContent = v.uitleg;
   vak.appendChild(label); vak.appendChild(ta); vak.appendChild(uitleg);
@@ -1548,6 +1587,12 @@ function toonBriefingVelden(){
     $('abVeld_'+v.id).classList.toggle('uit', !inGebruik);
     $('abOngebruikt_'+v.id).textContent = inGebruik ? '' : '  — niet in deze tekst';
   });
+  /* De kop van het dichtgeklapte blok vertelt wat erin staat: de gekozen soort en
+     of er nog velden open staan. Anders moet je het openklappen om dat te zien. */
+  const open = briefingOpenVelden();
+  $('abBriefStand').textContent = '— '
+    + (st.soort === 'vergelijking' ? 'Vergelijking' : 'Lichtberekening')
+    + (open.length ? ', ' + open.length + ' veld(en) nog leeg' : ', alles ingevuld');
 }
 $('abSoortLicht').checked = st.soort !== 'vergelijking';
 $('abSoortVerg').checked  = st.soort === 'vergelijking';
@@ -1572,6 +1617,23 @@ $('abPreviewClose').addEventListener('click', sluitVoorbeeld);
 $('abPreviewDl').addEventListener('click', exportPdf);
 $('abPreviewBg').addEventListener('click', e=>{ if(e.target.id==='abPreviewBg') sluitVoorbeeld(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && $('abPreviewBg').classList.contains('active')) sluitVoorbeeld(); });
+
+/* De knoppen in de vaste balk onderaan doen zelf niets: ze klikken de echte knop in het
+   overzichtspaneel aan, zodat de handeling maar op één plek staat. Wat die knop laat zien
+   - "Bezig…", uitgeschakeld - wordt overgenomen; anders lijkt de balk niets te doen
+   terwijl de PDF gemaakt wordt. */
+document.querySelectorAll('[data-spiegel]').forEach(knop=>{
+  const bron = document.getElementById(knop.dataset.spiegel);   /* niet $(): dit stukje staat buiten de code die dat hulpje kent */
+  if(!bron){ knop.remove(); return; }
+  const eigenTekst = knop.textContent;
+  knop.addEventListener('click', ()=> bron.click());
+  const volg = ()=>{
+    knop.disabled = bron.disabled;
+    knop.textContent = bron.disabled ? bron.textContent : eigenTekst;
+  };
+  new MutationObserver(volg).observe(bron, {attributes:true, childList:true, characterData:true, subtree:true});
+  volg();
+});
 </script>
 </body>
 </html>
