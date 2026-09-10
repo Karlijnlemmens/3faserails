@@ -102,6 +102,14 @@
   .ab-docveld.uit textarea{background:#F7F9FC; color:var(--slate);}
   .c2-prodlist{display:flex; flex-direction:column; gap:5px; max-height:640px; overflow-y:auto; padding:6px; border:1.5px solid var(--border); border-radius:8px;}
   .c2-armrow{display:flex; align-items:center; gap:8px; padding:6px 2px; flex-wrap:wrap;}
+  .c2-armvolg{display:flex; flex:0 0 auto; gap:2px;}
+  .c2-armvolg button{
+    width:20px; height:22px; padding:0; font:inherit; font-size:11px; line-height:1;
+    border:1.5px solid var(--border); border-radius:6px; background:var(--white);
+    color:var(--slate); cursor:pointer; transition:.12s;
+  }
+  .c2-armvolg button:hover:not(:disabled){border-color:var(--blue); color:var(--blue-dark);}
+  .c2-armvolg button:disabled{opacity:.3; cursor:default;}
   .c2-armrow input.c2-textinp{flex:1 1 130px; min-width:100px; padding:5px 8px; font-size:12px;}
   .c2-armrow input.c2-aanduiding{flex:0 0 96px; min-width:96px;}
   .c2-armrow input.c2-armcode{flex:0 0 100px; min-width:90px;}
@@ -929,13 +937,17 @@ async function buildArmaturenboekPdf(){
       beginPage(true);
       paginaKop('Armaturenlijst',
         (st.proj||'').trim() + ((st.proj||'').trim()? '  —  ':'') + datumNL(st.datum));
-      /* Elke ingevulde rij komt in deze tabel. Een kolom (Code of Aantal) valt
-         helemaal weg als GEEN ENKELE regel er een waarde voor heeft - anders staat
-         hij zinloos leeg/vol nullen; de vrijgekomen breedte gaat naar Omschrijving. */
-      const rijenVoorTabel = [
-        ...boek.flatMap(b=>b.rijen),
-        ...onbekend.map(a=>({a, s:st.armaturen[a.id]}))
-      ];
+      /* Elke ingevulde rij komt in deze tabel, in de volgorde waarin ze in de tool
+         staan - niet gegroepeerd per type. Wie de regels op volgorde van het bestek
+         invult wil ze zo terugzien; het hergroeperen liet een herkend type naar zijn
+         soortgenoten springen en zette de onherkende regels onderaan. De presenters
+         erachter volgen dezelfde volgorde: armaturenboek() zet elk type neer waar
+         het voor het eerst voorkomt. Een kolom (Code of Aantal) valt helemaal weg
+         als GEEN ENKELE regel er een waarde voor heeft - anders staat hij zinloos
+         leeg/vol nullen; de vrijgekomen breedte gaat naar Omschrijving. */
+      const rijenVoorTabel = ARMATUREN
+        .map(a=>({a, s:st.armaturen[a.id]}))
+        .filter(r=> r.s && !armSlotLeeg(r.s));
       const toonCode = rijenVoorTabel.some(r=> (r.s.aanduiding||'').trim());
       const toonAantal = rijenVoorTabel.some(r=> (r.s.qty||0)>0);
       let omschrijvingBreedte = 290;
@@ -954,8 +966,7 @@ async function buildArmaturenboekPdf(){
         if(toonAantal) basis.push(String(r.s.qty||0));
         return basis;
       };
-      boek.forEach(b=> b.rijen.forEach(r=> tableRow(TB, rijWaarden(r))));
-      onbekend.forEach(a=> tableRow(TB, rijWaarden({a, s:st.armaturen[a.id]})));
+      rijenVoorTabel.forEach(r=> tableRow(TB, rijWaarden(r)));
       y+=10;
       const ontbreekt = boek.filter(b=>!presenterAanwezig(b.g.id));
       if(ontbreekt.length){
@@ -1220,6 +1231,21 @@ async function previewPdf(){
 function maakArmRij(a){
   const s=st.armaturen[a.id];
   const row=document.createElement('div'); row.className='c2-armrow';
+  /* Regel omhoog of omlaag. De volgorde van de regels is de volgorde in het boek,
+     dus een vergissing of een regel die er later bij komt moet te verplaatsen zijn. */
+  const volg=document.createElement('span'); volg.className='c2-armvolg';
+  [['↑',-1,'Deze regel een plaats omhoog'], ['↓',1,'Deze regel een plaats omlaag']]
+    .forEach(([teken, richting, titel])=>{
+      const k=document.createElement('button'); k.type='button';
+      k.textContent=teken; k.title=titel;
+      k.addEventListener('click', ()=>{
+        /* De plaats bij de klik opzoeken, niet bij het tekenen: er kan intussen een
+           lege regel bij zijn gekomen (zie zorgVoorLegeSlot). */
+        const i = ARMATUREN.indexOf(a);
+        wisselArmRijen(i, i+richting);
+      });
+      volg.appendChild(k);
+    });
   const codeNaamInp=document.createElement('input'); codeNaamInp.type='text';
   codeNaamInp.className='c2-textinp c2-aanduiding';
   codeNaamInp.placeholder='CODE'; codeNaamInp.value=s.aanduiding||'';
@@ -1336,13 +1362,43 @@ function maakArmRij(a){
   function commitQty(){ const v=Math.max(0, parseInt(qty.value)||0); s.qty=v; qty.value=String(v); updateSummary(); }
   qty.addEventListener('change', commitQty);
   qty.addEventListener('keydown', e=>{ if(e.key==='Enter') qty.blur(); });
+  row.appendChild(volg);
   row.appendChild(codeNaamInp); row.appendChild(codeInp); row.appendChild(nameInp); row.appendChild(badge);
   row.appendChild(specialWrap); row.appendChild(stempelBtn); row.appendChild(qty);
   return row;
 }
+/* Verwisselt de INHOUD van twee regels, niet de slots zelf: arm01..armNN blijven op
+   volgorde staan. Dat scheelt: de labels ("Armatuur 3"), het opslaan en het herstellen
+   (dat op slotnummer sorteert) hoeven er niets van te weten. Een geüploade presenter
+   hangt wel aan het slot (sp<armId>), dus die moet met de hand mee - anders raakt een
+   verplaatste special zijn PDF kwijt. */
+function wisselArmRijen(i, j){
+  const a=ARMATUREN[i], b=ARMATUREN[j];
+  if(!a || !b) return;
+  const bewaar = st.armaturen[a.id];
+  st.armaturen[a.id] = st.armaturen[b.id];
+  st.armaturen[b.id] = bewaar;
+  const D = window.PRESENTER_DATA = window.PRESENTER_DATA || {};
+  const pa = specialPresenterId(a.id), pb = specialPresenterId(b.id);
+  const da = D[pa], db = D[pb];
+  if(db === undefined) delete D[pa]; else D[pa] = db;
+  if(da === undefined) delete D[pb]; else D[pb] = da;
+  buildArmList(); updateSummary();
+}
 function buildArmList(){
   const container=$('abArmList'); container.innerHTML='';
   ARMATUREN.forEach(a=>container.appendChild(maakArmRij(a)));
+  updateVolgKnoppen();
+}
+/* De ↑ van de eerste en de ↓ van de laatste regel wijzen nergens heen. Apart
+   bijwerken, want er komt een regel bij zonder dat de lijst opnieuw getekend wordt. */
+function updateVolgKnoppen(){
+  const rijen = Array.from($('abArmList').querySelectorAll('.c2-armrow'));
+  rijen.forEach((r,i)=>{
+    const k = r.querySelectorAll('.c2-armvolg button');
+    if(k[0]) k[0].disabled = (i === 0);
+    if(k[1]) k[1].disabled = (i === rijen.length-1);
+  });
 }
 /* Geen vaste bovengrens aan het aantal regels: zodra de laatste rij niet meer helemaal
    leeg is, komt er automatisch een nieuw leeg slot bij (zie updateSummary()). Na het
@@ -1362,6 +1418,7 @@ function zorgVoorLegeSlot(){
   if(!armSlotLeeg(st.armaturen[laatste.id])){
     const nieuw = voegArmatuurSlotToe();
     $('abArmList').appendChild(maakArmRij(nieuw));
+    updateVolgKnoppen();
   }
 }
 
