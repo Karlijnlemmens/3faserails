@@ -138,21 +138,26 @@
   .c2-qtyinp{width:48px; border:1.5px solid var(--border); border-radius:8px; padding:6px 4px; font-family:'JetBrains Mono',monospace; font-size:13px; text-align:center; color:var(--ink); background:#fff;}
 
   /* ---------- live overzicht ---------- */
+  /* Navy en geen blauw: dit paneel draagt de conclusie van de tool (aantallen,
+     herkende typen, waarschuwingen) in kleine letters, en op het blauw haalde die
+     tekst 1,9 tot 2,6:1 contrast waar 4,5:1 de norm is - zelfs zuiver wit kwam daar
+     niet verder dan 4,7:1. Op dit navy haalt wit 11:1 en de grijsblauwe labels 6:1.
+     Het blauw blijft waar het zijn werk doet: op de knoppen en de actieve tab. */
   .cfg-summary{
     position:sticky; top:150px; color:#fff; border-radius:var(--radius); padding:20px; display:flex; flex-direction:column; gap:14px;
-    background:linear-gradient(150deg, #3E8EDE 0%, #2C72BA 100%);
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='84'%3E%3Cpath d='M0 0 L42 0 L0 42 Z' fill='%23ffffff' fill-opacity='0.045'/%3E%3Cpath d='M84 84 L42 84 L84 42 Z' fill='%23ffffff' fill-opacity='0.045'/%3E%3C/svg%3E"), linear-gradient(150deg, #3E8EDE 0%, #2C72BA 100%);
-    box-shadow:0 10px 26px rgba(44,114,186,.30);
+    background:linear-gradient(150deg, #2A3A63 0%, #1A2440 100%);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='84' height='84'%3E%3Cpath d='M0 0 L42 0 L0 42 Z' fill='%23ffffff' fill-opacity='0.035'/%3E%3Cpath d='M84 84 L42 84 L84 42 Z' fill='%23ffffff' fill-opacity='0.035'/%3E%3C/svg%3E"), linear-gradient(150deg, #2A3A63 0%, #1A2440 100%);
+    box-shadow:0 10px 26px rgba(30,42,74,.30);
   }
   .cfg-summary h4{margin:0; font-size:14px; color:#fff;}
-  .cfg-summary .eyebrow{color:#8FA3C7;}
+  .cfg-summary .eyebrow{color:#A9BBD8;}
   .cfg-metric-row{display:flex; justify-content:space-between; font-size:13px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.12);}
   .cfg-metric-row .k{color:#AFC0DA;}
   .cfg-metric-row .v{font-family:'JetBrains Mono',monospace; font-weight:700;}
   .cfg-art-list{display:flex; flex-direction:column; gap:6px; max-height:260px; overflow-y:auto;}
   .cfg-art-row{display:flex; justify-content:space-between; font-size:12px; background:rgba(255,255,255,.06); border-radius:6px; padding:7px 10px;}
   .cfg-art-row .name{color:#C6D2E8; margin-right:8px;}
-  .cfg-art-row .qty{color:#8FA3C7; font-family:'JetBrains Mono',monospace;}
+  .cfg-art-row .qty{color:#A9BBD8; font-family:'JetBrains Mono',monospace;}
   .cfg-warns{display:flex; flex-direction:column; gap:8px;}
   .cfg-warn{background:rgba(214,54,43,.18); border-left:3px solid var(--red); padding:8px 10px; border-radius:6px; font-size:11.5px; line-height:1.5; color:#FFE3E0;}
   .cfg-actions{display:flex; gap:8px;}
