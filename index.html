@@ -5,8 +5,10 @@
 <!--__BASE_HREF__--><!-- wordt bij "Project opslaan" een <base href> naar de installatiemap; blijft hier inert. -->
 <title>PRX 3-Fase Rail — Kennistool</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,600;0,700;0,800;0,900;1,900&family=Caveat:wght@600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<!-- Schermlettertypes uit de repo en niet bij Google vandaan: deze tools worden vanaf
+     schijf geopend en rondgestuurd, en mogen niet op een verbinding wachten. Zie de kop
+     van fonts/schermfonts.css. -->
+<link rel="stylesheet" href="fonts/schermfonts.css">
 <style>
   :root{
     --navy-900:#1E2A4A;
@@ -55,7 +57,6 @@
   .brand{display:flex; align-items:baseline; gap:12px;}
   .brand{flex-direction:column; gap:0 !important; align-items:flex-start !important;}
   .brand .logo{height:100px; width:auto; display:block; transform:translateX(-7.65%);}
-  .brand .sub{font-family:'Caveat',cursive; font-size:17px; color:var(--blue); letter-spacing:.01em; margin-top:-4px;}
   .title-row{display:flex; align-items:center; gap:14px; margin-top:4px; flex-wrap:wrap;}
   h1{font-size:20px; margin:0; font-weight:800; color:var(--navy-900);}
   .badges{display:flex; gap:6px; flex-wrap:wrap;}
