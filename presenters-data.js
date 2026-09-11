@@ -70,10 +70,11 @@ window.PRESENTER_FILES = [
   'ag41',   /* Noodverlichting Uni */
   'ag42',   /* Waterdicht Hermes */
   'ag43',   /* Module Mico */
-  /* 'ag44' (Neo) staat er bewust NIET in: presenters/ag44.js is een lege export -
-     twee pagina's zonder tekenopdrachten - en zou als blanco pagina's in het
-     armaturenboek belanden. Nu waarschuwt de tool dat de presenter ontbreekt.
-     Terugzetten zodra het juiste familieblad is ingebakken. */
+  /* 'ag44' (Neo) staat er bewust NIET in: presenters/ag44.js was een lege export -
+     twee pagina's zonder tekenopdrachten, 42 MB aan ongebruikte bronnen - en is
+     daarom weggegooid. De tool waarschuwt nu dat de presenter ontbreekt in plaats
+     van blanco pagina's in te voegen. Terugzetten zodra het juiste familieblad is
+     ingebakken. */
   'ag45',   /* Auva G2 */
   'ag46',   /* Auva G2 Anticorrosie */
   'ag47',   /* Breedstraler Auva G3 */
