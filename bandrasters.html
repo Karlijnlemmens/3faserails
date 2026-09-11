@@ -354,6 +354,7 @@
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="pdf-huisstijl.js"></script>
 <script src="info-teken.js"></script>
+<script src="melding.js"></script>
 <script src="project-opslag.js"></script>
 <!-- De foto's bij de optieken en de aansluitingen. Ontbreekt het bestand, dan
      werkt de tool gewoon door; de fotokaart onderaan legt uit hoe je het maakt. -->
@@ -658,10 +659,10 @@ const BEELD_MAX = 900;
 function leesAfbeelding(bestand, klaar){
   if(!bestand) return;
   const lezer = new FileReader();
-  lezer.onerror = function(){ alert('Deze afbeelding kan niet worden gelezen.'); };
+  lezer.onerror = function(){ Melding.fout('Deze afbeelding kan niet worden gelezen.'); };
   lezer.onload = function(){
     const img = new Image();
-    img.onerror = function(){ alert('Deze afbeelding kan niet worden getoond.'); };
+    img.onerror = function(){ Melding.fout('Deze afbeelding kan niet worden getoond.'); };
     img.onload = function(){
       const grootste = Math.max(img.width, img.height);
       if(grootste <= BEELD_MAX && String(lezer.result).length < 200000){ klaar(lezer.result); return; }
@@ -2313,6 +2314,7 @@ function slaProjectOp(){
 
   download(projectNaamDeel() + '-bandrasters.html', html, 'text/html');
   ProjectOpslag.bewaard();
+  Melding.goed('Project opgeslagen. Dubbelklik dat bestand om hier verder te gaan.');
 }
 
 /* ======================= koppelen ======================= */
@@ -2391,14 +2393,14 @@ $('knProductblad').addEventListener('click', function(){
 
 $('knRfqPdf').addEventListener('click', function(){
   metWachten($('knRfqPdf'), async function(){
-    if(!P.posities.length){ alert('De RFQ-lijst is nog leeg.'); return; }
+    if(!P.posities.length){ Melding.letop('De RFQ-lijst is nog leeg — voeg eerst een positie toe.'); return; }
     const bytes = await bouwRfqPdf();
     toonVoorbeeld(bytes, 'RFQ-lijst', 'rfq-' + projectNaamDeel() + '.pdf');
   });
 });
 
 $('knRfqXlsx').addEventListener('click', function(){
-  if(!P.posities.length){ alert('De RFQ-lijst is nog leeg.'); return; }
+  if(!P.posities.length){ Melding.letop('De RFQ-lijst is nog leeg — voeg eerst een positie toe.'); return; }
   download('rfq-' + projectNaamDeel() + '.xlsx', rfqXlsx(),
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 });

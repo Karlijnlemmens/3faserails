@@ -125,6 +125,7 @@ PAGINAS.forEach(p => {
     ['project-opslag.js',/ProjectOpslag\./],
     ['pdf-huisstijl.js', /PdfHuisstijl\./],
     ['spec-lezer.js',    /SpecLezer\./],
+    ['melding.js',       /Melding\./],
   ];
   PAGINAS.forEach(p => {
     const t = lees(p);

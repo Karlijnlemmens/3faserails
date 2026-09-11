@@ -933,6 +933,7 @@
 <script src="presenters-data.js"></script>
 <script src="pdf-huisstijl.js"></script>
 <script src="info-teken.js"></script>
+<script src="melding.js"></script>
 <script src="project-opslag.js"></script>
 <script src="rail-figuren.js"></script>
 <script>
@@ -3256,6 +3257,7 @@ function slaProjectOp(){
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(_){ } }, 4000);
   ProjectOpslag.bewaard();
+  Melding.goed('Project opgeslagen als ' + projectBestandsnaam() + '. Dubbelklik dat bestand om hier verder te gaan.');
 }
 
 /* Gedeelde weg voor downloaden en Preview PDF: controleert of de tekening
@@ -3271,16 +3273,16 @@ function meldPdfGrootte(bytes, vak){
   const tekst = mb.toFixed(1).replace('.', ',') + ' MB';
   if(vak) vak.textContent = 'Zo ziet de installateur het document — ' + tekst + '.';
   if(mb < PDF_MAILGRENS_MB) return;
-  alert('Let op: deze PDF is ' + tekst + '. Veel mailservers weigeren bijlagen boven de '
-      + PDF_MAILGRENS_MB + ' MB.\n\nDeel hem als link, of laat de presenters eerst '
-      + 'comprimeren (node tools/comprimeer-presenters.mjs, zie CLAUDE.md).');
+  Melding.letop('Deze PDF is ' + tekst + ' — veel mailservers weigeren bijlagen boven de '
+      + PDF_MAILGRENS_MB + ' MB. Deel hem als link, of comprimeer eerst de presenters.',
+      {duur:9000});
 }
 async function maakPdfBytes(){
   const cmP=compMap(); const fedP=new Set(st.feeds.map(f=>feedComp(f,cmP.m)));
   if(cmP.count===0 || fedP.size<cmP.count){
     const msg = cmP.count===0 ? 'Teken eerst een figuur (stap 4) voordat de PDF gemaakt kan worden.'
       : 'Kies eerst per traject een stroomaansluitpunt (\u26a1 in stap 5) \u2014 daarna kan de PDF gemaakt worden.';
-    $('c2StepMsg').textContent=msg; alert(msg); return null;
+    $('c2StepMsg').textContent=msg; Melding.letop(msg); return null;
   }
   /* Waarschuwen over gaten in het armaturenboek, maar de PDF altijd gewoon maken. */
   const meldingen=[];
@@ -3467,7 +3469,7 @@ function buildArmList(){
       rdr.onload=()=>{
         const bytes=new Uint8Array(rdr.result);
         const kop=String.fromCharCode.apply(null, bytes.subarray(0,5));
-        if(kop!=='%PDF-'){ alert('Dit lijkt geen PDF-bestand.'); specialFileInp.value=''; return; }
+        if(kop!=='%PDF-'){ Melding.fout('Dit lijkt geen PDF-bestand.'); specialFileInp.value=''; return; }
         window.PRESENTER_DATA = window.PRESENTER_DATA || {};
         window.PRESENTER_DATA[specialPresenterId(a.id)] = bytesToB64(bytes);
         updateSpecialUI(); paintBadge(); refresh();

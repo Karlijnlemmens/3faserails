@@ -308,6 +308,7 @@
 <script src="presenters-data.js"></script>
 <script src="pdf-huisstijl.js"></script>
 <script src="info-teken.js"></script>
+<script src="melding.js"></script>
 <script src="project-opslag.js"></script>
 <script>
 const $=id=>document.getElementById(id);
@@ -1138,14 +1139,15 @@ function meldPdfGrootte(bytes, vak){
   const {mb, tekst} = pdfGrootteTekst(bytes);
   if(vak) vak.textContent = 'Zo ziet de PDF eruit — ' + tekst + '.';
   if(mb < PDF_MAILGRENS_MB) return;
-  alert('Let op: deze PDF is ' + tekst + '. Veel mailservers weigeren bijlagen boven de '
-      + PDF_MAILGRENS_MB + ' MB.\n\nDeel hem als link, of laat de presenters eerst '
-      + 'comprimeren (node tools/comprimeer-presenters.mjs, zie CLAUDE.md).');
+  Melding.letop('Deze PDF is ' + tekst + ' — veel mailservers weigeren bijlagen boven de '
+      + PDF_MAILGRENS_MB + ' MB. Deel hem als link, of comprimeer eerst de presenters.',
+      {duur:9000});
 }
 async function maakPdfBytes(){
   const heeftArmaturen = ARMATUREN.some(a=> !armSlotLeeg(st.armaturen[a.id]));
   if(!heeftArmaturen){
-    alert('Vul eerst minimaal één armatuur in voordat de PDF gemaakt kan worden.');
+    Melding.letop('Vul eerst minimaal één armatuur in; dan valt er een boek te maken.',
+      {bij: document.querySelector('input.c2-armnaam')});
     return null;
   }
   const meldingen=[];
@@ -1249,6 +1251,7 @@ function slaProjectOp(){
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(_){ } }, 4000);
   ProjectOpslag.bewaard();
+  Melding.goed('Project opgeslagen als ' + projectBestandsnaam() + '. Dubbelklik dat bestand om hier verder te gaan.');
 }
 async function exportPdf(){
   return metBezigKnop('abPdf', async()=>{
@@ -1332,7 +1335,7 @@ function maakArmRij(a){
     rdr.onload=()=>{
       const bytes=new Uint8Array(rdr.result);
       const kop=String.fromCharCode.apply(null, bytes.subarray(0,5));
-      if(kop!=='%PDF-'){ alert('Dit lijkt geen PDF-bestand.'); specialFileInp.value=''; return; }
+      if(kop!=='%PDF-'){ Melding.fout('Dit lijkt geen PDF-bestand.'); specialFileInp.value=''; return; }
       window.PRESENTER_DATA = window.PRESENTER_DATA || {};
       window.PRESENTER_DATA[specialPresenterId(a.id)] = bytesToB64(bytes);
       updateSpecialUI(); paintBadge(); updateStempelUI(); updateSummary();

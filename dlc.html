@@ -186,6 +186,7 @@
 <script src="pdf-huisstijl.js"></script>
 <script src="spec-lezer.js"></script>
 <script src="info-teken.js"></script>
+<script src="melding.js"></script>
 <script src="project-opslag.js"></script>
 <script>
 /* ===================================================================
@@ -465,10 +466,10 @@ const BEELD_MAX = 1400;
 function leesAfbeelding(bestand, klaar){
   if(!bestand) return;
   const lezer=new FileReader();
-  lezer.onerror=()=>alert('Deze afbeelding kan niet worden gelezen.');
+  lezer.onerror=()=>Melding.fout('Deze afbeelding kan niet worden gelezen.');
   lezer.onload=()=>{
     const img=new Image();
-    img.onerror=()=>alert('Deze afbeelding kan niet worden getoond.');
+    img.onerror=()=>Melding.fout('Deze afbeelding kan niet worden getoond.');
     img.onload=()=>{
       const grootste=Math.max(img.width,img.height);
       if(grootste<=BEELD_MAX && String(lezer.result).length<400000){ klaar(lezer.result); return; }
@@ -958,6 +959,7 @@ function slaSpecialOp(){
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(_){ } }, 4000);
   ProjectOpslag.bewaard();
+  Melding.goed('Special opgeslagen als ' + specialBestandsnaam() + '. Dubbelklik dat bestand om hier verder te gaan.');
 }
 $('btnBewaar').onclick=slaSpecialOp;
 

@@ -218,6 +218,7 @@
 <script src="armaturen-data.js"></script>
 <script src="armatuur-beelden.js"></script>
 <script src="info-teken.js"></script>
+<script src="melding.js"></script>
 <script>
 /* ===================================================================
    Presenters — stelt uit de productdata een presenter samen en tekent
@@ -486,10 +487,10 @@ const BEELD_MAX = 1400;
 function leesAfbeelding(bestand, klaar){
   if(!bestand) return;
   const lezer=new FileReader();
-  lezer.onerror=()=>alert('Deze afbeelding kan niet worden gelezen.');
+  lezer.onerror=()=>Melding.fout('Deze afbeelding kan niet worden gelezen.');
   lezer.onload=()=>{
     const img=new Image();
-    img.onerror=()=>alert('Deze afbeelding kan niet worden getoond.');
+    img.onerror=()=>Melding.fout('Deze afbeelding kan niet worden getoond.');
     img.onload=()=>{
       const grootste=Math.max(img.width,img.height);
       if(grootste<=BEELD_MAX && String(lezer.result).length<400000){ klaar(lezer.result); return; }
