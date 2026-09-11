@@ -1,9 +1,26 @@
-# PDF-regressiecontrole
+# Controles
+
+Er is geen testrunner in dit project. In plaats daarvan staan hier vier scripts die
+je met de hand draait; samen vangen ze wat anders pas opvalt als een collega het
+meldt. Alle vier eindigen met afsluitcode 1 als er iets mis is.
+
+| script | wat het nakijkt |
+|---|---|
+| `node tools/controleer-logica.mjs` | de rekenkern: armatuurherkenning en de bandrasterberekening, tegen het voorbeeld uit de werkmap |
+| `node tools/controleer-suite.mjs` | wat over meerdere bestanden gelijk moet blijven: armatuurtabel, tabbladenrij, palet, geen netwerkverzoeken, gedeelde scripts |
+| `node tools/controleer-presenters.mjs` | de ingebakken presenters: lege pagina's, uitschieters in grootte, lijst en map uit de pas |
+| `node tools/pdfbaseline.mjs` + `vergelijk.mjs` | dat een wijziging niets aan de PDF's verandert (hieronder) |
+
+`controleer-logica.mjs` draait de échte code van de tools: het snijdt de declaraties
+die het nodig heeft uit het HTML-bestand en importeert die als module via een
+`data:`-URL. Er hoeft dus niets aan de tools zelf te veranderen om ze te kunnen
+testen, en de test kan niet uit de pas lopen met een kopie.
+
+## PDF-regressiecontrole
 
 Hulpmiddelen om te controleren dat een wijziging in de PDF-code niets aan de
-uitvoer verandert. Er is geen testrunner in dit project; dit is het vangnet dat
-daarvoor in de plaats komt bij het verbouwen van `pdf-huisstijl.js` en de tools
-die hem gebruiken.
+uitvoer verandert. Dit is het vangnet bij het verbouwen van `pdf-huisstijl.js` en de
+tools die hem gebruiken.
 
 Nodig: Node en Playwright met Chromium (staat op de ontwikkelmachine onder
 `/opt/pw-browsers`; pas het pad in `pdfbaseline.mjs` aan als het ergens anders
