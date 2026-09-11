@@ -5,8 +5,9 @@
  *     node tools/controleer-logica.mjs
  *
  * Hoe dit kan zonder de code op te knippen: een tool is één HTML-bestand, maar de
- * functies die rekenen staan gewoon op het hoogste niveau van zijn <script>. Dit
- * script snijdt precies die declaraties eruit, plakt er export-regels achter en
+ * functies die rekenen staan gewoon op het hoogste niveau van zijn <script> (of, voor
+ * wat gedeeld is, in een los .js-bestand). Dit script snijdt precies die declaraties
+ * eruit, plakt er export-regels achter en
  * importeert dat als module via een data:-URL. Zo draait de ECHTE code van de tool,
  * niet een kopie die uit de pas kan lopen - en hoeft er niets aan de tools zelf te
  * veranderen om ze te kunnen testen.
@@ -52,7 +53,7 @@ function is(wat, gekregen, verwacht){
 
 /* ============================ armatuurherkenning ============================ */
 {
-  const m = await laadUit('armaturenboek.html',
+  const m = await laadUit('armatuur-groepen.js',
     ['ARM_GROEPEN', 'ARM_STOPWOORDEN', 'ARM_GETAL', 'ARM_CODE', 'armTokens', 'ARM_GROEP_TOKENS',
      'ARM_VOCAB', 'armSchoon', 'armZinvolleTokens', 'ARM_TYPEWOORDEN', 'ARM_TUSSENWOORDEN',
      'ARM_NAAMWOORDEN', 'armNaamZone', 'armBesteGroep', 'matchArmGroep']);

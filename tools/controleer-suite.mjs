@@ -31,28 +31,21 @@ const fouten = [];
 const meld = (regel) => fouten.push(regel);
 const zonderCommentaar = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\n/gm, '');
 
-/* ---------- 1. armatuurherkenning in twee bestanden ---------- */
-function herkenningsBlok(t){
-  const a = t.indexOf('const ARM_STOPWOORDEN');
-  const b = t.indexOf('function matchArmGroep');
-  if(a < 0 || b < 0) return null;
-  return zonderCommentaar(t.slice(a, t.indexOf('\n}', b)));
-}
+/* ---------- 1. de armatuurtabel staat maar op één plek ---------- */
 {
-  const a = herkenningsBlok(lees('index.html'));
-  const b = herkenningsBlok(lees('armaturenboek.html'));
-  if(!a || !b) meld('armatuurherkenning: het blok is niet in allebei de bestanden te vinden');
-  else if(a !== b) meld('armatuurherkenning: index.html en armaturenboek.html lopen uit elkaar '
-                      + '(zelfde code hoort in allebei te staan)');
-
-  const groepen = (t) => [...t.matchAll(/\{id:'(ag\d+|lichtlijn-[a-z]+)'[^}]*naam:'([^']*)'/g)]
-    .map(m => m[1] + ' = ' + m[2]);
-  const gi = groepen(lees('index.html')), ga = groepen(lees('armaturenboek.html'));
-  /* De lichtlijn-groepen staan bewust alleen in het armaturenboek; de rest hoort gelijk. */
-  const kaal = (lijst) => lijst.filter(r => !r.startsWith('lichtlijn-'));
-  const alleen = (x, y) => kaal(x).filter(r => !y.includes(r));
-  alleen(gi, ga).forEach(r => meld('armatuurgroep alleen in index.html: ' + r));
-  alleen(ga, gi).forEach(r => meld('armatuurgroep alleen in armaturenboek.html: ' + r));
+  /* ARM_GROEPEN en matchArmGroep horen in armatuur-groepen.js te staan en nergens
+     anders; ze stonden lang in twee bestanden en liepen daar uit elkaar. */
+  if(!existsSync(join(root, 'armatuur-groepen.js'))){
+    meld('armatuur-groepen.js ontbreekt - daar hoort de armatuurtabel te staan');
+  }
+  ['index.html', 'armaturenboek.html'].forEach(p => {
+    const t = zonderCommentaar(lees(p));
+    if(/const\s+ARM_GROEPEN\s*=/.test(t)) meld(p + ' heeft weer een eigen ARM_GROEPEN; die hoort alleen in armatuur-groepen.js');
+    if(/function\s+matchArmGroep\s*\(/.test(t)) meld(p + ' heeft weer een eigen matchArmGroep(); die hoort alleen in armatuur-groepen.js');
+    if(/ARM_GROEPEN/.test(t) && !lees(p).includes('src="armatuur-groepen.js"')){
+      meld(p + ' gebruikt ARM_GROEPEN maar laadt armatuur-groepen.js niet in');
+    }
+  });
 }
 
 /* ---------- 2. dezelfde rij tabbladen op elke pagina ---------- */
