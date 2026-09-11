@@ -206,6 +206,7 @@
 <script src="pdf-huisstijl.js"></script>
 <script src="spec-lezer.js"></script>
 <script src="info-teken.js"></script>
+<script src="project-opslag.js"></script>
 <script>
 /* ===================================================================
    DLC specials — maakt een DLC-productblad van een armatuur dat niet in
@@ -458,10 +459,18 @@ let S = leegBlad();
 /* Een opgeslagen special (dubbelgeklikt .html-bestand, zie slaSpecialOp()) herstellen
    over de zojuist gezette defaults heen - mergen i.p.v. vervangen zodat velden die
    sinds het opslaan aan SCHEMA zijn toegevoegd niet undefined blijven. */
+const SPECIAL_VERSIE = 1;
+/* Een hele special in de tool zetten: uit het ingebakken bestand hieronder, of uit de
+   balk van project-opslag.js die vraagt of je verder wilt waar je gebleven was. */
+function herstelSpecial(bron){
+    S = Object.assign(leegBlad(), bron.S);
+    SCHEMA.forEach(gr=>gr.velden.forEach(v=>{ if(!S.velden[v.id]) S.velden[v.id]={l:v.l, w:''}; }));
+}
 if(OPGESLAGEN_SPECIAL){
   try{
-    S = Object.assign(leegBlad(), OPGESLAGEN_SPECIAL.S);
-    SCHEMA.forEach(gr=>gr.velden.forEach(v=>{ if(!S.velden[v.id]) S.velden[v.id]={l:v.l, w:''}; }));
+    if(ProjectOpslag.controleer(OPGESLAGEN_SPECIAL, SPECIAL_VERSIE, 'de DLC-tool')){
+      herstelSpecial(OPGESLAGEN_SPECIAL);
+    }
   }catch(err){
     console.error('Kon opgeslagen special niet laden:', err);
     alert('De opgeslagen special kon niet worden geladen: '+(err&&err.message?err.message:err));
@@ -884,7 +893,11 @@ async function bouwBlad(){
 /* ======================= voorbeeld en download ======================= */
 
 let voorbeeldUrl=null, bezigNu=false, opnieuw=false, wachter=null;
+/* Staat de tool nog op te starten? Dan is een verversing geen wijziging van de
+   gebruiker, en hoeft er niets bewaard of gewaarschuwd te worden. */
+let startKlaar = false;
 function plan(){
+  if(startKlaar) ProjectOpslag.gewijzigd();
   clearTimeout(wachter);
   wachter=setTimeout(ververs, 300);
 }
@@ -937,8 +950,9 @@ $('btnPdf').onclick=async()=>{
 function specialBestandsnaam(){
   return bestandsnaam()+'-special.html';
 }
+function specialPayload(){ return { versie:SPECIAL_VERSIE, S:JSON.parse(JSON.stringify(S)) }; }
 function slaSpecialOp(){
-  const payload = { versie:1, S:JSON.parse(JSON.stringify(S)) };
+  const payload = specialPayload();
   let json = JSON.stringify(payload).replace(/<\/script/gi, '<\\/script');
 
   /* document.baseURI is bij de originele tool gewoon zijn eigen map; bij een al
@@ -963,12 +977,40 @@ function slaSpecialOp(){
   a.download=specialBestandsnaam();
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(_){ } }, 4000);
+  ProjectOpslag.bewaard();
 }
 $('btnBewaar').onclick=slaSpecialOp;
 
 /* ======================= start ======================= */
 tekenPaneel();
 plan();
+
+/* Leeg = nog niets van de standaardwaarden afgeweken: geen eigen titel, geen
+   omschrijving, geen ingevuld veld en geen foto. */
+function specialLeeg(){
+  const kaal = leegBlad();
+  if((S.titelVet||'') !== kaal.titelVet || (S.titelDun||'') !== kaal.titelDun) return false;
+  if((S.artikelcode||'') !== kaal.artikelcode || (S.omschrijving||'').trim()) return false;
+  if((S.hoofdfoto||'') || (S.beelden||[]).length || (S.extra||[]).length) return false;
+  return !Object.keys(S.velden||{}).some(k=> ((S.velden[k]||{}).w||'').toString().trim());
+}
+ProjectOpslag.koppel({
+  sleutel: 'dlc-special',
+  versie: SPECIAL_VERSIE,
+  naam: 'de DLC-tool',
+  maakPayload: specialPayload,
+  herstel: (payload)=>{ herstelSpecial(payload); tekenPaneel(); plan(); },
+  isLeeg: specialLeeg,
+  omschrijf: ()=> (S.titelVet||'').trim(),
+  /* Zonder de geplakte foto's: die zijn als data-URI zo een paar MB en dan past het
+     niet meer in de opslag van de browser. In het opgeslagen bestand gaan ze wel mee. */
+  licht: (payload)=>{
+    const kaal = JSON.parse(JSON.stringify(payload));
+    if(kaal.S){ kaal.S.beelden = []; kaal.S.hoofdfoto = ''; }
+    return kaal;
+  },
+});
+startKlaar = true;
 </script>
 </body>
 </html>

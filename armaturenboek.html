@@ -332,6 +332,7 @@
 <script src="presenters-data.js"></script>
 <script src="pdf-huisstijl.js"></script>
 <script src="info-teken.js"></script>
+<script src="project-opslag.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 
@@ -1218,8 +1219,14 @@ function verzamelSpecialPresenters(){
   });
   return out;
 }
+const PROJECT_VERSIE = 1;
+/* Eén beschrijving van wat een project is: het bestand dat "Project opslaan" bakt en
+   het hoekje dat project-opslag.js in de browser bijhoudt schrijven allebei dit weg. */
+function projectPayload(){
+  return { versie:PROJECT_VERSIE, st:JSON.parse(JSON.stringify(st)), presenters:verzamelSpecialPresenters() };
+}
 function slaProjectOp(){
-  const payload = { versie:1, st:JSON.parse(JSON.stringify(st)), presenters:verzamelSpecialPresenters() };
+  const payload = projectPayload();
   let json = JSON.stringify(payload).replace(/<\/script/gi, '<\\/script');
 
   /* document.baseURI is bij de originele tool gewoon zijn eigen map; bij een al
@@ -1244,6 +1251,7 @@ function slaProjectOp(){
   a.download=projectBestandsnaam();
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(_){ } }, 4000);
+  ProjectOpslag.bewaard();
 }
 async function exportPdf(){
   return metBezigKnop('abPdf', async()=>{
@@ -1468,8 +1476,12 @@ function zorgVoorLegeSlot(){
   }
 }
 
+/* Staat de tool nog op te starten? Dan is een verversing geen wijziging van de
+   gebruiker, en hoeft er niets bewaard of gewaarschuwd te worden. */
+let startKlaar = false;
 function updateSummary(){
   zorgVoorLegeSlot();
+  if(startKlaar) ProjectOpslag.gewijzigd();
   const boek = armaturenboek();
   const totArm = ARMATUREN.reduce((s,a)=> s + (st.armaturen[a.id].qty||0), 0);
   $('abTotArm').textContent = String(totArm);
@@ -1519,28 +1531,33 @@ st.armaturen = ARMATUREN.reduce((o,a)=>{o[a.id]={aanduiding:'',name:'',code:'',g
 /* Een opgeslagen project (dubbelgeklikt .html-bestand, zie slaProjectOp()) herstellen
    over de zojuist gezette defaults heen - vóór buildArmList()/updateSummary() zodat
    die de herstelde staat meteen goed tonen, zonder aparte resync-code. */
+function herstelProject(bron){
+  if(bron.presenters){
+    window.PRESENTER_DATA = window.PRESENTER_DATA || {};
+    Object.assign(window.PRESENTER_DATA, bron.presenters);
+  }
+  const s = bron.st || {};
+  /* armaturen is een sloten-map (arm01, arm02, ...): mergen i.p.v. vervangen, anders
+     vallen sloten die na het opslaan zijn toegevoegd terug op undefined i.p.v. hun
+     lege default, en crasht buildArmList(). */
+  Object.keys(st).forEach(k=>{
+    if(!Object.prototype.hasOwnProperty.call(s,k)) return;
+    if(k==='armaturen'){ st[k] = Object.assign({}, st[k], s[k]); }
+    else { st[k]=s[k]; }
+  });
+  /* Geen vaste bovengrens meer aan het aantal regels (zie zorgVoorLegeSlot()): een
+     opgeslagen project kan dus meer sloten hebben dan de standaard 12 - die moeten
+     ook in ARMATUREN zelf staan, anders tekent buildArmList() ze nooit. */
+  Object.keys(st.armaturen).forEach(id=>{
+    if(!ARMATUREN.some(a=>a.id===id)) ARMATUREN.push({id});
+  });
+  ARMATUREN.sort((a,b)=> parseInt(a.id.slice(3),10) - parseInt(b.id.slice(3),10));
+}
 if(OPGESLAGEN_PROJECT){
   try{
-    if(OPGESLAGEN_PROJECT.presenters){
-      window.PRESENTER_DATA = window.PRESENTER_DATA || {};
-      Object.assign(window.PRESENTER_DATA, OPGESLAGEN_PROJECT.presenters);
+    if(ProjectOpslag.controleer(OPGESLAGEN_PROJECT, PROJECT_VERSIE, 'het armaturenboek')){
+      herstelProject(OPGESLAGEN_PROJECT);
     }
-    const s = OPGESLAGEN_PROJECT.st || {};
-    /* armaturen is een sloten-map (arm01, arm02, ...): mergen i.p.v. vervangen, anders
-       vallen sloten die na het opslaan zijn toegevoegd terug op undefined i.p.v. hun
-       lege default, en crasht buildArmList(). */
-    Object.keys(st).forEach(k=>{
-      if(!Object.prototype.hasOwnProperty.call(s,k)) return;
-      if(k==='armaturen'){ st[k] = Object.assign({}, st[k], s[k]); }
-      else { st[k]=s[k]; }
-    });
-    /* Geen vaste bovengrens meer aan het aantal regels (zie zorgVoorLegeSlot()): een
-       opgeslagen project kan dus meer sloten hebben dan de standaard 12 - die moeten
-       ook in ARMATUREN zelf staan, anders tekent buildArmList() ze nooit. */
-    Object.keys(st.armaturen).forEach(id=>{
-      if(!ARMATUREN.some(a=>a.id===id)) ARMATUREN.push({id});
-    });
-    ARMATUREN.sort((a,b)=> parseInt(a.id.slice(3),10) - parseInt(b.id.slice(3),10));
   }catch(err){
     console.error('Kon opgeslagen project niet laden:', err);
     alert('Het opgeslagen project kon niet worden geladen: '+(err&&err.message?err.message:err));
@@ -1634,6 +1651,42 @@ document.querySelectorAll('[data-spiegel]').forEach(knop=>{
   new MutationObserver(volg).observe(bron, {attributes:true, childList:true, characterData:true, subtree:true});
   volg();
 });
+/* De staat terug in het scherm zetten. Bij het opstarten gebeurt dat hierboven regel
+   voor regel; deze functie is voor het moment dat er ná het opstarten een heel project
+   binnenkomt - de balk van project-opslag.js die vraagt of je verder wilt. */
+function zetProjectInScherm(){
+  $('abProj').value = st.proj || '';
+  $('abProjNr').value = st.projNr || '';
+  $('abInst').value = st.installateur || '';
+  $('abDatum').value = st.datum || '';
+  BRIEF_VELDEN.forEach(v=>{ $('abDoc_'+v.id).value = st[v.id] || ''; });
+  $('abSoortLicht').checked = st.soort !== 'vergelijking';
+  $('abSoortVerg').checked  = st.soort === 'vergelijking';
+  $('abToonLijst').checked = st.toonLijst !== false;
+  toonBriefingVelden();
+  buildArmList();
+  updateSummary();
+}
+/* Is er nog niets ingevuld? Dan mag de balk met "verder waar je gebleven was" komen,
+   en hoeft er bij het sluiten niets gevraagd te worden. */
+function projectLeeg(){
+  if((st.proj||'').trim() || (st.projNr||'').trim() || (st.installateur||'').trim()) return false;
+  if(BRIEF_VELDEN.some(v=> (st[v.id]||'').trim())) return false;
+  return !ARMATUREN.some(a=> !armSlotLeeg(st.armaturen[a.id]));
+}
+ProjectOpslag.koppel({
+  sleutel: 'armaturenboek',
+  versie: PROJECT_VERSIE,
+  naam: 'het armaturenboek',
+  maakPayload: projectPayload,
+  herstel: (payload)=>{ herstelProject(payload); zetProjectInScherm(); },
+  isLeeg: projectLeeg,
+  omschrijf: ()=> (st.proj||'').trim(),
+  /* Zonder de geüploade presenter-PDF's: die zijn zo een paar MB en dan past het niet
+     meer in de opslag van de browser. In het opgeslagen bestand gaan ze wel mee. */
+  licht: (payload)=> ({versie:payload.versie, st:payload.st}),
+});
+startKlaar = true;
 </script>
 </body>
 </html>

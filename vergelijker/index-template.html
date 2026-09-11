@@ -258,6 +258,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 <script src="pdf-huisstijl.js"></script>
 <script src="spec-lezer.js"></script>
 <script src="info-teken.js"></script>
+<script src="project-opslag.js"></script>
 <script>
 /* ======================= productdata ======================= */
 let DATA = /*__ARMATUREN_DATA__*/ null;
@@ -935,7 +936,10 @@ function kort(v){
   return b.join(' · ');
 }
 
-function render(){renderRail();renderSheet()}
+/* Staat de tool nog op te starten? Dan is een verversing geen wijziging van de
+   gebruiker, en hoeft er niets bewaard of gewaarschuwd te worden. */
+let startKlaar = false;
+function render(){ if(startKlaar) ProjectOpslag.gewijzigd(); renderRail(); renderSheet(); }
 
 /* ======================= projectvelden ======================= */
 const bind=(id,key,fn)=>{const e=document.getElementById(id);
@@ -954,8 +958,11 @@ function projectBestandsnaam(){
   const nm=(S.project.nr||S.project.naam||'vergelijker').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'vergelijker';
   return nm+'-vergelijker.html';
 }
+function projectPayload(){
+  return { versie:PROJECT_VERSIE, S:JSON.parse(JSON.stringify({project:S.project, posities:S.posities, actief:S.actief})) };
+}
 function slaProjectOp(){
-  const payload = { versie:1, S:JSON.parse(JSON.stringify({project:S.project, posities:S.posities, actief:S.actief})) };
+  const payload = projectPayload();
   let json = JSON.stringify(payload).replace(/<\/script/gi, '<\\/script');
 
   /* document.baseURI is bij de originele tool gewoon zijn eigen map; bij een al
@@ -1325,12 +1332,20 @@ document.addEventListener('paste',e=>{
 if(DATA) dataTag(DATA); else dataTag(null);
 /* Een opgeslagen project (dubbelgeklikt .html-bestand, zie slaProjectOp()) herstellen
    i.p.v. een lege startpositie aan te maken. */
-if(OPGESLAGEN_PROJECT){
-  try{
-    const s = OPGESLAGEN_PROJECT.S || {};
+const PROJECT_VERSIE = 1;
+/* Een heel project in de tool zetten: uit het ingebakken bestand hieronder, of uit de
+   balk van project-opslag.js die vraagt of je verder wilt waar je gebleven was. */
+function herstelProject(bron){
+    const s = bron.S || {};
     if(s.project) S.project = Object.assign({}, S.project, s.project);
     if(s.posities) S.posities = s.posities;
     if(typeof s.actief==='number') S.actief = s.actief;
+}
+if(OPGESLAGEN_PROJECT){
+  try{
+    if(ProjectOpslag.controleer(OPGESLAGEN_PROJECT, PROJECT_VERSIE, 'de vergelijker')){
+      herstelProject(OPGESLAGEN_PROJECT);
+    }
   }catch(err){
     console.error('Kon opgeslagen project niet laden:', err);
     alert('Het opgeslagen project kon niet worden geladen: '+(err&&err.message?err.message:err));
@@ -1338,6 +1353,25 @@ if(OPGESLAGEN_PROJECT){
 }
 if(!S.posities.length) S.posities.push(nieuwePositie('A'));
 vulProjectVelden(); render();
+
+/* Leeg = geen projectgegevens en niet meer dan de ene lege beginpositie. */
+function projectLeeg(){
+  const pr = S.project || {};
+  if(['nr','naam','inst'].some(k=> (pr[k]||'').toString().trim())) return false;
+  if(S.posities.length > 1) return false;
+  const p0 = S.posities[0] || {};
+  return !(p0.familieId || p0.artikelcode || ((p0.ref||{}).type||'').trim());
+}
+ProjectOpslag.koppel({
+  sleutel: 'vergelijker',
+  versie: PROJECT_VERSIE,
+  naam: 'de vergelijker',
+  maakPayload: projectPayload,
+  herstel: (payload)=>{ herstelProject(payload); vulProjectVelden(); render(); },
+  isLeeg: projectLeeg,
+  omschrijf: ()=> ((S.project && S.project.naam) || '').trim(),
+});
+startKlaar = true;
 </script>
 </body>
 </html>

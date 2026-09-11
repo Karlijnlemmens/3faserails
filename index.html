@@ -941,6 +941,7 @@
 <script src="presenters-data.js"></script>
 <script src="pdf-huisstijl.js"></script>
 <script src="info-teken.js"></script>
+<script src="project-opslag.js"></script>
 <script src="rail-figuren.js"></script>
 <script>
 /* =================== TAB NAVIGATION =================== */
@@ -2728,7 +2729,11 @@ function renderSheetsBar(){
     st.sheet=id; view={zoom:1,px:0,py:0}; snap(); goStep(4);
   });
 }
+/* Staat de tool nog op te starten? Dan is een verversing geen wijziging van de
+   gebruiker, en hoeft er niets bewaard of gewaarschuwd te worden. */
+let startKlaar = false;
 function refresh(){
+  if(startKlaar) ProjectOpslag.gewijzigd();
   const B=computeBOM(); lastBOM=B;
   renderSheetsBar();
   /* stepper */
@@ -3225,8 +3230,14 @@ function verzamelSpecialPresenters(){
   });
   return out;
 }
+const PROJECT_VERSIE = 1;
+/* Eén beschrijving van wat een project is: het bestand dat "Project opslaan" bakt en
+   het hoekje dat project-opslag.js in de browser bijhoudt schrijven allebei dit weg. */
+function projectPayload(){
+  return { versie:PROJECT_VERSIE, st:JSON.parse(JSON.stringify(st)), presenters:verzamelSpecialPresenters() };
+}
 function slaProjectOp(){
-  const payload = { versie:1, st:JSON.parse(JSON.stringify(st)), presenters:verzamelSpecialPresenters() };
+  const payload = projectPayload();
   let json = JSON.stringify(payload).replace(/<\/script/gi, '<\\/script');
 
   /* document.baseURI is altijd het juiste antwoord: bij de originele tool is dat
@@ -3252,6 +3263,7 @@ function slaProjectOp(){
   a.download=projectBestandsnaam();
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(_){ } }, 4000);
+  ProjectOpslag.bewaard();
 }
 
 /* Gedeelde weg voor downloaden en Preview PDF: controleert of de tekening
@@ -3543,13 +3555,14 @@ function init(){
      knoppenrijen hieronder bakken hun .sel-klasse in op het moment dat ze gebouwd
      worden, dus door st al hier te muteren krijgen ze de juiste selectie automatisch
      mee, zonder aparte resync-code. */
-  if(OPGESLAGEN_PROJECT){
-    try{
-      if(OPGESLAGEN_PROJECT.presenters){
+  /* Een heel project in de tool zetten: uit het ingebakken bestand hieronder, of uit
+     de balk van project-opslag.js die vraagt of je verder wilt waar je gebleven was. */
+  function herstelProject(bron){
+      if(bron.presenters){
         window.PRESENTER_DATA = window.PRESENTER_DATA || {};
-        Object.assign(window.PRESENTER_DATA, OPGESLAGEN_PROJECT.presenters);
+        Object.assign(window.PRESENTER_DATA, bron.presenters);
       }
-      const s = OPGESLAGEN_PROJECT.st || {};
+      const s = bron.st || {};
       /* armaturen/overig zijn sloten-maps (arm01, ao01, ...): mergen i.p.v.
          vervangen, anders vallen sloten die na het opslaan zijn toegevoegd
          (bijv. door uitbreiding van ARMATUREN) terug op undefined i.p.v. hun
@@ -3564,6 +3577,12 @@ function init(){
       $('c2Inst').value=st.installateur; $('c2Datum').value=st.datum;
       $('c2Mount').value=st.mount; $('c2Use4m').checked=st.use4m;
       snap();
+  }
+  if(OPGESLAGEN_PROJECT){
+    try{
+      if(ProjectOpslag.controleer(OPGESLAGEN_PROJECT, PROJECT_VERSIE, 'de railconfigurator')){
+        herstelProject(OPGESLAGEN_PROJECT);
+      }
     }catch(err){
       console.error('Kon opgeslagen project niet laden:', err);
       alert('Het opgeslagen project kon niet worden geladen: '+(err&&err.message?err.message:err));
@@ -3745,6 +3764,27 @@ function init(){
   $('pdfPreviewBg').addEventListener('click', e=>{ if(e.target.id==='pdfPreviewBg') sluitVoorbeeld(); });
   document.addEventListener('keydown', e=>{ if(e.key==='Escape' && $('pdfPreviewBg').classList.contains('active')) sluitVoorbeeld(); });
   refresh();
+
+  ProjectOpslag.koppel({
+    sleutel: 'railconfigurator',
+    versie: PROJECT_VERSIE,
+    naam: 'de railconfigurator',
+    maakPayload: projectPayload,
+    herstel: (payload)=>{
+      herstelProject(payload);
+      document.querySelectorAll('.shape-card').forEach(x=>x.classList.toggle('sel', x.dataset.shape===st.shape));
+      refresh();
+    },
+    /* Leeg = er is nog niets getekend en niets ingevuld. Kleur, voeding en de andere
+       keuzes van stap 1-2 tellen niet mee: daar kies je zo weer iets anders. */
+    isLeeg: ()=> !st.nodes.length && !(st.proj||'').trim() && !(st.projNr||'').trim()
+              && !ARMATUREN.some(a=> (st.armaturen[a.id].qty||0) > 0 || (st.armaturen[a.id].name||'').trim()),
+    omschrijf: ()=> (st.proj||'').trim(),
+    /* Zonder de geüploade presenter-PDF's: die zijn zo een paar MB en dan past het niet
+       meer in de opslag van de browser. In het opgeslagen bestand gaan ze wel mee. */
+    licht: (payload)=> ({versie:payload.versie, st:payload.st}),
+  });
+  startKlaar = true;
 }
 init();
 

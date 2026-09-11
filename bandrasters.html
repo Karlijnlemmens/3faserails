@@ -374,6 +374,7 @@
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="pdf-huisstijl.js"></script>
 <script src="info-teken.js"></script>
+<script src="project-opslag.js"></script>
 <!-- De foto's bij de optieken en de aansluitingen. Ontbreekt het bestand, dan
      werkt de tool gewoon door; de fotokaart onderaan legt uit hoe je het maakt. -->
 <script src="bandraster-beelden.js"></script>
@@ -782,16 +783,24 @@ function vandaag(){
    project - blijft null in de originele tool, net als bij dlc.html. */
 const OPGESLAGEN_PROJECT = /*__PROJECT_DATA_START__*/null/*__PROJECT_DATA_END__*/;
 
+const PROJECT_VERSIE = 1;
 let P = leegProject();
-if(OPGESLAGEN_PROJECT){
-  try{
-    P = Object.assign(leegProject(), OPGESLAGEN_PROJECT.P);
+/* Een heel project in de tool zetten: uit het ingebakken bestand hieronder, of uit de
+   balk van project-opslag.js die vraagt of je verder wilt waar je gebleven was. */
+function herstelProject(bron){
+    P = Object.assign(leegProject(), bron.P);
     /* Mergen i.p.v. vervangen: velden die sinds het opslaan zijn bijgekomen
        blijven anders undefined. */
     P.project      = Object.assign(leegProject().project, P.project||{});
     P.instellingen = Object.assign(leegProject().instellingen, P.instellingen||{});
     P.concept      = herstelConcept(P.concept);
     P.posities     = (P.posities||[]).map(herstelConcept);
+}
+if(OPGESLAGEN_PROJECT){
+  try{
+    if(ProjectOpslag.controleer(OPGESLAGEN_PROJECT, PROJECT_VERSIE, 'de bandrastertool')){
+      herstelProject(OPGESLAGEN_PROJECT);
+    }
   }catch(err){
     console.error('Kon opgeslagen project niet laden:', err);
     alert('Het opgeslagen project kon niet worden geladen: '+(err&&err.message?err.message:err));
@@ -1549,7 +1558,11 @@ function tekenAlles(){ tekenIntake(); tekenLichtvlakken(); ververs(); }
 
 /* Alles wat van de staat afhangt maar niet uit een invoerveld komt. Wordt na
    elke wijziging aangeroepen; het intakeraster zelf blijft staan. */
+/* Staat de tool nog op te starten? Dan is een verversing geen wijziging van de
+   gebruiker, en hoeft er niets bewaard of gewaarschuwd te worden. */
+let startKlaar = false;
 function ververs(){
+  if(startKlaar) ProjectOpslag.gewijzigd();
   const c = P.concept;
 
   if(AFGELEID.lumenOud)   vulBerekend(AFGELEID.lumenOud,   lumenOud(c));
@@ -2278,8 +2291,9 @@ async function metWachten(knop, werk){
   finally{ knop.disabled = false; knop.textContent = oud; }
 }
 
+function projectPayload(){ return {versie:PROJECT_VERSIE, P:JSON.parse(JSON.stringify(P))}; }
 function slaProjectOp(){
-  const payload = {versie:1, P:JSON.parse(JSON.stringify(P))};
+  const payload = projectPayload();
   const json = JSON.stringify(payload).replace(/<\/script/gi, '<\\/script');
 
   /* document.baseURI is bij de originele tool gewoon zijn eigen map; bij een al
@@ -2309,6 +2323,7 @@ function slaProjectOp(){
   html = '<!doctype html>\n' + html;   /* outerHTML bevat de <!DOCTYPE> zelf niet */
 
   download(projectNaamDeel() + '-bandrasters.html', html, 'text/html');
+  ProjectOpslag.bewaard();
 }
 
 /* ======================= koppelen ======================= */
@@ -2491,6 +2506,40 @@ InfoTeken.zet($('figuurkop'), {
 bindProject();
 tekenAlles();
 tekenFotos();
+
+/* Het hele scherm opnieuw opbouwen. Bij het opstarten gebeurt dat hierboven; dit is
+   voor het moment dat er ná het opstarten een heel project binnenkomt uit de balk van
+   project-opslag.js. */
+function zetProjectInScherm(){
+  bindProject();
+  tekenAlles();
+  tekenFotos();
+}
+/* Leeg = geen projectgegevens, geen positie op de RFQ-lijst, en ook de intake die nu
+   open staat (P.concept, nog niet toegevoegd) nog onaangeroerd. Juist die laatste is
+   het werk dat je kwijt zou raken. */
+function projectLeeg(){
+  const pr = P.project || {};
+  if(['nr','naam','inst','contact','fabrikant','opm'].some(k=> (pr[k]||'').toString().trim())) return false;
+  if((P.posities||[]).length) return false;
+  const c = P.concept || {};
+  if((c.omschrijving||'').trim() || (c.bestekcode||'').trim()) return false;
+  const ingevuld = (vak)=> Object.keys(vak||{}).some(k=>{
+    const w = vak[k];
+    return typeof w === 'string' && w.trim() && w !== '1' && w !== 'Optic bandraster';
+  });
+  return !ingevuld(c.oud) && !ingevuld(c.nieuw);
+}
+ProjectOpslag.koppel({
+  sleutel: 'bandrasters',
+  versie: PROJECT_VERSIE,
+  naam: 'de bandrastertool',
+  maakPayload: projectPayload,
+  herstel: (payload)=>{ herstelProject(payload); zetProjectInScherm(); },
+  isLeeg: projectLeeg,
+  omschrijf: ()=> ((P.project && P.project.naam) || '').trim(),
+});
+startKlaar = true;
 </script>
 </body>
 </html>
