@@ -96,6 +96,21 @@ function herkenningsBlok(t){
   });
 }
 
+/* ---------- 3b. elke gebruikte kleurnaam bestaat ook ---------- */
+{
+  const gedeeld = lees('suite-stijl.css');
+  const namenIn = (t) => new Set([...t.matchAll(/(--[a-z0-9-]+)\s*:/g)].map(m => m[1]));
+  const uitSuite = namenIn(gedeeld);
+  PAGINAS.forEach(p => {
+    const t = lees(p);
+    const eigen = namenIn(t);
+    /* var(--x, terugval) is geen fout: daar is een alternatief opgeschreven. */
+    const gebruikt = new Set([...t.matchAll(/var\((--[a-z0-9-]+)\s*\)/g)].map(m => m[1]));
+    [...gebruikt].filter(n => !eigen.has(n) && !uitSuite.has(n))
+      .forEach(n => meld(p + ' gebruikt ' + n + ' maar die kleur is nergens gezet'));
+  });
+}
+
 /* ---------- 4. niets meer van het netwerk ---------- */
 PAGINAS.forEach(p => {
   const t = lees(p);

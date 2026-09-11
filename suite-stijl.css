@@ -1,0 +1,84 @@
+/* De opmaak die alle tools van de suite delen: het palet, de rij tabbladen bovenin en
+   de focusring. Elke pagina had hier een eigen kopie van staan - zes keer hetzelfde,
+   met zes kansen om uit elkaar te lopen. Dat gebeurde ook: de vergelijker droeg een
+   ander blauw (#0E6FB0 tegen #3E8EDE), een andere inkt en een ander oranje.
+
+   Laden vóór de eigen <style> van de pagina, zodat een tool een regel hiervandaan
+   nog kan overschrijven:
+
+       <link rel="stylesheet" href="suite-stijl.css">
+
+   Alles wat maar één tool aangaat hoort hier NIET in; dit bestand is voor wat overal
+   hetzelfde moet zijn. node tools/controleer-suite.mjs kijkt na of het zo blijft. */
+
+:root{
+  /* Distrilight-blauw en de navyreeks eromheen. */
+  --navy-900:#1E2A4A;
+  --navy-800:#26365E;
+  --navy-700:#2F4372;
+  --blue:#3E8EDE;
+  --blue-dark:#2C72BA;
+  --blue-light:#EAF3FC;
+  /* Accent: alleen voor de ene knop die de hoofdhandeling is. */
+  --orange:#EC6431;
+  --orange-dark:#D4531F;
+  /* Papier, inkt en lijnen. */
+  --paper:#F3F7FC;
+  --white:#FFFFFF;
+  --ink:#1C2534;
+  --slate:#5A6B84;
+  --slate-light:#8FA0B8;
+  --border:#DCE6F2;
+  /* Betekeniskleuren: goed, let op, fout. Los van het accent. */
+  --green:#22935F;
+  --green-light:#E1F4EB;
+  --amber:#B9791C;
+  --amber-light:#FBF0DC;
+  --red:#D6362B;
+  --red-light:#FBE7E5;
+  --radius:14px;
+}
+
+/* Zichtbaar waar je bent met de tab-toets. Er stond nergens een focusstijl, en in een
+   formulier van dertig velden ben je dan meteen kwijt waar je gebleven bent. Alleen
+   :focus-visible, dus een muisklik geeft geen ring - die hoort bij het toetsenbord. */
+:focus-visible{
+  outline:2px solid var(--blue);
+  outline-offset:2px;
+  border-radius:4px;
+}
+button:focus-visible, a:focus-visible, summary:focus-visible,
+[role="button"]:focus-visible, [tabindex]:focus-visible{
+  outline:2px solid var(--blue-dark);
+  outline-offset:2px;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible{
+  outline:2px solid var(--blue);
+  outline-offset:1px;
+}
+
+/* De rij tabbladen naar de andere tools, boven aan elke pagina. */
+.badges{display:flex; gap:6px; flex-wrap:wrap;}
+.badge{
+  border:1px solid var(--blue-light);
+  background:var(--blue-light);
+  color:var(--blue-dark); font-size:11px; padding:3px 10px; border-radius:999px;
+  font-family:'JetBrains Mono',monospace; letter-spacing:.03em; font-weight:600;
+  text-decoration:none; display:inline-block; cursor:pointer; transition:.12s;
+}
+.badge:hover{border-color:var(--blue);}
+.badge.active{background:var(--blue); border-color:var(--blue); color:#fff;}
+
+/* Een knop die iets weggooit hoort er anders uit te zien dan een knop die iets maakt,
+   en niet in dezelfde kleur pal naast "opslaan" te staan. */
+.knop-gevaar{
+  background:var(--white) !important;
+  border:1.5px solid var(--red) !important;
+  color:var(--red) !important;
+  box-shadow:none !important;
+}
+.knop-gevaar:hover{background:var(--red-light) !important;}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important;}
+}

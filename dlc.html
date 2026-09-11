@@ -9,19 +9,9 @@
      schijf geopend en rondgestuurd, en mogen niet op een verbinding wachten. Zie de kop
      van fonts/schermfonts.css. -->
 <link rel="stylesheet" href="fonts/schermfonts.css">
+<link rel="stylesheet" href="suite-stijl.css">
 <style>
-  :root{
-    --navy-900:#1E2A4A;
-    --blue:#3E8EDE;
-    --blue-dark:#2C72BA;
-    --blue-light:#EAF3FC;
-    --paper:#F3F7FC;
-    --white:#FFFFFF;
-    --ink:#1C2534;
-    --slate:#5A6B84;
-    --border:#DCE6F2;
-    --radius:14px;
-  }
+  /* Palet, tabbladenrij en focusring staan in suite-stijl.css. */
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
@@ -45,16 +35,6 @@
   .brand .logo{height:100px; width:auto; display:block; transform:translateX(-7.65%);}
   .title-row{display:flex; align-items:center; gap:14px; margin-top:4px; flex-wrap:wrap;}
   h1{font-size:20px; margin:0; font-weight:800; color:var(--navy-900);}
-  .badges{display:flex; gap:6px; flex-wrap:wrap;}
-  .badge{
-    border:1px solid var(--blue-light);
-    background:var(--blue-light);
-    color:var(--blue-dark); font-size:11px; padding:3px 10px; border-radius:999px;
-    font-family:'JetBrains Mono',monospace; letter-spacing:.03em; font-weight:600;
-    text-decoration:none; display:inline-block; cursor:pointer; transition:.12s;
-  }
-  .badge:hover{border-color:var(--blue);}
-  .badge.active{background:var(--blue); border-color:var(--blue); color:#fff;}
   .tagline{color:var(--slate); font-size:13px; margin-top:2px; max-width:700px; line-height:1.4;}
 
   main{max-width:1600px; margin:0 auto; padding:16px 28px 60px;}
@@ -1002,6 +982,7 @@ ProjectOpslag.koppel({
   herstel: (payload)=>{ herstelSpecial(payload); tekenPaneel(); plan(); },
   isLeeg: specialLeeg,
   omschrijf: ()=> (S.titelVet||'').trim(),
+  bewaar: slaSpecialOp,
   /* Zonder de geplakte foto's: die zijn als data-URI zo een paar MB en dan past het
      niet meer in de opslag van de browser. In het opgeslagen bestand gaan ze wel mee. */
   licht: (payload)=>{

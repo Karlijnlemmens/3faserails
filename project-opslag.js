@@ -20,6 +20,7 @@
        maakPayload: () => ({st: ...}),     // precies wat "Project opslaan" wegschrijft
        herstel:     (payload) => {...},    // en hoe dat terugkomt
        isLeeg:      () => boolean,         // staat er nog niets ingevuld?
+     bewaar:      () => {...},           // optioneel: wat Ctrl+S moet doen
        omschrijf:   () => 'Hoofdstraat 12',// optioneel: wat er in de balk komt te staan
        licht:       (payload) => payload,  // optioneel: kleinere versie, zie hieronder
      });
@@ -202,6 +203,16 @@ function koppel(instellingen){
      gaat of sluit - dan is het juist het moment waarop het ertoe doet. */
   document.addEventListener('visibilitychange', ()=>{ if(document.hidden && vuil) schrijf(); });
   window.addEventListener('pagehide', ()=>{ if(vuil) schrijf(); });
+  /* Ctrl+S (Cmd+S) doet wat iedereen verwacht: het project opslaan. Zonder dit bood de
+     browser aan de HTML-pagina zelf te bewaren, wat niemand wil. */
+  if(opt.bewaar){
+    window.addEventListener('keydown', (e)=>{
+      if((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')){
+        e.preventDefault();
+        opt.bewaar();
+      }
+    });
+  }
   window.addEventListener('beforeunload', (e)=>{
     if(!vuil || (opt.isLeeg && opt.isLeeg())) return;
     if(vuil) schrijf();

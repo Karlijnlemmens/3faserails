@@ -9,30 +9,9 @@
      schijf geopend en rondgestuurd, en mogen niet op een verbinding wachten. Zie de kop
      van fonts/schermfonts.css. -->
 <link rel="stylesheet" href="fonts/schermfonts.css">
+<link rel="stylesheet" href="suite-stijl.css">
 <style>
-  :root{
-    --navy-900:#1E2A4A;
-    --navy-800:#26365E;
-    --navy-700:#2F4372;
-    --blue:#3E8EDE;
-    --blue-dark:#2C72BA;
-    --blue-light:#EAF3FC;
-    --orange:#EC6431;
-    --orange-dark:#D4531F;
-    --paper:#F3F7FC;
-    --white:#FFFFFF;
-    --ink:#1C2534;
-    --slate:#5A6B84;
-    --slate-light:#8FA0B8;
-    --red:#D6362B;
-    --red-light:#FBE7E5;
-    --amber:#B9791C;
-    --amber-light:#FBF0DC;
-    --green:#22935F;
-    --green-light:#E1F4EB;
-    --border:#DCE6F2;
-    --radius:14px;
-  }
+  /* Palet, tabbladenrij en focusring staan in suite-stijl.css. */
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
@@ -59,16 +38,6 @@
   .brand .logo{height:100px; width:auto; display:block; transform:translateX(-7.65%);}
   .title-row{display:flex; align-items:center; gap:14px; margin-top:4px; flex-wrap:wrap;}
   h1{font-size:20px; margin:0; font-weight:800; color:var(--navy-900);}
-  .badges{display:flex; gap:6px; flex-wrap:wrap;}
-  .badge{
-    border:1px solid var(--blue-light);
-    background:var(--blue-light);
-    color:var(--blue-dark); font-size:11px; padding:3px 10px; border-radius:999px;
-    font-family:'JetBrains Mono',monospace; letter-spacing:.03em; font-weight:600;
-    text-decoration:none; display:inline-block; cursor:pointer; transition:.12s;
-  }
-  .badge:hover{border-color:var(--blue);}
-  .badge.active{background:var(--blue); border-color:var(--blue); color:#fff;}
   .tagline{color:var(--slate); font-size:13px; margin-top:2px; max-width:640px; line-height:1.4;}
 
   nav{
@@ -325,6 +294,7 @@
     body{padding-bottom:72px;}   /* de balk mag de laatste regel niet afdekken */
   }
   .cfg-actions{display:flex; gap:8px;}
+  .cfg-actions .knop-gevaar{flex:0 0 auto; margin-left:4px;}
   .cfg-actions button{
     flex:1; background:#fff; color:var(--blue-dark); border:none; border-radius:999px; padding:10px; font-weight:800; font-size:12.5px; cursor:pointer; font-family:'Nunito Sans',sans-serif;
   }
@@ -496,7 +466,7 @@
   .pdfprev-bg{position:fixed; inset:0; background:rgba(11,24,48,.66); display:none; align-items:center; justify-content:center; z-index:120; padding:18px;}
   .pdfprev-bg.active{display:flex;}
   .pdfprev{background:#fff; border-radius:14px; width:min(1100px,100%); height:min(94vh,100%); display:flex; flex-direction:column; overflow:hidden;}
-  .pdfprev-bar{display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--line); flex-wrap:wrap;}
+  .pdfprev-bar{display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); flex-wrap:wrap;}
   .pdfprev-bar b{font-size:14px; color:var(--navy-900);}
   .pdfprev-bar .hint{margin:0; flex:1 1 auto;}
   .pdfprev iframe{flex:1 1 auto; width:100%; border:0; background:var(--shade,#EDEFF3);}
@@ -839,7 +809,7 @@
         <div class="c2-toolbar">
           <button id="c2Undo" title="Ongedaan maken">↶ Ongedaan</button>
           <button id="c2Redo" title="Herstellen">↷ Herstel</button>
-          <button id="c2Reset">Opnieuw beginnen</button>
+          <button id="c2Reset" title="Wist alleen de tekening op dit tekenvlak; de armaturen en projectgegevens blijven staan">Tekening wissen</button>
           <button id="c2AddFig">＋ Nieuw figuur</button>
           <button id="c2ZoomOut" title="Uitzoomen">−</button>
           <button id="c2ZoomIn" title="Inzoomen">＋</button>
@@ -911,7 +881,7 @@
         <button id="c2Pdf">Download PDF</button>
         <button id="c2Preview">Preview PDF</button>
         <button id="c2ProjectOpslaan" title="Slaat een kopie van deze tool op met het huidige project erin - dubbelklikken op dat bestand opent de tool weer precies zo ingevuld">Project opslaan</button>
-        <button id="c2ResetAll">Reset</button>
+        <button id="c2ResetAll" class="knop-gevaar" title="Gooit de tekening, de armaturen en de projectgegevens weg en begint opnieuw">Alles wissen</button>
       </div>
     </div>
   </div>
@@ -3710,6 +3680,10 @@ function init(){
   buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
   /* acties */
   $('c2ResetAll').addEventListener('click', ()=>{
+    /* Deze knop staat naast "Project opslaan" en gooit alles weg; zonder deze vraag is
+       één misklik genoeg om een tekening en een hele armaturenlijst kwijt te zijn. */
+    if(!confirm('Alles weggooien en opnieuw beginnen?\n\nDe tekening, de armaturen en de '
+              + 'projectgegevens verdwijnen. Dit kan niet ongedaan gemaakt worden.')) return;
     st.shape=null; st.nodes=[]; st.edges=[]; st.feeds=[]; st.angles={}; st.mount='geen'; st.pick=false; st.step=1;
     st.sysOphang=false; st.sysOphangLen='3'; st.pendelKabelkleur='zilver'; st.pendelKabelLen='3';
     /* geüploade Special-PDF's horen niet bij een specifieke tekening, dus die vervallen mee. */
@@ -3820,6 +3794,7 @@ function init(){
     isLeeg: ()=> !st.nodes.length && !(st.proj||'').trim() && !(st.projNr||'').trim()
               && !ARMATUREN.some(a=> (st.armaturen[a.id].qty||0) > 0 || (st.armaturen[a.id].name||'').trim()),
     omschrijf: ()=> (st.proj||'').trim(),
+    bewaar: slaProjectOp,
     /* Zonder de geüploade presenter-PDF's: die zijn zo een paar MB en dan past het niet
        meer in de opslag van de browser. In het opgeslagen bestand gaan ze wel mee. */
     licht: (payload)=> ({versie:payload.versie, st:payload.st}),

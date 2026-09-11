@@ -9,26 +9,9 @@
      schijf geopend en rondgestuurd, en mogen niet op een verbinding wachten. Zie de kop
      van fonts/schermfonts.css. -->
 <link rel="stylesheet" href="fonts/schermfonts.css">
+<link rel="stylesheet" href="suite-stijl.css">
 <style>
-  :root{
-    --navy-900:#1E2A4A;
-    --navy-800:#26365E;
-    --blue:#3E8EDE;
-    --blue-dark:#2C72BA;
-    --blue-light:#EAF3FC;
-    --orange:#EC6431;
-    --orange-dark:#D4531F;
-    --paper:#F3F7FC;
-    --white:#FFFFFF;
-    --ink:#1C2534;
-    --slate:#5A6B84;
-    --slate-light:#8FA0B8;
-    --red:#D6362B;
-    --green:#22935F;
-    --green-light:#E1F4EB;
-    --border:#DCE6F2;
-    --radius:14px;
-  }
+  /* Palet, tabbladenrij en focusring staan in suite-stijl.css. */
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
@@ -52,16 +35,6 @@
   .brand .logo{height:100px; width:auto; display:block; transform:translateX(-7.65%);}
   .title-row{display:flex; align-items:center; gap:14px; margin-top:4px; flex-wrap:wrap;}
   h1{font-size:20px; margin:0; font-weight:800; color:var(--navy-900);}
-  .badges{display:flex; gap:6px; flex-wrap:wrap;}
-  .badge{
-    border:1px solid var(--blue-light);
-    background:var(--blue-light);
-    color:var(--blue-dark); font-size:11px; padding:3px 10px; border-radius:999px;
-    font-family:'JetBrains Mono',monospace; letter-spacing:.03em; font-weight:600;
-    text-decoration:none; display:inline-block; cursor:pointer; transition:.12s;
-  }
-  .badge:hover{border-color:var(--blue);}
-  .badge.active{background:var(--blue); border-color:var(--blue); color:#fff;}
 
   main{max-width:1400px; margin:0 auto; padding:16px 28px 60px;}
   .lede{font-size:14px; color:var(--slate); max-width:760px; line-height:1.5; margin-bottom:12px;}
@@ -147,7 +120,10 @@
     padding:3px 8px; border-radius:20px; border:none; cursor:pointer;}
   .c2-armspecial .c2-specialbtn.miss{background:#FDECEC; color:#B0362B;}
   .c2-armspecial .c2-specialbtn.ok{background:var(--green-light); color:var(--green);}
-  .c2-armspecial .c2-specialx{font-size:14px; color:var(--slate); cursor:pointer; padding:0 3px; line-height:1;}
+  /* Een knop, geen span: hij doet iets, en dan hoort hij bereikbaar te zijn met de
+     tab-toets en een naam te hebben. De opmaak blijft die van het kruisje. */
+  .c2-armspecial .c2-specialx{font:inherit; font-size:14px; color:var(--slate); cursor:pointer;
+    padding:0 3px; line-height:1; background:none; border:0;}
   .c2-qtyinp{width:48px; border:1.5px solid var(--border); border-radius:8px; padding:6px 4px; font-family:'JetBrains Mono',monospace; font-size:13px; text-align:center; color:var(--ink); background:#fff;}
 
   /* ---------- live overzicht ---------- */
@@ -1312,7 +1288,7 @@ function maakArmRij(a){
   [['↑',-1,'Deze regel een plaats omhoog'], ['↓',1,'Deze regel een plaats omlaag']]
     .forEach(([teken, richting, titel])=>{
       const k=document.createElement('button'); k.type='button';
-      k.textContent=teken; k.title=titel;
+      k.textContent=teken; k.title=titel; k.setAttribute('aria-label', titel);
       k.addEventListener('click', ()=>{
         /* De plaats bij de klik opzoeken, niet bij het tekenen: er kan intussen een
            lege regel bij zijn gekomen (zie zorgVoorLegeSlot). */
@@ -1339,8 +1315,10 @@ function maakArmRij(a){
   const specialFileInp=document.createElement('input'); specialFileInp.type='file'; specialFileInp.accept='application/pdf';
   specialFileInp.style.display='none';
   const specialBtn=document.createElement('button'); specialBtn.type='button'; specialBtn.className='c2-specialbtn';
-  const specialX=document.createElement('span'); specialX.className='c2-specialx'; specialX.textContent='✕';
+  const specialX=document.createElement('button'); specialX.type='button';
+  specialX.className='c2-specialx'; specialX.textContent='✕';
   specialX.title='Geüploade PDF verwijderen';
+  specialX.setAttribute('aria-label', 'Geüploade PDF verwijderen');
   specialBtn.addEventListener('click', ()=>specialFileInp.click());
   specialX.addEventListener('click', ()=>{
     if(window.PRESENTER_DATA) delete window.PRESENTER_DATA[specialPresenterId(a.id)];
@@ -1703,6 +1681,7 @@ ProjectOpslag.koppel({
   herstel: (payload)=>{ herstelProject(payload); zetProjectInScherm(); },
   isLeeg: projectLeeg,
   omschrijf: ()=> (st.proj||'').trim(),
+  bewaar: slaProjectOp,
   /* Zonder de geüploade presenter-PDF's: die zijn zo een paar MB en dan past het niet
      meer in de opslag van de browser. In het opgeslagen bestand gaan ze wel mee. */
   licht: (payload)=> ({versie:payload.versie, st:payload.st}),

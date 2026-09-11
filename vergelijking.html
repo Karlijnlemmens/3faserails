@@ -11,12 +11,17 @@
      schijf geopend en rondgestuurd, en mogen niet op een verbinding wachten. Zie de kop
      van fonts/schermfonts.css. -->
 <link rel="stylesheet" href="fonts/schermfonts.css">
+<link rel="stylesheet" href="suite-stijl.css">
 <style>
+/* Deze tool draagt eigen namen voor zijn kleuren (--line, --muted, --bg), maar de
+   WAARDEN komen uit suite-stijl.css: hij stond met een ander blauw, oranje en inkt
+   tussen de rest van de suite. De namen die de andere tools ook kennen worden hier
+   niet opnieuw gezet - die komen uit het gedeelde bestand. */
 :root{
-  --blue:#0E6FB0; --blue-dark:#0A4E7C; --blue-soft:#E8F2F9; --blue-line:#BBD7EA;
-  --orange:#F5821F; --orange-soft:#FDF0E2;
-  --ink:#1B2733; --muted:#6B7B8A; --line:#DCE5EC; --bg:#F4F7FA; --white:#fff;
-  --ok:#2E9E5B; --warn:#C9721A; --err:#C0392B;
+  --blue-soft:var(--blue-light); --blue-line:#C3DCF5;
+  --orange-soft:#FDEDE6;
+  --muted:var(--slate); --line:var(--border); --bg:var(--paper);
+  --ok:var(--green); --warn:var(--amber); --err:var(--red);
   --r:10px; --rail:264px;
 }
 *{box-sizing:border-box}
