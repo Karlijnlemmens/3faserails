@@ -227,6 +227,13 @@
   .cfg-panel{display:flex; flex-direction:column; gap:10px; align-self:stretch;}
   .cfg-block{background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px;}
   .cfg-block h4{margin:0 0 2px; font-size:13px;}
+  .c2-uitleg{
+    margin-top:14px; padding:14px 16px; border-radius:var(--radius);
+    background:var(--blue-light); border:1px solid var(--border);
+  }
+  .c2-uitleg b{font-size:12.5px; color:var(--navy-900);}
+  .c2-uitleg ol{margin:6px 0 0; padding-left:18px; font-size:12.5px; line-height:1.7; color:var(--slate);}
+  .c2-uitleg li b{font-size:inherit; color:var(--ink);}
   .cfg-block .hint{font-size:11.5px; line-height:1.4; color:var(--slate); margin:0 0 8px;}
   .cfg-step-num{
     display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%;
@@ -788,6 +795,21 @@
         <h4>Standaard of DALI-dimbaar?</h4>
         <p class="hint">Bepaalt welke artikelcodes in de stuklijst en PDF komen. Vorm, kleur, voeding en de rest van de logica blijven voor beide lijnen gelijk.</p>
         <div class="choice-row" id="c2DaliRow"></div>
+        <!-- Stap 1 is één keuze op een verder leeg scherm; deze uitleg vertelt wat er
+             daarna gebeurt, zodat het scherm iets zegt tegen wie de tool voor het
+             eerst opent. Hij staat alleen in stap 1. -->
+        <div class="c2-uitleg">
+          <b>Wat de tool voor je doet</b>
+          <ol>
+            <li>Jij tekent het <b>traject</b> en zet de maten erbij (stap 4).</li>
+            <li>De tool leidt daaruit af welk <b>koppelstuk</b> op elk punt hoort — inclusief
+                de kant waar de polariteitsrib zit, want die bepaalt links of rechts.</li>
+            <li>De <b>raillengtes</b> worden verdeeld over 3, 2 en 1 meter, met een
+                elektrisch koppelstuk per naad, en de <b>montagepunten</b> geteld.</li>
+            <li>Je krijgt een <b>stuklijst</b> met artikelcodes en een PDF voor de
+                installateur, met de presenters van de gekozen armaturen erachter.</li>
+          </ol>
+        </div>
       </div>
 
       <div class="cfg-block c2-pane" data-pane="2">
@@ -903,7 +925,7 @@
     <div class="pdfprev">
       <div class="pdfprev-bar">
         <b>Voorbeeld &mdash; Download PDF</b>
-        <span class="hint">Zo ziet de installateur het document.</span>
+        <span class="hint" id="pdfPreviewHint">Zo ziet de installateur het document.</span>
         <button id="pdfPreviewDl">Downloaden</button>
         <button class="ghost" id="pdfPreviewClose">Sluiten</button>
       </div>
@@ -3269,6 +3291,20 @@ function slaProjectOp(){
 /* Gedeelde weg voor downloaden en Preview PDF: controleert of de tekening
    compleet is, waarschuwt over gaten in het armaturenboek en levert de bytes.
    Geeft null terug als er niets te maken valt. */
+/* Hoe groot de gemaakte PDF is, en of dat nog te mailen valt. De presenters zijn
+   fotografie op drukwerkkwaliteit en pdf-lib kan die niet verkleinen zodra ze in een
+   pagina zitten, dus het aantal typen bepaalt het gewicht: gemeten 3,0 MB bij één type
+   en 5,8 MB bij zes. Boven de grens hieronder begint mail te weigeren. */
+const PDF_MAILGRENS_MB = 8;
+function meldPdfGrootte(bytes, vak){
+  const mb = bytes.length / 1048576;
+  const tekst = mb.toFixed(1).replace('.', ',') + ' MB';
+  if(vak) vak.textContent = 'Zo ziet de installateur het document — ' + tekst + '.';
+  if(mb < PDF_MAILGRENS_MB) return;
+  alert('Let op: deze PDF is ' + tekst + '. Veel mailservers weigeren bijlagen boven de '
+      + PDF_MAILGRENS_MB + ' MB.\n\nDeel hem als link, of laat de presenters eerst '
+      + 'comprimeren (node tools/comprimeer-presenters.mjs, zie CLAUDE.md).');
+}
 async function maakPdfBytes(){
   const cmP=compMap(); const fedP=new Set(st.feeds.map(f=>feedComp(f,cmP.m)));
   if(cmP.count===0 || fedP.size<cmP.count){
@@ -3305,7 +3341,11 @@ async function maakPdfBytes(){
       + 'Toevoegen: zet de PDF in presenters-bron/ en draai "node tools/maak-presenters.mjs".');
   }
   if(meldingen.length) alert(meldingen.join('\n\n')+'\n\nDe PDF wordt verder gewoon gegenereerd.');
-  try{ return await assembleFinalPdf(); }
+  try{
+    const bytes = await assembleFinalPdf();
+    meldPdfGrootte(bytes, $('pdfPreviewHint'));
+    return bytes;
+  }
   catch(err){ console.error(err); alert('De PDF kon niet worden gegenereerd: '+(err&&err.message?err.message:err)); return null; }
 }
 

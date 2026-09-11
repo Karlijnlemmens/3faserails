@@ -314,7 +314,7 @@
     <div class="pdfprev">
       <div class="pdfprev-bar">
         <b>Voorbeeld — Armaturenboek</b>
-        <span class="hint">Zo ziet de PDF eruit.</span>
+        <span class="hint" id="abPreviewHint">Zo ziet de PDF eruit.</span>
         <button id="abPreviewDl">Downloaden</button>
         <button id="abPreviewClose">Sluiten</button>
       </div>
@@ -1149,6 +1149,23 @@ function pdfBestandsnaam(){
   return ['AB'+nr, inst, naam].filter(Boolean).join(' - ') + '.pdf';
 }
 
+/* Hoe groot de gemaakte PDF is, en of dat nog te mailen valt. De presenters zijn
+   fotografie op drukwerkkwaliteit en pdf-lib kan die niet verkleinen zodra ze in een
+   pagina zitten, dus het aantal typen bepaalt het gewicht: gemeten 3,0 MB bij één
+   type en 5,8 MB bij zes. Boven de grens hieronder begint mail te weigeren. */
+const PDF_MAILGRENS_MB = 8;
+function pdfGrootteTekst(bytes){
+  const mb = bytes.length / 1048576;
+  return {mb, tekst: mb.toFixed(1).replace('.', ',') + ' MB'};
+}
+function meldPdfGrootte(bytes, vak){
+  const {mb, tekst} = pdfGrootteTekst(bytes);
+  if(vak) vak.textContent = 'Zo ziet de PDF eruit — ' + tekst + '.';
+  if(mb < PDF_MAILGRENS_MB) return;
+  alert('Let op: deze PDF is ' + tekst + '. Veel mailservers weigeren bijlagen boven de '
+      + PDF_MAILGRENS_MB + ' MB.\n\nDeel hem als link, of laat de presenters eerst '
+      + 'comprimeren (node tools/comprimeer-presenters.mjs, zie CLAUDE.md).');
+}
 async function maakPdfBytes(){
   const heeftArmaturen = ARMATUREN.some(a=> !armSlotLeeg(st.armaturen[a.id]));
   if(!heeftArmaturen){
@@ -1187,7 +1204,11 @@ async function maakPdfBytes(){
       + 'Daar komt nu de plaatshouder uit het ontwerp te staan ([projectnaam], [naam documenten]).');
   }
   if(meldingen.length) alert(meldingen.join('\n\n')+'\n\nDe PDF wordt verder gewoon gegenereerd.');
-  try{ return await assembleArmaturenboekPdf(); }
+  try{
+    const bytes = await assembleArmaturenboekPdf();
+    meldPdfGrootte(bytes, $('abPreviewHint'));
+    return bytes;
+  }
   catch(err){ console.error(err); alert('De PDF kon niet worden gegenereerd: '+(err&&err.message?err.message:err)); return null; }
 }
 

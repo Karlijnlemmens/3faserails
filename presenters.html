@@ -153,6 +153,18 @@
     font-size:11px; font-weight:700; padding:5px 11px; border-radius:999px; pointer-events:none;
   }
   .bladwrap{position:relative;}
+  /* Zolang er geen familie gekozen is staat de pdf-weergave leeg, en dat is een
+     donkergrijs vlak van bijna een heel scherm - dat leest als een storing in plaats
+     van als een beginpunt. Deze uitleg ligt er dan overheen. */
+  .bladleeg{
+    position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+    gap:10px; padding:32px 34px; background:var(--white); border-radius:var(--radius);
+    border:1px dashed var(--border);
+  }
+  .bladleeg h3{margin:0; font-size:17px; color:var(--navy-900);}
+  .bladleeg p{margin:0; font-size:13px; color:var(--slate); max-width:52ch; line-height:1.55;}
+  .bladleeg ol{margin:4px 0 0; padding-left:18px; font-size:13px; color:var(--slate); line-height:1.7;}
+  .bladleeg b{color:var(--ink);}
   .melding{
     background:#FFF6E5; border:1px solid #F0D9A8; color:#7A5B12; border-radius:9px;
     padding:8px 11px; font-size:12px; line-height:1.45; margin-bottom:10px;
@@ -203,6 +215,17 @@
       <div class="bladwrap">
         <div class="blad"><iframe id="voorbeeld" title="Voorbeeld van de presenter"></iframe></div>
         <div class="bezig" id="bezig" style="display:none">bezig…</div>
+        <div class="bladleeg" id="bladleeg">
+          <h3>Hier komt de presenter te staan</h3>
+          <p>Geen namaak van het blad: dit vak toont straks de <b>echte PDF</b>, opnieuw
+             getekend bij elke wijziging. Wat je hier ziet, krijgt de klant.</p>
+          <ol>
+            <li>Kies links een <b>productfamilie</b>.</li>
+            <li>Titel, specificaties en het assortiment komen uit de productdata.</li>
+            <li>Jij vult aan wat daar niet in staat: de <b>verkooptekst</b> en de <b>foto's</b>.</li>
+            <li><b>Download PDF</b> als het klopt. Je instellingen blijven per familie bewaard.</li>
+          </ol>
+        </div>
       </div>
     </div>
   </div>
@@ -1098,6 +1121,8 @@ function plan(){
   wachter=setTimeout(ververs, 350);
 }
 async function ververs(){
+  /* De uitleg ligt over het lege pdf-vak; zodra er iets te tonen valt mag hij weg. */
+  $('bladleeg').style.display = S.familieId ? 'none' : '';
   if(!S.familieId) return;
   if(bezigNu){ opnieuw=true; return; }
   bezigNu=true; $('bezig').style.display='';
