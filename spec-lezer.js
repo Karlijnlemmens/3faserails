@@ -133,7 +133,16 @@ function maak(opt){
     return !lijktWaarde(k) && pastLabel(k);
   }
 
-  /* Is deze regel zo'n rij losse waarden? Vier drempels, en ze zijn er alle vier
+  /* Een patroon dat aan het begin verankerd is (^) past alleen als het HELE stuk
+     die waarde is: "3600 lm", "IK02", "600x600 mm". Een patroon zonder anker pakt
+     een woord midden in een zin - "prisma" zit ook in "met microprismatische
+     afdekking voor kantoren". Dat verschil is het enige harde onderscheid tussen
+     een waardenrij en een zin met komma's, dus het telt hieronder mee. Een
+     patroon mag het zelf zeggen met `anker`, anders lezen we het van de regexp
+     af, zodat het niet uit de pas kan lopen met het patroon. */
+  const vastAnker = (f) => f.anker !== undefined ? !!f.anker : f.p.source.charAt(0) === '^';
+
+  /* Is deze regel zo'n rij losse waarden? Vijf drempels, en ze zijn er alle vijf
      om hetzelfde te voorkomen: dat een gewone zin met komma's erin uit elkaar
      getrokken wordt in plaats van als omschrijving te blijven staan.
 
@@ -141,17 +150,20 @@ function maak(opt){
        - nauwelijks dubbele punten, anders is het een bestektekst en hoort hij
          bij de gewone ronde;
        - geen stuk langer dan 60 tekens - een waarde is kort, een bijzin niet;
-       - de HELFT van de stukken wordt herkend, en minstens twee. In "Inbouw-
-         downlight, rond, met microprismatische afdekking voor kantoren" past er
-         precies één; dat is een zin en geen lijst. */
+       - de HELFT van de stukken wordt herkend;
+       - en minstens TWEE stukken zijn in hun geheel een waarde (een verankerd
+         patroon). In "Recessed downlight, round, with a micro-prismatic diffuser
+         for offices" passen er twee, maar allebei op een woord midden in een
+         zinsdeel; dat is een omschrijving en geen lijst. */
   function fragmentStukken(regel){
     if(!FRAG.length || /\t| {2,}/.test(regel)) return null;
     const stukken = splitsFragmenten(regel);
     if(stukken.length < 3) return null;
     if(stukken.filter(x=>x.includes(':')).length * 3 > stukken.length) return null;
     if(stukken.some(x=>x.length > 60)) return null;
-    const raak = stukken.filter(x=>FRAG.some(f=>f.p.test(x))).length;
-    return (raak >= 2 && raak * 2 >= stukken.length) ? stukken : null;
+    const raak  = stukken.filter(x=>FRAG.some(f=>f.p.test(x))).length;
+    const vast  = stukken.filter(x=>FRAG.some(f=>vastAnker(f) && f.p.test(x))).length;
+    return (vast >= 2 && raak * 2 >= stukken.length) ? stukken : null;
   }
 
   /* Bestekteksten zetten meerdere "Label: waarde"-paren op één regel met komma's

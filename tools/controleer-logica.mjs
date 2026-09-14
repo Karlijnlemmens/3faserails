@@ -242,6 +242,65 @@ function is(wat, gekregen, verwacht){
     is('dit blad laat niets liggen', r.onbekend, []);
   }
 
+  /* Hetzelfde blad in het Engels - zo levert een deel van de leveranciers aan.
+     De kopjes tellen mee: zonder "Control/dimming" als kopje valt "Type" terug op
+     het armatuurtype, en komt "Trailing edge" als Type op het blad te staan. */
+  {
+    const blad = [
+      'Electrical', 'Wattage', '8W/17W', 'Voltage', '220-240V',
+      'Frequency (Hz)', '50/60Hz',
+      'Max. luminaires per circuit breaker', 'B10: 30, B16: 47, C10: 50, C16: 80',
+      'Photometrics', 'Light source', 'LED',
+      'Luminous flux', '580/620/1220/1300lm',
+      'Luminaire efficacy', '73/78/72/76lm/W',
+      'Colour temperature', '3000/4000K', 'Colour rendering (CRI)', 'Ra>80',
+      'MacAdam', 'SDCM: 3', 'Lifetime', 'L80/B20>50,000',
+      'Light distribution', 'Direct', 'Optic', 'Glass', 'UGR', 'UGR<22/25',
+      'Photobiological safety', 'RG 1', 'ULOR (<1%)', 'Yes',
+      'Control/dimming', 'Type', 'Trailing edge',
+      'Protection', 'Protection class', 'Class II', 'IK Class', 'IK06',
+      'IP Class', 'IP65',
+      'Energy and approvals', 'Contains a light source with energy class', 'E/E/E/E',
+      'Material and finish', 'Housing', 'Aluminium',
+      'Mounting/Connection', 'Mounting', 'Pole, wall, base or ground spike, Outdoor',
+      'Model', '\u00d860', 'Cable', 'Cable 2x1mm\u00b2 5.0m',
+      'Dimensions', 'Length (mm) L', '342', 'Width (mm) W', '182',
+      'Height (mm) H', '144', 'Weight (kg) gross/net', '2.55 / 2.02',
+      'Packaging', 'Packaging dimensions (mm)', '340 x 190 x 200',
+    ].join('\n');
+    const r = lees(blad);
+    is('engels blad vult het blad', m.naarBladvelden(r.uit),
+      {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', cct:'3000/4000K',
+       dimbaar:'Ja \u2014 Trailing edge', afmetingen:'342\u00d7182 \u00d7 H144'});
+    is('Type onder Control/dimming is de dimwijze', r.uit.type, undefined);
+    is('Optic als veldnaam, niet als kopje', r.uit._optiek, 'Glass');
+    is('engels blad laat niets liggen', r.onbekend, []);
+  }
+
+  /* Een rij losse waarden in het Engels. */
+  {
+    const r = lees('600x600 mm, Visible profile ceiling version, Steel, White, Signal white (RAL9003), '
+      + 'Power supply with DALI interface, 3600 lm, 26 W, 140 lm/W, 4000 K, (0.38, 0.38) SDCM \u22643, '
+      + 'UGR19, Beam angle 90\u00b0, Micro-prismatic lens, Polystyrene, '
+      + 'IP 20/44 | Protection against fingers, IK02 | 0.2 J standard, '
+      + 'Safety class II, Plug connector, 4-pole');
+    is('engelse waardenrij vult het blad', m.naarBladvelden(r.uit),
+      {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K',
+       dimbaar:'Ja \u2014 Power supply with DALI interface', afmetingen:'600\u00d7600 mm'});
+    is('engelse klasse-aanduiding', r.uit._klasse, 'Safety class II');
+    is('engelse materialen schuiven aan', r.uit._materiaal, 'Steel, Polystyrene');
+  }
+
+  /* En de keerzijde: een Engelse zin met komma's is GEEN waardenrij. "Recessed"
+     en "prismatic" passen allebei op een patroon, maar midden in een zinsdeel -
+     daarom telt alleen een patroon dat het hele stuk beslaat. */
+  {
+    const zin = 'Recessed downlight, round, with a micro-prismatic diffuser for offices';
+    const r = lees(zin + '\nPower: 15 W');
+    is('engelse zin blijft de omschrijving', r.uit.omschrijving, zin);
+    is('en de regel eronder wordt gewoon gelezen', r.uit.vermogen, '15 W');
+  }
+
   /* Een echt label weet meer dan een patroon en wordt niet overschreven. */
   {
     const r = lees('Lichtstroom: 1650 lm\nWit, 3600 lm, 26 W, 4000 K, IP20, UGR<19');
