@@ -13,6 +13,7 @@
      Groep: Label: waarde           bestekteksten zetten de groepsnaam ervoor
      Label (W)                      eenheid in het label, kaal getal als waarde
      a, b: 1, c: 2                  bestektekst met komma's op een enkele regel
+     600x600 mm, Wit, 26 W, ...     een rij waarden zonder ook maar één label
      Ra&gt;90                     geplakt uit een webpagina, met entiteiten
 
    Wat hij NIET doet is raden. Een regel die hij niet thuis kan brengen komt in
@@ -56,6 +57,26 @@ function ontHtml(s){
     .replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(+n));
 }
 
+/* Een rij waarden zonder labels uit elkaar halen. Leveranciers zetten hun halve
+   blad soms op één regel: "600x600 mm, Staal, Wit, 3600 lm, 26 W, IP 20/44 |
+   Bescherming tegen vingers, IK02 | 0,2 J". Geknipt wordt op de komma, de
+   puntkomma en de pijp - maar NIET binnen haakjes, want "(0.38, 0.38) SDCM <=3"
+   is één waarde, en NIET tussen twee cijfers, want "0,2 J" is een getal en geen
+   twee stukken. */
+function splitsFragmenten(regel){
+  const uit=[]; let diep=0, huidig='';
+  for(let i=0;i<regel.length;i++){
+    const c=regel[i];
+    if(c==='('||c==='[') diep++;
+    else if(c===')'||c===']') diep=Math.max(0,diep-1);
+    const inGetal = c===',' && /\d/.test(regel[i-1]||'') && /\d/.test(regel[i+1]||'');
+    if(diep===0 && !inGetal && (c===','||c===';'||c==='|')){ uit.push(huidig); huidig=''; continue; }
+    huidig+=c;
+  }
+  uit.push(huidig);
+  return uit.map(x=>x.trim()).filter(Boolean);
+}
+
 /* Bouwt een lezer voor een veldenlijst.
 
    opt.veldmap  [{v:'veldnaam', l:/label-patroon/, s:/alleen in deze groep/}]
@@ -64,6 +85,15 @@ function ontHtml(s){
    opt.sectie   patroon dat een groepskop herkent ("Elektrische gegevens")
    opt.kop      true als de eerste regel de omschrijving van het armatuur is
                 (bestekteksten beginnen daarmee); levert veld 'omschrijving'
+   opt.fragmenten
+                [{v:'veldnaam', p:/patroon/, l:'label voor de melding',
+                  uit:(m,stuk)=>waarde, voeg:true, wint:true}]
+                Ronde voor een regel die alleen WAARDEN bevat, zonder labels -
+                zie de toelichting bij die ronde hieronder. `voeg` plakt een
+                tweede treffer achter de eerste ("Insteekconnector, 4-polig"),
+                `wint` laat een preciezere waarde een eerdere overschrijven
+                (RAL9003 boven "Wit"); allebei alleen binnen deze ronde, een
+                echt label wint altijd.
    opt.vrijeTekst
                 [{v:'veldnaam', p:/patroon/, l:'label voor de melding', uit:(m)=>waarde}]
                 Tweede leesronde over de lopende tekst, voor leveranciers die geen
@@ -90,6 +120,7 @@ function maak(opt){
   const kopregel = opt.kop !== false;
   const eenheidErbij = opt.eenheidUitLabel !== false;
   const VRIJ = opt.vrijeTekst || [];
+  const FRAG = opt.fragmenten || [];
 
   function pastLabel(s){
     return VELDMAP.some(x=>x.l.test(schoonLabel(s)));
@@ -102,6 +133,27 @@ function maak(opt){
     return !lijktWaarde(k) && pastLabel(k);
   }
 
+  /* Is deze regel zo'n rij losse waarden? Vier drempels, en ze zijn er alle vier
+     om hetzelfde te voorkomen: dat een gewone zin met komma's erin uit elkaar
+     getrokken wordt in plaats van als omschrijving te blijven staan.
+
+       - drie stukken of meer;
+       - nauwelijks dubbele punten, anders is het een bestektekst en hoort hij
+         bij de gewone ronde;
+       - geen stuk langer dan 60 tekens - een waarde is kort, een bijzin niet;
+       - de HELFT van de stukken wordt herkend, en minstens twee. In "Inbouw-
+         downlight, rond, met microprismatische afdekking voor kantoren" past er
+         precies één; dat is een zin en geen lijst. */
+  function fragmentStukken(regel){
+    if(!FRAG.length || /\t| {2,}/.test(regel)) return null;
+    const stukken = splitsFragmenten(regel);
+    if(stukken.length < 3) return null;
+    if(stukken.filter(x=>x.includes(':')).length * 3 > stukken.length) return null;
+    if(stukken.some(x=>x.length > 60)) return null;
+    const raak = stukken.filter(x=>FRAG.some(f=>f.p.test(x))).length;
+    return (raak >= 2 && raak * 2 >= stukken.length) ? stukken : null;
+  }
+
   function lees(tekst){
     const regels=ontHtml(tekst).split(/\r?\n/)
       /* Bestekteksten staan op een regel met komma's ertussen. Alleen knippen
@@ -110,8 +162,12 @@ function maak(opt){
       .flatMap(r=>r.split(/,\s*(?=[^,:]{2,40}:)/))
       .map(s=>s.trim()).filter(Boolean);
     const uit={}, herkend=[], bijgezet=[]; let onbekend=[];
+    /* Welke regels zijn een rij losse waarden? Die slaat de gewone ronde over -
+       ook als kopregel, want dan zou de hele rij als omschrijving eindigen. */
+    const fragRegel = regels.map(fragmentStukken);
     let sectie='';
     for(let i=0;i<regels.length;i++){
+      if(fragRegel[i]) continue;
       let label=regels[i], waarde=null;
 
       /* Kopregel van een bestektekst: de omschrijving van het armatuur zelf.
@@ -181,7 +237,47 @@ function maak(opt){
       if(uit[m.v]==null){ uit[m.v]=waarde; herkend.push({label,waarde,veld:m.v,sectie}); }
     }
 
-    /* Tweede ronde: lopende tekst.
+    /* Ronde voor de rijen losse waarden.
+
+       Niet elke leverancier levert labels. Soms is het één regel met alleen
+       waarden erop, in de volgorde van zijn eigen blad: "600x600 mm, Staal,
+       Wit, 3600 lm, 26 W, 4000 K, UGR19, IP 20/44". Daar valt niets te
+       splitsen in label en waarde - wat een stuk betekent zit in het stuk zelf.
+
+       Daarom staan hier patronen: "lm" kan alleen lichtstroom zijn, "IK02"
+       alleen slagvastheid. Wat geen patroon raakt gaat naar `onbekend`, zodat
+       de tool het kan tonen; raden doet deze ronde net zomin als de andere.
+
+       Een veld dat de gewone ronde al gevuld heeft blijft staan: een echt label
+       weet meer dan een patroon. Binnen deze ronde mag een stuk wel bij een
+       eerder stuk aanschuiven (`voeg`) of het overschrijven (`wint`). */
+    if(FRAG.length){
+      const vanLijst = new Set();
+      regels.forEach((regel, i)=>{
+        if(!fragRegel[i]) return;
+        fragRegel[i].forEach(stuk=>{
+          const r = FRAG.find(f=>f.p.test(stuk));
+          if(!r){ onbekend.push(stuk); return; }
+          const t = stuk.match(r.p);
+          let w = r.uit ? r.uit(t, stuk) : stuk;
+          w = String(w==null?'':w).trim();
+          if(!w){ onbekend.push(stuk); return; }
+          const bezet = uit[r.v]!=null, eigen = vanLijst.has(r.v);
+          if(bezet && !(eigen && (r.voeg || r.wint))){ onbekend.push(stuk); return; }
+          if(bezet && r.voeg){
+            if(uit[r.v].toLowerCase().includes(w.toLowerCase())) return;
+            w = uit[r.v] + ', ' + w;
+          }
+          uit[r.v] = w;
+          vanLijst.add(r.v);
+          const eerder = herkend.find(h=>h.veld===r.v && h.sectie==='uit de lijst');
+          if(eerder) eerder.waarde = w;
+          else herkend.push({label:r.l||r.v, waarde:w, veld:r.v, sectie:'uit de lijst'});
+        });
+      });
+    }
+
+    /* Derde ronde: lopende tekst.
 
        Lang niet elke leverancier levert een tabel. Vaak is het een verkooptekst
        met de gegevens erin verstopt, over meerdere regels afgebroken en met een
@@ -220,5 +316,5 @@ function maak(opt){
   return {lees, isLabel};
 }
 
-window.SpecLezer = {maak, lijktWaarde, schoonLabel, ontHtml};
+window.SpecLezer = {maak, lijktWaarde, schoonLabel, ontHtml, splitsFragmenten};
 })();

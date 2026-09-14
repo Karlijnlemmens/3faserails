@@ -6,7 +6,7 @@ meldt. Alle vier eindigen met afsluitcode 1 als er iets mis is.
 
 | script | wat het nakijkt |
 |---|---|
-| `node tools/controleer-logica.mjs` | de rekenkern: armatuurherkenning en de bandrasterberekening, tegen het voorbeeld uit de werkmap |
+| `node tools/controleer-logica.mjs` | de rekenkern: armatuurherkenning, de bandrasterberekening tegen het voorbeeld uit de werkmap, en het uitlezen van geplakte specificaties |
 | `node tools/controleer-suite.mjs` | wat over meerdere bestanden gelijk moet blijven: armatuurtabel, tabbladenrij, palet, geen netwerkverzoeken, gedeelde scripts |
 | `node tools/controleer-presenters.mjs` | de ingebakken presenters: lege pagina's, uitschieters in grootte, lijst en map uit de pas |
 | `node tools/pdfbaseline.mjs` + `vergelijk.mjs` | dat een wijziging niets aan de PDF's verandert (hieronder) |

@@ -36,10 +36,10 @@ function snijUit(tekst, naam){
   throw new Error('geen einde gevonden voor: ' + naam);
 }
 
-async function laadUit(bestand, namen, extra = ''){
+async function laadUit(bestand, namen, extra = '', ookUit = []){
   const bron = readFileSync(join(root, bestand), 'utf8');
   const code = namen.map(n => snijUit(bron, n)).join('\n') + '\n' + extra
-             + '\nexport {' + namen.join(', ') + '};\n';
+             + '\nexport {' + namen.concat(ookUit).join(', ') + '};\n';
   return import('data:text/javascript;base64,' + Buffer.from(code).toString('base64'));
 }
 
@@ -136,6 +136,74 @@ function is(wat, gekregen, verwacht){
   /* Een buis waarvoor die combinatie niet bestaat (TL5 bij 90+) net zo. */
   is('TL5-35W bij CRI 90+ bestaat niet',
     m.lumenOud(positie({...p7633.oud, cri:'90+'}, p7633.nieuw)), null);
+}
+
+/* ======================= specificaties uitlezen ======================= */
+{
+  /* spec-lezer.js is geen module maar een IIFE die zichzelf op window zet; hier
+     zetten we dat window zelf neer en halen de lezer er weer af. De VELDMAP en
+     FRAGMENTEN komen uit de echte template van de vergelijker. */
+  const lezer = readFileSync(join(root, 'spec-lezer.js'), 'utf8');
+  const m = await laadUit('vergelijker/index-template.html',
+    ['SECTIE', 'VELDMAP', 'FRAGMENTEN', 'parseGetal', 'mm', 'naarBladvelden'],
+    'const window = {};\n' + lezer + '\n'
+    + 'const LEZER = window.SpecLezer.maak({veldmap:VELDMAP, sectie:SECTIE, kop:true, fragmenten:FRAGMENTEN});',
+    ['LEZER']);
+  const lees = (t) => m.LEZER.lees(t);
+
+  console.log('\nspecificaties uitlezen');
+
+  /* Een gewone leverancierstabel: label en waarde, al dan niet met een kopregel
+     erboven. Die kopregel is de omschrijving van het armatuur. */
+  {
+    const r = lees('Inbouwdownlight met microprismatische afdekking voor kantoren\n'
+      + 'Vermogen: 15 W\nLichtstroom: 1650 lm\nKleurtemperatuur: 3000 K\nDimbaar: Ja, DALI');
+    is('kopregel wordt de omschrijving', r.uit.omschrijving,
+      'Inbouwdownlight met microprismatische afdekking voor kantoren');
+    is('tabel vult de velden', m.naarBladvelden(r.uit),
+      {omschrijving:'Inbouwdownlight met microprismatische afdekking voor kantoren',
+       vermogen:'15 W', lumen:'1650 lm', cct:'3000 K', dimbaar:'Ja \u2014 DALI'});
+  }
+
+  /* Een rij losse waarden zonder ook maar één label - zo levert een deel van de
+     leveranciers zijn blad aan. Dit was de aanleiding voor de fragmentronde:
+     hiervoor belandde de hele regel als omschrijving in het blad. */
+  {
+    const r = lees('600x600 mm, Visible profile ceiling version, Staal, Wit, Signaalwit (RAL9003), '
+      + 'Voedingsunit met DALI-interface, 3600 lm, 26 W, 140 lm/W, 4000 K, (0.38, 0.38) SDCM \u22643, '
+      + 'UGR19, Bundelhoek 90\u00b0, Microprismatische lens, Polystyreen, '
+      + 'IP 20/44 | Bescherming tegen vingers, bescherming tegen draden, spatwaterdicht, '
+      + 'IK02 | 0,2 J standaard, Veiligheidsklasse II, Insteekconnector, 4-polig, SC | Veiligheidskabel');
+    is('waardenrij vult het blad', m.naarBladvelden(r.uit),
+      {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K',
+       dimbaar:'Ja \u2014 Voedingsunit met DALI-interface', afmetingen:'600\u00d7600 mm'});
+    is('waardenrij wordt geen omschrijving', r.uit.omschrijving, undefined);
+    is('IP-klasse uit de rij',   r.uit._ip,   'IP 20/44');
+    is('UGR uit de rij',         r.uit._ugr,  'UGR19');
+    /* Een tweede treffer schuift aan bij de eerste in plaats van te verdwijnen. */
+    is('slagvastheid plus de energie', r.uit._ik, 'IK02, 0,2 J standaard');
+    is('aansluiting plus polen', r.uit._aansluiting, 'Insteekconnector, 4-polig');
+    /* RAL is preciezer dan "Wit" en overschrijft dat binnen dezelfde ronde. */
+    is('RAL wint van de kleurnaam', r.uit._kleur, 'Signaalwit (RAL9003)');
+    /* Wat nergens onder valt blijft zichtbaar in plaats van stilletjes te verdwijnen. */
+    is('de rest blijft zichtbaar', r.onbekend,
+      ['Bescherming tegen vingers', 'bescherming tegen draden', 'spatwaterdicht',
+       'SC', 'Veiligheidskabel']);
+  }
+
+  /* Een zin met komma's erin is geen waardenrij: die hoort de omschrijving te
+     blijven. Dat is waar de drempels in fragmentStukken() voor zijn. */
+  {
+    const zin = 'Inbouwdownlight, rond, met microprismatische afdekking voor kantoren';
+    const r = lees(zin + '\nVermogen: 15 W');
+    is('een zin met komma\'s blijft de omschrijving', r.uit.omschrijving, zin);
+  }
+
+  /* Een echt label weet meer dan een patroon en wordt niet overschreven. */
+  {
+    const r = lees('Lichtstroom: 1650 lm\nWit, 3600 lm, 26 W, 4000 K, IP20, UGR<19');
+    is('het label wint van de waardenrij', r.uit.lumen, '1650 lm');
+  }
 }
 
 /* ---------------------------------------------------------------- verslag ---- */
