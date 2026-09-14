@@ -199,6 +199,49 @@ function is(wat, gekregen, verwacht){
     is('een zin met komma\'s blijft de omschrijving', r.uit.omschrijving, zin);
   }
 
+  /* Het blad dat label en waarde om en om op een eigen regel zet - de vorm waarin
+     de meeste leveranciers hun tabel plakken. Hier hoort niets in `onbekend` te
+     eindigen: elk label op dit blad staat in de VELDMAP. */
+  {
+    const blad = [
+      'Elektrisch', 'Wattage', '8W/17W', 'Spanning', '220-240V',
+      'Frequentie (Hz)', '50/60Hz',
+      'Max. armaturen per stroomonderbreker', 'B10: 30, B16: 47, C10: 50, C16: 80',
+      'Lichttechniek', 'Soort lichtbron', 'LED',
+      'Luminous flux', '580/620/1220/1300lm',
+      'Armatuur effici\u00ebntie LED', '73/78/72/76lm/W',
+      'Kleur temperatuur', '3000/4000K', 'Kleurweergave (CRI)', 'Ra>80',
+      'MacAdams factor', 'SDCM: 3', 'Levensduur', 'L80/B20>50,000',
+      'Lichtverdeling', 'Direct', 'Optiek', 'Glas', 'UGR', 'UGR<22/25',
+      'Fotobiologische veiligheid', 'RG 1', 'ULOR (<1%)', 'Ja',
+      'Controle/dimmen', 'Type', 'Fase afsnijding',
+      'Bescherming', 'Isolatieklasse', 'Klasse II', 'IK Klasse', 'IK06',
+      'IP Klasse', 'IP65',
+      'Energie en goedkeuringen', 'Bevat een lichtbron met energieclasse', 'E/E/E/E',
+      'Materiaal en afwerking', 'Behuizing', 'Aluminium',
+      'Montage/Aansluiting', 'Montage', 'Paal, wand, sokkel of aardstaaf, Buiten',
+      'Model', '\u00d860', 'Kabel', 'Kabel 2x1mm\u00b2 5,0m',
+      'Afmetingen', 'Lengte (mm) L', '342', 'Breedte (mm) W', '182',
+      'Hoogte (mm) H', '144', 'Gewicht (kg) bruto/netto', '2.55 / 2.02',
+      'Verpakking', 'Packaging dimensions (mm)', '340 x 190 x 200',
+    ].join('\n');
+    const r = lees(blad);
+    is('label-boven-waarde vult het blad', m.naarBladvelden(r.uit),
+      {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', cct:'3000/4000K',
+       dimbaar:'Ja \u2014 Fase afsnijding', afmetingen:'342\u00d7182 \u00d7 H144'});
+    /* "Optiek" is zowel een kopje als een veldnaam; wat eronder staat beslist. */
+    is('Optiek als veldnaam, niet als kopje', r.uit._optiek, 'Glas');
+    /* "Type" telt alleen als dimwijze onder een dimsectie. */
+    is('Type onder Controle/dimmen is de dimwijze', r.uit.dimbaar, 'Fase afsnijding');
+    /* Een waarde met dubbele punten erin blijft heel: dit is \u00e9\u00e9n opgave,
+       geen vier losse paren. */
+    is('waarde met dubbele punten blijft heel', r.uit._zekering,
+      'B10: 30, B16: 47, C10: 50, C16: 80');
+    /* Het haakje is versiering: "ULOR (<1%)" is een label, geen waarde. */
+    is('haakje met cijfers maakt het nog geen waarde', r.uit._ulor, 'Ja');
+    is('dit blad laat niets liggen', r.onbekend, []);
+  }
+
   /* Een echt label weet meer dan een patroon en wordt niet overschreven. */
   {
     const r = lees('Lichtstroom: 1650 lm\nWit, 3600 lm, 26 W, 4000 K, IP20, UGR<19');

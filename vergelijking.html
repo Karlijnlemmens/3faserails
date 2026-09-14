@@ -397,12 +397,35 @@ const VELDMAP=[
   {v:'_optiek',    l:/^optiek/i},
   {v:'_levensduur',l:/^levensduur/i},
   {v:'_klasse',    l:/^(isolatieklasse|beschermingsklasse|class|klasse|protection class)$/i},
-  {v:'_aansluiting',l:/^aansluiting/i}
+  {v:'_aansluiting',l:/^aansluiting/i},
+  /* Een kabel IS de aansluiting van dit armatuur; hij hoort niet in een eigen veld. */
+  {v:'_aansluiting',l:/^(kabel|aansluitkabel|voedingskabel|snoer|cable)$/i},
+  /* Wat leveranciersbladen verder nog opgeven. Deze velden staan niet op het
+     vergelijkingsblad, maar worden wel bewaard bij de positie en getoond onder
+     "Ook bewaard" - beter dan als "niet herkend" te eindigen. */
+  {v:'_lichtbron',  l:/^(soort lichtbron|lichtbron|lichtbrontype|light source|lamp ?type)$/i},
+  {v:'_rendement',  l:/^(armatuur ?effici|lichtrendement|systeemrendement|rendement|efficacy|luminaire efficacy)/i},
+  {v:'_sdcm',       l:/^(macadam|sdcm|kleurconsistentie|binning)/i},
+  {v:'_verdeling',  l:/^(lichtverdeling|verdeling|light distribution|bundeltype)$/i},
+  {v:'_risicogroep',l:/^(fotobiologisch|photobiological|risicogroep|risk group)/i},
+  {v:'_ulor',       l:/^ulor/i},
+  {v:'_energie',    l:/energiecla|energiekla|energielabel|energy class/i},
+  {v:'_materiaal',  l:/^(behuizing|materiaal|afwerking|housing|material|body)$/i},
+  {v:'_spanning',   l:/^(spanning|netspanning|ingangsspanning|voltage|input voltage)$/i},
+  {v:'_frequentie', l:/^(frequentie|frequency)$/i},
+  {v:'_zekering',   l:/^max\.? ?(aantal )?armaturen per|stroomonderbreker|leidingbeveiliging|circuit breaker/i},
+  {v:'_gewicht',    l:/^(gewicht|weight)/i},
+  {v:'_model',      l:/^model$/i},
+  {v:'_verpakking', l:/^(packaging|verpakkingsafmeting|verpakkingsmaat)/i}
 ];
 const LABELS={_nood:'Noodlumen',_cri:'Kleurweergave',_ugr:'UGR',_ip:'IP-klasse',_ik:'IK-klasse',
   _kleur:'Kleur',_montage:'Montage',_bundel:'Lichtbundel',_optiek:'Optiek',_levensduur:'Levensduur',
   _klasse:'Isolatieklasse',_aansluiting:'Aansluiting',_diepte:'Inbouwdiepte',_cutout:'Cut-out',
-  _materiaal:'Materiaal',_rendement:'Rendement',_sdcm:'Kleurconsistentie'};
+  _materiaal:'Materiaal',_rendement:'Rendement',_sdcm:'Kleurconsistentie',
+  _lichtbron:'Lichtbron',_verdeling:'Lichtverdeling',_risicogroep:'Fotobiologische veiligheid',
+  _ulor:'ULOR',_energie:'Energieklasse',_spanning:'Spanning',_frequentie:'Frequentie',
+  _zekering:'Max. armaturen per groep',_gewicht:'Gewicht',_model:'Model',_verpakking:'Verpakking',
+  _lengte:'Lengte',_breedte:'Breedte',_hoogte:'Hoogte',_diameter:'Diameter'};
 
 /* Een rij waarden zonder labels: "600x600 mm, Staal, Wit, Voedingsunit met
    DALI-interface, 3600 lm, 26 W, 140 lm/W, 4000 K, UGR19, IP 20/44 | ...".

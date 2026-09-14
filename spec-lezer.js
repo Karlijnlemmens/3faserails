@@ -154,12 +154,26 @@ function maak(opt){
     return (raak >= 2 && raak * 2 >= stukken.length) ? stukken : null;
   }
 
+  /* Bestekteksten zetten meerdere "Label: waarde"-paren op één regel met komma's
+     ertussen; die halen we uit elkaar. Alleen knippen waar na de komma een label
+     staat dat we KENNEN - anders valt "Reflector, spot" uit elkaar, wordt
+     "L70/B50>50,000" halverwege afgekapt, en gaat een waarde als
+     "B10: 30, B16: 47, C10: 50, C16: 80" in vieren terwijl het één opgave is. */
+  function splitsLabelparen(regel){
+    const delen = regel.split(/,\s*(?=[^,:]{2,40}:)/);
+    if(delen.length < 2) return delen;
+    const uit = [delen[0]];
+    for(let i=1;i<delen.length;i++){
+      const kop = delen[i].slice(0, delen[i].indexOf(':')).trim();
+      if(pastLabel(schoonLabel(kop)) || SECTIE.test(kop)) uit.push(delen[i]);
+      else uit[uit.length-1] += ', ' + delen[i];
+    }
+    return uit;
+  }
+
   function lees(tekst){
     const regels=ontHtml(tekst).split(/\r?\n/)
-      /* Bestekteksten staan op een regel met komma's ertussen. Alleen knippen
-         waar na de komma een nieuw "Label:" begint, anders valt "Reflector, spot"
-         uit elkaar en wordt "L70/B50>50,000" halverwege afgekapt. */
-      .flatMap(r=>r.split(/,\s*(?=[^,:]{2,40}:)/))
+      .flatMap(splitsLabelparen)
       .map(s=>s.trim()).filter(Boolean);
     const uit={}, herkend=[], bijgezet=[]; let onbekend=[];
     /* Welke regels zijn een rij losse waarden? Die slaat de gewone ronde over -
@@ -216,7 +230,10 @@ function maak(opt){
          && (!isLabel(label) || volgtLabel)){
         sectie=label; continue;
       }
-      const m=(waarde!=null || !lijktWaarde(label))
+      /* Of de regel zelf een waarde is, beoordelen we op het SCHOONGEMAAKTE label -
+         net als isLabel() hierboven. Het haakje is versiering en hoort niet mee te
+         tellen: "ULOR (<1%)" is een label, ook al staan er cijfers en een < in. */
+      const m=(waarde!=null || !lijktWaarde(schoonLabel(label)))
         ? VELDMAP.find(x=>x.l.test(schoonLabel(label)) && (!x.s || x.s.test(sectie))) : null;
       if(!m){ onbekend.push(label); continue; }
       if(waarde==null){
