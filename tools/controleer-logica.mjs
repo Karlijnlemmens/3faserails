@@ -175,13 +175,16 @@ function is(wat, gekregen, verwacht){
       + 'IP 20/44 | Bescherming tegen vingers, bescherming tegen draden, spatwaterdicht, '
       + 'IK02 | 0,2 J standaard, Veiligheidsklasse II, Insteekconnector, 4-polig, SC | Veiligheidskabel');
     is('waardenrij vult het blad', m.naarBladvelden(r.uit),
-      {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K',
-       dimbaar:'Ja \u2014 Voedingsunit met DALI-interface', afmetingen:'600\u00d7600 mm'});
+      {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K', ip:'IP 20/44',
+       ik:'IK02, 0,2 J standaard', dimbaar:'Ja \u2014 Voedingsunit met DALI-interface',
+       afmetingen:'600\u00d7600 mm'});
     is('waardenrij wordt geen omschrijving', r.uit.omschrijving, undefined);
-    is('IP-klasse uit de rij',   r.uit._ip,   'IP 20/44');
+    /* IP en IK staan sinds kort op het blad zelf, niet meer alleen in de
+       bewaarde velden - vandaar dat ze hierboven in naarBladvelden() staan. */
+    is('IP-klasse uit de rij',   r.uit.ip,    'IP 20/44');
     is('UGR uit de rij',         r.uit._ugr,  'UGR19');
     /* Een tweede treffer schuift aan bij de eerste in plaats van te verdwijnen. */
-    is('slagvastheid plus de energie', r.uit._ik, 'IK02, 0,2 J standaard');
+    is('slagvastheid plus de energie', r.uit.ik, 'IK02, 0,2 J standaard');
     is('aansluiting plus polen', r.uit._aansluiting, 'Insteekconnector, 4-polig');
     /* RAL is preciezer dan "Wit" en overschrijft dat binnen dezelfde ronde. */
     is('RAL wint van de kleurnaam', r.uit._kleur, 'Signaalwit (RAL9003)');
@@ -228,7 +231,8 @@ function is(wat, gekregen, verwacht){
     const r = lees(blad);
     is('label-boven-waarde vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', cct:'3000/4000K',
-       dimbaar:'Ja \u2014 Fase afsnijding', afmetingen:'342\u00d7182 \u00d7 H144'});
+       ip:'IP65', ik:'IK06', dimbaar:'Ja \u2014 Fase afsnijding',
+       afmetingen:'342\u00d7182 \u00d7 H144'});
     /* "Optiek" is zowel een kopje als een veldnaam; wat eronder staat beslist. */
     is('Optiek als veldnaam, niet als kopje', r.uit._optiek, 'Glas');
     /* "Type" telt alleen als dimwijze onder een dimsectie. */
@@ -271,7 +275,8 @@ function is(wat, gekregen, verwacht){
     const r = lees(blad);
     is('engels blad vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', cct:'3000/4000K',
-       dimbaar:'Ja \u2014 Trailing edge', afmetingen:'342\u00d7182 \u00d7 H144'});
+       ip:'IP65', ik:'IK06', dimbaar:'Ja \u2014 Trailing edge',
+       afmetingen:'342\u00d7182 \u00d7 H144'});
     is('Type onder Control/dimming is de dimwijze', r.uit.type, undefined);
     is('Optic als veldnaam, niet als kopje', r.uit._optiek, 'Glass');
     is('engels blad laat niets liggen', r.onbekend, []);
@@ -285,8 +290,9 @@ function is(wat, gekregen, verwacht){
       + 'IP 20/44 | Protection against fingers, IK02 | 0.2 J standard, '
       + 'Safety class II, Plug connector, 4-pole');
     is('engelse waardenrij vult het blad', m.naarBladvelden(r.uit),
-      {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K',
-       dimbaar:'Ja \u2014 Power supply with DALI interface', afmetingen:'600\u00d7600 mm'});
+      {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K', ip:'IP 20/44',
+       ik:'IK02, 0.2 J standard', dimbaar:'Ja \u2014 Power supply with DALI interface',
+       afmetingen:'600\u00d7600 mm'});
     is('engelse klasse-aanduiding', r.uit._klasse, 'Safety class II');
     is('engelse materialen schuiven aan', r.uit._materiaal, 'Steel, Polystyrene');
   }
@@ -310,10 +316,10 @@ function is(wat, gekregen, verwacht){
       + 'heldere polycarbonaat afdekking met prismastructuur, 2200 lm, 19 W, '
       + '1270 \u00d7 113 \u00d7 106 mm,  IP65, IK08.');
     is('zinsvorm vult het blad', m.naarBladvelden(r.uit),
-      {type:'LED-armatuur', vermogen:'19 W', lumen:'2200 lm',
+      {type:'LED-armatuur', vermogen:'19 W', lumen:'2200 lm', ip:'IP65', ik:'IK08',
        afmetingen:'1270\u00d7113\u00d7106 mm'});
     /* De punt van de zin hoort niet bij de waarde. */
-    is('punt aan het eind gaat eraf', r.uit._ik, 'IK08');
+    is('punt aan het eind gaat eraf', r.uit.ik, 'IK08');
     /* Het materiaal staat hier in een zinsdeel, niet als los woord. */
     is('materiaal uit een zinsdeel', r.uit._materiaal, 'grijze spuitgietpolycarbonaat behuizing');
     is('optiek gaat voor materiaal', r.uit._optiek, 'heldere polycarbonaat afdekking met prismastructuur');

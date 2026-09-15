@@ -281,7 +281,7 @@ const REF_VELDEN = [
   ['leverancier','Leverancier'],['type','Type'],['artikelnummer','Artikelnummer'],
   ['omschrijving','Omschrijving'],['toepassing','Toepassing'],['vermogen','Vermogen'],
   ['cct','Kleurtemperatuur'],['lumen','Nuttige lichtstroom'],['dimbaar','Dimbaar'],
-  ['afmetingen','Afmetingen']
+  ['afmetingen','Afmetingen'],['ip','IP-klasse'],['ik','IK-klasse']
 ];
 const KENMERKEN = [['uitvoering','Uitvoering'],['kleur','Kleur'],['wattage','Wattage'],
                    ['driver','Driver'],['sensor','Sensor'],['noodverlichting','Noodverlichting']];
@@ -398,8 +398,8 @@ const VELDMAP=[
   {v:'_nood',      l:/^(noodlumen|nood lumen|emergency lumen|noodverlichting)/i},
   {v:'_cri',       l:/^(kleurweergave|cri|colour rendering)/i},
   {v:'_ugr',       l:/^ugr/i},
-  {v:'_ip',        l:/^(ip\s?(klasse|class|degree|rating|code)|beschermingsgraad|ip)$/i},
-  {v:'_ik',        l:/^(ik\s?klasse|ik\s?class|ik)$/i},
+  {v:'ip',         l:/^(ip\s?(klasse|class|degree|rating|code)|beschermingsgraad|ip)$/i},
+  {v:'ik',         l:/^(ik\s?klasse|ik\s?class|ik)$/i},
   {v:'_diameter',  l:/^diameter/i},
   {v:'_hoogte',    l:/^(hoogte|height)/i},
   {v:'_breedte',   l:/^(breedte|width)/i},
@@ -437,7 +437,9 @@ const VELDMAP=[
   {v:'_model',      l:/^model$/i},
   {v:'_verpakking', l:/^(packaging|verpakkingsafmeting|verpakkingsmaat)/i}
 ];
-const LABELS={_nood:'Noodlumen',_cri:'Kleurweergave',_ugr:'UGR',_ip:'IP-klasse',_ik:'IK-klasse',
+/* Labels voor de velden die WEL bewaard worden maar niet op het blad staan;
+   IP en IK staan er sinds kort wel op en halen hun label uit REF_VELDEN. */
+const LABELS={_nood:'Noodlumen',_cri:'Kleurweergave',_ugr:'UGR',
   _kleur:'Kleur',_montage:'Montage',_bundel:'Lichtbundel',_optiek:'Optiek',_levensduur:'Levensduur',
   _klasse:'Isolatieklasse',_aansluiting:'Aansluiting',_diepte:'Inbouwdiepte',_cutout:'Cut-out',
   _materiaal:'Materiaal',_rendement:'Rendement',_sdcm:'Kleurconsistentie',
@@ -464,9 +466,9 @@ const FRAGMENTEN=[
   {v:'cct',         l:'Kleurtemperatuur', p:/^\d{3,5}\s*k$/i},
   {v:'_levensduur', l:'Levensduur',       p:/^(?:l\d{2}b\d{2}\b.*|\d[\d.,]*\s*(?:uur|h|hours)\b.*)$/i},
   /* Vorm als anker: een code die maar één ding kan zijn. */
-  {v:'_ip',         l:'IP-klasse',        p:/^ip\s?\d{2}(?:\s?\/\s?\d{2})?$/i},
-  {v:'_ik',         l:'IK-klasse',        p:/^ik\s?\d{2}$/i},
-  {v:'_ik',         l:'IK-klasse',        p:/^\d+(?:[.,]\d+)?\s*j\b/i, voeg:true},
+  {v:'ip',          l:'IP-klasse',        p:/^ip\s?\d{2}(?:\s?\/\s?\d{2})?$/i},
+  {v:'ik',          l:'IK-klasse',        p:/^ik\s?\d{2}$/i},
+  {v:'ik',          l:'IK-klasse',        p:/^\d+(?:[.,]\d+)?\s*j\b/i, voeg:true},
   {v:'_ugr',        l:'UGR',              p:/^ugr\s*[<>=\u2264\u2265]?\s*\d+$/i},
   {v:'_cri',        l:'Kleurweergave',    p:/^(?:ra|cri)\s*[<>=\u2264\u2265]?\s*\d+$/i},
   {v:'_sdcm',       l:'Kleurconsistentie',p:/sdcm|macadam/i},
@@ -514,6 +516,8 @@ function naarBladvelden(u){
   if(u.vermogen) r.vermogen=u.vermogen;
   if(u.lumen)    r.lumen=u.lumen;
   if(u.cct)      r.cct=u.cct;
+  if(u.ip)       r.ip=u.ip;
+  if(u.ik)       r.ik=u.ik;
   /* Alleen "Ja" zeggen als de leverancier dat zegt of een dimwijze noemt.
      Staat er iets anders, dan nemen we het over zoals het er staat: bij
      "Driver 350mA apart te bestellen" is "Ja" een bewering die er niet staat. */
@@ -546,6 +550,18 @@ function bereik(o,eh){
   if(b==null||a===b) return a+eh;
   return a+'-'+b+eh;
 }
+/* De IP-klasse staat op twee plekken in de data: als tekst bij de familie, en als
+   kaal getal bij de variant. Het familieveld draagt soms de nuance die je op een
+   vergelijkingsblad wilt lezen ("IP54 kamerzijde / IP20 achterzijde"); dat is
+   rijker dan "IP54", zolang het over hetzelfde getal gaat. Wijkt de variant af,
+   dan wint de variant - die gaat over dit ene artikel. */
+function ipVan(fam,v){
+  const fi = fam && fam.ip ? String(fam.ip).trim() : '';
+  const vi = v && v.ip != null ? 'IP'+v.ip : '';
+  if(!vi) return fi;
+  return fi.indexOf(vi)===0 ? fi : vi;
+}
+
 function onzeWaarden(fam,v){
   if(!fam||!v) return {};
   const d={
@@ -558,6 +574,8 @@ function onzeWaarden(fam,v){
     cct:(fam.cct||[]).join('-')+(fam.cct?'K':''),
     lumen:bereik(v.lichtstroom_lm,'lm'),
     dimbaar: v.dimprotocol==null ? '' : (v.dimprotocol==='geen'?'Nee':v.dimprotocol.toUpperCase()),
+    ip: ipVan(fam,v),
+    ik: fam.ik || '',
     afmetingen: v.buitenmaat_mm ? ('Ø'+v.buitenmaat_mm+(zaagmaatVan(v)?' — zaagmaat Ø'+zaagmaatVan(v):''))
       : v.afmetingen_mm ? [v.afmetingen_mm.l,v.afmetingen_mm.b,v.afmetingen_mm.h].filter(Boolean).join('×')+'mm'
       : ''
