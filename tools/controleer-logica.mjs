@@ -177,7 +177,9 @@ function is(wat, gekregen, verwacht){
       + 'IK02 | 0,2 J standaard, Veiligheidsklasse II, Insteekconnector, 4-polig, SC | Veiligheidskabel');
     is('waardenrij vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K', ip:'IP 20/44',
-       ik:'IK02, 0,2 J standaard', ugr:'UGR19', bundel:'90\u00b0',
+       ik:'IK02, 0,2 J standaard', ugr:'UGR19',
+       montage:'Visible profile ceiling version', aansluiting:'Insteekconnector, 4-polig',
+       bundel:'90\u00b0',
        dimbaar:'Ja \u2014 Voedingsunit met DALI-interface', afmetingen:'600\u00d7600 mm'});
     is('waardenrij wordt geen omschrijving', r.uit.omschrijving, undefined);
     /* IP en IK staan sinds kort op het blad zelf, niet meer alleen in de
@@ -186,7 +188,7 @@ function is(wat, gekregen, verwacht){
     is('UGR uit de rij',         r.uit.ugr,   'UGR19');
     /* Een tweede treffer schuift aan bij de eerste in plaats van te verdwijnen. */
     is('slagvastheid plus de energie', r.uit.ik, 'IK02, 0,2 J standaard');
-    is('aansluiting plus polen', r.uit._aansluiting, 'Insteekconnector, 4-polig');
+    is('aansluiting plus polen', r.uit.aansluiting, 'Insteekconnector, 4-polig');
     /* RAL is preciezer dan "Wit" en overschrijft dat binnen dezelfde ronde. */
     is('RAL wint van de kleurnaam', r.uit._kleur, 'Signaalwit (RAL9003)');
     /* Wat nergens onder valt blijft zichtbaar in plaats van stilletjes te verdwijnen. */
@@ -233,6 +235,7 @@ function is(wat, gekregen, verwacht){
     is('label-boven-waarde vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', cct:'3000/4000K',
        ip:'IP65', ik:'IK06', ugr:'UGR<22/25', cri:'Ra>80',
+       montage:'Paal, wand, sokkel of aardstaaf, Buiten', aansluiting:'Kabel 2x1mm\u00b2 5,0m',
        levensduur:'L80/B20>50,000', dimbaar:'Ja \u2014 Fase afsnijding',
        afmetingen:'342\u00d7182 \u00d7 H144'});
     /* "Optiek" is zowel een kopje als een veldnaam; wat eronder staat beslist. */
@@ -278,6 +281,7 @@ function is(wat, gekregen, verwacht){
     is('engels blad vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', cct:'3000/4000K',
        ip:'IP65', ik:'IK06', ugr:'UGR<22/25', cri:'Ra>80',
+       montage:'Pole, wall, base or ground spike, Outdoor', aansluiting:'Cable 2x1mm\u00b2 5.0m',
        levensduur:'L80/B20>50,000', dimbaar:'Ja \u2014 Trailing edge',
        afmetingen:'342\u00d7182 \u00d7 H144'});
     is('Type onder Control/dimming is de dimwijze', r.uit.type, undefined);
@@ -294,7 +298,9 @@ function is(wat, gekregen, verwacht){
       + 'Safety class II, Plug connector, 4-pole');
     is('engelse waardenrij vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K', ip:'IP 20/44',
-       ik:'IK02, 0.2 J standard', ugr:'UGR19', bundel:'90\u00b0',
+       ik:'IK02, 0.2 J standard', ugr:'UGR19',
+       montage:'Visible profile ceiling version', aansluiting:'Plug connector, 4-pole',
+       bundel:'90\u00b0',
        dimbaar:'Ja \u2014 Power supply with DALI interface', afmetingen:'600\u00d7600 mm'});
     is('engelse klasse-aanduiding', r.uit._klasse, 'Safety class II');
     is('engelse materialen schuiven aan', r.uit._materiaal, 'Steel, Polystyrene');
@@ -342,6 +348,25 @@ function is(wat, gekregen, verwacht){
     const r = lees('LED paneel, 3600 lm, 26 W, 4000 K, UGR<19, Ra>80.');
     is('UGR blijft heel', r.uit.ugr, 'UGR<19');
     is('kleurweergave blijft heel', r.uit.cri, 'Ra>80');
+  }
+
+  /* Montage, aansluiting en noodverlichting staan sinds kort op het blad zelf. */
+  {
+    const blad = (t,k) => m.naarBladvelden(lees(t).uit)[k];
+    is('montage uit een tabelrij',
+      blad('\tMontage\tPaal, wand, sokkel of aardstaaf', 'montage'), 'Paal, wand, sokkel of aardstaaf');
+    is('engels mounting', blad('Mounting\tSurface', 'montage'), 'Surface');
+    is('de kabel is de aansluiting',
+      blad('Kabel\tKabel 2x1mm\u00b2 5,0m', 'aansluiting'), 'Kabel 2x1mm\u00b2 5,0m');
+    is('noodmodule', blad('Noodverlichting: Noodmodule 3 uur autotest', 'nood'),
+      'Noodmodule 3 uur autotest');
+    is('noodmodule los in een waardenrij',
+      blad('LED Downlight, 15 W, 1650 lm, IP44, Noodmodule 3 uur zelftest.', 'nood'),
+      'Noodmodule 3 uur zelftest');
+    /* "Aansturing" is hoe het vak de dimwijze noemt; die rij heet Dimbaar en
+       stond er al, dus het woord moet daarheen en niet naar een eigen veld. */
+    is('aansturing is de dimwijze',
+      blad('Controle/dimmen\nAansturing\tDALI', 'dimbaar'), 'Ja \u2014 DALI');
   }
 
   /* Het gradenteken zegt dat het om de lichtbundel gaat. */

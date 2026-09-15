@@ -272,8 +272,9 @@ const REF_VELDEN = [
   ['omschrijving','Omschrijving'],['toepassing','Toepassing'],['vermogen','Vermogen'],
   ['cct','Kleurtemperatuur'],['lumen','Nuttige lichtstroom'],
   ['bundel','Lichtbundel'],['ugr','UGR'],['cri','Kleurweergave'],
-  ['levensduur','Levensduur'],['dimbaar','Dimbaar'],
-  ['afmetingen','Afmetingen'],['ip','IP-klasse'],['ik','IK-klasse']
+  ['levensduur','Levensduur'],['dimbaar','Dimbaar'],['aansluiting','Aansluiting'],
+  ['afmetingen','Afmetingen'],['montage','Montage'],['ip','IP-klasse'],['ik','IK-klasse'],
+  ['nood','Noodverlichting']
 ];
 const KENMERKEN = [['uitvoering','Uitvoering'],['kleur','Kleur'],['wattage','Wattage'],
                    ['driver','Driver'],['sensor','Sensor'],['noodverlichting','Noodverlichting']];
@@ -382,12 +383,12 @@ const VELDMAP=[
   {v:'vermogen',   l:/^(systeem\s?wattage|wattage|vermogen|opgenomen vermogen|system power|power|max(imum)? bulb wattage)$/i},
   {v:'lumen',      l:/^(luminous flux|lichtstroom|nuttige lichtstroom|armatuurlichtstroom|lichtstroom armatuur|output)$/i},
   {v:'cct',        l:/^(kleur\s?temperatuur|kleurtemperatuur|colour temperature|color temperature|cct)$/i},
-  {v:'dimbaar',    l:/^(type|dimmen|dimming|besturing|sturing)$/i, s:/controle|dim/i},
-  {v:'dimbaar',    l:/^(dimbaar|dimbaarheid|dimmable)$/i},
+  {v:'dimbaar',    l:/^(type|dimmen|dimming|aansturing|besturing|sturing)$/i, s:/controle|dim/i},
+  {v:'dimbaar',    l:/^(dimbaar|dimbaarheid|dimmable|aansturing)$/i},
   /* "Type" zonder dimsectie is het soort armatuur, niet de dimwijze.
      Staat na de regel hierboven, zodat die eerst aan bod komt. */
   {v:'type',       l:/^(type|producttype|armatuurtype|product ?type)$/i},
-  {v:'_nood',      l:/^(noodlumen|nood lumen|emergency lumen|noodverlichting)/i},
+  {v:'nood',       l:/^(noodverlichting|noodmodule|noodlumen|nood lumen|emergency|nood)/i},
   {v:'cri',        l:/^(kleurweergave|cri|colour rendering|color rendering|ra)$/i},
   {v:'ugr',        l:/^ugr/i},
   {v:'ip',         l:/^(ip[\s-]?(klasse|class|degree|rating|code)|beschermingsgraad|ip)$/i},
@@ -406,14 +407,14 @@ const VELDMAP=[
   {v:'afmetingen', l:/^(afmetingen|afmeting|maten|buitenmaat|buitenafmeting|dimensions|overall dimensions|outer dimensions|size)$/i},
   {v:'_diepte',    l:/^(inbouwdiepte|recess(ed)? depth|installation depth)/i},
   {v:'_kleur',     l:/^(kleur|colou?r)$/i},
-  {v:'_montage',   l:/^(montage|mounting)$/i},
+  {v:'montage',    l:/^(montage|montagewijze|bevestiging|mounting|installation)$/i},
   {v:'bundel',     l:/^(lichtbundel|bundelhoek|stralingshoek|uitstralingshoek|spreidingshoek|openingshoek|beam)/i},
   {v:'_optiek',    l:/^(optiek|optic|optics|lens)$/i},
   {v:'levensduur', l:/^(levensduur|lifetime|life ?time|lifespan|service life|rated life)/i},
   {v:'_klasse',    l:/^(isolatieklasse|beschermingsklasse|class|klasse|protection class)$/i},
-  {v:'_aansluiting',l:/^aansluiting/i},
+  {v:'aansluiting',l:/^aansluiting/i},
   /* Een kabel IS de aansluiting van dit armatuur; hij hoort niet in een eigen veld. */
-  {v:'_aansluiting',l:/^(kabel|aansluitkabel|voedingskabel|snoer|cable)$/i},
+  {v:'aansluiting',l:/^(kabel|aansluitkabel|voedingskabel|snoer|cable|connection)$/i},
   /* Wat leveranciersbladen verder nog opgeven. Deze velden staan niet op het
      vergelijkingsblad, maar worden wel bewaard bij de positie en getoond onder
      "Ook bewaard" - beter dan als "niet herkend" te eindigen. */
@@ -434,9 +435,9 @@ const VELDMAP=[
 ];
 /* Labels voor de velden die WEL bewaard worden maar niet op het blad staan;
    IP en IK staan er sinds kort wel op en halen hun label uit REF_VELDEN. */
-const LABELS={_nood:'Noodlumen',
-  _kleur:'Kleur',_montage:'Montage',_optiek:'Optiek',
-  _klasse:'Isolatieklasse',_aansluiting:'Aansluiting',_diepte:'Inbouwdiepte',_cutout:'Cut-out',
+const LABELS={
+  _kleur:'Kleur',_optiek:'Optiek',
+  _klasse:'Isolatieklasse',_diepte:'Inbouwdiepte',_cutout:'Cut-out',
   _materiaal:'Materiaal',_rendement:'Rendement',_sdcm:'Kleurconsistentie',
   _lichtbron:'Lichtbron',_verdeling:'Lichtverdeling',_risicogroep:'Fotobiologische veiligheid',
   _ulor:'ULOR',_energie:'Energieklasse',_spanning:'Spanning',_frequentie:'Frequentie',
@@ -484,14 +485,17 @@ const FRAGMENTEN=[
   {v:'bundel',      l:'Lichtbundel',      p:/^\d{1,3}(?:\s*-\s*\d{1,3})?\s*\u00b0$/},
   {v:'_klasse',     l:'Isolatieklasse',   p:/^(?:veiligheids|isolatie|beschermings)?klasse\s*(?:I{1,3}|[123])$/i},
   {v:'_klasse',     l:'Isolatieklasse',   p:/^(?:safety |protection |insulation )?class\s*(?:I{1,3}|[123])$/i},
-  {v:'_aansluiting',l:'Aansluiting',      p:/\d+[-\s]?(?:polig|pole|pins?)$/i, voeg:true},
-  {v:'_aansluiting',l:'Aansluiting',      p:/(connector|steker|stekker|aansluitklem|klemmenblok|wago|gst\s?18|doorkoppel)/i},
+  {v:'aansluiting', l:'Aansluiting',      p:/\d+[-\s]?(?:polig|pole|pins?)$/i, voeg:true},
+  {v:'aansluiting', l:'Aansluiting',      p:/(connector|steker|stekker|aansluitklem|klemmenblok|wago|gst\s?18|doorkoppel|doorvoerbedrading)/i},
   /* Woorden als anker: een begrip dat maar bij één veld hoort. */
+  /* Een noodmodule staat in zo'n rij als eigen stuk: "..., Noodmodule 3 uur
+     zelftest, ...". Het woord begint het stuk, dus dit is een hele waarde. */
+  {v:'nood',        l:'Noodverlichting',  p:/^(?:\+\s*)?(?:nood(?:module|verlichting|unit|armatuur)|emergency)\b/i},
   {v:'dimbaar',     l:'Dimmen',           p:/\b(dali|casambi|zigbee|bluetooth|triac|dim(?:baar|ming|bar|mable)?|[01]-?10\s?v|push|fase(?:af|aan)snijding|trailing edge|leading edge|mains dim|aan-?uit|on\/off|niet dimbaar|non-?dim)\b/i},
   {v:'_optiek',     l:'Optiek',           p:/(prisma|opaal|opal|reflector|lens|diffus|louvre|lamel|darklight|honingraat|satine|frosted|gesatineerd)/i},
   {v:'_kleur',      l:'Kleur',            p:/ral\s?\d{3,4}/i, wint:true},
   {v:'_kleur',      l:'Kleur',            p:/^(?:signaal|verkeers|zuiver|gebroken)?(wit|zwart|grijs|antraciet|zilver|goud|brons|white|black|gr[ae]y|silver)$/i},
-  {v:'_montage',    l:'Montage',          p:/\b(inbouw|opbouw|pendel|recessed|surface|ceiling|plafond|wand|wall|suspended|trunking)\b/i},
+  {v:'montage',     l:'Montage',          p:/\b(inbouw|opbouw|pendel|recessed|surface|ceiling|plafond|wand|wall|suspended|trunking)\b/i},
   {v:'_materiaal',  l:'Materiaal',        p:/^(staal|steel|aluminium|rvs|stainless|kunststof|plastics?|polycarbonaa?t|polycarbonate|polystyr(?:een|ene)|acryl|pmma|abs|glas|glass)\b/i, voeg:true},
   /* En als het materiaal in een zinsdeel staat: "grijze spuitgietpolycarbonaat
      behuizing". Niet verankerd, dus dit stuk telt niet mee als bewijs dat de
@@ -532,6 +536,9 @@ function naarBladvelden(u){
   if(u.cri)      r.cri=u.cri;
   /* "90 °" en "90°" zijn hetzelfde getal; de spatie ervoor komt uit de tabel van
      de leverancier en staat naast onze eigen kolom raar. */
+  if(u.montage)  r.montage=u.montage;
+  if(u.aansluiting) r.aansluiting=u.aansluiting;
+  if(u.nood)     r.nood=u.nood;
   if(u.bundel)   r.bundel=String(u.bundel).replace(/\s+°/,'°');
   if(u.levensduur) r.levensduur=u.levensduur;
   /* Alleen "Ja" zeggen als de leverancier dat zegt of een dimwijze noemt.
@@ -607,6 +614,28 @@ function bundelVan(v){
   return m ? m[1]+'\u00b0' : '';
 }
 
+/* De montagewijze staat bij de familie als lijst ("inbouw", "opbouw") en bij de
+   variant als uitvoering. Noemt die uitvoering één van die wijzen, dan gaat het
+   over dit ene artikel en telt alleen die; "standaard" en "verdiept" zijn
+   inbouwdieptes en geen montagewijzen, dus die laten de lijst van de familie staan. */
+function montageVan(fam,v){
+  const lijst = (fam && fam.montagewijzen) || [];
+  if(!lijst.length) return '';
+  const u = v && v.uitvoering ? String(v.uitvoering).toLowerCase() : '';
+  const raak = lijst.find(x=>String(x).toLowerCase()===u);
+  const uit = (raak ? [raak] : lijst).join(', ');
+  return uit.charAt(0).toUpperCase() + uit.slice(1);
+}
+
+/* Noodverlichting heeft ook geen eigen veld; waar hij er is staat hij achter een
+   + in de omschrijving van de variant: "+ Noodmodule 3uur zelftest & manueel".
+   Een variant zonder noodmodule levert LEEG op en niet "Nee": de data zegt niet
+   dat er geen is, hij zegt er niets over. */
+function noodVan(v){
+  const m = /(noodmodule[^+]*)/i.exec((v && v.omschrijving) || '');
+  return m ? m[1].trim() : '';
+}
+
 function onzeWaarden(fam,v){
   if(!fam||!v) return {};
   const d={
@@ -621,6 +650,11 @@ function onzeWaarden(fam,v){
     dimbaar: v.dimprotocol==null ? '' : (v.dimprotocol==='geen'?'Nee':v.dimprotocol.toUpperCase()),
     ip: ipVan(fam,v),
     ik: fam.ik || '',
+    montage: montageVan(fam,v),
+    /* De aansluiting staat niet in de productdata - geen veld, en niets in de
+       omschrijving dat er betrouwbaar uit te lezen valt. Die kolom blijft leeg
+       en wordt met de hand ingevuld, net als Toepassing. */
+    nood: noodVan(v),
     bundel: bundelVan(v),
     ugr: ugrVan(fam),
     cri: criVan(fam),
@@ -677,8 +711,8 @@ function bouwPlakblok(p){
         s.append(el('span','paste-waarde',rest.map(h=>(LABELS[h.veld]||h.label)+': '+h.waarde).join(' · ')));
         tab.append(s);
       }
-      if(r.uit._nood) tab.append(el('div','hint warn',
-        'Deze referentie heeft noodverlichting ('+r.uit._nood+'). Kies aan onze kant een variant met noodmodule of splits de positie.'));
+      if(r.uit.nood) tab.append(el('div','hint warn',
+        'Deze referentie heeft noodverlichting ('+r.uit.nood+'). Kies aan onze kant een variant met noodmodule of splits de positie.'));
       if(r.uit._cutout) tab.append(el('div','hint',
         'Cut-out Ø'+mm(r.uit._cutout)+' mm wordt overgenomen als bestaand gat voor de renovatiecontrole.'));
       if(r.onbekend.length){
