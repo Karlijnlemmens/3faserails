@@ -111,7 +111,11 @@ function pdfTxt(s){
   s=String(s==null?'':s).replace(/\u2014|\u2013/g,'-').replace(/\u00d7/g,'x').replace(/\u2192/g,'->')
     .replace(/\u201c|\u201d/g,'"').replace(/\u2018|\u2019/g,"'")
     .replace(/\u00ab|\u00bb/g,'"')
-    .replace(/\u26a1/g,'').replace(/\uff0b/g,'+').replace(/\u2212/g,'-');
+    .replace(/\u26a1/g,'').replace(/\uff0b/g,'+').replace(/\u2212/g,'-')
+    /* Lichttechniek schrijft zich met <= en >=: "UGR \u226419", "Ra \u226580",
+       "SDCM \u22643". Het scherm mag het echte teken tonen; hier moet het terug
+       naar ASCII, want alles boven tekencode 255 wordt hieronder een vraagteken. */
+    .replace(/\u2264/g,'<=').replace(/\u2265/g,'>=').replace(/\u2248/g,'~');
   let o='';
   for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); o += String.fromCharCode(c>255?63:c); }
   return o;

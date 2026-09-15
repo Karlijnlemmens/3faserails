@@ -147,8 +147,9 @@ function is(wat, gekregen, verwacht){
   const m = await laadUit('vergelijker/index-template.html',
     ['SECTIE', 'VELDMAP', 'FRAGMENTEN', 'parseGetal', 'mm', 'naarBladvelden'],
     'const window = {};\n' + lezer + '\n'
-    + 'const LEZER = window.SpecLezer.maak({veldmap:VELDMAP, sectie:SECTIE, kop:true, fragmenten:FRAGMENTEN});',
-    ['LEZER']);
+    + 'const LEZER = window.SpecLezer.maak({veldmap:VELDMAP, sectie:SECTIE, kop:true, fragmenten:FRAGMENTEN});\n'
+    + 'const ONTHTML = window.SpecLezer.ontHtml;',
+    ['LEZER', 'ONTHTML']);
   const lees = (t) => m.LEZER.lees(t);
 
   console.log('\nspecificaties uitlezen');
@@ -176,13 +177,13 @@ function is(wat, gekregen, verwacht){
       + 'IK02 | 0,2 J standaard, Veiligheidsklasse II, Insteekconnector, 4-polig, SC | Veiligheidskabel');
     is('waardenrij vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K', ip:'IP 20/44',
-       ik:'IK02, 0,2 J standaard', dimbaar:'Ja \u2014 Voedingsunit met DALI-interface',
-       afmetingen:'600\u00d7600 mm'});
+       ik:'IK02, 0,2 J standaard', ugr:'UGR19',
+       dimbaar:'Ja \u2014 Voedingsunit met DALI-interface', afmetingen:'600\u00d7600 mm'});
     is('waardenrij wordt geen omschrijving', r.uit.omschrijving, undefined);
     /* IP en IK staan sinds kort op het blad zelf, niet meer alleen in de
        bewaarde velden - vandaar dat ze hierboven in naarBladvelden() staan. */
     is('IP-klasse uit de rij',   r.uit.ip,    'IP 20/44');
-    is('UGR uit de rij',         r.uit._ugr,  'UGR19');
+    is('UGR uit de rij',         r.uit.ugr,   'UGR19');
     /* Een tweede treffer schuift aan bij de eerste in plaats van te verdwijnen. */
     is('slagvastheid plus de energie', r.uit.ik, 'IK02, 0,2 J standaard');
     is('aansluiting plus polen', r.uit._aansluiting, 'Insteekconnector, 4-polig');
@@ -231,8 +232,8 @@ function is(wat, gekregen, verwacht){
     const r = lees(blad);
     is('label-boven-waarde vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', cct:'3000/4000K',
-       ip:'IP65', ik:'IK06', dimbaar:'Ja \u2014 Fase afsnijding',
-       afmetingen:'342\u00d7182 \u00d7 H144'});
+       ip:'IP65', ik:'IK06', ugr:'UGR<22/25', cri:'Ra>80',
+       dimbaar:'Ja \u2014 Fase afsnijding', afmetingen:'342\u00d7182 \u00d7 H144'});
     /* "Optiek" is zowel een kopje als een veldnaam; wat eronder staat beslist. */
     is('Optiek als veldnaam, niet als kopje', r.uit._optiek, 'Glas');
     /* "Type" telt alleen als dimwijze onder een dimsectie. */
@@ -275,8 +276,8 @@ function is(wat, gekregen, verwacht){
     const r = lees(blad);
     is('engels blad vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', cct:'3000/4000K',
-       ip:'IP65', ik:'IK06', dimbaar:'Ja \u2014 Trailing edge',
-       afmetingen:'342\u00d7182 \u00d7 H144'});
+       ip:'IP65', ik:'IK06', ugr:'UGR<22/25', cri:'Ra>80',
+       dimbaar:'Ja \u2014 Trailing edge', afmetingen:'342\u00d7182 \u00d7 H144'});
     is('Type onder Control/dimming is de dimwijze', r.uit.type, undefined);
     is('Optic als veldnaam, niet als kopje', r.uit._optiek, 'Glass');
     is('engels blad laat niets liggen', r.onbekend, []);
@@ -291,8 +292,8 @@ function is(wat, gekregen, verwacht){
       + 'Safety class II, Plug connector, 4-pole');
     is('engelse waardenrij vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K', ip:'IP 20/44',
-       ik:'IK02, 0.2 J standard', dimbaar:'Ja \u2014 Power supply with DALI interface',
-       afmetingen:'600\u00d7600 mm'});
+       ik:'IK02, 0.2 J standard', ugr:'UGR19',
+       dimbaar:'Ja \u2014 Power supply with DALI interface', afmetingen:'600\u00d7600 mm'});
     is('engelse klasse-aanduiding', r.uit._klasse, 'Safety class II');
     is('engelse materialen schuiven aan', r.uit._materiaal, 'Steel, Polystyrene');
   }
@@ -324,6 +325,19 @@ function is(wat, gekregen, verwacht){
     is('materiaal uit een zinsdeel', r.uit._materiaal, 'grijze spuitgietpolycarbonaat behuizing');
     is('optiek gaat voor materiaal', r.uit._optiek, 'heldere polycarbonaat afdekking met prismastructuur');
     is('zinsvorm laat niets liggen', r.onbekend, []);
+  }
+
+  /* < en > op dezelfde regel zijn geen HTML. "UGR<19, Ra>80" werd "UGR80":
+     alles tussen de tekens gold als tag. Een tag begint met een letter of een /. */
+  {
+    is('< en > op \u00e9\u00e9n regel zijn geen tag',
+      m.ONTHTML('UGR<19, Ra>80.'), 'UGR<19, Ra>80.');
+    /* Echte opmaak gaat er wel uit - zo komt het binnen uit een webpagina. */
+    is('echte opmaak gaat er wel uit',
+      m.ONTHTML('<span class="w">50.000 uur</span>'), '50.000 uur');
+    const r = lees('LED paneel, 3600 lm, 26 W, 4000 K, UGR<19, Ra>80.');
+    is('UGR blijft heel', r.uit.ugr, 'UGR<19');
+    is('kleurweergave blijft heel', r.uit.cri, 'Ra>80');
   }
 
   /* Een echt label weet meer dan een patroon en wordt niet overschreven. */

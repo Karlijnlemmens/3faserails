@@ -51,7 +51,11 @@ function schoonLabel(s){
    andersom zou &lt;b&gt; als een echte tag behandeld worden. */
 function ontHtml(s){
   return String(s||'')
-    .replace(/<[^>]{0,400}>/g,'')
+    /* Alleen wat er ECHT als tag uitziet: < gevolgd door een letter of een /,
+       en zonder nog een < ertussen. Zonder die eis eet "UGR<19, Ra>80" zichzelf
+       op - dan geldt "<19, Ra>" als tag en blijft "UGR80" over. Zo'n regel komt
+       gewoon op een leveranciersblad voor. */
+    .replace(/<\/?[a-zA-Z][^<>]{0,400}>/g,'')
     .replace(/&(lt|gt|amp|quot|apos|nbsp|#39);/g,
       m=>({'&lt;':'<','&gt;':'>','&amp;':'&','&quot;':'"','&apos;':"'",'&#39;':"'",'&nbsp;':' '}[m]))
     .replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(+n));
