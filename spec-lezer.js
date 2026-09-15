@@ -74,7 +74,11 @@ function splitsFragmenten(regel){
     huidig+=c;
   }
   uit.push(huidig);
-  return uit.map(x=>x.trim()).filter(Boolean);
+  /* De punt aan het eind van een stuk is de punt van de ZIN: een rij waarden
+     eindigt vaak op "... IP65, IK08." en dan is het laatste stuk "IK08." - dat
+     past nergens meer op. Een punt tussen cijfers (2.55) blijft staan, want die
+     hoort bij het getal. */
+  return uit.map(x=>x.trim().replace(/\s*\.$/,'').trim()).filter(Boolean);
 }
 
 /* Bouwt een lezer voor een veldenlijst.
@@ -156,7 +160,11 @@ function maak(opt){
          for offices" passen er twee, maar allebei op een woord midden in een
          zinsdeel; dat is een omschrijving en geen lijst. */
   function fragmentStukken(regel){
-    if(!FRAG.length || /\t| {2,}/.test(regel)) return null;
+    /* Alleen een TAB wijst op een geplakte tabel. Een rij spaties deed dat eerst
+       ook, maar die zit net zo goed per ongeluk in een waardenrij ("... mm,  IP65")
+       en daar viel de hele regel dan op stuk. De drempels hieronder houden een
+       echte tabelregel toch al tegen: die levert één stuk op, geen drie. */
+    if(!FRAG.length || /\t/.test(regel)) return null;
     const stukken = splitsFragmenten(regel);
     if(stukken.length < 3) return null;
     if(stukken.filter(x=>x.includes(':')).length * 3 > stukken.length) return null;

@@ -301,6 +301,25 @@ function is(wat, gekregen, verwacht){
     is('en de regel eronder wordt gewoon gelezen', r.uit.vermogen, '15 W');
   }
 
+  /* Een waardenrij zoals hij echt binnenkomt: als een zin getypt, met een punt
+     erachter en een dubbele spatie er per ongeluk in. Allebei lieten ze de hele
+     regel eerst op stuk vallen - de dubbele spatie omdat die voor een geplakte
+     tabelregel doorging, de punt omdat "IK08." nergens meer op past. */
+  {
+    const r = lees('LED-armatuur, grijze spuitgietpolycarbonaat behuizing, '
+      + 'heldere polycarbonaat afdekking met prismastructuur, 2200 lm, 19 W, '
+      + '1270 \u00d7 113 \u00d7 106 mm,  IP65, IK08.');
+    is('zinsvorm vult het blad', m.naarBladvelden(r.uit),
+      {type:'LED-armatuur', vermogen:'19 W', lumen:'2200 lm',
+       afmetingen:'1270\u00d7113\u00d7106 mm'});
+    /* De punt van de zin hoort niet bij de waarde. */
+    is('punt aan het eind gaat eraf', r.uit._ik, 'IK08');
+    /* Het materiaal staat hier in een zinsdeel, niet als los woord. */
+    is('materiaal uit een zinsdeel', r.uit._materiaal, 'grijze spuitgietpolycarbonaat behuizing');
+    is('optiek gaat voor materiaal', r.uit._optiek, 'heldere polycarbonaat afdekking met prismastructuur');
+    is('zinsvorm laat niets liggen', r.onbekend, []);
+  }
+
   /* Een echt label weet meer dan een patroon en wordt niet overschreven. */
   {
     const r = lees('Lichtstroom: 1650 lm\nWit, 3600 lm, 26 W, 4000 K, IP20, UGR<19');

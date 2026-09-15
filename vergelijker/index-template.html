@@ -471,7 +471,7 @@ const FRAGMENTEN=[
   {v:'_cri',        l:'Kleurweergave',    p:/^(?:ra|cri)\s*[<>=\u2264\u2265]?\s*\d+$/i},
   {v:'_sdcm',       l:'Kleurconsistentie',p:/sdcm|macadam/i},
   {v:'afmetingen',  l:'Afmetingen',       p:/^(?:afmeting(?:en)?\s*)?(?:\u00d8\s*\d[\d.,]*|\d[\d.,]*\s*[x\u00d7*]\s*\d[\d.,]*(?:\s*[x\u00d7*]\s*\d[\d.,]*)?)\s*(?:mm|cm)?$/i,
-                    uit:(t,stuk)=>stuk.replace(/\s*[x*]\s*/g,'\u00d7')},
+                    uit:(t,stuk)=>stuk.replace(/\s*[x\u00d7*]\s*/gi,'\u00d7')},
   {v:'_bundel',     l:'Lichtbundel',      p:/^(?:bundelhoek|stralingshoek|lichtbundel|beam ?angle)\s*:?\s*(\d[\d.,]*\s*\u00b0?)$/i, uit:t=>t[1]},
   {v:'_bundel',     l:'Lichtbundel',      p:/^\d{1,3}\s*\u00b0$/},
   {v:'_klasse',     l:'Isolatieklasse',   p:/^(?:veiligheids|isolatie|beschermings)?klasse\s*(?:I{1,3}|[123])$/i},
@@ -485,6 +485,17 @@ const FRAGMENTEN=[
   {v:'_kleur',      l:'Kleur',            p:/^(?:signaal|verkeers|zuiver|gebroken)?(wit|zwart|grijs|antraciet|zilver|goud|brons|white|black|gr[ae]y|silver)$/i},
   {v:'_montage',    l:'Montage',          p:/\b(inbouw|opbouw|pendel|recessed|surface|ceiling|plafond|wand|wall|suspended|trunking)\b/i},
   {v:'_materiaal',  l:'Materiaal',        p:/^(staal|steel|aluminium|rvs|stainless|kunststof|plastics?|polycarbonaa?t|polycarbonate|polystyr(?:een|ene)|acryl|pmma|abs|glas|glass)\b/i, voeg:true},
+  /* En als het materiaal in een zinsdeel staat: "grijze spuitgietpolycarbonaat
+     behuizing". Niet verankerd, dus dit stuk telt niet mee als bewijs dat de
+     regel een waardenrij is - het pakt ook een woord midden in een zin. */
+  {v:'_materiaal',  l:'Materiaal',        p:/(polycarbona|polystyr|aluminium|staal|steel|rvs|kunststof|acryl|pmma|glas|glass|abs)/i, voeg:true},
+  /* Het soort armatuur, als het stuk verder niets anders is: "LED-armatuur",
+     "LED downlight". Staat achteraan, zodat een stuk dat preciezer is (de optiek,
+     de montagewijze) eerst aan bod komt. anker:false: dit is een soortnaam en
+     geen gemeten waarde, dus het telt niet mee als bewijs dat de regel een
+     waardenrij is - anders zou "Downlight, rond, met ..." er al een worden. */
+  {v:'type',        l:'Type', anker:false,
+   p:/^(?:led[\s-]?)?(armatuur|down-?light|paneel|panel|spot|luminaire|bollard|sokkelarmatuur|wandarmatuur|plafonni\u00e8re|plafonniere|pendelarmatuur|gevelarmatuur|breedstraler|schijnwerper|floodlight|highbay|lichtlijn|inbouwspot|opbouwarmatuur|tl-?armatuur)$/i},
 ];
 
 function mm(s){const n=parseGetal(s);return n==null?null:Math.round(n)}
