@@ -271,7 +271,7 @@ const REF_VELDEN = [
   ['leverancier','Leverancier'],['type','Type'],['artikelnummer','Artikelnummer'],
   ['omschrijving','Omschrijving'],['toepassing','Toepassing'],['vermogen','Vermogen'],
   ['cct','Kleurtemperatuur'],['lumen','Nuttige lichtstroom'],
-  ['ugr','UGR'],['cri','Kleurweergave'],['dimbaar','Dimbaar'],
+  ['ugr','UGR'],['cri','Kleurweergave'],['levensduur','Levensduur'],['dimbaar','Dimbaar'],
   ['afmetingen','Afmetingen'],['ip','IP-klasse'],['ik','IK-klasse']
 ];
 const KENMERKEN = [['uitvoering','Uitvoering'],['kleur','Kleur'],['wattage','Wattage'],
@@ -408,7 +408,7 @@ const VELDMAP=[
   {v:'_montage',   l:/^(montage|mounting)$/i},
   {v:'_bundel',    l:/^(lichtbundel|bundelhoek|beam|stralingshoek)/i},
   {v:'_optiek',    l:/^(optiek|optic|optics|lens)$/i},
-  {v:'_levensduur',l:/^(levensduur|lifetime|life ?time|lifespan|service life|rated life)/i},
+  {v:'levensduur', l:/^(levensduur|lifetime|life ?time|lifespan|service life|rated life)/i},
   {v:'_klasse',    l:/^(isolatieklasse|beschermingsklasse|class|klasse|protection class)$/i},
   {v:'_aansluiting',l:/^aansluiting/i},
   /* Een kabel IS de aansluiting van dit armatuur; hij hoort niet in een eigen veld. */
@@ -434,7 +434,7 @@ const VELDMAP=[
 /* Labels voor de velden die WEL bewaard worden maar niet op het blad staan;
    IP en IK staan er sinds kort wel op en halen hun label uit REF_VELDEN. */
 const LABELS={_nood:'Noodlumen',
-  _kleur:'Kleur',_montage:'Montage',_bundel:'Lichtbundel',_optiek:'Optiek',_levensduur:'Levensduur',
+  _kleur:'Kleur',_montage:'Montage',_bundel:'Lichtbundel',_optiek:'Optiek',
   _klasse:'Isolatieklasse',_aansluiting:'Aansluiting',_diepte:'Inbouwdiepte',_cutout:'Cut-out',
   _materiaal:'Materiaal',_rendement:'Rendement',_sdcm:'Kleurconsistentie',
   _lichtbron:'Lichtbron',_verdeling:'Lichtverdeling',_risicogroep:'Fotobiologische veiligheid',
@@ -458,7 +458,7 @@ const FRAGMENTEN=[
   {v:'lumen',       l:'Lichtstroom',      p:/^\d[\d.,]*\s*(?:lm|lumen)$/i},
   {v:'vermogen',    l:'Vermogen',         p:/^\d[\d.,]*\s*(?:w|watt)$/i},
   {v:'cct',         l:'Kleurtemperatuur', p:/^\d{3,5}\s*k$/i},
-  {v:'_levensduur', l:'Levensduur',       p:/^(?:l\d{2}b\d{2}\b.*|\d[\d.,]*\s*(?:uur|h|hours)\b.*)$/i},
+  {v:'levensduur',  l:'Levensduur',       p:/^(?:l\d{2}b\d{2}\b.*|\d[\d.,]*\s*(?:uur|h|hours)\b.*)$/i},
   /* Vorm als anker: een code die maar één ding kan zijn. */
   {v:'ip',          l:'IP-klasse',        p:/^ip\s?\d{2}(?:\s?\/\s?\d{2})?$/i},
   {v:'ik',          l:'IK-klasse',        p:/^ik\s?\d{2}$/i},
@@ -526,6 +526,7 @@ function naarBladvelden(u){
   if(u.ik)       r.ik=u.ik;
   if(u.ugr)      r.ugr=u.ugr;
   if(u.cri)      r.cri=u.cri;
+  if(u.levensduur) r.levensduur=u.levensduur;
   /* Alleen "Ja" zeggen als de leverancier dat zegt of een dimwijze noemt.
      Staat er iets anders, dan nemen we het over zoals het er staat: bij
      "Driver 350mA apart te bestellen" is "Ja" een bewering die er niet staat. */
@@ -605,6 +606,7 @@ function onzeWaarden(fam,v){
     ik: fam.ik || '',
     ugr: ugrVan(fam),
     cri: criVan(fam),
+    levensduur: fam.levensduur || '',
     afmetingen: v.buitenmaat_mm ? ('Ø'+v.buitenmaat_mm+(zaagmaatVan(v)?' — zaagmaat Ø'+zaagmaatVan(v):''))
       : v.afmetingen_mm ? [v.afmetingen_mm.l,v.afmetingen_mm.b,v.afmetingen_mm.h].filter(Boolean).join('×')+'mm'
       : ''

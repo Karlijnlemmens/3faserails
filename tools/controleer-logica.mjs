@@ -233,7 +233,8 @@ function is(wat, gekregen, verwacht){
     is('label-boven-waarde vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', cct:'3000/4000K',
        ip:'IP65', ik:'IK06', ugr:'UGR<22/25', cri:'Ra>80',
-       dimbaar:'Ja \u2014 Fase afsnijding', afmetingen:'342\u00d7182 \u00d7 H144'});
+       levensduur:'L80/B20>50,000', dimbaar:'Ja \u2014 Fase afsnijding',
+       afmetingen:'342\u00d7182 \u00d7 H144'});
     /* "Optiek" is zowel een kopje als een veldnaam; wat eronder staat beslist. */
     is('Optiek als veldnaam, niet als kopje', r.uit._optiek, 'Glas');
     /* "Type" telt alleen als dimwijze onder een dimsectie. */
@@ -277,7 +278,8 @@ function is(wat, gekregen, verwacht){
     is('engels blad vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', cct:'3000/4000K',
        ip:'IP65', ik:'IK06', ugr:'UGR<22/25', cri:'Ra>80',
-       dimbaar:'Ja \u2014 Trailing edge', afmetingen:'342\u00d7182 \u00d7 H144'});
+       levensduur:'L80/B20>50,000', dimbaar:'Ja \u2014 Trailing edge',
+       afmetingen:'342\u00d7182 \u00d7 H144'});
     is('Type onder Control/dimming is de dimwijze', r.uit.type, undefined);
     is('Optic als veldnaam, niet als kopje', r.uit._optiek, 'Glass');
     is('engels blad laat niets liggen', r.onbekend, []);
@@ -335,6 +337,8 @@ function is(wat, gekregen, verwacht){
     /* Echte opmaak gaat er wel uit - zo komt het binnen uit een webpagina. */
     is('echte opmaak gaat er wel uit',
       m.ONTHTML('<span class="w">50.000 uur</span>'), '50.000 uur');
+    is('levensduur uit geplakte opmaak',
+      lees('Levensduur: <span class="w">50.000 uur</span>').uit.levensduur, '50.000 uur');
     const r = lees('LED paneel, 3600 lm, 26 W, 4000 K, UGR<19, Ra>80.');
     is('UGR blijft heel', r.uit.ugr, 'UGR<19');
     is('kleurweergave blijft heel', r.uit.cri, 'Ra>80');
