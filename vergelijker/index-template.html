@@ -401,15 +401,18 @@ const VELDMAP=[
   {v:'ugr',        l:/^ugr/i},
   {v:'ip',         l:/^(ip[\s-]?(klasse|class|degree|rating|code)|beschermingsgraad|ip)$/i},
   {v:'ik',         l:/^(ik[\s-]?(klasse|class)|ik)$/i},
-  {v:'_diameter',  l:/^diameter/i},
+  /* De zaagmaat staat BOVEN de diameter: "inbouwdiameter" en "zaagdiameter" zijn
+     in het vak het gat dat je moet zagen, niet de maat van het armatuur. Wie ze
+     andersom zet, leest de zaagmaat als buitenmaat op het blad terug. */
+  {v:'_cutout',    l:/^(cut-?out|zaagmaat|zaagdiameter|gatmaat|inbouwopening|inbouwmaat|inbouwdiameter)/i},
+  {v:'_diameter',  l:/^((buiten|uitwendig|outer|overall)\s?)?diameter$|^doorsnede$|^\u00d8$/i},
   {v:'_hoogte',    l:/^(hoogte|height)/i},
   {v:'_breedte',   l:/^(breedte|width)/i},
   {v:'_lengte',    l:/^(lengte|length)/i},
-  {v:'_cutout',    l:/^(cut-?out|zaagmaat|gatmaat|inbouwopening|inbouwmaat)/i},
   /* Een blad dat de maat in één veld geeft ("600x600x11 mm"). Staat het label
      boven een lijst losse maten, dan is het een kopje en niet dit veld - dat
      onderscheid maakt de lezer zelf, aan wat eronder staat. */
-  {v:'afmetingen', l:/^(afmetingen|afmeting|maten|dimensions|size)$/i},
+  {v:'afmetingen', l:/^(afmetingen|afmeting|maten|buitenmaat|buitenafmeting|dimensions|overall dimensions|outer dimensions|size)$/i},
   {v:'_diepte',    l:/^(inbouwdiepte|recess(ed)? depth|installation depth)/i},
   {v:'_kleur',     l:/^(kleur|colou?r)$/i},
   {v:'_montage',   l:/^(montage|mounting)$/i},
@@ -473,8 +476,16 @@ const FRAGMENTEN=[
   {v:'ugr',         l:'UGR',              p:/^ugr\s*[<>=\u2264\u2265]?\s*\d+$/i},
   {v:'cri',         l:'Kleurweergave',    p:/^(?:ra|cri)\s*[<>=\u2264\u2265]?\s*\d+$/i},
   {v:'_sdcm',       l:'Kleurconsistentie',p:/sdcm|macadam/i},
-  {v:'afmetingen',  l:'Afmetingen',       p:/^(?:afmeting(?:en)?\s*)?(?:\u00d8\s*\d[\d.,]*|\d[\d.,]*\s*[x\u00d7*]\s*\d[\d.,]*(?:\s*[x\u00d7*]\s*\d[\d.,]*)?)\s*(?:mm|cm)?$/i,
-                    uit:(t,stuk)=>stuk.replace(/\s*[x\u00d7*]\s*/gi,'\u00d7')},
+  /* Een maat is \u00d8 met een getal - dat teken zegt dat het om de diameter gaat -
+     of twee tot drie getallen met een x ertussen, allebei met een hoogte erachter
+     ("\u00d8226 x 80(H)"). Een KAAL getal blijft eraf: dat kan van alles zijn. */
+  {v:'afmetingen',  l:'Afmetingen',
+   p:/^(?:afmeting(?:en)?\s*:?\s*)?(?:\u00d8\s*[\d.,]+(?:\s*[x\u00d7*]\s*[\d.,]+\s*(?:\([a-z]\))?)?|[\d.,]+\s*[x\u00d7*]\s*[\d.,]+(?:\s*[x\u00d7*]\s*[\d.,]+)?)\s*(?:mm|cm)?$/i,
+   uit:(t,stuk)=>stuk.replace(/\s*[x\u00d7*]\s*/gi,'\u00d7').replace(/\u00d8\s+/g,'\u00d8')},
+  /* En de zaagmaat, die er in zo'n rij los achter staat: "\u00d8226, zaagmaat \u00d8200-210". */
+  {v:'_cutout',     l:'Cut-out',
+   p:/^(?:zaagmaat|gatmaat|cut-?out|inbouwdiameter|inbouwopening)\s*:?\s*\u00d8?\s*[\d.,]+(?:\s*-\s*[\d.,]+)?\s*(?:mm)?$/i,
+   uit:(t,stuk)=>stuk.replace(/^[^\u00d8\d]*/,'')},
   {v:'_bundel',     l:'Lichtbundel',      p:/^(?:bundelhoek|stralingshoek|lichtbundel|beam ?angle)\s*:?\s*(\d[\d.,]*\s*\u00b0?)$/i, uit:t=>t[1]},
   {v:'_bundel',     l:'Lichtbundel',      p:/^\d{1,3}\s*\u00b0$/},
   {v:'_klasse',     l:'Isolatieklasse',   p:/^(?:veiligheids|isolatie|beschermings)?klasse\s*(?:I{1,3}|[123])$/i},
@@ -502,6 +513,10 @@ const FRAGMENTEN=[
 ];
 
 function mm(s){const n=parseGetal(s);return n==null?null:Math.round(n)}
+function zaagTekst(w){
+  const z = String(w).replace(/^\s*Ø\s*/,'').replace(/\s*mm\s*$/i,'').trim();
+  return /^\d+([.,]\d+)?$/.test(z) ? String(mm(z)) : z;
+}
 
 /* De parser zelf staat in spec-lezer.js, met VELDMAP hierboven als kaart; de
    DLC-tool gebruikt dezelfde lezer met een eigen kaart. */
@@ -537,11 +552,16 @@ function naarBladvelden(u){
   else if(u._lengte&&u._breedte) maten.push(mm(u._lengte)+'×'+mm(u._breedte));
   if(u._hoogte) maten.push('H'+mm(u._hoogte));
   let a=maten.join(' × ');
-  if(u._cutout) a+=(a?' — ':'')+'cut-out Ø'+mm(u._cutout);
-  if(u._diepte) a+=(a?', ':'')+'inbouwdiepte '+mm(u._diepte)+'mm';
-  /* Stond de maat als één stuk in de tekst ("600x600 mm"), dan is er niets uit
-     losse velden op te bouwen en nemen we hem over zoals hij er staat. */
+  /* Stond de maat als één stuk in de tekst ("600x600 mm", "Ø226"), dan is er niets
+     uit losse velden op te bouwen en nemen we hem over zoals hij er staat. Dit
+     moet VÓÓR de zaagmaat: anders valt de buitenmaat weg zodra er ook een
+     zaagmaat gelezen is, want dan is `a` niet meer leeg. */
   if(!a && u.afmetingen) a=u.afmetingen;
+  /* Een zaagmaat is vaak een bereik ("Ø200-210"); dan is het eerste getal niet
+     het hele verhaal. Één kaal getal wordt afgerond overgenomen, al het andere
+     blijft staan zoals de leverancier het schreef. */
+  if(u._cutout) a+=(a?' — ':'')+'cut-out Ø'+zaagTekst(u._cutout);
+  if(u._diepte) a+=(a?', ':'')+'inbouwdiepte '+mm(u._diepte)+'mm';
   if(a) r.afmetingen=a;
   return r;
 }

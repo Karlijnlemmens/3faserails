@@ -145,7 +145,7 @@ function is(wat, gekregen, verwacht){
      FRAGMENTEN komen uit de echte template van de vergelijker. */
   const lezer = readFileSync(join(root, 'spec-lezer.js'), 'utf8');
   const m = await laadUit('vergelijker/index-template.html',
-    ['SECTIE', 'VELDMAP', 'FRAGMENTEN', 'parseGetal', 'mm', 'naarBladvelden'],
+    ['SECTIE', 'VELDMAP', 'FRAGMENTEN', 'parseGetal', 'mm', 'zaagTekst', 'naarBladvelden'],
     'const window = {};\n' + lezer + '\n'
     + 'const LEZER = window.SpecLezer.maak({veldmap:VELDMAP, sectie:SECTIE, kop:true, fragmenten:FRAGMENTEN});\n'
     + 'const ONTHTML = window.SpecLezer.ontHtml;',
@@ -338,6 +338,31 @@ function is(wat, gekregen, verwacht){
     const r = lees('LED paneel, 3600 lm, 26 W, 4000 K, UGR<19, Ra>80.');
     is('UGR blijft heel', r.uit.ugr, 'UGR<19');
     is('kleurweergave blijft heel', r.uit.cri, 'Ra>80');
+  }
+
+  /* \u00d8 zegt dat het om de diameter gaat, en die hoort bij de afmetingen. */
+  {
+    const blad = (t) => m.naarBladvelden(lees(t).uit).afmetingen;
+    is('\u00d8 in een waardenrij',
+      blad('LED Downlight, 15 W, 1650 lm, 3000 K, \u00d8150, IP20'), '\u00d8150');
+    is('spatie achter de \u00d8 gaat eruit',
+      blad('LED paneel, 26 W, 3600 lm, \u00d8 226 mm, IP20, IK02'), '\u00d8226 mm');
+    is('\u00d8 met hoogte achter een label',
+      blad('Afmetingen: \u00d8226 x 80(H) mm'), '\u00d8226 x 80(H) mm');
+    is('buitenmaat is ook de maat',
+      blad('Buitenmaat: \u00d8150x80(H)'), '\u00d8150x80(H)');
+    is('los diameterlabel wordt \u00d8',
+      blad('Diameter: 226 mm'), '\u00d8226');
+    /* "Inbouwdiameter" is in het vak het GAT, niet de maat van het armatuur. */
+    is('inbouwdiameter is de zaagmaat',
+      blad('Inbouwdiameter: \u00d8200'), 'cut-out \u00d8200');
+    /* En dan houden de buitenmaat en de zaagmaat elkaar niet weg. */
+    is('buitenmaat en zaagmaat naast elkaar',
+      blad('LED Downlight, 15 W, 1650 lm, \u00d8226, zaagmaat \u00d8200-210, IP44'),
+      '\u00d8226 \u2014 cut-out \u00d8200-210');
+    /* Een kaal getal is geen maat: dat kan van alles zijn. */
+    is('kaal getal wordt geen maat',
+      blad('LED Downlight, 15 W, 1650 lm, 226, IP44'), undefined);
   }
 
   /* Een echt label weet meer dan een patroon en wordt niet overschreven. */
