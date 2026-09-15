@@ -281,7 +281,8 @@ const REF_VELDEN = [
   ['leverancier','Leverancier'],['type','Type'],['artikelnummer','Artikelnummer'],
   ['omschrijving','Omschrijving'],['toepassing','Toepassing'],['vermogen','Vermogen'],
   ['cct','Kleurtemperatuur'],['lumen','Nuttige lichtstroom'],
-  ['ugr','UGR'],['cri','Kleurweergave'],['levensduur','Levensduur'],['dimbaar','Dimbaar'],
+  ['bundel','Lichtbundel'],['ugr','UGR'],['cri','Kleurweergave'],
+  ['levensduur','Levensduur'],['dimbaar','Dimbaar'],
   ['afmetingen','Afmetingen'],['ip','IP-klasse'],['ik','IK-klasse']
 ];
 const KENMERKEN = [['uitvoering','Uitvoering'],['kleur','Kleur'],['wattage','Wattage'],
@@ -416,7 +417,7 @@ const VELDMAP=[
   {v:'_diepte',    l:/^(inbouwdiepte|recess(ed)? depth|installation depth)/i},
   {v:'_kleur',     l:/^(kleur|colou?r)$/i},
   {v:'_montage',   l:/^(montage|mounting)$/i},
-  {v:'_bundel',    l:/^(lichtbundel|bundelhoek|beam|stralingshoek)/i},
+  {v:'bundel',     l:/^(lichtbundel|bundelhoek|stralingshoek|uitstralingshoek|spreidingshoek|openingshoek|beam)/i},
   {v:'_optiek',    l:/^(optiek|optic|optics|lens)$/i},
   {v:'levensduur', l:/^(levensduur|lifetime|life ?time|lifespan|service life|rated life)/i},
   {v:'_klasse',    l:/^(isolatieklasse|beschermingsklasse|class|klasse|protection class)$/i},
@@ -444,7 +445,7 @@ const VELDMAP=[
 /* Labels voor de velden die WEL bewaard worden maar niet op het blad staan;
    IP en IK staan er sinds kort wel op en halen hun label uit REF_VELDEN. */
 const LABELS={_nood:'Noodlumen',
-  _kleur:'Kleur',_montage:'Montage',_bundel:'Lichtbundel',_optiek:'Optiek',
+  _kleur:'Kleur',_montage:'Montage',_optiek:'Optiek',
   _klasse:'Isolatieklasse',_aansluiting:'Aansluiting',_diepte:'Inbouwdiepte',_cutout:'Cut-out',
   _materiaal:'Materiaal',_rendement:'Rendement',_sdcm:'Kleurconsistentie',
   _lichtbron:'Lichtbron',_verdeling:'Lichtverdeling',_risicogroep:'Fotobiologische veiligheid',
@@ -486,8 +487,11 @@ const FRAGMENTEN=[
   {v:'_cutout',     l:'Cut-out',
    p:/^(?:zaagmaat|gatmaat|cut-?out|inbouwdiameter|inbouwopening)\s*:?\s*\u00d8?\s*[\d.,]+(?:\s*-\s*[\d.,]+)?\s*(?:mm)?$/i,
    uit:(t,stuk)=>stuk.replace(/^[^\u00d8\d]*/,'')},
-  {v:'_bundel',     l:'Lichtbundel',      p:/^(?:bundelhoek|stralingshoek|lichtbundel|beam ?angle)\s*:?\s*(\d[\d.,]*\s*\u00b0?)$/i, uit:t=>t[1]},
-  {v:'_bundel',     l:'Lichtbundel',      p:/^\d{1,3}\s*\u00b0$/},
+  {v:'bundel',      l:'Lichtbundel',      p:/^(?:bundelhoek|stralingshoek|lichtbundel|beam ?angle)\s*:?\s*(\d[\d.,]*\s*\u00b0?)$/i, uit:t=>t[1]},
+  /* Het gradenteken zegt dat het om de lichtbundel gaat - maar niet als er een
+     C, F of K achter staat: dat is een omgevings- of kleurtemperatuur. Het teken
+     staat aan het eind van het stuk, dus "\u00b0C" valt hier vanzelf al buiten. */
+  {v:'bundel',      l:'Lichtbundel',      p:/^\d{1,3}(?:\s*-\s*\d{1,3})?\s*\u00b0$/},
   {v:'_klasse',     l:'Isolatieklasse',   p:/^(?:veiligheids|isolatie|beschermings)?klasse\s*(?:I{1,3}|[123])$/i},
   {v:'_klasse',     l:'Isolatieklasse',   p:/^(?:safety |protection |insulation )?class\s*(?:I{1,3}|[123])$/i},
   {v:'_aansluiting',l:'Aansluiting',      p:/\d+[-\s]?(?:polig|pole|pins?)$/i, voeg:true},
@@ -536,6 +540,9 @@ function naarBladvelden(u){
   if(u.ik)       r.ik=u.ik;
   if(u.ugr)      r.ugr=u.ugr;
   if(u.cri)      r.cri=u.cri;
+  /* "90 °" en "90°" zijn hetzelfde getal; de spatie ervoor komt uit de tabel van
+     de leverancier en staat naast onze eigen kolom raar. */
+  if(u.bundel)   r.bundel=String(u.bundel).replace(/\s+°/,'°');
   if(u.levensduur) r.levensduur=u.levensduur;
   /* Alleen "Ja" zeggen als de leverancier dat zegt of een dimwijze noemt.
      Staat er iets anders, dan nemen we het over zoals het er staat: bij
@@ -600,6 +607,16 @@ function criVan(fam){
   return c==null ? '' : 'CRI\u2265'+c;
 }
 
+/* De lichtbundel heeft geen eigen veld in de productdata; hij staat in de
+   omschrijving van de variant, in Pragmalux' eigen notatie: "...1650lm 100D
+   Ø150x80(H)...". Alleen die vorm wordt gelezen - een getal met een hoofdletter D
+   erachter en niets wat eraan vastzit - en alleen uit de variant, want het is een
+   eigenschap van het artikel. Een familie die hem niet vermeldt levert niets.  */
+function bundelVan(v){
+  const m = /(?<![A-Za-z0-9])(\d{2,3})D(?![A-Za-z0-9])/.exec((v && v.omschrijving) || '');
+  return m ? m[1]+'\u00b0' : '';
+}
+
 function onzeWaarden(fam,v){
   if(!fam||!v) return {};
   const d={
@@ -614,6 +631,7 @@ function onzeWaarden(fam,v){
     dimbaar: v.dimprotocol==null ? '' : (v.dimprotocol==='geen'?'Nee':v.dimprotocol.toUpperCase()),
     ip: ipVan(fam,v),
     ik: fam.ik || '',
+    bundel: bundelVan(v),
     ugr: ugrVan(fam),
     cri: criVan(fam),
     levensduur: fam.levensduur || '',

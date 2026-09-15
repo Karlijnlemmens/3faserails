@@ -177,7 +177,7 @@ function is(wat, gekregen, verwacht){
       + 'IK02 | 0,2 J standaard, Veiligheidsklasse II, Insteekconnector, 4-polig, SC | Veiligheidskabel');
     is('waardenrij vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K', ip:'IP 20/44',
-       ik:'IK02, 0,2 J standaard', ugr:'UGR19',
+       ik:'IK02, 0,2 J standaard', ugr:'UGR19', bundel:'90\u00b0',
        dimbaar:'Ja \u2014 Voedingsunit met DALI-interface', afmetingen:'600\u00d7600 mm'});
     is('waardenrij wordt geen omschrijving', r.uit.omschrijving, undefined);
     /* IP en IK staan sinds kort op het blad zelf, niet meer alleen in de
@@ -294,7 +294,7 @@ function is(wat, gekregen, verwacht){
       + 'Safety class II, Plug connector, 4-pole');
     is('engelse waardenrij vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K', ip:'IP 20/44',
-       ik:'IK02, 0.2 J standard', ugr:'UGR19',
+       ik:'IK02, 0.2 J standard', ugr:'UGR19', bundel:'90\u00b0',
        dimbaar:'Ja \u2014 Power supply with DALI interface', afmetingen:'600\u00d7600 mm'});
     is('engelse klasse-aanduiding', r.uit._klasse, 'Safety class II');
     is('engelse materialen schuiven aan', r.uit._materiaal, 'Steel, Polystyrene');
@@ -342,6 +342,25 @@ function is(wat, gekregen, verwacht){
     const r = lees('LED paneel, 3600 lm, 26 W, 4000 K, UGR<19, Ra>80.');
     is('UGR blijft heel', r.uit.ugr, 'UGR<19');
     is('kleurweergave blijft heel', r.uit.cri, 'Ra>80');
+  }
+
+  /* Het gradenteken zegt dat het om de lichtbundel gaat. */
+  {
+    const blad = (t) => m.naarBladvelden(lees(t).uit).bundel;
+    /* Zo komt het uit een tabel van een leverancier: label en waarde met een tab
+       ertussen, en een spatie voor het teken. */
+    is('tabelrij met het gradenteken', blad('\tLichtbundel\t90 \u00b0'), '90\u00b0');
+    is('label met dubbele punt',       blad('Bundelhoek: 60\u00b0'), '60\u00b0');
+    is('engels label',                 blad('Beam angle\t120 \u00b0'), '120\u00b0');
+    is('kaal in een waardenrij',
+      blad('LED Downlight, 15 W, 1650 lm, 90\u00b0, IP44, IK03'), '90\u00b0');
+    is('een bereik blijft een bereik',
+      blad('LED Downlight, 15 W, 1650 lm, 60-90\u00b0, IP44, IK03'), '60-90\u00b0');
+    /* Maar een temperatuur draagt hetzelfde teken en is geen bundel. */
+    is('omgevingstemperatuur is geen bundel',
+      blad('Omgevingstemperatuur: -20\u00b0C tot +40\u00b0C\nVermogen: 15 W'), undefined);
+    is('graden Celsius in een rij ook niet',
+      blad('LED Downlight, 15 W, 1650 lm, 25 \u00b0C, IP44, IK03'), undefined);
   }
 
   /* \u00d8 zegt dat het om de diameter gaat, en die hoort bij de afmetingen. */
