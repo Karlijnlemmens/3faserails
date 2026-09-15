@@ -178,7 +178,8 @@ function is(wat, gekregen, verwacht){
     is('waardenrij vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K', ip:'IP 20/44',
        ik:'IK02, 0,2 J standaard', ugr:'UGR19',
-       montage:'Visible profile ceiling version', aansluiting:'Insteekconnector, 4-polig',
+       montage:'Visible profile ceiling version', kleur:'Signaalwit (RAL9003)',
+       aansluiting:'Insteekconnector, 4-polig',
        bundel:'90\u00b0', aansturing:'Voedingsunit met DALI-interface', dimbaar:'Ja',
        afmetingen:'600\u00d7600 mm'});
     is('waardenrij wordt geen omschrijving', r.uit.omschrijving, undefined);
@@ -190,7 +191,10 @@ function is(wat, gekregen, verwacht){
     is('slagvastheid plus de energie', r.uit.ik, 'IK02, 0,2 J standaard');
     is('aansluiting plus polen', r.uit.aansluiting, 'Insteekconnector, 4-polig');
     /* RAL is preciezer dan "Wit" en overschrijft dat binnen dezelfde ronde. */
-    is('RAL wint van de kleurnaam', r.uit._kleur, 'Signaalwit (RAL9003)');
+    is('RAL wint van de kleurnaam', r.uit.kleur, 'Signaalwit (RAL9003)');
+    /* Een behuizingskleur achter een eigen label komt er net zo goed uit. */
+    is('behuizingskleur als label',
+      m.naarBladvelden(lees('Behuizingskleur: Zwart (RAL9005)').uit).kleur, 'Zwart (RAL9005)');
     /* Wat nergens onder valt blijft zichtbaar in plaats van stilletjes te verdwijnen. */
     is('de rest blijft zichtbaar', r.onbekend,
       ['Bescherming tegen vingers', 'bescherming tegen draden', 'spatwaterdicht',
@@ -299,7 +303,8 @@ function is(wat, gekregen, verwacht){
     is('engelse waardenrij vult het blad', m.naarBladvelden(r.uit),
       {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K', ip:'IP 20/44',
        ik:'IK02, 0.2 J standard', ugr:'UGR19',
-       montage:'Visible profile ceiling version', aansluiting:'Plug connector, 4-pole',
+       montage:'Visible profile ceiling version', kleur:'Signal white (RAL9003)',
+       aansluiting:'Plug connector, 4-pole',
        bundel:'90\u00b0', aansturing:'Power supply with DALI interface', dimbaar:'Ja',
        afmetingen:'600\u00d7600 mm'});
     is('engelse klasse-aanduiding', r.uit._klasse, 'Safety class II');

@@ -284,7 +284,7 @@ const REF_VELDEN = [
   ['bundel','Lichtbundel'],['ugr','UGR'],['cri','Kleurweergave'],
   ['levensduur','Levensduur'],['dimbaar','Dimbaar'],
   ['aansturing','Aansturing'],['sensor','Sensor'],['aansluiting','Aansluiting'],
-  ['afmetingen','Afmetingen'],['montage','Montage'],['ip','IP-klasse'],['ik','IK-klasse'],
+  ['afmetingen','Afmetingen'],['montage','Montage'],['kleur','Kleur'],['ip','IP-klasse'],['ik','IK-klasse'],
   ['nood','Noodverlichting']
 ];
 const KENMERKEN = [['uitvoering','Uitvoering'],['kleur','Kleur'],['wattage','Wattage'],
@@ -423,7 +423,7 @@ const VELDMAP=[
      onderscheid maakt de lezer zelf, aan wat eronder staat. */
   {v:'afmetingen', l:/^(afmetingen|afmeting|maten|buitenmaat|buitenafmeting|dimensions|overall dimensions|outer dimensions|size)$/i},
   {v:'_diepte',    l:/^(inbouwdiepte|recess(ed)? depth|installation depth)/i},
-  {v:'_kleur',     l:/^(kleur|colou?r)$/i},
+  {v:'kleur',      l:/^(kleur|behuizingskleur|kleur behuizing|kast ?kleur|colou?r|housing colou?r|body colou?r|finish)$/i},
   {v:'montage',    l:/^(montage|montagewijze|bevestiging|mounting|installation)$/i},
   {v:'bundel',     l:/^(lichtbundel|bundelhoek|stralingshoek|uitstralingshoek|spreidingshoek|openingshoek|beam)/i},
   {v:'_optiek',    l:/^(optiek|optic|optics|lens)$/i},
@@ -453,7 +453,7 @@ const VELDMAP=[
 /* Labels voor de velden die WEL bewaard worden maar niet op het blad staan;
    IP en IK staan er sinds kort wel op en halen hun label uit REF_VELDEN. */
 const LABELS={
-  _kleur:'Kleur',_optiek:'Optiek',
+  _optiek:'Optiek',
   _klasse:'Isolatieklasse',_diepte:'Inbouwdiepte',_cutout:'Cut-out',
   _materiaal:'Materiaal',_rendement:'Rendement',_sdcm:'Kleurconsistentie',
   _lichtbron:'Lichtbron',_verdeling:'Lichtverdeling',_risicogroep:'Fotobiologische veiligheid',
@@ -511,8 +511,8 @@ const FRAGMENTEN=[
   {v:'sensor',      l:'Sensor',           p:/^(?:\+\s*)?(?:[a-z\u00e0-\u00ff]*(?:sensor|melder|detectie|detector)|pir|hf|microgolf|microwave)\b/i},
   {v:'aansturing',  l:'Aansturing',       p:/\b(dali[-\s]?2|dali|casambi|zigbee|bluetooth|triac|dim(?:baar|ming|bar|mable)?|[01]-?10\s?v|push[-\s]?dim|push|fase(?:af|aan)snijding|trailing edge|leading edge|mains dim|aan-?uit|on\/off|niet dimbaar|non-?dim)\b/i},
   {v:'_optiek',     l:'Optiek',           p:/(prisma|opaal|opal|reflector|lens|diffus|louvre|lamel|darklight|honingraat|satine|frosted|gesatineerd)/i},
-  {v:'_kleur',      l:'Kleur',            p:/ral\s?\d{3,4}/i, wint:true},
-  {v:'_kleur',      l:'Kleur',            p:/^(?:signaal|verkeers|zuiver|gebroken)?(wit|zwart|grijs|antraciet|zilver|goud|brons|white|black|gr[ae]y|silver)$/i},
+  {v:'kleur',       l:'Kleur',            p:/ral\s?\d{3,4}/i, wint:true},
+  {v:'kleur',       l:'Kleur',            p:/^(?:signaal|verkeers|zuiver|gebroken)?(wit|zwart|grijs|antraciet|zilver|goud|brons|white|black|gr[ae]y|silver)$/i},
   {v:'montage',     l:'Montage',          p:/\b(inbouw|opbouw|pendel|recessed|surface|ceiling|plafond|wand|wall|suspended|trunking)\b/i},
   {v:'_materiaal',  l:'Materiaal',        p:/^(staal|steel|aluminium|rvs|stainless|kunststof|plastics?|polycarbonaa?t|polycarbonate|polystyr(?:een|ene)|acryl|pmma|abs|glas|glass)\b/i, voeg:true},
   /* En als het materiaal in een zinsdeel staat: "grijze spuitgietpolycarbonaat
@@ -555,6 +555,7 @@ function naarBladvelden(u){
   /* "90 °" en "90°" zijn hetzelfde getal; de spatie ervoor komt uit de tabel van
      de leverancier en staat naast onze eigen kolom raar. */
   if(u.montage)  r.montage=u.montage;
+  if(u.kleur)    r.kleur=u.kleur;
   if(u.aansluiting) r.aansluiting=u.aansluiting;
   if(u.nood)     r.nood=u.nood;
   if(u.bundel)   r.bundel=String(u.bundel).replace(/\s+°/,'°');
@@ -707,6 +708,9 @@ function onzeWaarden(fam,v){
     ip: ipVan(fam,v),
     ik: fam.ik || '',
     montage: montageVan(fam,v),
+    /* De kleur staat bij de variant als kleine letter ('wit', 'zwart', 'grijs');
+       in een tabelcel naast "Signaalwit (RAL9003)" hoort er een hoofdletter voor. */
+    kleur: v.kleur ? String(v.kleur).charAt(0).toUpperCase()+String(v.kleur).slice(1) : '',
     /* De aansluiting staat niet in de productdata - geen veld, en niets in de
        omschrijving dat er betrouwbaar uit te lezen valt. Die kolom blijft leeg
        en wordt met de hand ingevuld, net als Toepassing. */
