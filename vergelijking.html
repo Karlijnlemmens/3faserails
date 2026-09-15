@@ -272,7 +272,8 @@ const REF_VELDEN = [
   ['omschrijving','Omschrijving'],['toepassing','Toepassing'],['vermogen','Vermogen'],
   ['cct','Kleurtemperatuur'],['lumen','Nuttige lichtstroom'],
   ['bundel','Lichtbundel'],['ugr','UGR'],['cri','Kleurweergave'],
-  ['levensduur','Levensduur'],['dimbaar','Dimbaar'],['aansluiting','Aansluiting'],
+  ['levensduur','Levensduur'],['dimbaar','Dimbaar'],
+  ['aansturing','Aansturing'],['sensor','Sensor'],['aansluiting','Aansluiting'],
   ['afmetingen','Afmetingen'],['montage','Montage'],['ip','IP-klasse'],['ik','IK-klasse'],
   ['nood','Noodverlichting']
 ];
@@ -383,8 +384,14 @@ const VELDMAP=[
   {v:'vermogen',   l:/^(systeem\s?wattage|wattage|vermogen|opgenomen vermogen|system power|power|max(imum)? bulb wattage)$/i},
   {v:'lumen',      l:/^(luminous flux|lichtstroom|nuttige lichtstroom|armatuurlichtstroom|lichtstroom armatuur|output)$/i},
   {v:'cct',        l:/^(kleur\s?temperatuur|kleurtemperatuur|colour temperature|color temperature|cct)$/i},
-  {v:'dimbaar',    l:/^(type|dimmen|dimming|aansturing|besturing|sturing)$/i, s:/controle|dim/i},
-  {v:'dimbaar',    l:/^(dimbaar|dimbaarheid|dimmable|aansturing)$/i},
+  /* Dimbaar en aansturing zijn twee dingen: OF er gedimd kan worden, en WAARMEE.
+     "Dimbaar: ja" zegt het eerste, "Aansturing: DALI-2" het tweede - en uit dat
+     tweede volgt het eerste meestal vanzelf (zie naarBladvelden). */
+  {v:'dimbaar',    l:/^(dimbaar|dimbaarheid|dimmable)$/i},
+  {v:'aansturing', l:/^(aansturing|besturing|sturing|bediening|control|dimwijze|dimprotocol|protocol)$/i},
+  /* Een kale "Type" telt alleen als aansturing onder een dim- of besturingskopje. */
+  {v:'aansturing', l:/^(type|dimmen|dimming)$/i, s:/controle|dim/i},
+  {v:'sensor',     l:/^(sensor|sensoren|bewegingssensor|bewegingsmelder|aanwezigheidssensor|aanwezigheidsdetectie|daglichtsensor|daglichtregeling|detectie|motion ?sensor|presence ?detection|occupancy)/i},
   /* "Type" zonder dimsectie is het soort armatuur, niet de dimwijze.
      Staat na de regel hierboven, zodat die eerst aan bod komt. */
   {v:'type',       l:/^(type|producttype|armatuurtype|product ?type)$/i},
@@ -491,7 +498,8 @@ const FRAGMENTEN=[
   /* Een noodmodule staat in zo'n rij als eigen stuk: "..., Noodmodule 3 uur
      zelftest, ...". Het woord begint het stuk, dus dit is een hele waarde. */
   {v:'nood',        l:'Noodverlichting',  p:/^(?:\+\s*)?(?:nood(?:module|verlichting|unit|armatuur)|emergency)\b/i},
-  {v:'dimbaar',     l:'Dimmen',           p:/\b(dali|casambi|zigbee|bluetooth|triac|dim(?:baar|ming|bar|mable)?|[01]-?10\s?v|push|fase(?:af|aan)snijding|trailing edge|leading edge|mains dim|aan-?uit|on\/off|niet dimbaar|non-?dim)\b/i},
+  {v:'sensor',      l:'Sensor',           p:/^(?:\+\s*)?(?:[a-z\u00e0-\u00ff]*(?:sensor|melder|detectie|detector)|pir|hf|microgolf|microwave)\b/i},
+  {v:'aansturing',  l:'Aansturing',       p:/\b(dali[-\s]?2|dali|casambi|zigbee|bluetooth|triac|dim(?:baar|ming|bar|mable)?|[01]-?10\s?v|push[-\s]?dim|push|fase(?:af|aan)snijding|trailing edge|leading edge|mains dim|aan-?uit|on\/off|niet dimbaar|non-?dim)\b/i},
   {v:'_optiek',     l:'Optiek',           p:/(prisma|opaal|opal|reflector|lens|diffus|louvre|lamel|darklight|honingraat|satine|frosted|gesatineerd)/i},
   {v:'_kleur',      l:'Kleur',            p:/ral\s?\d{3,4}/i, wint:true},
   {v:'_kleur',      l:'Kleur',            p:/^(?:signaal|verkeers|zuiver|gebroken)?(wit|zwart|grijs|antraciet|zilver|goud|brons|white|black|gr[ae]y|silver)$/i},
@@ -544,13 +552,25 @@ function naarBladvelden(u){
   /* Alleen "Ja" zeggen als de leverancier dat zegt of een dimwijze noemt.
      Staat er iets anders, dan nemen we het over zoals het er staat: bij
      "Driver 350mA apart te bestellen" is "Ja" een bewering die er niet staat. */
+  if(u.sensor) r.sensor=u.sensor;
+  /* Dimbaar en aansturing staan als twee rijen op het blad: of er gedimd kan
+     worden, en waarmee. De leverancier noemt meestal maar één van de twee, en dan
+     volgt de ander eruit: wie een dimprotocol noemt is dimbaar, wie "aan-uit"
+     zegt niet. Blijkt er niets uit, dan blijft de rij leeg - een bewegingsmelder
+     als aansturing zegt bijvoorbeeld niets over dimmen. */
+  const DIMT = /dali|1-?10\s?v|0-?10\s?v|push|fase|phase|triac|casambi|zigbee|bluetooth|trailing edge|leading edge|mains dim|dimbaar|dimming|dimmable/i;
+  const NIET = /^(nee|no)\b|niet dimbaar|non-?dim|aan[-\/ ]?uit|on\/off|\bgeen\b/i;
+  if(u.aansturing) r.aansturing=u.aansturing.trim();
   if(u.dimbaar){
     const t=u.dimbaar.trim();
-    const zonderJa=t.replace(/^(ja|yes)[,:]?\s*/i,'');
-    r.dimbaar = /^(nee|no)\b|niet dimbaar|non-?dim|aan\/uit|on\/off|\bgeen\b/i.test(t) ? 'Nee'
-      : /^(ja|yes)\b/i.test(t) ? (zonderJa ? 'Ja — '+zonderJa : 'Ja')
-      : /dali|1-?10|0-?10\s?v|push|fase|phase|triac|casambi|dimbaar|dimming|trailing edge|leading edge|mains dim|zigbee|bluetooth/i.test(t) ? 'Ja — '+t
-      : t;
+    const zonderJa=t.replace(/^(ja|yes)[,:]?\s*/i,'').trim();
+    r.dimbaar = NIET.test(t) ? 'Nee' : /^(ja|yes)\b/i.test(t) ? 'Ja' : DIMT.test(t) ? 'Ja' : t;
+    /* "Dimbaar: ja, DALI" noemt allebei; het protocol hoort dan in zijn eigen rij. */
+    if(!r.aansturing && zonderJa && zonderJa.toLowerCase()!==t.toLowerCase()) r.aansturing=zonderJa;
+    else if(!r.aansturing && DIMT.test(t) && !/^(ja|yes)$/i.test(t)) r.aansturing=t;
+  } else if(r.aansturing){
+    if(NIET.test(r.aansturing)) r.dimbaar='Nee';
+    else if(DIMT.test(r.aansturing)) r.dimbaar='Ja';
   }
   const maten=[];
   if(u._diameter) maten.push('Ø'+mm(u._diameter));
@@ -631,6 +651,30 @@ function montageVan(fam,v){
    + in de omschrijving van de variant: "+ Noodmodule 3uur zelftest & manueel".
    Een variant zonder noodmodule levert LEEG op en niet "Nee": de data zegt niet
    dat er geen is, hij zegt er niets over. */
+/* Het dimprotocol staat in de data als sleutelwoord, soms meerdere met een /
+   ertussen ("dali2/1-10v/push-dim"). Op het blad hoort het te staan zoals een
+   installateur het schrijft. "geen" is geen protocol maar de afwezigheid ervan,
+   en dat is aan-uit. */
+const DIMNAMEN = {dali2:'DALI-2', 'dali-2':'DALI-2', dali:'DALI', '1-10v':'1-10V',
+  '0-10v':'0-10V', 'push-dim':'push-dim', push:'push-dim', casambi:'Casambi',
+  triac:'TRIAC', zigbee:'Zigbee', bluetooth:'Bluetooth', geen:'Aan/uit'};
+function aansturingVan(v){
+  const p = v && v.dimprotocol;
+  if(p==null) return '';
+  return String(p).split('/').map(x=>{
+    const k=x.trim().toLowerCase();
+    return DIMNAMEN[k] || x.trim();
+  }).join(' / ');
+}
+
+/* De sensor staat, net als de noodmodule, achter een + in de omschrijving van de
+   variant: "+ Bewegingssensor & Noodmodule 3uur". Zonder sensor blijft het leeg
+   en niet "Nee" - de data zegt er dan niets over. */
+function sensorVan(v){
+  const m = /([A-Za-z\u00c0-\u00ff]*(?:sensor|melder|detectie))/i.exec((v && v.omschrijving) || '');
+  return m ? m[1].trim() : '';
+}
+
 function noodVan(v){
   const m = /(noodmodule[^+]*)/i.exec((v && v.omschrijving) || '');
   return m ? m[1].trim() : '';
@@ -647,7 +691,9 @@ function onzeWaarden(fam,v){
     vermogen:bereik(v.vermogen_w,'W'),
     cct:(fam.cct||[]).join('-')+(fam.cct?'K':''),
     lumen:bereik(v.lichtstroom_lm,'lm'),
-    dimbaar: v.dimprotocol==null ? '' : (v.dimprotocol==='geen'?'Nee':v.dimprotocol.toUpperCase()),
+    dimbaar: v.dimprotocol==null ? '' : (v.dimprotocol==='geen' ? 'Nee' : 'Ja'),
+    aansturing: aansturingVan(v),
+    sensor: sensorVan(v),
     ip: ipVan(fam,v),
     ik: fam.ik || '',
     montage: montageVan(fam,v),

@@ -163,7 +163,7 @@ function is(wat, gekregen, verwacht){
       'Inbouwdownlight met microprismatische afdekking voor kantoren');
     is('tabel vult de velden', m.naarBladvelden(r.uit),
       {omschrijving:'Inbouwdownlight met microprismatische afdekking voor kantoren',
-       vermogen:'15 W', lumen:'1650 lm', cct:'3000 K', dimbaar:'Ja \u2014 DALI'});
+       vermogen:'15 W', lumen:'1650 lm', cct:'3000 K', dimbaar:'Ja', aansturing:'DALI'});
   }
 
   /* Een rij losse waarden zonder ook maar één label - zo levert een deel van de
@@ -179,8 +179,8 @@ function is(wat, gekregen, verwacht){
       {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K', ip:'IP 20/44',
        ik:'IK02, 0,2 J standaard', ugr:'UGR19',
        montage:'Visible profile ceiling version', aansluiting:'Insteekconnector, 4-polig',
-       bundel:'90\u00b0',
-       dimbaar:'Ja \u2014 Voedingsunit met DALI-interface', afmetingen:'600\u00d7600 mm'});
+       bundel:'90\u00b0', aansturing:'Voedingsunit met DALI-interface', dimbaar:'Ja',
+       afmetingen:'600\u00d7600 mm'});
     is('waardenrij wordt geen omschrijving', r.uit.omschrijving, undefined);
     /* IP en IK staan sinds kort op het blad zelf, niet meer alleen in de
        bewaarde velden - vandaar dat ze hierboven in naarBladvelden() staan. */
@@ -236,12 +236,12 @@ function is(wat, gekregen, verwacht){
       {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', cct:'3000/4000K',
        ip:'IP65', ik:'IK06', ugr:'UGR<22/25', cri:'Ra>80',
        montage:'Paal, wand, sokkel of aardstaaf, Buiten', aansluiting:'Kabel 2x1mm\u00b2 5,0m',
-       levensduur:'L80/B20>50,000', dimbaar:'Ja \u2014 Fase afsnijding',
+       levensduur:'L80/B20>50,000', aansturing:'Fase afsnijding', dimbaar:'Ja',
        afmetingen:'342\u00d7182 \u00d7 H144'});
     /* "Optiek" is zowel een kopje als een veldnaam; wat eronder staat beslist. */
     is('Optiek als veldnaam, niet als kopje', r.uit._optiek, 'Glas');
     /* "Type" telt alleen als dimwijze onder een dimsectie. */
-    is('Type onder Controle/dimmen is de dimwijze', r.uit.dimbaar, 'Fase afsnijding');
+    is('Type onder Controle/dimmen is de aansturing', r.uit.aansturing, 'Fase afsnijding');
     /* Een waarde met dubbele punten erin blijft heel: dit is \u00e9\u00e9n opgave,
        geen vier losse paren. */
     is('waarde met dubbele punten blijft heel', r.uit._zekering,
@@ -282,7 +282,7 @@ function is(wat, gekregen, verwacht){
       {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', cct:'3000/4000K',
        ip:'IP65', ik:'IK06', ugr:'UGR<22/25', cri:'Ra>80',
        montage:'Pole, wall, base or ground spike, Outdoor', aansluiting:'Cable 2x1mm\u00b2 5.0m',
-       levensduur:'L80/B20>50,000', dimbaar:'Ja \u2014 Trailing edge',
+       levensduur:'L80/B20>50,000', aansturing:'Trailing edge', dimbaar:'Ja',
        afmetingen:'342\u00d7182 \u00d7 H144'});
     is('Type onder Control/dimming is de dimwijze', r.uit.type, undefined);
     is('Optic als veldnaam, niet als kopje', r.uit._optiek, 'Glass');
@@ -300,8 +300,8 @@ function is(wat, gekregen, verwacht){
       {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K', ip:'IP 20/44',
        ik:'IK02, 0.2 J standard', ugr:'UGR19',
        montage:'Visible profile ceiling version', aansluiting:'Plug connector, 4-pole',
-       bundel:'90\u00b0',
-       dimbaar:'Ja \u2014 Power supply with DALI interface', afmetingen:'600\u00d7600 mm'});
+       bundel:'90\u00b0', aansturing:'Power supply with DALI interface', dimbaar:'Ja',
+       afmetingen:'600\u00d7600 mm'});
     is('engelse klasse-aanduiding', r.uit._klasse, 'Safety class II');
     is('engelse materialen schuiven aan', r.uit._materiaal, 'Steel, Polystyrene');
   }
@@ -363,10 +363,21 @@ function is(wat, gekregen, verwacht){
     is('noodmodule los in een waardenrij',
       blad('LED Downlight, 15 W, 1650 lm, IP44, Noodmodule 3 uur zelftest.', 'nood'),
       'Noodmodule 3 uur zelftest');
-    /* "Aansturing" is hoe het vak de dimwijze noemt; die rij heet Dimbaar en
-       stond er al, dus het woord moet daarheen en niet naar een eigen veld. */
-    is('aansturing is de dimwijze',
-      blad('Controle/dimmen\nAansturing\tDALI', 'dimbaar'), 'Ja \u2014 DALI');
+    /* Dimbaar en aansturing zijn twee rijen: of er gedimd kan worden, en waarmee.
+       Noemt de leverancier er maar \u00e9\u00e9n, dan volgt de ander eruit. */
+    is('aansturing vult zijn eigen rij',
+      blad('Controle/dimmen\nAansturing\tDALI', 'aansturing'), 'DALI');
+    is('en maakt het armatuur dimbaar',
+      blad('Controle/dimmen\nAansturing\tDALI', 'dimbaar'), 'Ja');
+    is('aan-uit is niet dimbaar', blad('Aansturing: Aan-uit', 'dimbaar'), 'Nee');
+    /* Een bewegingsmelder als aansturing zegt niets over dimmen: dan leeg. */
+    is('een melder zegt niets over dimmen', blad('Aansturing: BM', 'dimbaar'), undefined);
+    /* "Dimbaar: ja, DALI" noemt allebei; het protocol hoort in zijn eigen rij. */
+    is('protocol achter "ja" schuift door', blad('Dimbaar: Ja, DALI', 'aansturing'), 'DALI');
+    is('sensor uit een label', blad('Sensor: Bewegingssensor 360\u00b0', 'sensor'), 'Bewegingssensor 360\u00b0');
+    is('sensor los in een waardenrij',
+      blad('LED paneel, 26 W, 3600 lm, 4000 K, DALI-2, Bewegingssensor, IP20', 'sensor'),
+      'Bewegingssensor');
   }
 
   /* Het gradenteken zegt dat het om de lichtbundel gaat. */
