@@ -15,6 +15,11 @@ logo van de suite) en staat alles waarmee het gemaakt wordt in deze map.
 
 ## Familie toevoegen
 
+> Doe je dit op je eigen laptop en ben je geen ontwikkelaar? Neem dan
+> **[HANDLEIDING-familie-toevoegen.md](HANDLEIDING-familie-toevoegen.md)** — daar staat
+> hetzelfde, maar met het installeren, het opdrachtvenster, de JSON-valkuilen en
+> wat je moet doen als het misgaat erbij.
+
 Drie stappen, daarna is de familie beschikbaar in de tool.
 
 **1 · Knip de prijslijstexport uit en zet hem in `data/bron/`**
