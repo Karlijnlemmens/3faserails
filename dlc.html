@@ -329,7 +329,9 @@ const VELDMAP = [
   {v:'garantie',  l:/^(garantie|warranty|garantietermijn)$/i},
 
   {v:'matBehuizing', l:/^(materiaal ?behuizing|behuizing ?materiaal|housing ?material|materiaal|material|behuizing)$/i},
-  {v:'kleur',        l:/^(kleur ?behuizing|kleur|colou?r|finish)$/i},
+  /* Leveranciers draaien deze twee woorden om zoals het uitkomt; de vergelijker
+     kent dezelfde reeks, zodat dezelfde plaktekst in beide tools hetzelfde leest. */
+  {v:'kleur',        l:/^(kleur ?behuizing|behuizingskleur|kast ?kleur|kleur|colou?r|housing colou?r|body colou?r|finish)$/i},
   {v:'matAfdekking', l:/^(materiaal ?afdekking|afdekking|cover ?material)$/i},
   /* Let op: geen kaal "reflector" of "lens" - dat zijn WAARDEN bij het label
      Optiek, en als ze ook als label gelden slikt de lezer ze op. */
