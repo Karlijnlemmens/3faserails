@@ -50,10 +50,14 @@ def controleer_familie(fam):
     # --- familievelden die in het vergelijkingsblad terechtkomen ---
     if not fam.get("naam"):
         kritiek.append("familie heeft geen naam — de keuzelijst in de tool blijft leeg")
-    if not fam.get("cct"):
+    # De kleurtemperatuur mag ook per artikel uit de omschrijving komen; dan is
+    # het familieveld niet nodig en zegt de rij nog steeds iets.
+    if not fam.get("cct") and not any(v.get("cct_tekst") for v in varianten):
         aandacht.append("geen cct — de rij Kleurtemperatuur blijft leeg")
-    if not fam.get("zoektermen"):
-        aandacht.append("geen zoektermen — de familie is straks niet te vinden op trefwoord")
+    # De zoekbalk kijkt naar naam, merk, lijn, armatuurtype én zoektermen; alleen
+    # als er van dat alles niets is valt een familie echt niet te vinden.
+    if not fam.get("zoektermen") and not fam.get("armatuurtype") and not fam.get("lijn"):
+        aandacht.append("geen zoektermen of armatuurtype — alleen op de naam te vinden")
 
     # --- per variant ---
     zonder_lm = [v for v in varianten if not v.get("lichtstroom_lm")]
@@ -63,10 +67,20 @@ def controleer_familie(fam):
     zonder_dim = [v for v in varianten if v.get("driver") and not v.get("dimprotocol")]
     zonder_oms = [v for v in varianten if not v.get("omschrijving")]
 
-    if zonder_lm:
-        kritiek.append(f"{len(zonder_lm)}x geen lichtstroom — de tool kan hier niet op filteren: {codes(zonder_lm)}")
+    # Een enkel artikel zonder lichtstroom is een gat in die ene omschrijving;
+    # de familie blijft bruikbaar. Staat er bij géén van de artikelen een
+    # lichtstroom, dan valt er met deze familie niets te vergelijken.
+    if zonder_lm and len(zonder_lm) == len(varianten):
+        kritiek.append(f"geen enkel artikel noemt een lichtstroom — de tool kan hier "
+                       f"niet op filteren: {codes(zonder_lm)}")
+    elif zonder_lm:
+        aandacht.append(f"{len(zonder_lm)}x geen lichtstroom — die artikelen vallen weg "
+                        f"bij het filteren: {codes(zonder_lm)}")
+    # Geen afmeting is geen blokkade: de tool kiest dan gewoon niet op "kleinste
+    # behuizing wint". Zonder lichtstroom kan hij helemaal niet kiezen, en dat
+    # is wél een uitroepteken.
     if zonder_maat:
-        kritiek.append(f"{len(zonder_maat)}x geen afmeting — 'kleinste behuizing wint' werkt niet: {codes(zonder_maat)}")
+        aandacht.append(f"{len(zonder_maat)}x geen afmeting — 'kleinste behuizing wint' werkt hier niet: {codes(zonder_maat)}")
     if zonder_gat:
         aandacht.append(f"{len(zonder_gat)}x inbouw zonder gatmaat — geen melding over het bestaande gat: {codes(zonder_gat)}")
     if zonder_w:
@@ -161,20 +175,24 @@ def main():
     families = data.get("families", [])
     totaal_kritiek = controleer_lezer()
 
+    # Met een catalogus zijn het er honderden; alleen wat iets te melden heeft
+    # komt in beeld, anders staat het antwoord onder een scherm vol "goed".
+    schoon = 0
     for fam in families:
         kritiek, aandacht = controleer_familie(fam)
         totaal_kritiek += len(kritiek)
+        if not kritiek and not aandacht:
+            schoon += 1
+            continue
         n = len(fam.get("varianten", []))
-        vlag = "FOUT " if kritiek else ("kijk " if aandacht else "goed ")
+        vlag = "FOUT " if kritiek else "kijk "
         print(f"\n{vlag} {fam.get('id','?')}  ({n} artikelen)")
         for r in kritiek:
             print(f"     ! {r}")
         for r in aandacht:
             print(f"     - {r}")
-        if not kritiek and not aandacht:
-            print("       niets te melden")
 
-    print(f"\n{len(families)} families gecontroleerd.")
+    print(f"\n{len(families)} families gecontroleerd, {schoon} zonder opmerking.")
     if totaal_kritiek:
         print(f"{totaal_kritiek} punt(en) met een uitroepteken: die moeten eerst opgelost, "
               f"anders kiest de tool daar niet betrouwbaar.")

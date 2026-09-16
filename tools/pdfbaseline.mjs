@@ -53,7 +53,11 @@ const SCENARIOS = [
   { naam: 'vergelijker', url: 'vergelijking.html', knop: '#btnPdf',
     start: async (page) => page.evaluate(() => {
       S.project = { nr: 'P-001', naam: 'Testproject', inst: 'Installateur BV', datum: '2026-08-20', lagen: ['BG'], type: 'nieuwbouw' };
-      const fam = DATA.families[0], v = fam.varianten[0];
+      /* Een vaste familie, niet families[0]: die verschuift zodra er data
+         bij komt, en dan zegt een verschil in de PDF niets meer. */
+      const fam = DATA.families.find(f => f.id === 'led-downlight-essence-g2')
+                || DATA.families[0];
+      const v = fam.varianten[0];
       const p = nieuwePositie('A');
       p.familieId = fam.id; p.artikelcode = v.artikelcode; p.aantallen = { BG: 10 };
       p.ref = { leverancier: 'Referentie BV', type: 'REF-1', artikelnummer: '12345',

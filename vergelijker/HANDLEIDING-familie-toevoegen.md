@@ -1,10 +1,12 @@
-# Een armatuurfamilie toevoegen aan de vergelijker
+# Productdata in de vergelijker
 
 Stap voor stap, voor wie het op zijn eigen laptop doet. Windows; op een Mac is
 alles hetzelfde op de schuine streepjes na.
 
-Deze handleiding gaat over het **toevoegen van productdata**. Wil je de tool zelf
-veranderen, dan is `README.md` in deze map het startpunt.
+Deze handleiding gaat over de **productdata**: de catalogus bijwerken als er een
+nieuwe prijslijst is, en een familie completer maken met wat er niet in de
+prijslijst staat. Wil je de tool zelf veranderen, dan is `README.md` in deze map
+het startpunt.
 
 ---
 
@@ -81,21 +83,51 @@ wat er intussen op GitHub is bijgekomen.
 
 ---
 
-## Per familie: de zes stappen
+## Twee routes
 
-### 1 · Kijk in de Excel wat erin staat
+Er zit één export in de repo met **de hele Pragmalux-catalogus** erin:
+`vergelijker/data/bron/catalogus.csv`, drie kolommen, ~3600 artikelen. Daaruit
+maakt `bouw-data.py` de families zélf — alles vóór de eerste technische opgave
+in de omschrijving is de naam, en alle artikelen met dezelfde naam vormen samen
+een familie. Je hoeft dus niets te doen om een armatuur in de tool te krijgen.
 
-Open de prijslijstexport gewoon in Excel en kijk naar de kolomkoppen. De tool
-gebruikt er **drie**:
+Dat betekent dat er nog maar twee dingen te doen zijn:
 
-| kolom | waarvoor |
+| wat je wilt | route |
 |---|---|
-| `Artikelcode` | het artikelnummer, en het suffix erachter verraadt de driver |
-| `Merk` | de leverancier op het vergelijkingsblad |
-| `Omschrijving` | hier komt de hele technische opgave uit |
+| nieuwe prijslijst binnen → alle armaturen bijwerken | **A · Catalogus bijwerken** |
+| één familie completer maken (IP, UGR, levensduur, presenter) | **B · Familie verrijken** |
 
-Al het andere — bruto, netto inkoop, marge, staffels — wordt in de volgende stap
-weggeknipt. **Dat moet ook**, want deze repo staat openbaar op internet.
+---
+
+## Route A · De catalogus bijwerken
+
+Eén commando, en dan bouwen.
+
+```
+python vergelijker\knip-export.py "C:\Users\jij\Downloads\Artikelnaam_codes.xlsx" catalogus
+```
+
+Achter de scriptnaam staan twee dingen:
+
+- **het pad naar je Excel**. Staan er spaties in, zet het dan tussen
+  aanhalingstekens. Makkelijkste manier: sleep het bestand vanuit Verkenner het
+  opdrachtvenster in, dan wordt het pad er vanzelf ingetypt.
+- **`catalogus`** — de naam van het bestand dat eruit komt. Voor de hele
+  catalogus is dat altijd `catalogus`; die overschrijf je gewoon.
+
+Je krijgt te zien wat er gebeurd is:
+
+```
+Artikelnaam_codes.xlsx → data/bron/catalogus.csv  (3619 artikelen)
+   weggelaten kolommen (5): bruto prijs, netto inkoop, marge %, status, barcode 1
+```
+
+**Lees die tweede regel echt.** Alles behalve artikelcode, merk en omschrijving
+wordt weggeknipt, en dat moet ook: deze repo staat openbaar op internet en een
+prijslijstexport heeft inkoopprijzen, staffels en marges aan boord.
+
+Ga daarna door naar **Bouwen** hieronder.
 
 ### Wat de tool uit de omschrijving haalt
 
@@ -112,100 +144,84 @@ wordt dit op het blad:
 |---|---|---|
 | Leverancier | Pragmalux | kolom `Merk` |
 | Type | LED Inbouw/Opbouw Downlight Luna G2 | alles vóór de eerste technische opgave |
-| Artikelnummer | WO1050100 | kolom `Artikelcode` |
+| Artikelnummer | 1047515 | kolom `Artikelcode` |
 | Omschrijving | de hele regel | kolom `Omschrijving` |
 | Vermogen | 12-18W | `12W/18W` — twee standen, dus een onder- en een bovengrens |
 | Kleurtemperatuur | 3000K-6000K 3-CCT | letterlijk overgenomen, mét het aantal standen |
 | Nuttige lichtstroom | 1400-2050lm | |
 | Afmetingen | Ø217 Buitenmaat - Gatmaat Ø65-185 | letterlijk, dus de reeks blijft staan |
 | IP-klasse | IP44 | |
-| Montage | Inbouw, opbouw | `Inbouw/Opbouw` noemt er twee, dus blijft de lijst uit `families.json` staan |
+| Montage | Inbouw, opbouw | `Inbouw/Opbouw` noemt er twee, dus wordt er geen gekozen |
 
-Twee dingen die hierbij horen:
+**Wat er niet in staat, wordt niet verzonnen.** Staat de lichtstroom er als
+`900-1400ml` (een typefout in de prijslijst), dan blijft die rij leeg en meldt
+`controleer-data.py` het. Dat is de bedoeling: liever een lege rij dan een
+verkeerd getal op een blad dat naar een klant gaat.
 
-- **Wat de omschrijving zegt, wint van wat bij de familie staat** — behalve bij
-  Type, waar de familienaam blijft staan zolang die al zegt wat de omschrijving
-  zegt. Zo overschrijft `Essence Classic G3` de rijkere familienaam
-  `LED TL Waterdicht Armatuur Essence Classic G3 IP66` niet, maar wint
-  `LED Inbouw/Opbouw Downlight Luna G2` wél van `LED Downlight Luna G2`.
-- **Wat er niet in staat, wordt niet verzonnen.** Het script meldt in stap 5 wat
-  het niet kon vinden. Staat er geen kleurtemperatuur in de omschrijving, dan
-  valt de tool terug op de `cct` die je bij de familie invult.
+### Wat er níét in komt
 
-### 2 · Knip de export uit
+Frames, drivers, reflectoren, montagebeugels, opvulringen, noodmodules,
+afstandsbedieningen en losse LED-modules gaan er automatisch uit — dat zijn
+geen armaturen en dus geen alternatief voor een armatuur. De regel is: staat er
+zo'n woord in de naam, of noemt de regel géén lichtstroom én géén vermogen, dan
+valt hij af. Je ziet bij het bouwen hoeveel dat er waren. Valt er iets uit dat
+wél een lichtstroom noemt, dan wordt dat regel voor regel gemeld.
 
-```
-python vergelijker\knip-export.py "C:\Users\jij\Downloads\prijslijst-mondial.xlsx" mondial-downlight
-```
+---
 
-Twee dingen achter de scriptnaam:
+## Route B · Een familie verrijken
 
-- **het pad naar je Excel**. Staan er spaties in, zet het dan tussen
-  aanhalingstekens. Makkelijkste manier: sleep het bestand vanuit Verkenner het
-  opdrachtvenster in, dan wordt het pad er vanzelf ingetypt.
-- **de naam die de familie krijgt**, zonder extensie. Kleine letters en
-  streepjes; deze naam gebruik je zo weer.
+De prijslijst zegt niets over IP-klasse als die niet in de omschrijving staat,
+en al helemaal niets over IK, UGR, kleurweergave, levensduur of welk
+familieblad erbij hoort. Dat is de handgeschreven laag: een blok in
+`vergelijker\data\families.json` dat je **over** een of meer gevonden families
+heen legt.
 
-Je krijgt te zien wat er gebeurd is:
-
-```
-prijslijst-mondial.xlsx → data/bron/mondial-downlight.csv  (86 artikelen)
-   weggelaten kolommen (5): bruto prijs, netto inkoop, marge %, status, barcode 1
-```
-
-Lees die tweede regel echt. Staat er een kolom bij die je wél had willen houden,
-dan klopt er iets niet met de kolomnamen.
-
-Je mag dit commando vanuit elke map draaien — het script schrijft altijd naar
-`vergelijker\data\bron\`.
-
-### 3 · Zet het blok in `families.json`
-
-Open `vergelijker\data\families.json` in Kladblok of VS Code. Het is een lijst
-van blokken tussen `[` en `]`. Zet jouw blok onderaan, **vóór** de sluitende `]`,
-met een komma achter het blok dat er nu als laatste staat.
+Open dat bestand in Kladblok of VS Code. Het is een lijst van blokken tussen `[`
+en `]`. Zet jouw blok onderaan, **vóór** de sluitende `]`, met een komma achter
+het blok dat er nu als laatste staat.
 
 ```json
 {
   "id": "mondial-downlight",
   "naam": "LED Downlight Mondial",
-  "merk": "Pragmalux",
+  "namen": ["LED Downlight Mondial", "LED Downlight Mondial COB"],
   "lijn": "Premium",
-  "armatuurtype": "downlight",
-  "montagewijzen": ["inbouw"],
-  "balvast": false,
-  "look": ["strak"],
-  "zoektermen": ["mondial", "downlight", "downlighter"],
   "ip": "IP54",
   "ik": "IK03",
   "ugr": "<19",
   "cri_min": 90,
-  "cct": [3000, 3500, 4000],
   "levensduur": "100.000 L90B10 Ta25",
   "garantie_jaar": 5,
-  "presenter": "ag25",
-  "bron_excel": "mondial-downlight.csv"
+  "presenter": "ag25"
 }
 ```
 
-**Waar die waarden vandaan komen:**
+`namen` is het enige dat echt moet kloppen: dat zijn de familienamen **zoals de
+tool ze uit de catalogus heeft gehaald**. Hoe je die te weten komt:
+
+```
+cd vergelijker
+python bouw-data.py
+```
+
+en zoek in `data\armaturen.json` op een woord uit de naam, of open
+`vergelijking.html` en typ het in de zoekbalk. Je ziet daar precies hoe een
+familie heet.
+
+Dekt je blok meerdere families, dan krijgen ze allemaal die IP, UGR en
+presenter, maar houdt elke familie zijn eigen naam — anders zouden een 30x120 en
+een 60x60 paneel na afloop hetzelfde heten. Het script zegt erbij hoeveel
+families je blok geraakt heeft, en klaagt als het er nul zijn.
 
 | veld | waar je het haalt |
 |---|---|
 | `id` | verzin je, kleine letters met streepjes. Moet uniek zijn. |
-| `bron_excel` | exact de bestandsnaam uit stap 2, mét `.csv` |
-| `ip` `ik` `ugr` `cri_min` `cct` `levensduur` `garantie_jaar` | uit het familieblad van die serie |
+| `namen` | exact de familienamen uit de catalogus |
+| `ip` `ik` `ugr` `cri_min` `levensduur` `garantie_jaar` | uit het familieblad van die serie |
 | `presenter` | het `ag`-nummer van dat familieblad, te vinden in de map `presenters\` |
-| `zoektermen` | de woorden waarop jullie die familie zoeken. Ruim nemen. |
-| `montagewijzen` | `inbouw`, `opbouw`, `pendel` — wat er echt bestaat |
-| `balvast` `look` `lijn` | jullie eigen indeling |
-
-Staan er in de prijslijst ook losse frames, modules of accessoires? Zet er dan
-een regel bij die alleen complete armaturen doorlaat:
-
-```json
-  "alleen_codes_met_prefix": "^W[PV]F\\d{7}"
-```
+| `zoektermen` | extra woorden waarop jullie die familie zoeken |
+| `cct` | alleen nodig als de omschrijvingen geen kleurtemperatuur noemen |
 
 **Vier dingen waar JSON op stukgaat:**
 
@@ -213,15 +229,16 @@ een regel bij die alleen complete armaturen doorlaat:
 2. Altijd dubbele aanhalingstekens `"`, nooit enkele.
 3. `false` en `true` zonder aanhalingstekens; tekst juist wél tussen
    aanhalingstekens.
-4. In `alleen_codes_met_prefix` schrijf je een backslash **dubbel**: `\\d`, niet
-   `\d`.
+4. Een backslash schrijf je **dubbel**: `\\d`, niet `\d`.
 
 Twijfel je of het klopt? Plak de inhoud in [jsonlint.com](https://jsonlint.com) —
 die wijst de regel aan waar het misgaat.
 
-### 4 · Bouwen
+---
 
-Vier commando's, in deze volgorde:
+## Bouwen
+
+Vier commando's, in deze volgorde — bij allebei de routes hetzelfde:
 
 ```
 cd vergelijker
@@ -235,7 +252,7 @@ Wat ze doen:
 
 | script | van | naar |
 |---|---|---|
-| `bouw-data.py` | `data/bron/*.csv` + `families.json` | `data/armaturen.json` |
+| `bouw-data.py` | `data/bron/catalogus.csv` + `families.json` | `data/armaturen.json` |
 | `controleer-data.py` | *(alleen kijken)* | meldingen op je scherm |
 | `bouw-tool.py` | `armaturen.json` + de template | `..\vergelijking.html` |
 | `bouw-armaturen-data.py` | `armaturen.json` | `..\armaturen-data.js` |
@@ -243,51 +260,47 @@ Wat ze doen:
 Dat laatste script wordt makkelijk vergeten: de presenters-tool leest een eigen
 kopie van de data, en zonder die stap loopt die achter.
 
-### 5 · Lees de meldingen
+## Lees de meldingen
 
 Dit is de stap die telt. De twee scripts kijken naar **verschillende** dingen.
 
-**`bouw-data.py` meldt wat hij niet uit de omschrijving kon lezen.** Hij raadt
-nooit — liever een leeg veld dan een verzonnen getal. Je krijgt zoiets:
+**`bouw-data.py` meldt wat er niet klopte aan de bron.** Je krijgt zoiets:
 
 ```
-  mondial-downlight                    86 artikelen  (4 overgeslagen)
+  catalogus.csv       2867 artikelen in 399 families (752 overgeslagen: toebehoren, frames, drivers)
 
-2 punt(en) om na te kijken:
-  - [mondial-downlight] WPF1234567: lichtstroom niet gevonden
-  - [mondial-downlight] WPF1234890: buitenmaat niet gevonden
+3 punt(en) om na te kijken:
+  - overgeslagen maar noemt wel een lichtstroom: 9172508 — ...Railspot Alto SF Driver 29W...
+  - [essence-g2-downlight] dekt 2 families: LED Downlight Essence G2, LED Downlight Essence G2 PIR
 ```
 
-Bij zo'n melding kijk je in de Excel naar die artikelcode: staat de lichtstroom
-er anders geschreven dan `1650lm` of `1400-2450lm`? Dan is de omschrijving in de
-prijslijst het probleem, niet het script.
+De eerste soort melding is de belangrijkste: daar viel iets weg dat misschien
+tóch een armatuur was. De tweede vertelt alleen wat je blok geraakt heeft.
 
-"Overgeslagen" is meestal goed nieuws: dat zijn snoersets en artikelen die je
-filter eruit hield.
-
-**`controleer-data.py` kijkt naar wat de tool nódig heeft.** Dat is iets anders.
-Een artikel waarvan de buitenmaat wél gevonden is maar de zaagmaat niet, geeft
-bij het eerste script geen melding en valt hier wel op — want zonder zaagmaat
-kan de tool niet bepalen of het armatuur in een bestaand gat past.
+**`controleer-data.py` kijkt naar wat de tool nódig heeft.** Alleen families met
+iets te melden komen in beeld; de rest wordt geteld.
 
 ```
-3 families gecontroleerd.
-Geen kritieke gaten. De punten met een streepje maken alleen een rij in het blad leeg.
+399 families gecontroleerd, 31 zonder opmerking.
+27 punt(en) met een uitroepteken: ...
 ```
 
-Zolang er meldingen staan die je niet begrijpt: eerst uitzoeken, dan pas verder.
+Een uitroepteken betekent: van deze familie noemt **geen enkel** artikel een
+lichtstroom, dus daar valt niets mee te vergelijken. Dat komt bijna altijd
+doordat de omschrijving in de prijslijst incompleet is. Een streepje is een rij
+die leeg blijft — vervelend, niet stuk.
 
-### 6 · Kijk of het klopt
+## Kijk of het klopt
 
-Dubbelklik `vergelijking.html` in de hoofdmap. Maak een positie aan, typ je
-nieuwe familienaam in het zoekveld en kies hem. Controleer in de rechterkolom:
+Dubbelklik `vergelijking.html` in de hoofdmap. Maak een positie aan, typ de
+familienaam in het zoekveld en kies hem. Controleer in de rechterkolom:
 
 - staan vermogen, lichtstroom en kleurtemperatuur er?
-- klopt de IP-klasse met het familieblad?
+- klopt de IP-klasse?
 - vult hij een afmeting in?
 
-Klopt er iets niet, dan zit het bijna altijd in `families.json` (typefout) of in
-de omschrijvingen in de prijslijst.
+Klopt er iets niet, dan zit het in `families.json` (typefout in `namen`) of in de
+omschrijving in de prijslijst.
 
 ---
 
@@ -324,10 +337,11 @@ die, dan komt je volgende wijziging per ongeluk meteen bij je collega's terecht.
 | `'python' wordt niet herkend` | Python staat niet in PATH. Probeer `py`, of installeer opnieuw mét dat vinkje. |
 | `No module named openpyxl` | `pip install openpyxl` |
 | `Expecting ',' delimiter` | Komma vergeten of er één te veel in `families.json`. Het regelnummer staat erbij. |
-| `bronbestand niet gevonden` | De naam bij `bron_excel` komt niet overeen met het bestand in `data\bron\`. |
 | `kolom 'artikelcode' niet gevonden` | De Excel heeft andere kolomkoppen. Het script laat zien welke hij wél zag. |
 | `niet gevonden, blijft leeg: merk` | Geen fout: er is geen merkkolom. De tool gebruikt dan het `merk` uit `families.json`. |
-| `export ... niet gevonden; de N artikelen blijven staan` | Geen fout: hij houdt de bestaande data aan omdat de export ontbreekt. |
+| `geen enkele familie in de catalogus heet '...'` | De `namen` in je blok komen niet overeen. Zoek de familie op in `vergelijking.html` en neem de naam letterlijk over. |
+| `dekt N families: ...` | Geen fout: je blok raakt er meer dan één. Klopt dat rijtje, dan is het goed. |
+| `overgeslagen maar noemt wel een lichtstroom` | Een regel viel weg als toebehoren terwijl er een lichtstroom in staat. Kijk na of het toch een armatuur is. |
 | `Updates were rejected` bij `git push` | Er staat nieuwer werk op GitHub. Doe `git pull` en probeer opnieuw. |
 
 Kom je er niet uit: niets is stuk zolang je niet gepusht hebt. `git checkout .`

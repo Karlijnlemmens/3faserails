@@ -25,14 +25,27 @@ Drie stappen, daarna is de familie beschikbaar in de tool.
 **1 · Knip de prijslijstexport uit en zet hem in `data/bron/`**
 
 ```
-python knip-export.py ~/Downloads/prijslijst-mondial.xlsx mondial-downlight
+python knip-export.py ~/Downloads/Artikelnaam_codes.xlsx catalogus
 ```
 
-Dat schrijft `data/bron/mondial-downlight.csv` met alleen de drie kolommen die
-de tool leest — `Artikelcode`, `Merk`, `Omschrijving` — en meldt welke kolommen
-het heeft weggelaten. Meer is er niet nodig: in de omschrijving staat op één
-regel de hele technische opgave, en `bouw-data.py` leest daar het vermogen, de
+Dat schrijft `data/bron/catalogus.csv` met alleen de drie kolommen die de tool
+leest — `Artikelcode`, `Merk`, `Omschrijving` — en meldt welke kolommen het heeft
+weggelaten. Meer is er niet nodig: in de omschrijving staat op één regel de hele
+technische opgave, en `bouw-data.py` leest daar het vermogen, de
 kleurtemperatuur, de lichtstroom, de maten en de naam van het armatuur uit.
+
+**De families komen uit die omschrijvingen zelf.** Alles vóór de eerste
+technische opgave is de naam, en alle artikelen met dezelfde naam vormen samen
+een familie — ~400 families uit ~2900 artikelen, zonder dat er iets met de hand
+wordt ingevoerd. Toebehoren (frames, drivers, reflectoren, beugels) vallen eruit:
+die noemen geen lichtstroom en geen vermogen, of hebben zo'n woord in hun naam.
+Wat tóch een lichtstroom noemt en eruit valt, wordt regel voor regel gemeld.
+
+`families.json` is sindsdien de **handgeschreven laag erover**: een blok wijst met
+`namen` een of meer gevonden families aan en voegt toe wat niet in de prijslijst
+staat — IP, IK, UGR, kleurweergave, levensduur, het familieblad. Zie
+`HANDLEIDING-familie-toevoegen.md`. Een blok met een eigen `bron_excel` houdt zijn
+eigen export, zoals het was.
 
 **Die stap is niet optioneel, want deze repo is openbaar.** Een prijslijstexport
 heeft inkoop- en brutoprijzen, staffels en marges aan boord. `bouw-data.py` doet

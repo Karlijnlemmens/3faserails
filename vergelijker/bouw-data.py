@@ -83,8 +83,10 @@ CCT_TEKST = re.compile(r"\d{4}\s*K(?:\s*[-–/]\s*\d{4}\s*K)*(?:\s*\d?\s*-?\s*CC
 TYPE_STOP = re.compile(
     r"\bIP\s*\d{2}|\bIK\s*\d{2}|\bUGR\b|\bSDCM\b|\bCRI\b|\bRa\b"
     r"|\b(?:max|min|incl|excl|ca)\.|\b(?:max|min|incl|excl)\b"
-    r"|\d+(?:[,.]\d+)?\s*(?:W|lm|K|V|mm|cm|D)\b"
-    r"|\d+\s*[-–/]\s*\d+"
+    # \b vóór het getal: zonder dat knipt "LED Paneel 30x120cm Easy G2" bij de
+    # "120cm" middenin de maat, en houdt de familie "LED Paneel 30x" over.
+    r"|\b\d+(?:[,.]\d+)?\s*(?:W|lm|K|V|mm|cm|D)\b"
+    r"|\b\d+\s*[-–/]\s*\d+"
     r"|\d?\s*-?CCT\b"
     r"|\bwit\b|\bzwart\b|\bgrijs\b|\bRAL\b"
     r"|Ø|\+|\(", re.I)
@@ -133,29 +135,31 @@ def lees_omschrijving(o, merk=None):
     """Haal technische gegevens uit de omschrijvingstekst. Geeft (velden, ontbrekend)."""
     v, mist = {}, []
 
-    m = re.search(r"(\d+[,.]?\d*)\s*[-–]\s*(\d+[,.]?\d*)\s*W\b", o)
+    m = re.search(r"(\d+[,.]?\d*)\s*[-–]\s*(\d+[,.]?\d*)\s*W\b", o, re.I)
     if m:
         v["vermogen_w"] = {"min": getal(m.group(1)), "max": getal(m.group(2))}
     else:
         # "12W/18W" en "12/18W" zijn een schakelbaar armatuur: twee standen, dus
         # een ondergrens en een bovengrens - geen enkel vermogen met een noot.
-        m = re.search(r"((?:\d+(?:[,.]\d+)?\s*W?\s*/\s*)+\d+(?:[,.]\d+)?\s*W)\b", o)
+        m = re.search(r"((?:\d+(?:[,.]\d+)?\s*W?\s*/\s*)+\d+(?:[,.]\d+)?\s*W)\b", o, re.I)
         if m:
             n = [getal(x) for x in re.findall(r"\d+(?:[,.]\d+)?", m.group(1))]
             v["vermogen_w"] = {"min": min(n), "max": max(n)}
         else:
-            m = re.search(r"max\.?\s*(\d+[,.]?\d*)\s*W\b", o) or re.search(r"\b(\d+[,.]?\d*)\s*W\b", o)
+            m = (re.search(r"max\.?\s*(\d+[,.]?\d*)\s*W\b", o, re.I)
+                 or re.search(r"\b(\d+[,.]?\d*)\s*W\b", o, re.I))
             if m:
                 v["vermogen_w"] = {"min": None, "max": getal(m.group(1)),
                                    "opmerking": "ondergrens afhankelijk van gekozen driver"}
             else:
                 mist.append("vermogen")
 
-    m = re.search(r"(\d+)\s*[-–]\s*(\d+)\s*lm\b", o)
+    m = re.search(r"(\d+)\s*[-–]\s*(\d+)\s*lm\b(?!\s*/)", o, re.I)
     if m:
         v["lichtstroom_lm"] = {"min": int(m.group(1)), "max": int(m.group(2))}
     else:
-        m = re.search(r"max\.?\s*(\d+)\s*lm\b", o) or re.search(r"\b(\d+)\s*lm\b", o)
+        m = (re.search(r"max\.?\s*(\d+)\s*lm\b(?!\s*/)", o, re.I)
+             or re.search(r"\b(\d+)\s*lm\b(?!\s*/)", o, re.I))
         if m:
             v["lichtstroom_lm"] = {"min": None, "max": int(m.group(1))}
         else:
@@ -218,6 +222,165 @@ def lees_omschrijving(o, merk=None):
     if re.search(r"noodmodule|noodverlichting", o, re.I):
         v.setdefault("noodverlichting", "3u")
     return v, mist
+
+
+# --- Catalogus ---------------------------------------------------------------
+# Eén export met de hele catalogus erin, in plaats van één export per familie.
+# De families komen dan uit de omschrijvingen zelf: alles vóór de eerste
+# technische opgave is de naam, en alle artikelen met dezelfde naam vormen samen
+# een familie. Wat in families.json staat blijft leidend — dat is de laag met de
+# gegevens die niet in de prijslijst staan (IP, IK, UGR, levensduur, presenter) —
+# en wordt over de gevonden families heen gelegd.
+CATALOGUS = "catalogus"
+
+# Wat geen armatuur is. Deze woorden worden in de NAAM gezocht, niet in de hele
+# omschrijving: "incl. LED Driver" staat achter de opgave en hoort bij een echt
+# armatuur, terwijl "LED Driver CV 24V" de naam zelf is.
+TOEBEHOREN = re.compile(
+    r"\b(accessoire\w*|reserveonderdeel\w*|onderdeel|component|"
+    r"opbouwset|montageset|ophangset|schroefset|inbouwklemmen|[a-z]*frame|"
+    r"[a-z]*profiel|[a-z]*beugel|"
+    r"afscherming|grill|muursteun|steun|afstandsbediening|daglichtsensor|"
+    r"veiligheidskabel|driver|voeding|snoerset|adapter|eindkap|verbinder|"
+    r"reflector|opvulring|ring|blindplaat|kap|fitting|profiel|noodmodule|"
+    r"schakelaar|lens)\b", re.I)
+
+# Het soort armatuur en de montagewijze staan in de naam. Ze worden nergens uit
+# gerekend, maar de zoekbalk van de tool zoekt erop mee: wie "downlight" typt
+# hoort ze te vinden zonder de familienaam te kennen.
+SOORTEN = [
+    ("downlight", r"downlight"), ("paneel", r"paneel|panel"),
+    ("inlegarmatuur", r"inlegarmatuur"), ("opbouwarmatuur", r"opbouwarmatuur"),
+    ("bandrasterarmatuur", r"bandraster"), ("railspot", r"railspot|3-?fase"),
+    ("spot", r"\bspot\b|inbouwspot|richtspot|halve-?inbouwspot"),
+    ("wandarmatuur", r"wandarmatuur"), ("plafonnière", r"plafonni"),
+    ("pendelarmatuur", r"pendelarmatuur|pendel"), ("bulkhead", r"bulkhead"),
+    ("highbay", r"highbay"), ("gevelarmatuur", r"gevelarmatuur"),
+    ("waterdicht armatuur", r"waterdicht"), ("lichtlijn", r"lichtlijn|line\b"),
+    ("led-strip", r"\bstrip\b"), ("led-module", r"\bmodule\b"),
+    ("sporthalarmatuur", r"sporthal|balvast"), ("straatarmatuur", r"streetlight|area\b"),
+    ("portiekarmatuur", r"portiek"), ("noodverlichting", r"noodverlichting|vluchtweg"),
+]
+MONTAGE = [("inbouw", r"inbouw"), ("opbouw", r"opbouw"), ("pendel", r"pendel"),
+           ("wand", r"wandarmatuur|gevelarmatuur"), ("inleg", r"inleg")]
+
+
+def slug(naam):
+    """Een id uit een naam: kleine letters, streepjes, verder niets."""
+    s = re.sub(r"[^a-z0-9]+", "-", naam.lower()).strip("-")
+    return s[:60] or "familie"
+
+
+def plat(s):
+    return " ".join(str(s or "").lower().split())
+
+
+def catalogusfamilies(bestand):
+    """Groepeer een catalogusexport op de naam in de omschrijving.
+       Geeft (families, overgeslagen, meldingen)."""
+    rijen = lees_bron(bestand)
+    if not rijen:
+        return [], 0, [f"{bestand.name} is leeg"]
+    kop = [str(c or "").strip().lower() for c in rijen[0]]
+
+    def kol(*namen):
+        for n in namen:
+            if n in kop:
+                return kop.index(n)
+        return None
+
+    i_code = kol("artikelcode", "artikel", "artikelnummer")
+    i_merk = kol("merk", "brand", "fabrikant", "leverancier")
+    i_oms  = kol("omschrijving", "description")
+    if i_code is None or i_oms is None:
+        return [], 0, [f"{bestand.name}: kolommen Artikelcode/Omschrijving niet gevonden"]
+
+    groepen, overgeslagen, meldingen = {}, 0, []
+    for r in rijen[1:]:
+        if not r or i_code >= len(r) or not r[i_code]:
+            continue
+        code = str(r[i_code]).strip()
+        oms  = str(r[i_oms] or "") if i_oms < len(r) else ""
+        merk = str(r[i_merk]).strip() if (i_merk is not None and i_merk < len(r) and r[i_merk]) else ""
+
+        if any(code.endswith(x) for x in SNOER):
+            overgeslagen += 1
+            continue
+
+        naam = naamzone(oms, merk)
+        v, _ = lees_omschrijving(oms, merk)
+        # Een armatuur noemt een lichtstroom of een vermogen; een frame, een
+        # driver of een montagebeugel niet. Wat toch een lichtstroom noemt en
+        # eruit valt wordt gemeld - dan is het het nakijken waard.
+        bruikbaar = ("lichtstroom_lm" in v) or ("vermogen_w" in v)
+        if not naam or TOEBEHOREN.search(naam) or not bruikbaar:
+            overgeslagen += 1
+            if "lichtstroom_lm" in v and naam:
+                meldingen.append(f"overgeslagen maar noemt wel een lichtstroom: {code} — {oms[:80]}")
+            continue
+
+        basis, drv, extra = split_suffix(code)
+        v.update({"artikelcode": code, "basiscode": basis, "omschrijving": oms})
+        v.update(DRIVERS.get(drv, {}))
+        v.update(EXTRA.get(extra, {}))
+        groepen.setdefault(naam, {"merk": merk, "varianten": []})["varianten"].append(v)
+
+    families = []
+    for naam, g in sorted(groepen.items()):
+        laag = naam.lower()
+        fam = {"id": slug(naam), "naam": naam, "varianten":
+               sorted(g["varianten"], key=lambda x: x["artikelcode"])}
+        if g["merk"]:
+            fam["merk"] = g["merk"]
+        soorten = [s for s, p in SOORTEN if re.search(p, laag, re.I)]
+        if soorten:
+            fam["armatuurtype"] = soorten[0]
+            if len(soorten) > 1:
+                fam["zoektermen"] = soorten[1:]
+        montage = [m for m, p in MONTAGE if re.search(p, laag, re.I)]
+        if montage:
+            fam["montagewijzen"] = montage
+        families.append(fam)
+
+    # Twee namen die naar hetzelfde id slaan zouden elkaar in de tool overschrijven.
+    gezien = {}
+    for fam in families:
+        if fam["id"] in gezien:
+            fam["id"] = fam["id"] + "-" + str(len([f for f in families if f["id"].startswith(fam["id"])]))
+        gezien[fam["id"]] = True
+    return families, overgeslagen, meldingen
+
+
+def pasOverlaysToe(families, blokken):
+    """Leg de handgeschreven blokken uit families.json over de gevonden families
+       heen. Een blok wijst zijn families aan met "namen" (of met "naam"), en
+       alles wat erin staat wint - dat is juist de laag die niet in de prijslijst
+       staat. Geeft de meldingen over blokken die niets raakten."""
+    opNaam = {}
+    for fam in families:
+        opNaam.setdefault(plat(fam["naam"]), []).append(fam)
+
+    meldingen = []
+    for blok in blokken:
+        sleutels = [plat(x) for x in (blok.get("namen") or [blok.get("naam")]) if x]
+        raak = [f for s in sleutels for f in opNaam.get(s, [])]
+        if not raak:
+            meldingen.append(f"[{blok.get('id', blok.get('naam', '?'))}] geen enkele familie in de "
+                             f"catalogus heet {' of '.join(repr(s) for s in sleutels)}; "
+                             f"dit blok doet niets")
+            continue
+        velden = {k: w for k, w in blok.items()
+                  if k not in ("id", "namen", "varianten", "bron_excel",
+                               "alleen_codes_met_prefix")}
+        # De naam van de catalogus blijft staan zodra het blok er meer dan één
+        # dekt - anders zouden ze allemaal hetzelfde gaan heten.
+        if len(raak) > 1:
+            velden.pop("naam", None)
+            meldingen.append(f"[{blok.get('id', '?')}] dekt {len(raak)} families: "
+                             + ", ".join(f["naam"] for f in raak))
+        for f in raak:
+            f.update(velden)
+    return meldingen
 
 
 def split_suffix(code):
@@ -289,6 +452,21 @@ def main():
             print(f"Let op: {UIT.name} kon niet gelezen worden ({e}); niets om op terug te vallen.")
 
     meldingen, totaal = [], 0
+
+    # De catalogus: één export met alles erin. Wat daaruit komt zijn de families
+    # zelf; de blokken in families.json zijn er de handgeschreven laag overheen.
+    catalogus, uitCatalogus = bronbestand(CATALOGUS), []
+    if catalogus.exists():
+        uitCatalogus, over, cat_meld = catalogusfamilies(catalogus)
+        meldingen += cat_meld
+        n = sum(len(f["varianten"]) for f in uitCatalogus)
+        print(f"  {catalogus.name:34} {n:4} artikelen in {len(uitCatalogus)} families "
+              f"({over} overgeslagen: toebehoren, frames, drivers)")
+        totaal += n
+        overlays = [f for f in families
+                    if not f.get("bron_excel") and not f.get("varianten")]
+        meldingen += pasOverlaysToe(uitCatalogus, overlays)
+        families = [f for f in families if f not in overlays]
 
     for fam in families:
         if not fam.get("bron_excel"):
@@ -383,6 +561,7 @@ def main():
         totaal += len(varianten)
         print(f"  {fam['id']:34} {len(varianten):4} artikelen  ({overgeslagen} overgeslagen)")
 
+    families = families + uitCatalogus
     UIT.parent.mkdir(parents=True, exist_ok=True)
     UIT.write_text(json.dumps({"versie": "1.0", "families": families},
                               indent=2, ensure_ascii=False), encoding="utf-8")

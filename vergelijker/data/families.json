@@ -37,9 +37,12 @@
       "verdiept_9w": 87,
       "verdiept_15_21w": 89
     },
-    "bron_excel": "essence-g2-downlight.xlsx",
     "alleen_codes_met_prefix": "^[WZ][SVO]\\d{7}",
-    "presenter": "ag14"
+    "presenter": "ag14",
+    "namen": [
+      "LED Downlight Essence G2",
+      "LED Downlight Essence G2 PIR"
+    ]
   },
   {
     "id": "essence-g3-paneel",
@@ -78,7 +81,6 @@
     "driver_inbegrepen": true,
     "driver_opmerking": "Driver zit in de artikelcode verwerkt via achtervoegsel: -PR Pragmalux, -UN universeel, -PH Philips, -PH-DA Philips DALI2, -TC-DA TCI DALI.",
     "inbouwdiepte_mm": 35,
-    "bron_excel": "essence-g3-paneel.xlsx",
     "accessoires": [
       {
         "artikelcode": "4607764",
@@ -106,7 +108,11 @@
       }
     ],
     "balvast": false,
-    "presenter": "ag13"
+    "presenter": "ag13",
+    "namen": [
+      "LED Paneel 30x120cm Essence G3",
+      "LED Paneel 60x60cm Essence G3"
+    ]
   },
   {
     "id": "essence-classic-g3-waterdicht",
@@ -145,7 +151,6 @@
       "bedrijfshal",
       "kelder"
     ],
-    "bron_excel": "essence-classic-g3-waterdicht.xlsx",
     "accessoires": [
       {
         "artikelcode": "2024786",
@@ -161,6 +166,9 @@
       }
     ],
     "dimbaar": false,
-    "balvast": false
+    "balvast": false,
+    "namen": [
+      "LED TL Waterdicht Armatuur Essence Classic G3"
+    ]
   }
 ]
