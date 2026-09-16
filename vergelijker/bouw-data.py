@@ -236,14 +236,21 @@ CATALOGUS = "catalogus"
 # Wat geen armatuur is. Deze woorden worden in de NAAM gezocht, niet in de hele
 # omschrijving: "incl. LED Driver" staat achter de opgave en hoort bij een echt
 # armatuur, terwijl "LED Driver CV 24V" de naam zelf is.
-TOEBEHOREN = re.compile(
+#
+# Twee lijsten, omdat de woorden niet even hard zijn. HARD is nooit een armatuur.
+# ZACHT beschrijft óók de optiek of de opbouw van een armatuur: "Railspot
+# Piccolo 15W 24D Reflector" is een losse reflector, maar "Bandrasterarmatuur
+# Optic matte reflector 147x1570mm 26-36W 3550-4700lm" is een armatuur. Het
+# verschil is dat een armatuur zowel een lichtstroom als een vermogen noemt en
+# een onderdeel hooguit één van de twee.
+TOEBEHOREN_HARD = re.compile(
     r"\b(accessoire\w*|reserveonderdeel\w*|onderdeel|component|"
     r"opbouwset|montageset|ophangset|schroefset|inbouwklemmen|[a-z]*frame|"
     r"[a-z]*profiel|[a-z]*beugel|"
     r"afscherming|grill|muursteun|steun|afstandsbediening|daglichtsensor|"
-    r"veiligheidskabel|driver|voeding|snoerset|adapter|eindkap|verbinder|"
-    r"reflector|opvulring|ring|blindplaat|kap|fitting|profiel|noodmodule|"
-    r"schakelaar|lens)\b", re.I)
+    r"veiligheidskabel|voeding|snoerset|adapter|eindkap|verbinder|"
+    r"opvulring|ring|blindplaat|fitting|noodmodule|schakelaar)\b", re.I)
+TOEBEHOREN_ZACHT = re.compile(r"\b(reflector|lens|kap|driver)\b", re.I)
 
 # Het soort armatuur en de montagewijze staan in de naam. Ze worden nergens uit
 # gerekend, maar de zoekbalk van de tool zoekt erop mee: wie "downlight" typt
@@ -313,7 +320,10 @@ def catalogusfamilies(bestand):
         # driver of een montagebeugel niet. Wat toch een lichtstroom noemt en
         # eruit valt wordt gemeld - dan is het het nakijken waard.
         bruikbaar = ("lichtstroom_lm" in v) or ("vermogen_w" in v)
-        if not naam or TOEBEHOREN.search(naam) or not bruikbaar:
+        volledig = ("lichtstroom_lm" in v) and ("vermogen_w" in v)
+        toebehoren = bool(naam) and (TOEBEHOREN_HARD.search(naam)
+                                     or (TOEBEHOREN_ZACHT.search(naam) and not volledig))
+        if not naam or toebehoren or not bruikbaar:
             overgeslagen += 1
             if "lichtstroom_lm" in v and naam:
                 meldingen.append(f"overgeslagen maar noemt wel een lichtstroom: {code} — {oms[:80]}")

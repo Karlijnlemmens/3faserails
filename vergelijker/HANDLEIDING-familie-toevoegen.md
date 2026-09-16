@@ -116,6 +116,18 @@ Achter de scriptnaam staan twee dingen:
 - **`catalogus`** — de naam van het bestand dat eruit komt. Voor de hele
   catalogus is dat altijd `catalogus`; die overschrijf je gewoon.
 
+Heb je een **losse lijst met aanvullingen** in plaats van een volledige nieuwe
+prijslijst, zet er dan `--aanvullen` achter:
+
+```
+python vergelijker\knip-export.py "C:\Users\jij\Downloads\extra.xlsx" catalogus --aanvullen
+```
+
+Dan blijft staan wat er al staat en komen alleen artikelcodes erbij die er nog
+niet in zaten. Je ziet het in de melding: `3707 artikelen: 3619 stonden er al,
+88 toegevoegd`. Staat een artikel er al maar luidt de omschrijving anders, dan
+wordt het **niet** aangeraakt — welke van de twee klopt is niet aan het script.
+
 Je krijgt te zien wat er gebeurd is:
 
 ```
@@ -160,12 +172,21 @@ verkeerd getal op een blad dat naar een klant gaat.
 
 ### Wat er níét in komt
 
-Frames, drivers, reflectoren, montagebeugels, opvulringen, noodmodules,
-afstandsbedieningen en losse LED-modules gaan er automatisch uit — dat zijn
-geen armaturen en dus geen alternatief voor een armatuur. De regel is: staat er
-zo'n woord in de naam, of noemt de regel géén lichtstroom én géén vermogen, dan
-valt hij af. Je ziet bij het bouwen hoeveel dat er waren. Valt er iets uit dat
-wél een lichtstroom noemt, dan wordt dat regel voor regel gemeld.
+Frames, montagebeugels, opvulringen, noodmodules, afstandsbedieningen en losse
+LED-modules gaan er automatisch uit — dat zijn geen armaturen en dus geen
+alternatief voor een armatuur. De regel is: staat er zo'n woord in de naam, of
+noemt de regel géén lichtstroom én géén vermogen, dan valt hij af.
+
+Vier woorden liggen lastiger, omdat ze ook de optiek van een armatuur
+beschrijven: **reflector, lens, kap en driver**. "Railspot Piccolo 15W 24D
+Reflector" is een losse reflector, maar "Bandrasterarmatuur Optic matte
+reflector 147x1570mm 26-36W 3550-4700lm" is een armatuur. Die vallen daarom
+alleen af als de regel niet zowel een lichtstroom als een vermogen noemt — een
+armatuur noemt allebei, een onderdeel hooguit één.
+
+Je ziet bij het bouwen hoeveel regels er zijn afgevallen. Valt er iets uit dat
+wél een lichtstroom noemt, dan wordt dat regel voor regel gemeld — dat is precies
+het geval dat je wilt nakijken.
 
 ---
 

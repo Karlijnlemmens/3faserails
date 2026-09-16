@@ -24,8 +24,13 @@ veranderd zijn, bij een .xlsx alleen dat het bestand anders is.
 
 Gebruik, vanuit de map vergelijker/:
 
-    python knip-export.py ~/Downloads/prijslijst-mondial.xlsx mondial-downlight
+    python knip-export.py ~/Downloads/Artikelnaam_codes.xlsx catalogus
+    python knip-export.py ~/Downloads/extra.xlsx catalogus --aanvullen
     python knip-export.py ~/Downloads/*.xlsx          # naam uit de bestandsnaam
+
+Met --aanvullen blijft staan wat er al staat en worden alleen artikelcodes
+toegevoegd die er nog niet in zitten. Zonder die vlag wordt het bestand
+overschreven.
 
 De tweede waarde is de naam die in families.json bij "bron_excel" staat; de
 extensie mag je weglaten. Laat je hem weg, dan wordt de naam van het
@@ -70,7 +75,18 @@ def lees(pad):
     return list(ws.iter_rows(values_only=True))
 
 
-def knip(pad, naam):
+def bestaande(uit):
+    """De regels die al in data/bron/<naam>.csv staan, op artikelcode."""
+    if not uit.exists():
+        return {}, []
+    with uit.open(newline="", encoding="utf-8-sig") as f:
+        rijen = list(csv.reader(f))
+    if not rijen:
+        return {}, []
+    return {r[0]: r for r in rijen[1:] if r and r[0]}, rijen[0]
+
+
+def knip(pad, naam, aanvullen=False):
     rijen = lees(pad)
     if not rijen:
         sys.exit(f"{pad.name} is leeg.")
@@ -92,10 +108,25 @@ def knip(pad, naam):
 
     uit = BRON / (naam + ".csv")
     uit.parent.mkdir(parents=True, exist_ok=True)
-    geschreven = 0
+
+    # Met --aanvullen blijft staan wat er al staat: een tweede export vult de
+    # catalogus aan in plaats van hem te vervangen. Regels die er al zijn worden
+    # niet aangeraakt - ook niet als de omschrijving inmiddels anders luidt, want
+    # dan is het aan jou om te zeggen welke van de twee klopt.
+    al, oudekop = ({}, [])
+    if aanvullen:
+        al, oudekop = bestaande(uit)
+        if oudekop and oudekop != [n for n, _ in gekozen]:
+            sys.exit(f"{uit.name} heeft andere kolommen ({', '.join(oudekop)}).\n"
+                     f"Aanvullen kan alleen op een bestand met dezelfde kolommen.")
+
+    geschreven = nieuwe = overgeslagen = 0
     with uit.open("w", newline="", encoding="utf-8") as f:
         schrijver = csv.writer(f)
         schrijver.writerow([n for n, _ in gekozen])
+        for r in al.values():           # eerst wat er al stond, in dezelfde volgorde
+            schrijver.writerow(r)
+            geschreven += 1
         for r in rijen[1:]:
             if not r:
                 continue
@@ -103,11 +134,21 @@ def knip(pad, naam):
                        for _, i in gekozen]
             if not waarden[0]:          # geen artikelcode: geen artikel
                 continue
+            if waarden[0] in al:
+                overgeslagen += 1
+                continue
             schrijver.writerow(waarden)
             geschreven += 1
+            nieuwe += 1
 
     weggelaten = [k for k in kop if k and k not in [n for n, i in gekozen if i is not None]]
-    print(f"{pad.name} → data/bron/{uit.name}  ({geschreven} artikelen)")
+    if aanvullen:
+        print(f"{pad.name} → data/bron/{uit.name}  ({geschreven} artikelen: "
+              f"{len(al)} stonden er al, {nieuwe} toegevoegd)")
+        if overgeslagen:
+            print(f"   {overgeslagen} regels stonden er al en zijn gelaten zoals ze waren")
+    else:
+        print(f"{pad.name} → data/bron/{uit.name}  ({geschreven} artikelen)")
     if ontbreekt:
         print(f"   niet gevonden, blijft leeg: {', '.join(ontbreekt)}")
     if weggelaten:
@@ -115,14 +156,15 @@ def knip(pad, naam):
 
 
 def main():
-    argumenten = sys.argv[1:]
+    argumenten = [a for a in sys.argv[1:] if not a.startswith("--")]
+    aanvullen = "--aanvullen" in sys.argv[1:]
     if not argumenten:
         sys.exit(__doc__.strip())
     pad = Path(argumenten[0]).expanduser()
     if not pad.exists():
         sys.exit(f"Niet gevonden: {pad}")
     naam = (argumenten[1] if len(argumenten) > 1 else pad.stem)
-    knip(pad, Path(naam).stem)
+    knip(pad, Path(naam).stem, aanvullen)
 
 
 if __name__ == "__main__":

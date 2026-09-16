@@ -2276,6 +2276,34 @@
       "armatuurtype": "railspot"
     },
     {
+      "id": "led-3-fase-railspot-alto-sf-driver",
+      "naam": "LED 3-Fase Railspot Alto SF Driver",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 29.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 4134
+          },
+          "cct_tekst": "3000K",
+          "type": "LED 3-Fase Railspot Alto SF Driver",
+          "kleur": "zwart",
+          "artikelcode": "9172508",
+          "basiscode": "9172508",
+          "omschrijving": "Pragmalux LED 3-Fase Railspot Alto SF Driver 29W 3000K CRI>90 36D 4134lm Zwart",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "railspot"
+    },
+    {
       "id": "led-3-fase-railspot-alto-vlees",
       "naam": "LED 3-Fase Railspot Alto VLEES",
       "varianten": [
@@ -9868,6 +9896,467 @@
       ]
     },
     {
+      "id": "led-bandrasterarmatuur-optic-hoogglans-reflector-110x1482mm",
+      "naam": "LED Bandrasterarmatuur Optic hoogglans reflector 110x1482mm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4400,
+            "max": 4800
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "110x1482",
+          "type": "LED Bandrasterarmatuur Optic hoogglans reflector 110x1482mm",
+          "kleur": "wit",
+          "artikelcode": "2019669",
+          "basiscode": "2019669",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic hoogglans reflector 110x1482mm 36W 4400-4800lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 excl. driver + plenum",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "bandrasterarmatuur"
+    },
+    {
+      "id": "led-bandrasterarmatuur-optic-hoogglans-reflector-145x1720mm",
+      "naam": "LED Bandrasterarmatuur Optic hoogglans reflector 145x1720mm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 36.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 4800
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "145x1720",
+          "type": "LED Bandrasterarmatuur Optic hoogglans reflector 145x1720mm",
+          "kleur": "wit",
+          "artikelcode": "H2011595-PH-S2M",
+          "basiscode": "H2011595-PH-S2M",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic hoogglans reflector 145x1720mm 26-36W 3600-4800lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + Philips driver + plenum + Schuko 2M",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "bandrasterarmatuur"
+    },
+    {
+      "id": "led-bandrasterarmatuur-optic-hoogglans-reflector-165x1196mm",
+      "naam": "LED Bandrasterarmatuur Optic hoogglans reflector 165x1196mm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 36.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 4800
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "165x1196",
+          "type": "LED Bandrasterarmatuur Optic hoogglans reflector 165x1196mm",
+          "kleur": "wit",
+          "artikelcode": "2031166",
+          "basiscode": "2031166",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic hoogglans reflector 165x1196mm 26-36W 3600-4800lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 excl. driver",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "bandrasterarmatuur"
+    },
+    {
+      "id": "led-bandrasterarmatuur-optic-hoogglans-reflector-165x1497mm",
+      "naam": "LED Bandrasterarmatuur Optic hoogglans reflector 165x1497mm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 36.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 4800
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "165x1497",
+          "type": "LED Bandrasterarmatuur Optic hoogglans reflector 165x1497mm",
+          "kleur": "wit",
+          "artikelcode": "2031180",
+          "basiscode": "2031180",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic hoogglans reflector 165x1497mm 26-36W 3600-4800lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 excl. driver",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "bandrasterarmatuur"
+    },
+    {
+      "id": "led-bandrasterarmatuur-optic-hoogglans-reflector-185x1542mm",
+      "naam": "LED Bandrasterarmatuur Optic hoogglans reflector 185x1542mm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 36.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 4800
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "185x1542",
+          "type": "LED Bandrasterarmatuur Optic hoogglans reflector 185x1542mm",
+          "kleur": "wit",
+          "artikelcode": "H2011595",
+          "basiscode": "H2011595",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic hoogglans reflector 185x1542mm 26-36W 3600-4800lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 excl. driver + plenum",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "bandrasterarmatuur"
+    },
+    {
+      "id": "led-bandrasterarmatuur-optic-matte-reflector-115x1495mm",
+      "naam": "LED Bandrasterarmatuur Optic matte reflector 115x1495mm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 36.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 4800
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "115x1495",
+          "type": "LED Bandrasterarmatuur Optic matte reflector 115x1495mm",
+          "kleur": "wit",
+          "artikelcode": "2029484",
+          "basiscode": "2029484",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic matte reflector 115x1495mm 26-36W 3600-4800lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 excl. Philips driver + plenum",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 36.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 4800
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "115x1495",
+          "type": "LED Bandrasterarmatuur Optic matte reflector 115x1495mm",
+          "kleur": "wit",
+          "artikelcode": "2029484-PH",
+          "basiscode": "2029484",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic matte reflector 115x1495mm 26-36W 3600-4800lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + Philips driver + plenum",
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "bandrasterarmatuur"
+    },
+    {
+      "id": "led-bandrasterarmatuur-optic-matte-reflector-147x1570mm",
+      "naam": "LED Bandrasterarmatuur Optic matte reflector 147x1570mm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 36.0
+          },
+          "lichtstroom_lm": {
+            "min": 3550,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "147x1570",
+          "type": "LED Bandrasterarmatuur Optic matte reflector 147x1570mm",
+          "kleur": "wit",
+          "artikelcode": "2033214",
+          "basiscode": "2033214",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic matte reflector 147x1570mm 26-36W 3550-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 excl.driver + plenum",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 36.0
+          },
+          "lichtstroom_lm": {
+            "min": 3550,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "147x1570",
+          "type": "LED Bandrasterarmatuur Optic matte reflector 147x1570mm",
+          "kleur": "wit",
+          "artikelcode": "2033214-PH",
+          "basiscode": "2033214",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic matte reflector 147x1570mm 26-36W 3550-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + Philips driver + plenum",
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "bandrasterarmatuur"
+    },
+    {
+      "id": "led-bandrasterarmatuur-optic-matte-reflector-180x1555mm",
+      "naam": "LED Bandrasterarmatuur Optic matte reflector 180x1555mm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 36.0
+          },
+          "lichtstroom_lm": {
+            "min": 3550,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "180x1555",
+          "type": "LED Bandrasterarmatuur Optic matte reflector 180x1555mm",
+          "kleur": "wit",
+          "artikelcode": "2031883",
+          "basiscode": "2031883",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic matte reflector 180x1555mm 26-36W 3550-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003  excl. driver + plenum",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 36.0
+          },
+          "lichtstroom_lm": {
+            "min": 3550,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "180x1555",
+          "type": "LED Bandrasterarmatuur Optic matte reflector 180x1555mm",
+          "kleur": "wit",
+          "artikelcode": "2031883-PH",
+          "basiscode": "2031883",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic matte reflector 180x1555mm 26-36W 3550-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + Philips driver + plenum",
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "bandrasterarmatuur"
+    },
+    {
+      "id": "led-bandrasterarmatuur-optic-matte-reflector-195x1545mm",
+      "naam": "LED Bandrasterarmatuur Optic matte reflector 195x1545mm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "195x1545",
+          "type": "LED Bandrasterarmatuur Optic matte reflector 195x1545mm",
+          "kleur": "wit",
+          "artikelcode": "2030954",
+          "basiscode": "2030954",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic matte reflector 195x1545mm 36W 4350-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 excl.driver + plenum",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "195x1545",
+          "type": "LED Bandrasterarmatuur Optic matte reflector 195x1545mm",
+          "kleur": "wit",
+          "artikelcode": "2030954-DA",
+          "basiscode": "2030954-DA",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic matte reflector 195x1545mm 36W 4350-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + Philips DALI driver + plenum",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "195x1545",
+          "type": "LED Bandrasterarmatuur Optic matte reflector 195x1545mm",
+          "kleur": "wit",
+          "artikelcode": "2030954-PH",
+          "basiscode": "2030954",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic matte reflector 195x1545mm 36W 4350-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + Philips driver + plenum",
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "195x1545",
+          "type": "LED Bandrasterarmatuur Optic matte reflector 195x1545mm",
+          "kleur": "zwart",
+          "artikelcode": "2030961",
+          "basiscode": "2030961",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic matte reflector 195x1545mm 36W 4350-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 Zwart RAL9005 excl.driver + plenum",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "195x1545",
+          "type": "LED Bandrasterarmatuur Optic matte reflector 195x1545mm",
+          "kleur": "zwart",
+          "artikelcode": "2030961-PH",
+          "basiscode": "2030961",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic matte reflector 195x1545mm 36W 4350-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 Zwart RAL9005 + Philips driver + plenum",
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "6500K",
+          "afmetingen_tekst": "195x1545",
+          "type": "LED Bandrasterarmatuur Optic matte reflector 195x1545mm",
+          "kleur": "wit",
+          "artikelcode": "2030978",
+          "basiscode": "2030978",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic matte reflector 195x1545mm 36W 4350-4750lm 6500K CRI>90 UGR<16 wit RAL9003 excl.driver + plenum",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "6500K",
+          "afmetingen_tekst": "195x1545",
+          "type": "LED Bandrasterarmatuur Optic matte reflector 195x1545mm",
+          "kleur": "wit",
+          "artikelcode": "2030978-DA",
+          "basiscode": "2030978-DA",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic matte reflector 195x1545mm 36W 4350-4750lm 6500K CRI>90 UGR<16 wit RAL9003 + Philips DALI driver + plenum",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "6500K",
+          "afmetingen_tekst": "195x1545",
+          "type": "LED Bandrasterarmatuur Optic matte reflector 195x1545mm",
+          "kleur": "wit",
+          "artikelcode": "2030978-PH",
+          "basiscode": "2030978",
+          "omschrijving": "Pragmalux LED Bandrasterarmatuur Optic matte reflector 195x1545mm 36W 4350-4750lm 6500K CRI>90 UGR<16 wit RAL9003 + Philips driver + plenum",
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "bandrasterarmatuur"
+    },
+    {
       "id": "led-bandrasterarmatuur-inbouw-1195x145mm",
       "naam": "LED Bandrasterarmatuur inbouw 1195x145mm",
       "varianten": [
@@ -10732,6 +11221,28 @@
           "afmetingen_tekst": "Ø300",
           "type": "LED Bulkhead Venus G2",
           "ip": 65,
+          "artikelcode": "1045443",
+          "basiscode": "1045443",
+          "omschrijving": "Pragmalux LED Bulkhead Venus G2 IP65 2,75W-5W 3000K-5000K 3-CCT 295-570lm Ø300",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 2.75,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 295,
+            "max": 570
+          },
+          "cct_tekst": "3000K-5000K 3-CCT",
+          "buitenmaat_mm": 300,
+          "afmetingen_tekst": "Ø300",
+          "type": "LED Bulkhead Venus G2",
+          "ip": 65,
           "sensor": true,
           "artikelcode": "1045443-DS",
           "basiscode": "1045443-DS",
@@ -10760,6 +11271,76 @@
           "artikelcode": "1045443-DSN",
           "basiscode": "1045443-DSN",
           "omschrijving": "Pragmalux LED Bulkhead Venus G2 IP65 2,75W-5W 3000K-5000K 3-CCT 295-570lm Ø300 + Step-dim daglicht & bewegingssensor & noodmodule 1uur autotest",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 2.75,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 295,
+            "max": 570
+          },
+          "cct_tekst": "3000K-5000K 3-CCT",
+          "buitenmaat_mm": 300,
+          "afmetingen_tekst": "Ø300",
+          "type": "LED Bulkhead Venus G2",
+          "ip": 65,
+          "noodverlichting": "3u",
+          "artikelcode": "1045443-N",
+          "basiscode": "1045443",
+          "omschrijving": "Pragmalux LED Bulkhead Venus G2 IP65 2,75W-5W 3000K-5000K 3-CCT 295-570lm Ø300 + Noodmodule 1uur autotest",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 2.75,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 295,
+            "max": 570
+          },
+          "cct_tekst": "3000K-5000K 3-CCT",
+          "buitenmaat_mm": 300,
+          "afmetingen_tekst": "Ø300",
+          "type": "LED Bulkhead Venus G2",
+          "ip": 65,
+          "sensor": true,
+          "artikelcode": "1045443-S",
+          "basiscode": "1045443",
+          "omschrijving": "Pragmalux LED Bulkhead Venus G2 IP65 2,75W-5W 3000K-5000K 3-CCT 295-570lm Ø300 + Step-dim bewegingssensor",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 2.75,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 295,
+            "max": 570
+          },
+          "cct_tekst": "3000K-5000K 3-CCT",
+          "buitenmaat_mm": 300,
+          "afmetingen_tekst": "Ø300",
+          "type": "LED Bulkhead Venus G2",
+          "ip": 65,
+          "sensor": true,
+          "noodverlichting": "3u",
+          "artikelcode": "1045443-SN",
+          "basiscode": "1045443",
+          "omschrijving": "Pragmalux LED Bulkhead Venus G2 IP65 2,75W-5W 3000K-5000K 3-CCT 295-570lm Ø300 + Step-dim bewegingssensor & noodmodule 1uur autotest",
           "driver": null,
           "dimprotocol": null,
           "driver_inbegrepen": false
@@ -17549,6 +18130,185 @@
         }
       ],
       "merk": "Pragmalux"
+    },
+    {
+      "id": "led-gevelarmatuur-briq-up-down",
+      "naam": "LED Gevelarmatuur Briq Up/Down",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 7.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 800,
+            "max": 840
+          },
+          "cct_tekst": "4000K 2CCT",
+          "type": "LED Gevelarmatuur Briq Up/Down",
+          "kleur": "zwart",
+          "ip": 65,
+          "artikelcode": "1082615-DA",
+          "basiscode": "1082615-DA",
+          "omschrijving": "Pragmalux LED Gevelarmatuur Briq Up/Down IP65 C4 Down 7W 800-840lm Up 3W 400-420lm 3000-4000K 2CCT Grafiet Zwart RAL9011 DALI-2",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 7.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 800,
+            "max": 840
+          },
+          "cct_tekst": "4000K 2CCT",
+          "type": "LED Gevelarmatuur Briq Up/Down",
+          "kleur": "zwart",
+          "ip": 65,
+          "artikelcode": "1082615-DS",
+          "basiscode": "1082615-DS",
+          "omschrijving": "Pragmalux LED Gevelarmatuur Briq Up/Down IP65 C4 Down 7W 800-840lm Up 3W 400-420lm 3000-4000K 2CCT Grafiet Zwart RAL9011 + Daglichtsensor",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 7.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 800,
+            "max": 840
+          },
+          "cct_tekst": "4000K 2CCT",
+          "type": "LED Gevelarmatuur Briq Up/Down",
+          "kleur": "zwart",
+          "ip": 65,
+          "artikelcode": "1082615-FD",
+          "basiscode": "1082615-FD",
+          "omschrijving": "Pragmalux LED Gevelarmatuur Briq Up/Down IP65 C4 Down 7W 800-840lm Up 3W 400-420lm 3000-4000K 2CCT Grafiet Zwart RAL9011 fase dimbaar",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 7.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 800,
+            "max": 840
+          },
+          "cct_tekst": "4000K 2CCT",
+          "type": "LED Gevelarmatuur Briq Up/Down",
+          "kleur": "zwart",
+          "ip": 65,
+          "artikelcode": "1082615-PR",
+          "basiscode": "1082615",
+          "omschrijving": "Pragmalux LED Gevelarmatuur Briq Up/Down IP65 C4 Down 7W 800-840lm Up 3W 400-420lm 3000-4000K 2CCT Grafiet Zwart RAL9011",
+          "driver": "Pragmalux",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 7.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 800,
+            "max": 840
+          },
+          "cct_tekst": "4000K 2CCT",
+          "type": "LED Gevelarmatuur Briq Up/Down",
+          "kleur": "wit",
+          "ip": 65,
+          "artikelcode": "1084176-DA",
+          "basiscode": "1084176-DA",
+          "omschrijving": "Pragmalux LED Gevelarmatuur Briq Up/Down IP65 C4 Down 7W 800-840lm Up 3W 400-420lm 3000-4000K 2CCT Wit RAL 9003 DALI-2",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 7.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 800,
+            "max": 840
+          },
+          "cct_tekst": "4000K 2CCT",
+          "type": "LED Gevelarmatuur Briq Up/Down",
+          "kleur": "wit",
+          "ip": 65,
+          "artikelcode": "1084176-DS",
+          "basiscode": "1084176-DS",
+          "omschrijving": "Pragmalux LED Gevelarmatuur Briq Up/Down IP65 C4 Down 7W 800-840lm Up 3W 400-420lm 3000-4000K 2CCT Wit RAL 9003 + Daglichtsensor",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 7.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 800,
+            "max": 840
+          },
+          "cct_tekst": "4000K 2CCT",
+          "type": "LED Gevelarmatuur Briq Up/Down",
+          "kleur": "wit",
+          "ip": 65,
+          "artikelcode": "1084176-FD",
+          "basiscode": "1084176-FD",
+          "omschrijving": "Pragmalux LED Gevelarmatuur Briq Up/Down IP65 C4 Down 7W 800-840lm Up 3W 400-420lm 3000-4000K 2CCT Wit RAL 9003 fase dimbaar",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 7.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 800,
+            "max": 840
+          },
+          "cct_tekst": "4000K 2CCT",
+          "type": "LED Gevelarmatuur Briq Up/Down",
+          "kleur": "wit",
+          "ip": 65,
+          "artikelcode": "1084176-PR",
+          "basiscode": "1084176",
+          "omschrijving": "Pragmalux LED Gevelarmatuur Briq Up/Down IP65 C4 Down 7W 800-840lm Up 3W 400-420lm 3000-4000K 2CCT Wit RAL 9003",
+          "driver": "Pragmalux",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "gevelarmatuur",
+      "montagewijzen": [
+        "wand"
+      ]
     },
     {
       "id": "led-gevelarmatuur-cilindro-60-up-down",
@@ -26191,6 +26951,622 @@
       ]
     },
     {
+      "id": "led-opbouwarmatuur-optic-hoogglans-reflector-20x120cm",
+      "naam": "LED Opbouwarmatuur Optic hoogglans reflector 20x120cm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4400,
+            "max": 4800
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "20x120",
+          "type": "LED Opbouwarmatuur Optic hoogglans reflector 20x120cm",
+          "kleur": "wit",
+          "uitvoering": "opbouw",
+          "artikelcode": "H1089348-TC-DA",
+          "basiscode": "H1089348",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic hoogglans reflector 20x120cm 36W 4400-4800lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4400,
+            "max": 4800
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "20x120",
+          "type": "LED Opbouwarmatuur Optic hoogglans reflector 20x120cm",
+          "kleur": "zwart",
+          "uitvoering": "opbouw",
+          "artikelcode": "H1089355-TC-DA",
+          "basiscode": "H1089355",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic hoogglans reflector 20x120cm 36W 4400-4800lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 zwart RAL9005 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "opbouwarmatuur",
+      "montagewijzen": [
+        "opbouw"
+      ]
+    },
+    {
+      "id": "led-opbouwarmatuur-optic-hoogglans-reflector-30x120cm",
+      "naam": "LED Opbouwarmatuur Optic hoogglans reflector 30x120cm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4400,
+            "max": 4800
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Opbouwarmatuur Optic hoogglans reflector 30x120cm",
+          "kleur": "wit",
+          "uitvoering": "opbouw",
+          "artikelcode": "H1089324-TC-DA",
+          "basiscode": "H1089324",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic hoogglans reflector 30x120cm 36W 4400-4800lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4400,
+            "max": 4800
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Opbouwarmatuur Optic hoogglans reflector 30x120cm",
+          "kleur": "zwart",
+          "uitvoering": "opbouw",
+          "artikelcode": "H1089331-TC-DA",
+          "basiscode": "H1089331",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic hoogglans reflector 30x120cm 36W 4400-4800lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 zwart RAL9005 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "opbouwarmatuur",
+      "montagewijzen": [
+        "opbouw"
+      ]
+    },
+    {
+      "id": "led-opbouwarmatuur-optic-hoogglans-reflector-60x60cm",
+      "naam": "LED Opbouwarmatuur Optic hoogglans reflector 60x60cm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4400,
+            "max": 4800
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Opbouwarmatuur Optic hoogglans reflector 60x60cm",
+          "kleur": "wit",
+          "uitvoering": "opbouw",
+          "artikelcode": "H1089300-TC-DA",
+          "basiscode": "H1089300",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic hoogglans reflector 60x60cm 36W 4400-4800lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4400,
+            "max": 4800
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Opbouwarmatuur Optic hoogglans reflector 60x60cm",
+          "kleur": "zwart",
+          "uitvoering": "opbouw",
+          "artikelcode": "H1089317-TC-DA",
+          "basiscode": "H1089317",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic hoogglans reflector 60x60cm 36W 4400-4800lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 zwart RAL9005 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "opbouwarmatuur",
+      "montagewijzen": [
+        "opbouw"
+      ]
+    },
+    {
+      "id": "led-opbouwarmatuur-optic-matte-reflector-150x1520mm",
+      "naam": "LED Opbouwarmatuur Optic matte reflector 150x1520mm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "150x1520",
+          "type": "LED Opbouwarmatuur Optic matte reflector 150x1520mm",
+          "kleur": "wit",
+          "uitvoering": "opbouw",
+          "artikelcode": "2030985",
+          "basiscode": "2030985",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic matte reflector 150x1520mm 36W 4350-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 excl.driver",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "150x1520",
+          "type": "LED Opbouwarmatuur Optic matte reflector 150x1520mm",
+          "kleur": "wit",
+          "uitvoering": "opbouw",
+          "artikelcode": "2030985-DA",
+          "basiscode": "2030985-DA",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic matte reflector 150x1520mm 36W 4350-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + Philips DALI driver",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "150x1520",
+          "type": "LED Opbouwarmatuur Optic matte reflector 150x1520mm",
+          "kleur": "wit",
+          "uitvoering": "opbouw",
+          "artikelcode": "2030985-PH",
+          "basiscode": "2030985",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic matte reflector 150x1520mm 36W 4350-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + Philips driver",
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "6500K",
+          "afmetingen_tekst": "150x1520",
+          "type": "LED Opbouwarmatuur Optic matte reflector 150x1520mm",
+          "kleur": "wit",
+          "uitvoering": "opbouw",
+          "artikelcode": "2030992",
+          "basiscode": "2030992",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic matte reflector 150x1520mm 36W 4350-4750lm 6500K CRI>90 UGR<16 wit RAL9003 excl.driver",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "6500K",
+          "afmetingen_tekst": "150x1520",
+          "type": "LED Opbouwarmatuur Optic matte reflector 150x1520mm",
+          "kleur": "wit",
+          "uitvoering": "opbouw",
+          "artikelcode": "2030992-PH",
+          "basiscode": "2030992",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic matte reflector 150x1520mm 36W 4350-4750lm 6500K CRI>90 UGR<16 wit RAL9003 + Philips driver",
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "opbouwarmatuur",
+      "montagewijzen": [
+        "opbouw"
+      ]
+    },
+    {
+      "id": "led-opbouwarmatuur-optic-matte-reflector-20x120cm",
+      "naam": "LED Opbouwarmatuur Optic matte reflector 20x120cm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "20x120",
+          "type": "LED Opbouwarmatuur Optic matte reflector 20x120cm",
+          "kleur": "wit",
+          "uitvoering": "opbouw",
+          "artikelcode": "1089348-TC-DA",
+          "basiscode": "1089348",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic matte reflector 20x120cm 36W 4350-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "20x120",
+          "type": "LED Opbouwarmatuur Optic matte reflector 20x120cm",
+          "kleur": "zwart",
+          "uitvoering": "opbouw",
+          "artikelcode": "1089355-TC-DA",
+          "basiscode": "1089355",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic matte reflector 20x120cm 36W 4350-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 zwart RAL9005 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "opbouwarmatuur",
+      "montagewijzen": [
+        "opbouw"
+      ]
+    },
+    {
+      "id": "led-opbouwarmatuur-optic-matte-reflector-30x120cm",
+      "naam": "LED Opbouwarmatuur Optic matte reflector 30x120cm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Opbouwarmatuur Optic matte reflector 30x120cm",
+          "kleur": "wit",
+          "uitvoering": "opbouw",
+          "artikelcode": "1089324-TC-DA",
+          "basiscode": "1089324",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic matte reflector 30x120cm 36W 4350-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Opbouwarmatuur Optic matte reflector 30x120cm",
+          "kleur": "zwart",
+          "uitvoering": "opbouw",
+          "artikelcode": "1089331-TC-DA",
+          "basiscode": "1089331",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic matte reflector 30x120cm 36W 4350-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 zwart RAL9005 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "opbouwarmatuur",
+      "montagewijzen": [
+        "opbouw"
+      ]
+    },
+    {
+      "id": "led-opbouwarmatuur-optic-matte-reflector-60x60cm",
+      "naam": "LED Opbouwarmatuur Optic matte reflector 60x60cm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Opbouwarmatuur Optic matte reflector 60x60cm",
+          "kleur": "wit",
+          "uitvoering": "opbouw",
+          "artikelcode": "1089300-TC-DA",
+          "basiscode": "1089300",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic matte reflector 60x60cm 36W 4350-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4350,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Opbouwarmatuur Optic matte reflector 60x60cm",
+          "kleur": "zwart",
+          "uitvoering": "opbouw",
+          "artikelcode": "1089317-TC-DA",
+          "basiscode": "1089317",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic matte reflector 60x60cm 36W 4350-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 zwart RAL9005 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "opbouwarmatuur",
+      "montagewijzen": [
+        "opbouw"
+      ]
+    },
+    {
+      "id": "led-opbouwarmatuur-optic-zwarte-reflector-20x120cm",
+      "naam": "LED Opbouwarmatuur Optic zwarte reflector 20x120cm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4050,
+            "max": 4400
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "20x120",
+          "type": "LED Opbouwarmatuur Optic zwarte reflector 20x120cm",
+          "kleur": "wit",
+          "uitvoering": "opbouw",
+          "artikelcode": "Z1089348-TC-DA",
+          "basiscode": "Z1089348",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic zwarte reflector 20x120cm 36W 4050-4400lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4050,
+            "max": 4400
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "20x120",
+          "type": "LED Opbouwarmatuur Optic zwarte reflector 20x120cm",
+          "kleur": "zwart",
+          "uitvoering": "opbouw",
+          "artikelcode": "Z1089355-TC-DA",
+          "basiscode": "Z1089355",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic zwarte reflector 20x120cm 36W 4050-4400lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 zwart RAL9005 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "opbouwarmatuur",
+      "montagewijzen": [
+        "opbouw"
+      ]
+    },
+    {
+      "id": "led-opbouwarmatuur-optic-zwarte-reflector-30x120cm",
+      "naam": "LED Opbouwarmatuur Optic zwarte reflector 30x120cm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4050,
+            "max": 4400
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Opbouwarmatuur Optic zwarte reflector 30x120cm",
+          "kleur": "wit",
+          "uitvoering": "opbouw",
+          "artikelcode": "Z1089324-TC-DA",
+          "basiscode": "Z1089324",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic zwarte reflector 30x120cm 36W 4050-4400lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4050,
+            "max": 4400
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Opbouwarmatuur Optic zwarte reflector 30x120cm",
+          "kleur": "zwart",
+          "uitvoering": "opbouw",
+          "artikelcode": "Z1089331-TC-DA",
+          "basiscode": "Z1089331",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic zwarte reflector 30x120cm 36W 4050-4400lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 zwart RAL9005 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "opbouwarmatuur",
+      "montagewijzen": [
+        "opbouw"
+      ]
+    },
+    {
+      "id": "led-opbouwarmatuur-optic-zwarte-reflector-60x60cm",
+      "naam": "LED Opbouwarmatuur Optic zwarte reflector 60x60cm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4050,
+            "max": 4400
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Opbouwarmatuur Optic zwarte reflector 60x60cm",
+          "kleur": "wit",
+          "uitvoering": "opbouw",
+          "artikelcode": "Z1089300-TC-DA",
+          "basiscode": "Z1089300",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic zwarte reflector 60x60cm 36W 4050-4400lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4050,
+            "max": 4400
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Opbouwarmatuur Optic zwarte reflector 60x60cm",
+          "kleur": "zwart",
+          "uitvoering": "opbouw",
+          "artikelcode": "Z1089317-TC-DA",
+          "basiscode": "Z1089317",
+          "omschrijving": "Pragmalux LED Opbouwarmatuur Optic zwarte reflector 60x60cm 36W 4050-4400lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 zwart RAL9005 + TCI DALI driver",
+          "driver": "TCI DALI",
+          "dimprotocol": "dali",
+          "driver_inbegrepen": true
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "opbouwarmatuur",
+      "montagewijzen": [
+        "opbouw"
+      ]
+    },
+    {
       "id": "led-opbouwarmatuur-opus-prisma-160x1300mm",
       "naam": "LED Opbouwarmatuur Opus prisma 160x1300mm",
       "varianten": [
@@ -32580,6 +33956,90 @@
             "max": 5500
           },
           "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "1048949-PH-800",
+          "basiscode": "1048949-PH-800",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 60x60cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003+Philips driver",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "1048949-PH-DA",
+          "basiscode": "1048949",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 60x60cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003+Philips DALI driver",
+          "driver": "Philips DALI2",
+          "dimprotocol": "dali2/push-dim",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "1048949-PR",
+          "basiscode": "1048949",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 60x60cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003+driver",
+          "driver": "Pragmalux",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "1048949-PR-UN",
+          "basiscode": "1048949-PR",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 60x60cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003+universele driver (DALI2, 1-10V, Push-dim)",
+          "driver": "Universeel",
+          "dimprotocol": "dali2/1-10v/push-dim",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
           "afmetingen_tekst": "30x120",
           "type": "LED Paneel Flexcore",
           "kleur": "wit",
@@ -32590,6 +34050,90 @@
           "driver": null,
           "dimprotocol": null,
           "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "1048956-PH-800",
+          "basiscode": "1048956-PH-800",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003+Philips driver",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "1048956-PH-DA",
+          "basiscode": "1048956",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003 +Philips DALI driver",
+          "driver": "Philips DALI2",
+          "dimprotocol": "dali2/push-dim",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "1048956-PR",
+          "basiscode": "1048956",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003 +driver",
+          "driver": "Pragmalux",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "1048956-PR-UN",
+          "basiscode": "1048956-PR",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003+universele driver (DALI2, 1-10V, Push-dim)",
+          "driver": "Universeel",
+          "dimprotocol": "dali2/1-10v/push-dim",
+          "driver_inbegrepen": true
         },
         {
           "vermogen_w": {
@@ -32622,6 +34166,90 @@
             "max": 5500
           },
           "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Flexcore",
+          "kleur": "zwart",
+          "ip": 44,
+          "artikelcode": "1048963-PH-800",
+          "basiscode": "1048963-PH-800",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 60x60cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 zwart RAL9005+Philips driver",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Flexcore",
+          "kleur": "zwart",
+          "ip": 44,
+          "artikelcode": "1048963-PH-DA",
+          "basiscode": "1048963",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 60x60cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 zwart RAL9005 +Philips DALI driver",
+          "driver": "Philips DALI2",
+          "dimprotocol": "dali2/push-dim",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Flexcore",
+          "kleur": "zwart",
+          "ip": 44,
+          "artikelcode": "1048963-PR",
+          "basiscode": "1048963",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 60x60cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 zwart RAL9005 +driver",
+          "driver": "Pragmalux",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Flexcore",
+          "kleur": "zwart",
+          "ip": 44,
+          "artikelcode": "1048963-PR-UN",
+          "basiscode": "1048963-PR",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 60x60cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 zwart RAL9005+universele driver (DALI2, 1-10V, Push-dim)",
+          "driver": "Universeel",
+          "dimprotocol": "dali2/1-10v/push-dim",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
           "afmetingen_tekst": "30x120",
           "type": "LED Paneel Flexcore",
           "kleur": "zwart",
@@ -32643,6 +34271,90 @@
             "max": 5500
           },
           "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "zwart",
+          "ip": 44,
+          "artikelcode": "1048970-PH-800",
+          "basiscode": "1048970-PH-800",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 zwart RAL9005+Philips driver",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "zwart",
+          "ip": 44,
+          "artikelcode": "1048970-PH-DA",
+          "basiscode": "1048970",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 zwart RAL9005 +Philips DALI driver",
+          "driver": "Philips DALI2",
+          "dimprotocol": "dali2/push-dim",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "zwart",
+          "ip": 44,
+          "artikelcode": "1048970-PR",
+          "basiscode": "1048970",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 zwart RAL9005 +driver",
+          "driver": "Pragmalux",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "zwart",
+          "ip": 44,
+          "artikelcode": "1048970-PR-UN",
+          "basiscode": "1048970-PR",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 zwart RAL9005+universele driver (DALI2, 1-10V, Push-dim)",
+          "driver": "Universeel",
+          "dimprotocol": "dali2/1-10v/push-dim",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
           "afmetingen_tekst": "60x60",
           "type": "LED Paneel Flexcore",
           "kleur": "wit",
@@ -32650,6 +34362,27 @@
           "artikelcode": "1048987",
           "basiscode": "1048987",
           "omschrijving": "Pragmalux LED Paneel Flexcore IP44 Easyair Sensor 60x60cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI >90 UGR<19 wit RAL9003excl. led driver",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "1048987-PH-SR",
+          "basiscode": "1048987-PH-SR",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 Easyair Sensor 60x60cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003+Philips SR driver",
           "driver": null,
           "dimprotocol": null,
           "driver_inbegrepen": false
@@ -32685,6 +34418,27 @@
             "max": 5500
           },
           "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "1048994-PH-SR",
+          "basiscode": "1048994-PH-SR",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 Easyair Sensor 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003 +Philips SR driver",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
           "afmetingen_tekst": "60x60",
           "type": "LED Paneel Flexcore",
           "kleur": "zwart",
@@ -32706,6 +34460,27 @@
             "max": 5500
           },
           "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Flexcore",
+          "kleur": "zwart",
+          "ip": 44,
+          "artikelcode": "1049007-PH-SR",
+          "basiscode": "1049007-PH-SR",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 Easyair Sensor 60x60cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 zwart RAL9005 +Philips SR driver",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
           "afmetingen_tekst": "30x120",
           "type": "LED Paneel Flexcore",
           "kleur": "zwart",
@@ -32713,6 +34488,27 @@
           "artikelcode": "1049014",
           "basiscode": "1049014",
           "omschrijving": "Pragmalux LED Paneel Flexcore IP44 Easyair Sensor 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI >90 UGR<19 zwart RAL9005 excl. led driver",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "zwart",
+          "ip": 44,
+          "artikelcode": "1049014-PH-SR",
+          "basiscode": "1049014-PH-SR",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 Easyair Sensor 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 zwart RAL9005 +Philips SR driver",
           "driver": null,
           "dimprotocol": null,
           "driver_inbegrepen": false
@@ -33024,6 +34820,34 @@
           "artikelcode": "84610308",
           "basiscode": "84610308",
           "omschrijving": "Pragmalux LED Paneel Lino 60x60cm 34W 4300lm 6500K UGR<19 DALI",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        }
+      ],
+      "merk": "Pragmalux",
+      "armatuurtype": "paneel"
+    },
+    {
+      "id": "led-paneel-optic-matte-reflector-60x60cm",
+      "naam": "LED Paneel Optic matte reflector 60x60cm",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 36.0
+          },
+          "lichtstroom_lm": {
+            "min": 3550,
+            "max": 4750
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Optic matte reflector 60x60cm",
+          "kleur": "wit",
+          "artikelcode": "2033221",
+          "basiscode": "2033221",
+          "omschrijving": "Pragmalux LED Paneel Optic matte reflector 60x60cm 26-36W 3550-4750lm 3000K-3500K-4000K 3CCT CRI>90 UGR<16 wit RAL9003 excl.driver+ plenum",
           "driver": null,
           "dimprotocol": null,
           "driver_inbegrepen": false
@@ -39976,6 +41800,28 @@
           "artikelcode": "1041827",
           "basiscode": "1041827",
           "omschrijving": "Pragmalux LED Spotlight Casso IP44 dimbaar 9W 810lm ø103 Buitenmaat-Gaatmaat ø90-95 40° 2700K UGR<19 Wit",
+          "driver": null,
+          "dimprotocol": null,
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 9.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 680
+          },
+          "cct_tekst": "2700K",
+          "afmetingen_tekst": "ø103 Buitenmaat",
+          "type": "LED Spotlight Casso",
+          "kleur": "zwart",
+          "ip": 44,
+          "artikelcode": "1041834",
+          "basiscode": "1041834",
+          "omschrijving": "Pragmalux LED Spotlight Casso IP44 dimbaar 9W 680lm ø103 Buitenmaat-Gaatmaat ø90-95 40° 2700K UGR<19 Zwart",
           "driver": null,
           "dimprotocol": null,
           "driver_inbegrepen": false
