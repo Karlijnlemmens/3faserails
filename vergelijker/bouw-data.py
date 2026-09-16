@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 """
-bouw-data.py — bouwt data/armaturen.json uit de Excel-exports in data/bron/.
+bouw-data.py — bouwt data/armaturen.json uit de exports in data/bron/.
 
 Werkwijze:
-  1. Zet de prijslijst-export van een familie als .xlsx in data/bron/
+  1. Zet de export van een familie in data/bron/, als .csv of als .xlsx
   2. Voeg een blokje voor die familie toe aan data/families.json
   3. python bouw-data.py
 
 Het script leest per artikel de omschrijving en haalt daar de technische
 gegevens uit. Wat het niet kan lezen wordt gemeld, niet geraden.
 
-Vereist: pip install openpyxl
+Over .csv tegenover .xlsx: van een ruwe prijslijst worden maar vier kolommen
+gebruikt (artikelcode, omschrijving, status, barcode). knip-export.py snijdt die
+eruit en schrijft een .csv, en díe gaat de repo in - zonder prijzen, en als
+tekstbestand, zodat git laat zien wat er tussen twee prijslijstrondes veranderd
+is. Een .xlsx blijft gewoon werken voor wie hem zo bij de hand heeft.
+
+Vereist: alleen de standaardbibliotheek voor .csv; openpyxl voor .xlsx.
 """
 
 import json, re, sys
@@ -116,15 +122,47 @@ def split_suffix(code):
     return rest, "", extra
 
 
+def bronbestand(naam):
+    """Het pad naar de export van een familie. families.json noemt vaak nog een
+       .xlsx terwijl er inmiddels een uitgeknipte .csv naast ligt; die wint, zodat
+       overstappen op csv geen aanpassing in families.json kost."""
+    pad = BRON / naam
+    csv_pad = pad.with_suffix(".csv")
+    if csv_pad.exists():
+        return csv_pad
+    return pad
+
+
+def lees_bron(bestand):
+    """De rijen van een export, ongeacht of het een .csv of een .xlsx is.
+       Geeft een lijst van tuples, met de koprij vooraan."""
+    if bestand.suffix.lower() == ".csv":
+        import csv
+        # utf-8-sig: Excel zet een BOM voor een csv, en die hoort niet in de
+        # eerste kolomnaam terecht te komen.
+        with bestand.open(newline="", encoding="utf-8-sig") as f:
+            monster = f.read(4096)
+            f.seek(0)
+            try:
+                scheiding = csv.Sniffer().sniff(monster, delimiters=",;\t").delimiter
+            except csv.Error:
+                scheiding = ";" if monster.count(";") > monster.count(",") else ","
+            return [tuple(r) for r in csv.reader(f, delimiter=scheiding)]
+    try:
+        import openpyxl
+    except ImportError:
+        sys.exit("Deze export is een .xlsx en daarvoor is openpyxl nodig.\n"
+                 "Draai eerst: pip install openpyxl — of maak er met "
+                 "knip-export.py een .csv van.")
+    ws = openpyxl.load_workbook(bestand, read_only=True).worksheets[0]
+    return list(ws.iter_rows(values_only=True))
+
+
 def main():
     if not FAMDEF.exists():
         sys.exit(f"Ontbreekt: {FAMDEF}\nMaak dit bestand eerst aan (zie README).")
     families = json.loads(FAMDEF.read_text(encoding="utf-8"))
 
-    try:
-        import openpyxl
-    except ImportError:
-        sys.exit("openpyxl ontbreekt. Draai eerst: pip install openpyxl")
 
     # Wat er al in armaturen.json staat. De Excel-exports blijven buiten de
     # repo, dus wie alleen een familiegegeven aanpast (een foto, een cct) heeft
@@ -148,7 +186,7 @@ def main():
             print(f"  {fam['id']:34} {n:4} artikelen  (handmatig, geen export)")
             totaal += n
             continue
-        bestand = BRON / fam["bron_excel"]
+        bestand = bronbestand(fam["bron_excel"])
         if not bestand.exists():
             bewaard = eerder.get(fam.get("id"))
             if bewaard:
@@ -165,8 +203,11 @@ def main():
                 fam.setdefault("varianten", [])
             continue
 
-        ws = openpyxl.load_workbook(bestand, read_only=True).worksheets[0]
-        rijen = list(ws.iter_rows(values_only=True))
+        rijen = lees_bron(bestand)
+        if not rijen:
+            meldingen.append(f"[{fam['id']}] {bestand.name} is leeg")
+            fam.setdefault("varianten", [])
+            continue
         kop = [str(c or "").strip().lower() for c in rijen[0]]
 
         def kol(*namen):

@@ -2,9 +2,12 @@
 # De tool leest presenters/<id>.js — die worden wel meegeleverd.
 presenters-bron/
 
-# Werkmap voor vergelijker/bouw-data.py: de prijslijst-exports uit Excel.
-# De tool leest vergelijker/data/armaturen.json — die wordt wel meegeleverd.
-vergelijker/data/bron/
+# vergelijker/data/bron/ staat NIET meer in deze lijst: daar horen de uitgeknipte
+# exports (.csv) juist wel in de repo, zodat armaturen.json opnieuw te bouwen is.
+# Wat er niet in hoort is een RUWE prijslijst — die draag je eerst door
+# vergelijker/knip-export.py, zodat de prijskolommen eraf gaan. De repo is openbaar.
+vergelijker/data/bron/*.xlsx
+vergelijker/data/bron/*.xls
 
 # Python-werkbestanden van de scripts in vergelijker/.
 __pycache__/

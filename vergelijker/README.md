@@ -17,10 +17,29 @@ logo van de suite) en staat alles waarmee het gemaakt wordt in deze map.
 
 Drie stappen, daarna is de familie beschikbaar in de tool.
 
-**1 · Zet de prijslijstexport in `data/bron/`**
+**1 · Knip de prijslijstexport uit en zet hem in `data/bron/`**
 
-Een `.xlsx` met minimaal de kolommen `Artikelcode` en `Omschrijving`.
-`Status` en `Barcode 1` worden meegenomen als ze er zijn.
+```
+python knip-export.py ~/Downloads/prijslijst-mondial.xlsx mondial-downlight
+```
+
+Dat schrijft `data/bron/mondial-downlight.csv` met alleen de vier kolommen die
+de tool leest — `Artikelcode`, `Omschrijving`, `Status`, `Barcode 1` — en meldt
+welke kolommen het heeft weggelaten.
+
+**Die stap is niet optioneel, want deze repo is openbaar.** Een prijslijstexport
+heeft inkoop- en brutoprijzen, staffels en marges aan boord. `bouw-data.py` doet
+daar niets mee, maar ze zouden wel mee de repo in gaan. `.gitignore` houdt daarom
+`.xlsx` uit `data/bron/` en laat `.csv` toe.
+
+De uitgeknipte `.csv` hoort er juist wél in: dan is `armaturen.json` opnieuw te
+bouwen zonder dat iemand de originele export op zijn schijf hoeft te hebben, en
+laat git zien wélke regels er tussen twee prijslijstrondes veranderd zijn — bij
+een `.xlsx` zie je alleen dát het bestand anders is.
+
+Heb je een export al bij de hand als `.xlsx` en zit er niets gevoeligs in, dan
+leest `bouw-data.py` die ook gewoon; hij kijkt eerst of er een `.csv` met dezelfde
+naam naast ligt en neemt dan díe.
 
 **2 · Voeg een blok toe aan `data/families.json`**
 
@@ -75,8 +94,7 @@ het raadt nooit. Zolang er meldingen staan, controleer je die eerst.
 
 Heb je nog geen export voor een familie? Zet de varianten dan met de hand onder
 `"varianten"` in `families.json` en laat `bron_excel` weg. Het script slaat die
-familie dan over en neemt hem ongewijzigd mee. Zo staan Essence G3 en Essence
-Classic G3 er nu in.
+familie dan over en neemt hem ongewijzigd mee.
 
 ## Bestanden
 
@@ -88,7 +106,8 @@ Classic G3 er nu in.
 | `bouw-tool.py` | `armaturen.json` + template → `../vergelijking.html` |
 | `data/families.json` | Handwerk: de familiegegevens die niet in de export staan |
 | `data/armaturen.json` | Gegenereerd — niet met de hand aanpassen |
-| `data/bron/` | De Excel-exports. Blijven buiten de repo. |
+| `knip-export.py` | Ruwe prijslijst → `data/bron/<familie>.csv`, zonder prijzen |
+| `data/bron/` | De uitgeknipte exports (`.csv`). Gaan mee de repo in; ruwe `.xlsx` niet. |
 
 ## Suffixen
 
