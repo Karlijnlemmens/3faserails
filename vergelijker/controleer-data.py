@@ -134,6 +134,14 @@ LEESPROEVEN = [
 
     # De doorvoerbedrading (3x2,5mm) en het aantal buizen (2x18W) zijn geen
     # afmetingen. Daarom eist een lxbxh per getal minstens twee cijfers.
+    # De prijslijst zet de eenheid soms achter allebei de getallen van een
+    # bereik. Zonder dat te kennen werd "8W-18W" gelezen als "tot 8W".
+    ("Pragmalux LED Bulkhead Venus G2 DALI2 IP65 5,5W-19,5W 3000K-5000K 3-CCT "
+     "550-2250lm \u00d8300 (450mA)", "Pragmalux",
+     {"vermogen_w": {"min": 5.5, "max": 19.5},
+      "lichtstroom_lm": {"min": 550, "max": 2250},
+      "dimprotocol": "dali2"}),
+
     ("Essence Classic G3 IP66 60cm 11-19W 1400-2450lm 3CCT 3x2,5mm Doorvoerbedrading (2x18W)",
      "Pragmalux",
      {"type": "Essence Classic G3", "lengte_cm": 60, "ip": 66,

@@ -10,6 +10,7 @@ meldt. Alle vier eindigen met afsluitcode 1 als er iets mis is.
 | `node tools/controleer-suite.mjs` | wat over meerdere bestanden gelijk moet blijven: armatuurtabel, tabbladenrij, palet, geen netwerkverzoeken, gedeelde scripts |
 | `node tools/controleer-presenters.mjs` | de ingebakken presenters: lege pagina's, uitschieters in grootte, lijst en map uit de pas |
 | `node tools/pdfbaseline.mjs` + `vergelijk.mjs` | dat een wijziging niets aan de PDF's verandert (hieronder) |
+| `python3 vergelijker/controleer-families.py` | dat de productdata in de juiste families valt: nagekeken gevallen, en hoeveel families er uit één artikel bestaan |
 
 `controleer-logica.mjs` draait de échte code van de tools: het snijdt de declaraties
 die het nodig heeft uit het HTML-bestand en importeert die als module via een

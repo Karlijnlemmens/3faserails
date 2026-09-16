@@ -81,15 +81,60 @@ CCT_TEKST = re.compile(r"\d{4}\s*K(?:\s*[-–/]\s*\d{4}\s*K)*(?:\s*\d?\s*-?\s*CC
 # Waar de naam ophoudt en de opgave begint. Alles hierachter gaat niet meer over
 # wélk armatuur het is. "Inbouw/Opbouw" blijft er dus in, "IP44 12W/18W" niet.
 TYPE_STOP = re.compile(
-    r"\bIP\s*\d{2}|\bIK\s*\d{2}|\bUGR\b|\bSDCM\b|\bCRI\b|\bRa\b"
+    # UGR, CRI en Ra zijn alleen een opgave als er een getal of een vergelijking
+    # achter staat. "Essence G2/UGR LED Driver" is een productaanduiding, en
+    # zonder deze eis knipt de naam daar af tot "Essence G2/".
+    r"\bIP\s*\d{2}|\bIK\s*\d{2}|\bSDCM\b"
+    r"|\b(?:UGR|CRI|Ra)\s*[<>=\u2264\u2265]?\s*\d"
     r"|\b(?:max|min|incl|excl|ca)\.|\b(?:max|min|incl|excl)\b"
     # \b vóór het getal: zonder dat knipt "LED Paneel 30x120cm Easy G2" bij de
     # "120cm" middenin de maat, en houdt de familie "LED Paneel 30x" over.
     r"|\b\d+(?:[,.]\d+)?\s*(?:W|lm|K|V|mm|cm|D)\b"
-    r"|\b\d+\s*[-–/]\s*\d+"
+    # De decimale komma hoort bij het getal: zonder (?:[,.]\d+)? knipt
+    # "18,5-30W" pas bij de "5-30" en blijft de "18" in de naam staan.
+    r"|\b\d+(?:[,.]\d+)?\s*[-–/]\s*\d+"
     r"|\d?\s*-?CCT\b"
     r"|\bwit\b|\bzwart\b|\bgrijs\b|\bRAL\b"
     r"|Ø|\+|\(", re.I)
+
+
+# Twee schrijfwijzen van een maat die de naamzone anders onderuit halen. Een
+# haakje is normaal een stopteken - "(2x28W)" is een opgave - maar een haakje
+# dat alleen zegt wélke maat volgt ("(LxW)", "(Width X Length)") hoort weg,
+# anders valt de maat erachter buiten de naam en belanden alle bandraster-
+# armaturen in één kale familie. En "1545mm length x 165mm width" is dezelfde
+# maat als "1545x165mm", alleen uitgeschreven.
+MAATLABEL = re.compile(r"\(\s*(?:[lwbh]\s*[x×]\s*[lwbh]|"
+                       r"(?:width|length|breedte|lengte)(?:\s*[x×]\s*"
+                       r"(?:width|length|breedte|lengte))?)\s*\)", re.I)
+MAAT_UITGESCHREVEN = re.compile(
+    r"\b(\d+(?:[,.]\d+)?)\s*(mm|cm)\s*(?:length|lengte|width|breedte|hoogte|height)\s*"
+    r"[x×]\s*(\d+(?:[,.]\d+)?)\s*(mm|cm)?\s*(?:length|lengte|width|breedte|hoogte|height)?", re.I)
+
+
+# De aansturing zoals de prijslijst hem schrijft. Volgorde telt: het specifiekste
+# eerst, want "DALI2" bevat "DALI". De waarden zijn de sleutels die de tool in
+# DIMNAMEN omzet naar de schrijfwijze van een installateur.
+DIM_IN_TEKST = [
+    (r"\bdali[\s-]?2\b|\bdali2,0\b",          "dali2"),
+    (r"\bd4i\b",                               "d4i"),
+    (r"\bcasambi\b",                           "casambi"),
+    (r"\bzigbee\b",                            "zigbee"),
+    (r"\bdali\b",                              "dali"),
+    (r"\b0\s*-\s*10\s*v\b",                   "0-10v"),
+    (r"\b1\s*-\s*10\s*v\b",                   "1-10v"),
+    (r"\btriac\b",                             "triac"),
+    (r"\bpush[\s-]?dim\b",                     "push-dim"),
+    (r"\bdim\s*to\s*warm\b",                  "dim-to-warm"),
+    (r"\bniet\s+dimbaar\b",                    "geen"),
+]
+
+
+def normaliseerOmschrijving(o):
+    """De omschrijving zoals de rest van het script hem leest."""
+    t = MAATLABEL.sub(" ", o)
+    t = MAAT_UITGESCHREVEN.sub(lambda m: f"{m.group(1)}x{m.group(3)}{m.group(4) or m.group(2)}", t)
+    return " ".join(t.split())
 
 
 def maatzone(o):
@@ -127,7 +172,7 @@ def naamzone(o, merk=None):
         # Geen enkele opgave gevonden en het is een lange regel: dan is dit geen
         # naam maar een zin, en raden we liever niet.
         return None
-    t = t.strip(" -–—,;:")
+    t = t.strip(" -–—,;:/")
     return t if 2 <= len(t) <= 60 else None
 
 
@@ -135,7 +180,9 @@ def lees_omschrijving(o, merk=None):
     """Haal technische gegevens uit de omschrijvingstekst. Geeft (velden, ontbrekend)."""
     v, mist = {}, []
 
-    m = re.search(r"(\d+[,.]?\d*)\s*[-–]\s*(\d+[,.]?\d*)\s*W\b", o, re.I)
+    # W? achter het eerste getal: de prijslijst schrijft zowel "8-18W" als
+    # "8W-18W", en zonder die W werd dat laatste gelezen als "tot 8W".
+    m = re.search(r"(\d+[,.]?\d*)\s*W?\s*[-–]\s*(\d+[,.]?\d*)\s*W\b", o, re.I)
     if m:
         v["vermogen_w"] = {"min": getal(m.group(1)), "max": getal(m.group(2))}
     else:
@@ -154,7 +201,7 @@ def lees_omschrijving(o, merk=None):
             else:
                 mist.append("vermogen")
 
-    m = re.search(r"(\d+)\s*[-–]\s*(\d+)\s*lm\b(?!\s*/)", o, re.I)
+    m = re.search(r"(\d+)\s*(?:lm)?\s*[-–]\s*(\d+)\s*lm\b(?!\s*/)", o, re.I)
     if m:
         v["lichtstroom_lm"] = {"min": int(m.group(1)), "max": int(m.group(2))}
     else:
@@ -214,6 +261,15 @@ def lees_omschrijving(o, merk=None):
             if re.search(r"\b" + k + r"\w*\b", o, re.I)) > 1:
         v.pop("uitvoering")
 
+    # De aansturing staat in de omschrijving: "Venus G2 DALI2", "... Casambi",
+    # "... niet dimbaar". Dat is de betrouwbare bron - het codesuffix kent 196
+    # vormen waarvan de tabel er dertien dekt, en de tekst zegt hetzelfde.
+    # Zonder dit zou DALI verdwenen zijn toen het uit de familienaam ging.
+    for patroon, waarde in DIM_IN_TEKST:
+        if re.search(patroon, o, re.I):
+            v["dimprotocol"] = waarde
+            break
+
     m = re.search(r"IP\s*(\d{2})", o)
     if m:
         v["ip"] = int(m.group(1))
@@ -272,6 +328,85 @@ MONTAGE = [("inbouw", r"inbouw"), ("opbouw", r"opbouw"), ("pendel", r"pendel"),
            ("wand", r"wandarmatuur|gevelarmatuur"), ("inleg", r"inleg")]
 
 
+# --- De familiesleutel -------------------------------------------------------
+# De naam zoals hij in de prijslijst staat is niet de sleutel waarop artikelen
+# samenkomen. Dezelfde reeks wordt daar op vier manieren anders geschreven, en
+# elk van die vier maakte een eigen familie:
+#
+#   hoofdletters   "LED TL waterdicht armatuur typhoon" naast "... Typhoon"
+#   taal           "110x1195mm recessed" naast "1195x110mm inbouw"
+#   eenheid        "11x120cm opbouw" naast "1195x110mm opbouw"
+#   typefout       "Mado 240 Matt" naast "Mado 240 Mat"
+#
+# En er staan kenmerken in die over het artikel gaan en niet over de reeks:
+# "Venus G2 DALI2" is de DALI-uitvoering van Venus G2 - de artikelcode zegt het
+# ook, 1000152-DA naast 1000152 - en hoort dus in dezelfde familie te vallen.
+# De omschrijving noemt die uitvoering nog steeds, dus er gaat niets verloren.
+
+# Kenmerken die het artikel beschrijven en niet de reeks. Bewust kort gehouden:
+# alles wat een ander armatuur maakt (een andere optiek, een andere diameter,
+# een ingebouwde sensor) hoort juist wel een eigen familie te zijn.
+VARIANTWOORDEN = re.compile(
+    r"\b(dali2?|d4i|casambi|sf\s+driver|\d?-?step[- ]dim|"
+    r"\d+\s*-\s*\d+\s*v\s*(ac/dc|ac|dc)?)\b"
+    r"|\d+\s*°", re.I)
+
+# Engelse schrijfwijzen die de prijslijst door elkaar gebruikt met de Nederlandse.
+VERTAAL = [
+    (r"\bsurface\s+mounted\b", "opbouw"), (r"\brecessed\b", "inbouw"),
+    (r"\bsuspended\b", "pendel"), (r"\bluminaire\b", ""),
+    (r"\bmatt\b", "mat"),          # typefout in de prijslijst
+]
+
+# Een maat in de naam: "1195x110mm", "11x120cm", "110x1195mm". Afgerond op hele
+# centimeters vallen die op elkaar - 1195 mm en 120 cm zijn hetzelfde armatuur -
+# en de grootste maat gaat vooraan, zodat de volgorde niet meer uitmaakt.
+MAAT_IN_NAAM = re.compile(
+    r"\b(\d+(?:[,.]\d+)?)\s*(mm|cm)?\s*[x×]\s*(\d+(?:[,.]\d+)?)\s*(mm|cm)?"
+    r"(?:\s*[x×]\s*(\d+(?:[,.]\d+)?)\s*(mm|cm)?)?", re.I)
+
+
+def _cm(waarde, eenheid, andere):
+    """Een getal uit een maat, in hele centimeters. Zonder eenheid telt de
+       eenheid van het andere getal in dezelfde maat; staat die er ook niet bij,
+       dan beslist de grootte: boven de 300 is het millimeters."""
+    n = float(str(waarde).replace(",", "."))
+    eh = (eenheid or andere or "").lower()
+    if eh == "cm":
+        return round(n)
+    if eh == "mm":
+        return round(n / 10)
+    return round(n / 10) if n > 300 else round(n)
+
+
+def maatSleutel(m):
+    eh = m.group(2) or m.group(4) or m.group(6)
+    getallen = [_cm(m.group(i), m.group(i + 1), eh)
+                for i in (1, 3, 5) if m.group(i)]
+    return "x".join(str(n) for n in sorted(getallen, reverse=True)) + "cm"
+
+
+def familiesleutel(naam):
+    """Waarop artikelen tot een familie samenkomen. Zie de uitleg hierboven."""
+    t = re.sub(r"^\s*led\b[\s-]*", "", naam.lower())
+    for patroon, vervang in VERTAAL:
+        t = re.sub(patroon, vervang, t)
+    t = VARIANTWOORDEN.sub(" ", t)
+    t = MAAT_IN_NAAM.sub(lambda m: " " + maatSleutel(m) + " ", t)
+    # "inbouw/recessed" is na het vertalen "inbouw/inbouw": één woord.
+    t = re.sub(r"\b(\w+)(?:\s*/\s*\1)+\b", r"\1", t)
+    t = re.sub(r"[^a-z0-9°/]+", " ", t)
+    return " ".join(t.split())
+
+
+def toonnaam(namen):
+    """Welke schrijfwijze de familie krijgt: die van de meeste artikelen. Bij
+       gelijk spel de kortste - het kenmerk dat we eruit halen maakte hem juist
+       langer - en daarna alfabetisch, zodat het antwoord niet van de
+       volgorde in het bestand afhangt."""
+    return sorted(namen.items(), key=lambda x: (-x[1], len(x[0]), x[0]))[0][0]
+
+
 def slug(naam):
     """Een id uit een naam: kleine letters, streepjes, verder niets."""
     s = re.sub(r"[^a-z0-9]+", "-", naam.lower()).strip("-")
@@ -314,7 +449,7 @@ def catalogusfamilies(bestand):
             overgeslagen += 1
             continue
 
-        naam = naamzone(oms, merk)
+        naam = naamzone(normaliseerOmschrijving(oms), merk)
         v, _ = lees_omschrijving(oms, merk)
         # Een armatuur noemt een lichtstroom of een vermogen; een frame, een
         # driver of een montagebeugel niet. Wat toch een lichtstroom noemt en
@@ -322,6 +457,7 @@ def catalogusfamilies(bestand):
         bruikbaar = ("lichtstroom_lm" in v) or ("vermogen_w" in v)
         volledig = ("lichtstroom_lm" in v) and ("vermogen_w" in v)
         toebehoren = bool(naam) and (TOEBEHOREN_HARD.search(naam)
+                                     or (TOEBEHOREN_HARD.search(oms) and not volledig)
                                      or (TOEBEHOREN_ZACHT.search(naam) and not volledig))
         if not naam or toebehoren or not bruikbaar:
             overgeslagen += 1
@@ -331,12 +467,20 @@ def catalogusfamilies(bestand):
 
         basis, drv, extra = split_suffix(code)
         v.update({"artikelcode": code, "basiscode": basis, "omschrijving": oms})
-        v.update(DRIVERS.get(drv, {}))
+        v.update({k: w for k, w in DRIVERS.get(drv, {}).items() if w is not None})
         v.update(EXTRA.get(extra, {}))
-        groepen.setdefault(naam, {"merk": merk, "varianten": []})["varianten"].append(v)
+        # Groeperen gaat op de genormaliseerde sleutel, niet op de naam zoals hij
+        # er staat; welke schrijfwijze de familie krijgt beslist toonnaam().
+        g = groepen.setdefault(familiesleutel(naam),
+                               {"merk": merk, "varianten": [], "namen": {}})
+        g["varianten"].append(v)
+        g["namen"][naam] = g["namen"].get(naam, 0) + 1
+        if merk and not g["merk"]:
+            g["merk"] = merk
 
     families = []
-    for naam, g in sorted(groepen.items()):
+    for sleutel, g in sorted(groepen.items()):
+        naam = toonnaam(g["namen"])
         laag = naam.lower()
         fam = {"id": slug(naam), "naam": naam, "varianten":
                sorted(g["varianten"], key=lambda x: x["artikelcode"])}
@@ -555,7 +699,7 @@ def main():
             # in armaturen.json zonder dat het iets toevoegt.
             if merk and merk != fam.get("merk"):
                 v["merk"] = merk
-            v.update(DRIVERS.get(drv, {}))
+            v.update({k: w for k, w in DRIVERS.get(drv, {}).items() if w is not None})
             v.update(EXTRA.get(extra, {}))
             if i_stat is not None:
                 v["status"] = r[i_stat]
