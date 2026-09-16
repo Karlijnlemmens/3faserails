@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-knip-export.py — snijdt uit een ruwe prijslijstexport de vier kolommen die de
+knip-export.py — snijdt uit een ruwe prijslijstexport de drie kolommen die de
 tool gebruikt, en schrijft die als .csv in data/bron/.
 
 Waarom dit bestaat: de repo is openbaar. Een prijslijstexport heet niet voor
@@ -8,7 +8,14 @@ niets zo — daar staan inkoop- en brutoprijzen, staffels en marges in, kolommen
 waar bouw-data.py niets mee doet maar die wel mee de repo in zouden gaan. Dit
 script houdt alleen over wat de tool echt leest:
 
-    artikelcode · omschrijving · status · barcode 1
+    artikelcode · merk · omschrijving
+
+Meer is er niet nodig. De artikelcode is het artikelnummer (en het suffix
+erachter verraadt de driver), het merk is de leverancier op het
+vergelijkingsblad, en in de omschrijving staat op één regel de hele technische
+opgave — vermogen, kleurtemperatuur, lichtstroom, maten, IP — die bouw-data.py
+eruit leest. Status en barcode stonden hier eerder ook in; geen enkele tool in
+de suite deed er iets mee.
 
 Daarmee is de opbouw van armaturen.json reproduceerbaar zonder dat er één
 prijsgegeven het pand verlaat. Dat het .csv wordt en geen .xlsx is geen detail:
@@ -38,9 +45,8 @@ BRON = HIER / "data" / "bron"
 # hij in een export kan staan; de eerste is de naam die we wegschrijven.
 KOLOMMEN = [
     ("artikelcode",  ("artikelcode", "artikel", "artikelnummer", "item number", "sku")),
+    ("merk",         ("merk", "brand", "fabrikant", "leverancier", "supplier", "manufacturer")),
     ("omschrijving", ("omschrijving", "description", "productomschrijving")),
-    ("status",       ("status",)),
-    ("barcode 1",    ("barcode 1", "barcode", "ean", "ean code")),
 ]
 
 
@@ -77,7 +83,8 @@ def knip(pad, naam):
             ontbreekt.append(uitnaam)
         gekozen.append((uitnaam, i))
 
-    # Zonder deze twee valt er niets te bouwen; de andere twee zijn een bonus.
+    # Zonder deze twee valt er niets te bouwen; het merk mag ontbreken - dan valt
+    # de tool terug op het merk dat in families.json bij de familie staat.
     for verplicht in ("artikelcode", "omschrijving"):
         if verplicht in ontbreekt:
             sys.exit(f"{pad.name}: kolom '{verplicht}' niet gevonden.\n"

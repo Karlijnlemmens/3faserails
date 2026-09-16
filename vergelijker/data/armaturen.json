@@ -62,7 +62,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391051673"
+          "barcode": "8720391051673",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø150x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -85,7 +88,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432011748"
+          "barcode": "8721432011748",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø150x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -108,7 +114,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391066394"
+          "barcode": "8720391066394",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø150x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -131,7 +140,10 @@
           "dimprotocol": "dali",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432019935"
+          "barcode": "8721432019935",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø150x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -154,7 +166,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391051680"
+          "barcode": "8720391051680",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -177,7 +192,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432011786"
+          "barcode": "8721432011786",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -200,7 +218,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391066400"
+          "barcode": "8720391066400",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -223,7 +244,10 @@
           "dimprotocol": "dali",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432019973"
+          "barcode": "8721432019973",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -247,7 +271,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391046877"
+          "barcode": "8720391046877",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø110 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -271,7 +298,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432011908"
+          "barcode": "8721432011908",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø110 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -295,7 +325,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391065601"
+          "barcode": "8720391065601",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø110 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -319,7 +352,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391046891"
+          "barcode": "8720391046891",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø146 Buitenmaat - Gatmaat Ø120",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -343,7 +379,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432011946"
+          "barcode": "8721432011946",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø146 Buitenmaat - Gatmaat Ø120",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -367,7 +406,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391065625"
+          "barcode": "8720391065625",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø146 Buitenmaat - Gatmaat Ø120",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -391,7 +433,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391046914"
+          "barcode": "8720391046914",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200 Buitenmaat - Gatmaat Ø150",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -415,7 +460,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432011823"
+          "barcode": "8721432011823",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200 Buitenmaat - Gatmaat Ø150",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -439,7 +487,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391065649"
+          "barcode": "8720391065649",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200 Buitenmaat - Gatmaat Ø150",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -463,7 +514,10 @@
           "dimprotocol": "dali",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432020016"
+          "barcode": "8721432020016",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200 Buitenmaat - Gatmaat Ø150",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -487,7 +541,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391046938"
+          "barcode": "8720391046938",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø250 Buitenmaat - Gatmaat Ø200",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -511,7 +568,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432011861"
+          "barcode": "8721432011861",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø250 Buitenmaat - Gatmaat Ø200",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -535,7 +595,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391065663"
+          "barcode": "8720391065663",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø250 Buitenmaat - Gatmaat Ø200",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -559,7 +622,10 @@
           "dimprotocol": "dali",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432020054"
+          "barcode": "8721432020054",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø250 Buitenmaat - Gatmaat Ø200",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -583,7 +649,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391047188"
+          "barcode": "8720391047188",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø110 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -607,7 +676,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432012066"
+          "barcode": "8721432012066",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø110 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -631,7 +703,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391065915"
+          "barcode": "8720391065915",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø110 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -655,7 +730,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391047195"
+          "barcode": "8720391047195",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø146 Buitenmaat - Gatmaat Ø120",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -679,7 +757,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432012103"
+          "barcode": "8721432012103",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø146 Buitenmaat - Gatmaat Ø120",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -703,7 +784,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391065922"
+          "barcode": "8720391065922",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø146 Buitenmaat - Gatmaat Ø120",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -727,7 +811,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391047201"
+          "barcode": "8720391047201",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø176 Buitenmaat - Gatmaat Ø150",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -751,7 +838,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432011984"
+          "barcode": "8721432011984",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø176 Buitenmaat - Gatmaat Ø150",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -775,7 +865,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391065939"
+          "barcode": "8720391065939",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø176 Buitenmaat - Gatmaat Ø150",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -799,7 +892,10 @@
           "dimprotocol": "dali",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432020092"
+          "barcode": "8721432020092",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø176 Buitenmaat - Gatmaat Ø150",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -823,7 +919,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391047218"
+          "barcode": "8720391047218",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø226 Buitenmaat - Gatmaat Ø200",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -847,7 +946,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432012028"
+          "barcode": "8721432012028",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø226 Buitenmaat - Gatmaat Ø200",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -871,7 +973,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391065946"
+          "barcode": "8720391065946",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø226 Buitenmaat - Gatmaat Ø200",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -895,7 +1000,10 @@
           "dimprotocol": "dali",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432020139"
+          "barcode": "8721432020139",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø226 Buitenmaat - Gatmaat Ø200",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -918,7 +1026,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391051697"
+          "barcode": "8720391051697",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø150x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -941,7 +1052,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432012141"
+          "barcode": "8721432012141",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø150x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -964,7 +1078,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391066417"
+          "barcode": "8720391066417",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø150x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -987,7 +1104,10 @@
           "dimprotocol": "dali",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432020177"
+          "barcode": "8721432020177",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø150x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1010,7 +1130,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391051703"
+          "barcode": "8720391051703",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1033,7 +1156,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432012189"
+          "barcode": "8721432012189",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1056,7 +1182,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391066424"
+          "barcode": "8720391066424",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1079,7 +1208,10 @@
           "dimprotocol": "dali",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432020214"
+          "barcode": "8721432020214",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200x80(H) Buitenmaat",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1103,7 +1235,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391046860"
+          "barcode": "8720391046860",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø110 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1127,7 +1262,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432012301"
+          "barcode": "8721432012301",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø110 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1151,7 +1289,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391065595"
+          "barcode": "8720391065595",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø110 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1175,7 +1316,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391046884"
+          "barcode": "8720391046884",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø146 Buitenmaat - Gatmaat Ø120",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1199,7 +1343,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432012349"
+          "barcode": "8721432012349",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø146 Buitenmaat - Gatmaat Ø120",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1223,7 +1370,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391065618"
+          "barcode": "8720391065618",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø146 Buitenmaat - Gatmaat Ø120",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1247,7 +1397,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391046907"
+          "barcode": "8720391046907",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200 Buitenmaat - Gatmaat Ø150",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1271,7 +1424,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432012226"
+          "barcode": "8721432012226",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200 Buitenmaat - Gatmaat Ø150",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1295,7 +1451,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391065632"
+          "barcode": "8720391065632",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200 Buitenmaat - Gatmaat Ø150",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1319,7 +1478,10 @@
           "dimprotocol": "dali",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432020252"
+          "barcode": "8721432020252",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø200 Buitenmaat - Gatmaat Ø150",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1343,7 +1505,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391046921"
+          "barcode": "8720391046921",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø250 Buitenmaat - Gatmaat Ø200",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1367,7 +1532,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432012264"
+          "barcode": "8721432012264",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø250 Buitenmaat - Gatmaat Ø200",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1391,7 +1559,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391065656"
+          "barcode": "8720391065656",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø250 Buitenmaat - Gatmaat Ø200",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1415,7 +1586,10 @@
           "dimprotocol": "dali",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432020290"
+          "barcode": "8721432020290",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø250 Buitenmaat - Gatmaat Ø200",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1439,7 +1613,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391047348"
+          "barcode": "8720391047348",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø110 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1463,7 +1640,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432012462"
+          "barcode": "8721432012462",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø110 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1487,7 +1667,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391066233"
+          "barcode": "8720391066233",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø110 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1511,7 +1694,10 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391047355"
+          "barcode": "8720391047355",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø146 Buitenmaat - Gatmaat Ø120",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1535,7 +1721,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432012509"
+          "barcode": "8721432012509",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø146 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1559,7 +1748,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391066240"
+          "barcode": "8720391066240",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø146 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1582,7 +1774,11 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391047362"
+          "barcode": "8720391047362",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "zaagmaat_mm": 150,
+          "afmetingen_tekst": "Ø176 B - G Ø150",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1606,7 +1802,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432012387"
+          "barcode": "8721432012387",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø176 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1630,7 +1829,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391066257"
+          "barcode": "8720391066257",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø176 Buitenmaat - Gatmaat Ø150",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1653,7 +1855,11 @@
           "dimprotocol": "dali",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432029743"
+          "barcode": "8721432029743",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "zaagmaat_mm": 150,
+          "afmetingen_tekst": "Ø176 B - G Ø150",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1676,7 +1882,11 @@
           "dimprotocol": null,
           "driver_inbegrepen": false,
           "status": "01. VOORRAADARTIKEL",
-          "barcode": "8720391047379"
+          "barcode": "8720391047379",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "zaagmaat_mm": 200,
+          "afmetingen_tekst": "Ø226 B - G Ø200",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1700,7 +1910,10 @@
           "dimprotocol": "casambi",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432012424"
+          "barcode": "8721432012424",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø226 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1724,7 +1937,10 @@
           "dimprotocol": "geen",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8720391066264"
+          "barcode": "8720391066264",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "Ø226 Buitenmaat - Gatmaat Ø90",
+          "type": "LED Downlight Essence G2"
         },
         {
           "vermogen_w": {
@@ -1747,7 +1963,11 @@
           "dimprotocol": "dali",
           "driver_inbegrepen": true,
           "status": "02. ASSEMBLAGEARTIKEL",
-          "barcode": "8721432029798"
+          "barcode": "8721432029798",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "zaagmaat_mm": 200,
+          "afmetingen_tekst": "Ø226 B - G Ø200",
+          "type": "LED Downlight Essence G2"
         }
       ]
     },
@@ -1788,268 +2008,6 @@
       "driver_inbegrepen": true,
       "driver_opmerking": "Driver zit in de artikelcode verwerkt via achtervoegsel: -PR Pragmalux, -UN universeel, -PH Philips, -PH-DA Philips DALI2, -TC-DA TCI DALI.",
       "inbouwdiepte_mm": 35,
-      "varianten": [
-        {
-          "artikelcode": "1044507-PR",
-          "omschrijving": "Paneel Essence G3 25-34W 600 3000K-6000K 3-CCT UGR<19",
-          "vermogen_w": {
-            "min": 25,
-            "max": 34
-          },
-          "lichtstroom_lm": {
-            "min": 3050,
-            "max": 4350
-          },
-          "kleur": "wit",
-          "maat": "60x60",
-          "afmetingen_mm": {
-            "l": 595,
-            "b": 595,
-            "h": 34
-          },
-          "zaagmaat_mm": {
-            "l": 580,
-            "b": 580
-          },
-          "dimprotocol": "geen",
-          "driver": "Pragmalux",
-          "rendement_lm_w": "122-127"
-        },
-        {
-          "artikelcode": "1044507-UN",
-          "omschrijving": "Paneel Essence G3 25-34W 600 3000K-6000K 3-CCT UGR<19 DALI2,0/1-10V,Push-dim",
-          "vermogen_w": {
-            "min": 25,
-            "max": 34
-          },
-          "lichtstroom_lm": {
-            "min": 3050,
-            "max": 4350
-          },
-          "kleur": "wit",
-          "maat": "60x60",
-          "afmetingen_mm": {
-            "l": 595,
-            "b": 595,
-            "h": 34
-          },
-          "zaagmaat_mm": {
-            "l": 580,
-            "b": 580
-          },
-          "dimprotocol": "dali2/1-10v/push-dim",
-          "driver": "Universeel",
-          "rendement_lm_w": "122-127"
-        },
-        {
-          "artikelcode": "1044507-PH",
-          "omschrijving": "Paneel Essence G3 27-34W 600 3000K-6000K 3-CCT UGR<19 Philips",
-          "vermogen_w": {
-            "min": 27,
-            "max": 34
-          },
-          "lichtstroom_lm": {
-            "min": 3300,
-            "max": 4350
-          },
-          "kleur": "wit",
-          "maat": "60x60",
-          "afmetingen_mm": {
-            "l": 595,
-            "b": 595,
-            "h": 34
-          },
-          "zaagmaat_mm": {
-            "l": 580,
-            "b": 580
-          },
-          "dimprotocol": "geen",
-          "driver": "Philips",
-          "rendement_lm_w": "122-127"
-        },
-        {
-          "artikelcode": "1044507-PH-DA",
-          "omschrijving": "Paneel Essence G3 34W 600 3000K-6000K 3-CCT UGR<19 Philips DALI2, Push-dim",
-          "vermogen_w": {
-            "min": 34,
-            "max": 34
-          },
-          "lichtstroom_lm": {
-            "min": 4250,
-            "max": 4350
-          },
-          "kleur": "wit",
-          "maat": "60x60",
-          "afmetingen_mm": {
-            "l": 595,
-            "b": 595,
-            "h": 34
-          },
-          "zaagmaat_mm": {
-            "l": 580,
-            "b": 580
-          },
-          "dimprotocol": "dali2/push-dim",
-          "driver": "Philips DALI2",
-          "rendement_lm_w": "127"
-        },
-        {
-          "artikelcode": "1044507-TC-DA",
-          "omschrijving": "Paneel 60x60cm Essence G3 34W 3000K-6000K 3-CCT 4250-4350lm UGR<19 +TCI DALI Driver (4x14W)",
-          "vermogen_w": {
-            "min": 34,
-            "max": 34
-          },
-          "lichtstroom_lm": {
-            "min": 4250,
-            "max": 4350
-          },
-          "kleur": "wit",
-          "maat": "60x60",
-          "afmetingen_mm": {
-            "l": 595,
-            "b": 595,
-            "h": 34
-          },
-          "zaagmaat_mm": {
-            "l": 580,
-            "b": 580
-          },
-          "dimprotocol": "dali",
-          "driver": "TCI DALI",
-          "rendement_lm_w": "127"
-        },
-        {
-          "artikelcode": "1044514-PR",
-          "omschrijving": "Paneel Essence G3 25-34W 1200 3000K-6000K 3-CCT UGR<19",
-          "vermogen_w": {
-            "min": 25,
-            "max": 34
-          },
-          "lichtstroom_lm": {
-            "min": 3050,
-            "max": 4350
-          },
-          "kleur": "wit",
-          "maat": "30x120",
-          "afmetingen_mm": {
-            "l": 1195,
-            "b": 295,
-            "h": 34
-          },
-          "zaagmaat_mm": {
-            "l": 1180,
-            "b": 280
-          },
-          "dimprotocol": "geen",
-          "driver": "Pragmalux",
-          "rendement_lm_w": "122-127"
-        },
-        {
-          "artikelcode": "1044514-UN",
-          "omschrijving": "Paneel Essence G3 25-34W 1200 3000K-6000K 3-CCT UGR<19 DALI2,0/1-10V,Push-dim",
-          "vermogen_w": {
-            "min": 25,
-            "max": 34
-          },
-          "lichtstroom_lm": {
-            "min": 3050,
-            "max": 4350
-          },
-          "kleur": "wit",
-          "maat": "30x120",
-          "afmetingen_mm": {
-            "l": 1195,
-            "b": 295,
-            "h": 34
-          },
-          "zaagmaat_mm": {
-            "l": 1180,
-            "b": 280
-          },
-          "dimprotocol": "dali2/1-10v/push-dim",
-          "driver": "Universeel",
-          "rendement_lm_w": "122-127"
-        },
-        {
-          "artikelcode": "1044514-PH",
-          "omschrijving": "Paneel Essence G3 27-34W 1200 3000K-6000K 3-CCT UGR<19 Philips",
-          "vermogen_w": {
-            "min": 27,
-            "max": 34
-          },
-          "lichtstroom_lm": {
-            "min": 3300,
-            "max": 4350
-          },
-          "kleur": "wit",
-          "maat": "30x120",
-          "afmetingen_mm": {
-            "l": 1195,
-            "b": 295,
-            "h": 34
-          },
-          "zaagmaat_mm": {
-            "l": 1180,
-            "b": 280
-          },
-          "dimprotocol": "geen",
-          "driver": "Philips",
-          "rendement_lm_w": "122-127"
-        },
-        {
-          "artikelcode": "1044514-PH-DA",
-          "omschrijving": "Paneel Essence G3 34W 1200 3000K-6000K 3-CCT UGR<19 Philips DALI2, Push-dim",
-          "vermogen_w": {
-            "min": 34,
-            "max": 34
-          },
-          "lichtstroom_lm": {
-            "min": 4250,
-            "max": 4350
-          },
-          "kleur": "wit",
-          "maat": "30x120",
-          "afmetingen_mm": {
-            "l": 1195,
-            "b": 295,
-            "h": 34
-          },
-          "zaagmaat_mm": {
-            "l": 1180,
-            "b": 280
-          },
-          "dimprotocol": "dali2/push-dim",
-          "driver": "Philips DALI2",
-          "rendement_lm_w": "127"
-        },
-        {
-          "artikelcode": "1044514-TC-DA",
-          "omschrijving": "Paneel 30x120cm Essence G3 34W 3000K-6000K 3-CCT 4250-4350lm UGR<19 +TCI DALI Driver (2x28W)",
-          "vermogen_w": {
-            "min": 34,
-            "max": 34
-          },
-          "lichtstroom_lm": {
-            "min": 4250,
-            "max": 4350
-          },
-          "kleur": "wit",
-          "maat": "30x120",
-          "afmetingen_mm": {
-            "l": 1195,
-            "b": 295,
-            "h": 34
-          },
-          "zaagmaat_mm": {
-            "l": 1180,
-            "b": 280
-          },
-          "dimprotocol": "dali",
-          "driver": "TCI DALI",
-          "rendement_lm_w": "127"
-        }
-      ],
       "accessoires": [
         {
           "artikelcode": "4607764",
@@ -2077,7 +2035,295 @@
         }
       ],
       "balvast": false,
-      "presenter": "ag13"
+      "presenter": "ag13",
+      "varianten": [
+        {
+          "artikelcode": "1044507-PR",
+          "omschrijving": "Paneel Essence G3 25-34W 600 3000K-6000K 3-CCT UGR<19",
+          "vermogen_w": {
+            "min": 25.0,
+            "max": 34.0
+          },
+          "lichtstroom_lm": {
+            "min": 3050,
+            "max": 4350
+          },
+          "kleur": "wit",
+          "maat": "60x60",
+          "afmetingen_mm": {
+            "l": 595,
+            "b": 595,
+            "h": 34
+          },
+          "zaagmaat_mm": {
+            "l": 580,
+            "b": 580
+          },
+          "dimprotocol": "geen",
+          "driver": "Pragmalux",
+          "rendement_lm_w": "122-127",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "type": "Paneel Essence G3"
+        },
+        {
+          "artikelcode": "1044507-UN",
+          "omschrijving": "Paneel Essence G3 25-34W 600 3000K-6000K 3-CCT UGR<19 DALI2,0/1-10V,Push-dim",
+          "vermogen_w": {
+            "min": 25.0,
+            "max": 34.0
+          },
+          "lichtstroom_lm": {
+            "min": 3050,
+            "max": 4350
+          },
+          "kleur": "wit",
+          "maat": "60x60",
+          "afmetingen_mm": {
+            "l": 595,
+            "b": 595,
+            "h": 34
+          },
+          "zaagmaat_mm": {
+            "l": 580,
+            "b": 580
+          },
+          "dimprotocol": "dali2/1-10v/push-dim",
+          "driver": "Universeel",
+          "rendement_lm_w": "122-127",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "type": "Paneel Essence G3"
+        },
+        {
+          "artikelcode": "1044507-PH",
+          "omschrijving": "Paneel Essence G3 27-34W 600 3000K-6000K 3-CCT UGR<19 Philips",
+          "vermogen_w": {
+            "min": 27.0,
+            "max": 34.0
+          },
+          "lichtstroom_lm": {
+            "min": 3300,
+            "max": 4350
+          },
+          "kleur": "wit",
+          "maat": "60x60",
+          "afmetingen_mm": {
+            "l": 595,
+            "b": 595,
+            "h": 34
+          },
+          "zaagmaat_mm": {
+            "l": 580,
+            "b": 580
+          },
+          "dimprotocol": "geen",
+          "driver": "Philips",
+          "rendement_lm_w": "122-127",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "type": "Paneel Essence G3"
+        },
+        {
+          "artikelcode": "1044507-PH-DA",
+          "omschrijving": "Paneel Essence G3 34W 600 3000K-6000K 3-CCT UGR<19 Philips DALI2, Push-dim",
+          "vermogen_w": {
+            "min": null,
+            "max": 34.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4250,
+            "max": 4350
+          },
+          "kleur": "wit",
+          "maat": "60x60",
+          "afmetingen_mm": {
+            "l": 595,
+            "b": 595,
+            "h": 34
+          },
+          "zaagmaat_mm": {
+            "l": 580,
+            "b": 580
+          },
+          "dimprotocol": "dali2/push-dim",
+          "driver": "Philips DALI2",
+          "rendement_lm_w": "127",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "type": "Paneel Essence G3"
+        },
+        {
+          "artikelcode": "1044507-TC-DA",
+          "omschrijving": "Paneel 60x60cm Essence G3 34W 3000K-6000K 3-CCT 4250-4350lm UGR<19 +TCI DALI Driver (4x14W)",
+          "vermogen_w": {
+            "min": null,
+            "max": 34.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4250,
+            "max": 4350
+          },
+          "kleur": "wit",
+          "maat": "60x60",
+          "afmetingen_mm": {
+            "l": 595,
+            "b": 595,
+            "h": 34
+          },
+          "zaagmaat_mm": {
+            "l": 580,
+            "b": 580
+          },
+          "dimprotocol": "dali",
+          "driver": "TCI DALI",
+          "rendement_lm_w": "127",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "Paneel 60x"
+        },
+        {
+          "artikelcode": "1044514-PR",
+          "omschrijving": "Paneel Essence G3 25-34W 1200 3000K-6000K 3-CCT UGR<19",
+          "vermogen_w": {
+            "min": 25.0,
+            "max": 34.0
+          },
+          "lichtstroom_lm": {
+            "min": 3050,
+            "max": 4350
+          },
+          "kleur": "wit",
+          "maat": "30x120",
+          "afmetingen_mm": {
+            "l": 1195,
+            "b": 295,
+            "h": 34
+          },
+          "zaagmaat_mm": {
+            "l": 1180,
+            "b": 280
+          },
+          "dimprotocol": "geen",
+          "driver": "Pragmalux",
+          "rendement_lm_w": "122-127",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "type": "Paneel Essence G3"
+        },
+        {
+          "artikelcode": "1044514-UN",
+          "omschrijving": "Paneel Essence G3 25-34W 1200 3000K-6000K 3-CCT UGR<19 DALI2,0/1-10V,Push-dim",
+          "vermogen_w": {
+            "min": 25.0,
+            "max": 34.0
+          },
+          "lichtstroom_lm": {
+            "min": 3050,
+            "max": 4350
+          },
+          "kleur": "wit",
+          "maat": "30x120",
+          "afmetingen_mm": {
+            "l": 1195,
+            "b": 295,
+            "h": 34
+          },
+          "zaagmaat_mm": {
+            "l": 1180,
+            "b": 280
+          },
+          "dimprotocol": "dali2/1-10v/push-dim",
+          "driver": "Universeel",
+          "rendement_lm_w": "122-127",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "type": "Paneel Essence G3"
+        },
+        {
+          "artikelcode": "1044514-PH",
+          "omschrijving": "Paneel Essence G3 27-34W 1200 3000K-6000K 3-CCT UGR<19 Philips",
+          "vermogen_w": {
+            "min": 27.0,
+            "max": 34.0
+          },
+          "lichtstroom_lm": {
+            "min": 3300,
+            "max": 4350
+          },
+          "kleur": "wit",
+          "maat": "30x120",
+          "afmetingen_mm": {
+            "l": 1195,
+            "b": 295,
+            "h": 34
+          },
+          "zaagmaat_mm": {
+            "l": 1180,
+            "b": 280
+          },
+          "dimprotocol": "geen",
+          "driver": "Philips",
+          "rendement_lm_w": "122-127",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "type": "Paneel Essence G3"
+        },
+        {
+          "artikelcode": "1044514-PH-DA",
+          "omschrijving": "Paneel Essence G3 34W 1200 3000K-6000K 3-CCT UGR<19 Philips DALI2, Push-dim",
+          "vermogen_w": {
+            "min": null,
+            "max": 34.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4250,
+            "max": 4350
+          },
+          "kleur": "wit",
+          "maat": "30x120",
+          "afmetingen_mm": {
+            "l": 1195,
+            "b": 295,
+            "h": 34
+          },
+          "zaagmaat_mm": {
+            "l": 1180,
+            "b": 280
+          },
+          "dimprotocol": "dali2/push-dim",
+          "driver": "Philips DALI2",
+          "rendement_lm_w": "127",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "type": "Paneel Essence G3"
+        },
+        {
+          "artikelcode": "1044514-TC-DA",
+          "omschrijving": "Paneel 30x120cm Essence G3 34W 3000K-6000K 3-CCT 4250-4350lm UGR<19 +TCI DALI Driver (2x28W)",
+          "vermogen_w": {
+            "min": null,
+            "max": 34.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4250,
+            "max": 4350
+          },
+          "kleur": "wit",
+          "maat": "30x120",
+          "afmetingen_mm": {
+            "l": 1195,
+            "b": 295,
+            "h": 34
+          },
+          "zaagmaat_mm": {
+            "l": 1180,
+            "b": 280
+          },
+          "dimprotocol": "dali",
+          "driver": "TCI DALI",
+          "rendement_lm_w": "127",
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "Paneel 30x"
+        }
+      ]
     },
     {
       "id": "essence-classic-g3-waterdicht",
@@ -2116,228 +2362,6 @@
         "bedrijfshal",
         "kelder"
       ],
-      "varianten": [
-        {
-          "artikelcode": "2024670",
-          "omschrijving": "Essence Classic G3 IP66 60cm 11-19W 1400-2450lm 3CCT 3x2,5mm Doorvoerbedrading (2x18W)",
-          "vermogen_w": {
-            "min": 11,
-            "max": 19
-          },
-          "lichtstroom_lm": {
-            "min": 1400,
-            "max": 2450
-          },
-          "kleur": "grijs",
-          "lengte_cm": 60,
-          "afmetingen_mm": {
-            "l": 600,
-            "b": 80,
-            "h": 68
-          },
-          "sensor": false,
-          "noodverlichting": null,
-          "dimprotocol": "geen"
-        },
-        {
-          "artikelcode": "2024670-S",
-          "omschrijving": "Essence Classic G3 IP66 60cm 11-19W 1400-2450lm 3CCT (2x18W) + Bewegingssensor",
-          "vermogen_w": {
-            "min": 11,
-            "max": 19
-          },
-          "lichtstroom_lm": {
-            "min": 1400,
-            "max": 2450
-          },
-          "kleur": "grijs",
-          "lengte_cm": 60,
-          "afmetingen_mm": {
-            "l": 600,
-            "b": 80,
-            "h": 68
-          },
-          "sensor": true,
-          "noodverlichting": null,
-          "dimprotocol": "geen"
-        },
-        {
-          "artikelcode": "2024687",
-          "omschrijving": "Essence Classic G3 IP66 120cm 22-39W 3100-5400lm 3CCT 4x2,5mm Doorvoerbedrading (2x36W)",
-          "vermogen_w": {
-            "min": 22,
-            "max": 39
-          },
-          "lichtstroom_lm": {
-            "min": 3100,
-            "max": 5400
-          },
-          "kleur": "grijs",
-          "lengte_cm": 120,
-          "afmetingen_mm": {
-            "l": 1200,
-            "b": 80,
-            "h": 68
-          },
-          "sensor": false,
-          "noodverlichting": null,
-          "dimprotocol": "geen"
-        },
-        {
-          "artikelcode": "2024687-S",
-          "omschrijving": "Essence Classic G3 IP66 120cm 22-39W 3100-5400lm 3CCT (2x36W) + Bewegingssensor",
-          "vermogen_w": {
-            "min": 22,
-            "max": 39
-          },
-          "lichtstroom_lm": {
-            "min": 3100,
-            "max": 5400
-          },
-          "kleur": "grijs",
-          "lengte_cm": 120,
-          "afmetingen_mm": {
-            "l": 1200,
-            "b": 80,
-            "h": 68
-          },
-          "sensor": true,
-          "noodverlichting": null,
-          "dimprotocol": "geen"
-        },
-        {
-          "artikelcode": "2024687-N",
-          "omschrijving": "Essence Classic G3 IP66 120cm 22-39W 3100-5400lm 3CCT (2x36W) + Noodmodule 3uur zelftest & manueel",
-          "vermogen_w": {
-            "min": 22,
-            "max": 39
-          },
-          "lichtstroom_lm": {
-            "min": 3100,
-            "max": 5400
-          },
-          "kleur": "grijs",
-          "lengte_cm": 120,
-          "afmetingen_mm": {
-            "l": 1200,
-            "b": 80,
-            "h": 68
-          },
-          "sensor": false,
-          "noodverlichting": "3u",
-          "dimprotocol": "geen"
-        },
-        {
-          "artikelcode": "2024687-SN",
-          "omschrijving": "Essence Classic G3 IP66 120cm 22-39W 3100-5400lm 3CCT (2x36W) + Bewegingssensor & Noodmodule 3uur",
-          "vermogen_w": {
-            "min": 22,
-            "max": 39
-          },
-          "lichtstroom_lm": {
-            "min": 3100,
-            "max": 5400
-          },
-          "kleur": "grijs",
-          "lengte_cm": 120,
-          "afmetingen_mm": {
-            "l": 1200,
-            "b": 80,
-            "h": 68
-          },
-          "sensor": true,
-          "noodverlichting": "3u",
-          "dimprotocol": "geen"
-        },
-        {
-          "artikelcode": "2024694",
-          "omschrijving": "Essence Classic G3 IP66 150cm 33-58W 4500-7700lm 3CCT 4x2,5mm Doorvoerbedrading (2x58W)",
-          "vermogen_w": {
-            "min": 33,
-            "max": 58
-          },
-          "lichtstroom_lm": {
-            "min": 4500,
-            "max": 7700
-          },
-          "kleur": "grijs",
-          "lengte_cm": 150,
-          "afmetingen_mm": {
-            "l": 1500,
-            "b": 80,
-            "h": 68
-          },
-          "sensor": false,
-          "noodverlichting": null,
-          "dimprotocol": "geen"
-        },
-        {
-          "artikelcode": "2024694-S",
-          "omschrijving": "Essence Classic G3 IP66 150cm 33-58W 4500-7700lm 3CCT (2x58W) + Bewegingssensor",
-          "vermogen_w": {
-            "min": 33,
-            "max": 58
-          },
-          "lichtstroom_lm": {
-            "min": 4500,
-            "max": 7700
-          },
-          "kleur": "grijs",
-          "lengte_cm": 150,
-          "afmetingen_mm": {
-            "l": 1500,
-            "b": 80,
-            "h": 68
-          },
-          "sensor": true,
-          "noodverlichting": null,
-          "dimprotocol": "geen"
-        },
-        {
-          "artikelcode": "2024694-N",
-          "omschrijving": "Essence Classic G3 IP66 150cm 33-58W 4500-7700lm 3CCT (2x58W) + Noodmodule 3uur zelftest & manueel",
-          "vermogen_w": {
-            "min": 33,
-            "max": 58
-          },
-          "lichtstroom_lm": {
-            "min": 4500,
-            "max": 7700
-          },
-          "kleur": "grijs",
-          "lengte_cm": 150,
-          "afmetingen_mm": {
-            "l": 1500,
-            "b": 80,
-            "h": 68
-          },
-          "sensor": false,
-          "noodverlichting": "3u",
-          "dimprotocol": "geen"
-        },
-        {
-          "artikelcode": "2024694-SN",
-          "omschrijving": "Essence Classic G3 IP66 150cm 33-58W 4500-7700lm 3CCT (2x58W) + Bewegingssensor & Noodmodule 3uur",
-          "vermogen_w": {
-            "min": 33,
-            "max": 58
-          },
-          "lichtstroom_lm": {
-            "min": 4500,
-            "max": 7700
-          },
-          "kleur": "grijs",
-          "lengte_cm": 150,
-          "afmetingen_mm": {
-            "l": 1500,
-            "b": 80,
-            "h": 68
-          },
-          "sensor": true,
-          "noodverlichting": "3u",
-          "dimprotocol": "geen"
-        }
-      ],
       "accessoires": [
         {
           "artikelcode": "2024786",
@@ -2353,7 +2377,249 @@
         }
       ],
       "dimbaar": false,
-      "balvast": false
+      "balvast": false,
+      "varianten": [
+        {
+          "artikelcode": "2024670",
+          "omschrijving": "Essence Classic G3 IP66 60cm 11-19W 1400-2450lm 3CCT 3x2,5mm Doorvoerbedrading (2x18W)",
+          "vermogen_w": {
+            "min": 11.0,
+            "max": 19.0
+          },
+          "lichtstroom_lm": {
+            "min": 1400,
+            "max": 2450
+          },
+          "kleur": "grijs",
+          "lengte_cm": 60,
+          "afmetingen_mm": {
+            "l": 600,
+            "b": 80,
+            "h": 68
+          },
+          "sensor": false,
+          "noodverlichting": null,
+          "dimprotocol": "geen",
+          "type": "Essence Classic G3",
+          "ip": 66
+        },
+        {
+          "artikelcode": "2024670-S",
+          "omschrijving": "Essence Classic G3 IP66 60cm 11-19W 1400-2450lm 3CCT (2x18W) + Bewegingssensor",
+          "vermogen_w": {
+            "min": 11.0,
+            "max": 19.0
+          },
+          "lichtstroom_lm": {
+            "min": 1400,
+            "max": 2450
+          },
+          "kleur": "grijs",
+          "lengte_cm": 60,
+          "afmetingen_mm": {
+            "l": 600,
+            "b": 80,
+            "h": 68
+          },
+          "sensor": true,
+          "noodverlichting": null,
+          "dimprotocol": "geen",
+          "type": "Essence Classic G3",
+          "ip": 66
+        },
+        {
+          "artikelcode": "2024687",
+          "omschrijving": "Essence Classic G3 IP66 120cm 22-39W 3100-5400lm 3CCT 4x2,5mm Doorvoerbedrading (2x36W)",
+          "vermogen_w": {
+            "min": 22.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3100,
+            "max": 5400
+          },
+          "kleur": "grijs",
+          "lengte_cm": 120,
+          "afmetingen_mm": {
+            "l": 1200,
+            "b": 80,
+            "h": 68
+          },
+          "sensor": false,
+          "noodverlichting": null,
+          "dimprotocol": "geen",
+          "type": "Essence Classic G3",
+          "ip": 66
+        },
+        {
+          "artikelcode": "2024687-S",
+          "omschrijving": "Essence Classic G3 IP66 120cm 22-39W 3100-5400lm 3CCT (2x36W) + Bewegingssensor",
+          "vermogen_w": {
+            "min": 22.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3100,
+            "max": 5400
+          },
+          "kleur": "grijs",
+          "lengte_cm": 120,
+          "afmetingen_mm": {
+            "l": 1200,
+            "b": 80,
+            "h": 68
+          },
+          "sensor": true,
+          "noodverlichting": null,
+          "dimprotocol": "geen",
+          "type": "Essence Classic G3",
+          "ip": 66
+        },
+        {
+          "artikelcode": "2024687-N",
+          "omschrijving": "Essence Classic G3 IP66 120cm 22-39W 3100-5400lm 3CCT (2x36W) + Noodmodule 3uur zelftest & manueel",
+          "vermogen_w": {
+            "min": 22.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3100,
+            "max": 5400
+          },
+          "kleur": "grijs",
+          "lengte_cm": 120,
+          "afmetingen_mm": {
+            "l": 1200,
+            "b": 80,
+            "h": 68
+          },
+          "sensor": false,
+          "noodverlichting": "3u",
+          "dimprotocol": "geen",
+          "type": "Essence Classic G3",
+          "ip": 66
+        },
+        {
+          "artikelcode": "2024687-SN",
+          "omschrijving": "Essence Classic G3 IP66 120cm 22-39W 3100-5400lm 3CCT (2x36W) + Bewegingssensor & Noodmodule 3uur",
+          "vermogen_w": {
+            "min": 22.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3100,
+            "max": 5400
+          },
+          "kleur": "grijs",
+          "lengte_cm": 120,
+          "afmetingen_mm": {
+            "l": 1200,
+            "b": 80,
+            "h": 68
+          },
+          "sensor": true,
+          "noodverlichting": "3u",
+          "dimprotocol": "geen",
+          "type": "Essence Classic G3",
+          "ip": 66
+        },
+        {
+          "artikelcode": "2024694",
+          "omschrijving": "Essence Classic G3 IP66 150cm 33-58W 4500-7700lm 3CCT 4x2,5mm Doorvoerbedrading (2x58W)",
+          "vermogen_w": {
+            "min": 33.0,
+            "max": 58.0
+          },
+          "lichtstroom_lm": {
+            "min": 4500,
+            "max": 7700
+          },
+          "kleur": "grijs",
+          "lengte_cm": 150,
+          "afmetingen_mm": {
+            "l": 1500,
+            "b": 80,
+            "h": 68
+          },
+          "sensor": false,
+          "noodverlichting": null,
+          "dimprotocol": "geen",
+          "type": "Essence Classic G3",
+          "ip": 66
+        },
+        {
+          "artikelcode": "2024694-S",
+          "omschrijving": "Essence Classic G3 IP66 150cm 33-58W 4500-7700lm 3CCT (2x58W) + Bewegingssensor",
+          "vermogen_w": {
+            "min": 33.0,
+            "max": 58.0
+          },
+          "lichtstroom_lm": {
+            "min": 4500,
+            "max": 7700
+          },
+          "kleur": "grijs",
+          "lengte_cm": 150,
+          "afmetingen_mm": {
+            "l": 1500,
+            "b": 80,
+            "h": 68
+          },
+          "sensor": true,
+          "noodverlichting": null,
+          "dimprotocol": "geen",
+          "type": "Essence Classic G3",
+          "ip": 66
+        },
+        {
+          "artikelcode": "2024694-N",
+          "omschrijving": "Essence Classic G3 IP66 150cm 33-58W 4500-7700lm 3CCT (2x58W) + Noodmodule 3uur zelftest & manueel",
+          "vermogen_w": {
+            "min": 33.0,
+            "max": 58.0
+          },
+          "lichtstroom_lm": {
+            "min": 4500,
+            "max": 7700
+          },
+          "kleur": "grijs",
+          "lengte_cm": 150,
+          "afmetingen_mm": {
+            "l": 1500,
+            "b": 80,
+            "h": 68
+          },
+          "sensor": false,
+          "noodverlichting": "3u",
+          "dimprotocol": "geen",
+          "type": "Essence Classic G3",
+          "ip": 66
+        },
+        {
+          "artikelcode": "2024694-SN",
+          "omschrijving": "Essence Classic G3 IP66 150cm 33-58W 4500-7700lm 3CCT (2x58W) + Bewegingssensor & Noodmodule 3uur",
+          "vermogen_w": {
+            "min": 33.0,
+            "max": 58.0
+          },
+          "lichtstroom_lm": {
+            "min": 4500,
+            "max": 7700
+          },
+          "kleur": "grijs",
+          "lengte_cm": 150,
+          "afmetingen_mm": {
+            "l": 1500,
+            "b": 80,
+            "h": 68
+          },
+          "sensor": true,
+          "noodverlichting": "3u",
+          "dimprotocol": "geen",
+          "type": "Essence Classic G3",
+          "ip": 66
+        }
+      ]
     }
   ]
 }

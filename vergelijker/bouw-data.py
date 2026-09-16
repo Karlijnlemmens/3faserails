@@ -48,7 +48,88 @@ def getal(s):
     return float(str(s).replace(",", ".")) if s is not None else None
 
 
-def lees_omschrijving(o):
+# --- De omschrijving ---------------------------------------------------------
+# In de prijslijst staat de hele technische opgave op één regel:
+#
+#   Pragmalux  LED Inbouw/Opbouw Downlight Luna G2 IP44 12W/18W 3000K-6000K
+#   3-CCT 1400-2050lm Ø217 Buitenmaat - Gatmaat Ø65-185 incl. LED Driver
+#
+# Daar komen de naam, het vermogen, de kleurtemperatuur, de lichtstroom en de
+# maten uit. Alles hieronder leest; niets raadt.
+
+# Een maatdeel. Vier vormen: een Ø-maat (eventueel een reeks, eventueel met de
+# hoogte erachter), een lxbxh, een maatwoord, en een losse eenheid als vervolg
+# ("600x600 mm"). De lxbxh eist per getal minstens twee cijfers, want anders
+# leest "3x2,5mm Doorvoerbedrading" als een afmeting en "(2x18W)" als een maat.
+MAATDEEL = re.compile(
+    r"Ø\s*\d+(?:[,.]\d+)?(?:\s*[-–]\s*\d+(?:[,.]\d+)?)?"
+    r"(?:\s*[x×]\s*\d+(?:[,.]\d+)?)*(?:\s*\(\s*[A-Za-z]\s*\))?"
+    r"|\b\d{2,}\s*[x×]\s*\d{2,}(?:\s*[x×]\s*\d{2,})*(?:\s*\(\s*[A-Za-z]\s*\))?"
+    r"|\b(?:buitenmaat|gatmaat|zaagmaat|inbouwmaat|inbouwdiepte|uitsparing|afmetingen?|maat)\b"
+    r"|\bB\s*-\s*G\b|\bZ:"
+    r"|\b(?:mm|cm)\b",
+    re.I)
+# Een maatzone telt alleen als er een Ø, een lxbxh of een maatwoord in staat;
+# een losse "mm" is een restje van iets anders (de doorvoerbedrading).
+MAATKERN = re.compile(r"Ø|\d\s*[x×]\s*\d|buitenmaat|gatmaat|zaagmaat|inbouwmaat"
+                      r"|inbouwdiepte|uitsparing|afmeting|maat|B\s*-\s*G|Z:", re.I)
+
+# De kleurtemperatuur zoals de prijslijst hem schrijft: "4000K", "3000K-6000K",
+# "3000K/4000K/6000K", met daarachter soms het aantal standen ("3-CCT").
+CCT_TEKST = re.compile(r"\d{4}\s*K(?:\s*[-–/]\s*\d{4}\s*K)*(?:\s*\d?\s*-?\s*CCT)?", re.I)
+
+# Waar de naam ophoudt en de opgave begint. Alles hierachter gaat niet meer over
+# wélk armatuur het is. "Inbouw/Opbouw" blijft er dus in, "IP44 12W/18W" niet.
+TYPE_STOP = re.compile(
+    r"\bIP\s*\d{2}|\bIK\s*\d{2}|\bUGR\b|\bSDCM\b|\bCRI\b|\bRa\b"
+    r"|\b(?:max|min|incl|excl|ca)\.|\b(?:max|min|incl|excl)\b"
+    r"|\d+(?:[,.]\d+)?\s*(?:W|lm|K|V|mm|cm|D)\b"
+    r"|\d+\s*[-–/]\s*\d+"
+    r"|\d?\s*-?CCT\b"
+    r"|\bwit\b|\bzwart\b|\bgrijs\b|\bRAL\b"
+    r"|Ø|\+|\(", re.I)
+
+
+def maatzone(o):
+    """De aaneengesloten maatopgave uit de omschrijving, letterlijk zoals hij er
+       staat: "Ø217 Buitenmaat - Gatmaat Ø65-185". Losse stukken die alleen door
+       spaties of een streepje gescheiden worden horen bij elkaar; alles ertussen
+       breekt de reeks af."""
+    delen = list(MAATDEEL.finditer(o))
+    zones, begin, eind = [], None, None
+    for m in delen:
+        if begin is not None and re.fullmatch(r"[\s\-–—]*", o[eind:m.start()]):
+            eind = m.end()
+            continue
+        if begin is not None:
+            zones.append((begin, eind))
+        begin, eind = m.start(), m.end()
+    if begin is not None:
+        zones.append((begin, eind))
+    zones = [o[a:b].strip() for a, b in zones]
+    zones = [z for z in zones if MAATKERN.search(z)]
+    return max(zones, key=len) if zones else None
+
+
+def naamzone(o, merk=None):
+    """De naam van het armatuur: wat er voor de eerste technische opgave staat,
+       zonder het merk dat er soms voor staat. "Pragmalux LED Inbouw/Opbouw
+       Downlight Luna G2 IP44 ..." geeft "LED Inbouw/Opbouw Downlight Luna G2"."""
+    t = " ".join(o.split())
+    if merk:
+        t = re.sub(r"^" + re.escape(str(merk).strip()) + r"\b[\s,\-]*", "", t, flags=re.I)
+    m = TYPE_STOP.search(t)
+    if m:
+        t = t[: m.start()]
+    elif len(t) > 60:
+        # Geen enkele opgave gevonden en het is een lange regel: dan is dit geen
+        # naam maar een zin, en raden we liever niet.
+        return None
+    t = t.strip(" -–—,;:")
+    return t if 2 <= len(t) <= 60 else None
+
+
+def lees_omschrijving(o, merk=None):
     """Haal technische gegevens uit de omschrijvingstekst. Geeft (velden, ontbrekend)."""
     v, mist = {}, []
 
@@ -56,12 +137,19 @@ def lees_omschrijving(o):
     if m:
         v["vermogen_w"] = {"min": getal(m.group(1)), "max": getal(m.group(2))}
     else:
-        m = re.search(r"max\.?\s*(\d+[,.]?\d*)\s*W\b", o) or re.search(r"\b(\d+[,.]?\d*)\s*W\b", o)
+        # "12W/18W" en "12/18W" zijn een schakelbaar armatuur: twee standen, dus
+        # een ondergrens en een bovengrens - geen enkel vermogen met een noot.
+        m = re.search(r"((?:\d+(?:[,.]\d+)?\s*W?\s*/\s*)+\d+(?:[,.]\d+)?\s*W)\b", o)
         if m:
-            v["vermogen_w"] = {"min": None, "max": getal(m.group(1)),
-                               "opmerking": "ondergrens afhankelijk van gekozen driver"}
+            n = [getal(x) for x in re.findall(r"\d+(?:[,.]\d+)?", m.group(1))]
+            v["vermogen_w"] = {"min": min(n), "max": max(n)}
         else:
-            mist.append("vermogen")
+            m = re.search(r"max\.?\s*(\d+[,.]?\d*)\s*W\b", o) or re.search(r"\b(\d+[,.]?\d*)\s*W\b", o)
+            if m:
+                v["vermogen_w"] = {"min": None, "max": getal(m.group(1)),
+                                   "opmerking": "ondergrens afhankelijk van gekozen driver"}
+            else:
+                mist.append("vermogen")
 
     m = re.search(r"(\d+)\s*[-–]\s*(\d+)\s*lm\b", o)
     if m:
@@ -73,6 +161,13 @@ def lees_omschrijving(o):
         else:
             mist.append("lichtstroom")
 
+    # De kleurtemperatuur staat ook bij de familie, maar die geldt voor de hele
+    # serie; wat hier staat gaat over dit ene artikel, inclusief het aantal
+    # standen. Zo letterlijk mogelijk overnemen: "3000K-6000K 3-CCT".
+    m = CCT_TEKST.search(o)
+    if m:
+        v["cct_tekst"] = " ".join(m.group(0).split())
+
     # "Buitenmaat - Gatmaat Ø90" is de gebruikelijke schrijfwijze, maar in de
     # prijslijst staat het soms afgekort als "B - G Ø150". Beide meenemen,
     # anders blijft de gatmaat leeg zonder dat er een melding komt: de
@@ -83,12 +178,22 @@ def lees_omschrijving(o):
     m = re.search(r"Ø\s*(\d+)", o)
     if m:
         v["buitenmaat_mm"] = int(m.group(1))
+    # De hele maatopgave zoals hij er staat. De losse getallen hierboven zijn wat
+    # de tool rekent (past het in het bestaande gat?); dit is wat op het
+    # vergelijkingsblad hoort, mét de reeks erin: "Gatmaat Ø65-185".
+    z = maatzone(o)
+    if z:
+        v["afmetingen_tekst"] = z
     if "zaagmaat_mm" not in v and "buitenmaat_mm" not in v:
         m = re.search(r"\b(\d{2,3})\s*cm\b", o)
         if m:
             v["lengte_cm"] = int(m.group(1))
-        else:
+        elif not z:
             mist.append("afmeting")
+
+    naam = naamzone(o, merk)
+    if naam:
+        v["type"] = naam
 
     for k in ("wit", "zwart", "grijs"):
         if re.search(r"\b" + k + r"\b", o, re.I):
@@ -98,6 +203,12 @@ def lees_omschrijving(o):
         if re.search(r"\b" + k + r"\w*\b", o, re.I):
             v["uitvoering"] = k
             break
+    # "Inbouw/Opbouw" noemt er twee: dan zegt de omschrijving niet welke van de
+    # twee dit artikel is, en blijft de lijst van de familie staan.
+    if v.get("uitvoering") in ("opbouw", "inbouw", "pendel") and sum(
+            1 for k in ("opbouw", "inbouw", "pendel")
+            if re.search(r"\b" + k + r"\w*\b", o, re.I)) > 1:
+        v.pop("uitvoering")
 
     m = re.search(r"IP\s*(\d{2})", o)
     if m:
@@ -190,6 +301,13 @@ def main():
         if not bestand.exists():
             bewaard = eerder.get(fam.get("id"))
             if bewaard:
+                # De export ontbreekt, maar de omschrijvingen staan in
+                # armaturen.json. Die lezen we opnieuw, zodat deze artikelen mee
+                # veranderen als de lezer hierboven iets nieuws leert; wat de
+                # lezer niet vindt blijft staan zoals het stond.
+                bewaard = [dict(x, **lees_omschrijving(x.get("omschrijving") or "",
+                                                       x.get("merk") or fam.get("merk"))[0])
+                           for x in bewaard]
                 fam["varianten"] = bewaard
                 fam.pop("bron_excel", None)
                 fam.pop("alleen_codes_met_prefix", None)
@@ -217,6 +335,7 @@ def main():
             return None
 
         i_code, i_oms = kol("artikelcode"), kol("omschrijving")
+        i_merk = kol("merk", "brand", "fabrikant", "leverancier")
         i_stat, i_bar = kol("status"), kol("barcode 1", "barcode")
         if i_code is None or i_oms is None:
             meldingen.append(f"[{fam['id']}] kolommen Artikelcode/Omschrijving niet gevonden")
@@ -237,8 +356,17 @@ def main():
                 overgeslagen += 1
                 continue
 
-            v, mist = lees_omschrijving(oms)
+            merk = ""
+            if i_merk is not None and i_merk < len(r) and r[i_merk]:
+                merk = str(r[i_merk]).strip()
+
+            v, mist = lees_omschrijving(oms, merk or fam.get("merk"))
             v.update({"artikelcode": code, "basiscode": basis, "omschrijving": oms})
+            # Het merk staat al bij de familie; alleen een artikel dat ervan
+            # afwijkt krijgt een eigen regel. Anders staat er 72 keer "Pragmalux"
+            # in armaturen.json zonder dat het iets toevoegt.
+            if merk and merk != fam.get("merk"):
+                v["merk"] = merk
             v.update(DRIVERS.get(drv, {}))
             v.update(EXTRA.get(extra, {}))
             if i_stat is not None:

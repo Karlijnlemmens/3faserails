@@ -86,17 +86,51 @@ wat er intussen op GitHub is bijgekomen.
 ### 1 · Kijk in de Excel wat erin staat
 
 Open de prijslijstexport gewoon in Excel en kijk naar de kolomkoppen. De tool
-gebruikt er **vier**:
+gebruikt er **drie**:
 
 | kolom | waarvoor |
 |---|---|
 | `Artikelcode` | het artikelnummer, en het suffix erachter verraadt de driver |
-| `Omschrijving` | hier komt bijna alles uit: wattage, lichtstroom, maten, kleur, IP |
-| `Status` | voorraadartikel of bestelartikel |
-| `Barcode 1` | de EAN |
+| `Merk` | de leverancier op het vergelijkingsblad |
+| `Omschrijving` | hier komt de hele technische opgave uit |
 
 Al het andere — bruto, netto inkoop, marge, staffels — wordt in de volgende stap
 weggeknipt. **Dat moet ook**, want deze repo staat openbaar op internet.
+
+### Wat de tool uit de omschrijving haalt
+
+De omschrijving is één regel waar alles in staat. Deze bijvoorbeeld:
+
+```
+Pragmalux  LED Inbouw/Opbouw Downlight Luna G2 IP44 12W/18W 3000K-6000K 3-CCT
+1400-2050lm Ø217 Buitenmaat - Gatmaat Ø65-185 incl. LED Driver
+```
+
+wordt dit op het blad:
+
+| rij op het blad | wat erin komt | waar het vandaan komt |
+|---|---|---|
+| Leverancier | Pragmalux | kolom `Merk` |
+| Type | LED Inbouw/Opbouw Downlight Luna G2 | alles vóór de eerste technische opgave |
+| Artikelnummer | WO1050100 | kolom `Artikelcode` |
+| Omschrijving | de hele regel | kolom `Omschrijving` |
+| Vermogen | 12-18W | `12W/18W` — twee standen, dus een onder- en een bovengrens |
+| Kleurtemperatuur | 3000K-6000K 3-CCT | letterlijk overgenomen, mét het aantal standen |
+| Nuttige lichtstroom | 1400-2050lm | |
+| Afmetingen | Ø217 Buitenmaat - Gatmaat Ø65-185 | letterlijk, dus de reeks blijft staan |
+| IP-klasse | IP44 | |
+| Montage | Inbouw, opbouw | `Inbouw/Opbouw` noemt er twee, dus blijft de lijst uit `families.json` staan |
+
+Twee dingen die hierbij horen:
+
+- **Wat de omschrijving zegt, wint van wat bij de familie staat** — behalve bij
+  Type, waar de familienaam blijft staan zolang die al zegt wat de omschrijving
+  zegt. Zo overschrijft `Essence Classic G3` de rijkere familienaam
+  `LED TL Waterdicht Armatuur Essence Classic G3 IP66` niet, maar wint
+  `LED Inbouw/Opbouw Downlight Luna G2` wél van `LED Downlight Luna G2`.
+- **Wat er niet in staat, wordt niet verzonnen.** Het script meldt in stap 5 wat
+  het niet kon vinden. Staat er geen kleurtemperatuur in de omschrijving, dan
+  valt de tool terug op de `cct` die je bij de familie invult.
 
 ### 2 · Knip de export uit
 
@@ -116,7 +150,7 @@ Je krijgt te zien wat er gebeurd is:
 
 ```
 prijslijst-mondial.xlsx → data/bron/mondial-downlight.csv  (86 artikelen)
-   weggelaten kolommen (3): bruto prijs, netto inkoop, marge %
+   weggelaten kolommen (5): bruto prijs, netto inkoop, marge %, status, barcode 1
 ```
 
 Lees die tweede regel echt. Staat er een kolom bij die je wél had willen houden,
@@ -292,6 +326,7 @@ die, dan komt je volgende wijziging per ongeluk meteen bij je collega's terecht.
 | `Expecting ',' delimiter` | Komma vergeten of er één te veel in `families.json`. Het regelnummer staat erbij. |
 | `bronbestand niet gevonden` | De naam bij `bron_excel` komt niet overeen met het bestand in `data\bron\`. |
 | `kolom 'artikelcode' niet gevonden` | De Excel heeft andere kolomkoppen. Het script laat zien welke hij wél zag. |
+| `niet gevonden, blijft leeg: merk` | Geen fout: er is geen merkkolom. De tool gebruikt dan het `merk` uit `families.json`. |
 | `export ... niet gevonden; de N artikelen blijven staan` | Geen fout: hij houdt de bestaande data aan omdat de export ontbreekt. |
 | `Updates were rejected` bij `git push` | Er staat nieuwer werk op GitHub. Doe `git pull` en probeer opnieuw. |
 

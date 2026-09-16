@@ -436,6 +436,36 @@ function is(wat, gekregen, verwacht){
   }
 }
 
+/* ==================== waarden uit de productdata ==================== */
+{
+  const m = await laadUit('vergelijker/index-template.html', ['typeVan']);
+
+  console.log('\nwaarden uit de productdata');
+
+  /* De familienaam geldt voor de hele serie, de uitgelezen naam voor dit ene
+     artikel. Dezelfde afweging als bij ipVan(): de familienaam blijft staan
+     zolang die al zegt wat de omschrijving zegt. */
+  is('rijkere familienaam blijft staan',
+    m.typeVan({naam:'LED TL Waterdicht Armatuur Essence Classic G3 IP66'},
+              {type:'Essence Classic G3'}),
+    'LED TL Waterdicht Armatuur Essence Classic G3 IP66');
+  is('preciezere omschrijving wint',
+    m.typeVan({naam:'LED Downlight Luna G2'},
+              {type:'LED Inbouw/Opbouw Downlight Luna G2'}),
+    'LED Inbouw/Opbouw Downlight Luna G2');
+  is('dezelfde naam verandert niets',
+    m.typeVan({naam:'LED Downlight Essence G2'}, {type:'LED Downlight Essence G2'}),
+    'LED Downlight Essence G2');
+  /* Hoofdletters en dubbele spaties uit de prijslijst mogen niet uitmaken. */
+  is('hoofdletters en spaties tellen niet mee',
+    m.typeVan({naam:'LED Paneel Essence G3'}, {type:'paneel  essence g3'}),
+    'LED Paneel Essence G3');
+  is('zonder uitgelezen naam blijft de familienaam',
+    m.typeVan({naam:'LED Downlight Mondial'}, {}), 'LED Downlight Mondial');
+  is('zonder familienaam wint de uitgelezen naam',
+    m.typeVan({}, {type:'LED Downlight Mondial'}), 'LED Downlight Mondial');
+}
+
 /* ---------------------------------------------------------------- verslag ---- */
 console.log('\n' + gedaan + ' controles, ' + (mis ? mis + ' MIS' : 'alles goed') + '.');
 process.exit(mis ? 1 : 0);

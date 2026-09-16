@@ -691,16 +691,36 @@ function noodVan(v){
   return m ? m[1].trim() : '';
 }
 
+/* De naam van het armatuur staat op twee plekken: bij de familie - één naam voor
+   de hele serie - en bij de variant, uitgelezen uit de omschrijving in de
+   prijslijst. Dezelfde afweging als bij ipVan(): de familienaam wint zolang die
+   al zegt wat het artikel zegt, en de omschrijving wint als die meer noemt.
+   "LED Inbouw/Opbouw Downlight Luna G2" gaat zo voor op "LED Downlight Luna G2",
+   terwijl "Essence Classic G3" de rijkere familienaam laat staan. */
+function typeVan(fam,v){
+  const f = (fam && fam.naam) ? String(fam.naam).trim() : '';
+  const t = (v && v.type) ? String(v.type).trim() : '';
+  if(!t) return f;
+  if(!f) return t;
+  const plat = x => x.toLowerCase().replace(/\s+/g,' ');
+  return plat(f).indexOf(plat(t))>=0 ? f : t;
+}
+
 function onzeWaarden(fam,v){
   if(!fam||!v) return {};
   const d={
-    leverancier:'Pragmalux / Distrilight',
-    type:fam.naam,
+    /* Het merk staat in de prijslijst in een eigen kolom; wat daar staat is de
+       leverancier op het blad. Ontbreekt die kolom, dan valt hij terug op het
+       merk van de familie. */
+    leverancier: v.merk || fam.merk || 'Pragmalux / Distrilight',
+    type: typeVan(fam,v),
     artikelnummer:v.artikelcode,
     omschrijving:v.omschrijving||'',
     toepassing:'',
     vermogen:bereik(v.vermogen_w,'W'),
-    cct:(fam.cct||[]).join('-')+(fam.cct?'K':''),
+    /* De familie noemt de kleurtemperaturen van de hele serie; de omschrijving
+       noemt die van dit artikel, mét het aantal standen ("3000K-6000K 3-CCT"). */
+    cct: v.cct_tekst || ((fam.cct||[]).join('-')+(fam.cct?'K':'')),
     lumen:bereik(v.lichtstroom_lm,'lm'),
     dimbaar: v.dimprotocol==null ? '' : (v.dimprotocol==='geen' ? 'Nee' : 'Ja'),
     aansturing: aansturingVan(v),
@@ -719,9 +739,14 @@ function onzeWaarden(fam,v){
     ugr: ugrVan(fam),
     cri: criVan(fam),
     levensduur: fam.levensduur || '',
-    afmetingen: v.buitenmaat_mm ? ('Ø'+v.buitenmaat_mm+(zaagmaatVan(v)?' — zaagmaat Ø'+zaagmaatVan(v):''))
+    /* De maatopgave zoals hij in de prijslijst staat gaat voor op de losse
+       getallen: alleen daar staat de reeks nog in ("Gatmaat Ø65-185") en staat
+       erbij wélke maat het is. De losse getallen blijven wat de tool rékent. */
+    afmetingen: v.afmetingen_tekst
+      || (v.buitenmaat_mm ? ('Ø'+v.buitenmaat_mm+(zaagmaatVan(v)?' — zaagmaat Ø'+zaagmaatVan(v):''))
       : v.afmetingen_mm ? [v.afmetingen_mm.l,v.afmetingen_mm.b,v.afmetingen_mm.h].filter(Boolean).join('×')+'mm'
-      : ''
+      : v.lengte_cm ? v.lengte_cm+' cm'
+      : '')
   };
   if(v.vermogen_w && v.vermogen_w.min==null && v.vermogen_w.opmerking)
     d.vermogen='tot '+v.vermogen_w.max+'W';

@@ -28,9 +28,11 @@ Drie stappen, daarna is de familie beschikbaar in de tool.
 python knip-export.py ~/Downloads/prijslijst-mondial.xlsx mondial-downlight
 ```
 
-Dat schrijft `data/bron/mondial-downlight.csv` met alleen de vier kolommen die
-de tool leest — `Artikelcode`, `Omschrijving`, `Status`, `Barcode 1` — en meldt
-welke kolommen het heeft weggelaten.
+Dat schrijft `data/bron/mondial-downlight.csv` met alleen de drie kolommen die
+de tool leest — `Artikelcode`, `Merk`, `Omschrijving` — en meldt welke kolommen
+het heeft weggelaten. Meer is er niet nodig: in de omschrijving staat op één
+regel de hele technische opgave, en `bouw-data.py` leest daar het vermogen, de
+kleurtemperatuur, de lichtstroom, de maten en de naam van het armatuur uit.
 
 **Die stap is niet optioneel, want deze repo is openbaar.** Een prijslijstexport
 heeft inkoop- en brutoprijzen, staffels en marges aan boord. `bouw-data.py` doet
