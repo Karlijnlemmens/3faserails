@@ -438,7 +438,7 @@ function is(wat, gekregen, verwacht){
 
 /* ==================== waarden uit de productdata ==================== */
 {
-  const m = await laadUit('vergelijker/index-template.html', ['typeVan']);
+  const m = await laadUit('vergelijker/index-template.html', ['typeVan','artikelVoorWoord']);
 
   console.log('\nwaarden uit de productdata');
 
@@ -464,6 +464,28 @@ function is(wat, gekregen, verwacht){
     m.typeVan({naam:'LED Downlight Mondial'}, {}), 'LED Downlight Mondial');
   is('zonder familienaam wint de uitgelezen naam',
     m.typeVan({}, {type:'LED Downlight Mondial'}), 'LED Downlight Mondial');
+
+  /* Zoeken op artikelnummer. artikelVoorWoord() is het stuk dat beslist wélk
+     artikel een getypt nummer aanwijst; zoekFamilies() eromheen leest de
+     globale DATA en valt daarom buiten deze controle. */
+  const fam = {varianten:[
+    {artikelcode:'1000152'}, {artikelcode:'1000152-DA'}, {artikelcode:'1000152-S'},
+    {artikelcode:'WO1046761', basiscode:'WO1046761', barcode:'8712345678901'},
+  ]};
+  is('kale code wint van de uitvoering eronder',
+    m.artikelVoorWoord(fam,'1000152')?.artikelcode, '1000152');
+  is('code met uitvoering wijst die uitvoering aan',
+    m.artikelVoorWoord(fam,'1000152-da')?.artikelcode, '1000152-DA');
+  is('een begin van een code is genoeg',
+    m.artikelVoorWoord(fam,'wo10467')?.artikelcode, 'WO1046761');
+  is('de barcode telt ook mee',
+    m.artikelVoorWoord(fam,'8712345678901')?.artikelcode, 'WO1046761');
+  /* Zonder cijfer is het geen artikelnummer; anders wees "wit" het eerste het
+     beste artikel aan en kreeg je dat in plaats van een vrije keuze. */
+  is('een woord zonder cijfer wijst niets aan',
+    m.artikelVoorWoord(fam,'wit'), null);
+  is('een nummer dat niet bestaat wijst niets aan',
+    m.artikelVoorWoord(fam,'9999999'), null);
 }
 
 /* ---------------------------------------------------------------- verslag ---- */

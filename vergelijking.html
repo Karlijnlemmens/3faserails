@@ -1040,27 +1040,68 @@ function huidigeKenmerken(v){
   const o={}; KENMERKEN.forEach(([k])=>{ const w=kenmerkVan(v,k); if(w!=null&&w!=='') o[k]=w }); return o;
 }
 
-/* Zoeken op naam, merk, lijn, armatuurtype en zoektermen. Elk getypt woord moet
-   ergens raken, zodat "essence downlight" hetzelfde vindt als "downlight essence".
-   Volgorde: naam die ermee begint eerst, dan naam die het bevat, dan de rest. */
+/* Alle codes van een familie als één doorzoekbare regel: artikelcode, basiscode
+   en barcode van elk artikel. Wordt één keer per familie berekend en op de
+   familie bewaard - de data verandert tijdens het gebruik niet, en dit draait
+   bij elke toetsaanslag over alle families heen. */
+const CODECACHE = new WeakMap();   /* buiten de data om: die is niet van ons */
+function codeRegel(f){
+  let r=CODECACHE.get(f);
+  if(r==null){
+    r=(f.varianten||[]).flatMap(v=>[v.artikelcode,v.basiscode,v.barcode])
+      .filter(Boolean).join(' ').toLowerCase();
+    CODECACHE.set(f,r);
+  }
+  return r;
+}
+
+/* Welk artikel een getypt woord aanwijst. Alleen woorden met een cijfer erin
+   tellen mee: "s" of "wit" is geen artikelnummer, en zou anders het eerste het
+   beste artikel aanwijzen. Een code die met het woord begint gaat voor op een
+   code die het ergens bevat, zodat "1000152" het kale artikel aanwijst en niet
+   de -DA eronder. */
+function artikelVoorWoord(f,w){
+  if(!/\d/.test(w)) return null;
+  const vs=f.varianten||[];
+  return vs.find(v=>String(v.artikelcode||'').toLowerCase()===w)
+      || vs.find(v=>String(v.artikelcode||'').toLowerCase().startsWith(w))
+      || vs.find(v=>String(v.basiscode||'').toLowerCase().startsWith(w))
+      || vs.find(v=>String(v.barcode||'').toLowerCase()===w)
+      || vs.find(v=>String(v.artikelcode||'').toLowerCase().includes(w))
+      || null;
+}
+
+/* Zoeken op naam, merk, lijn, armatuurtype, zoektermen én artikelnummer. Elk
+   getypt woord moet ergens raken, zodat "essence downlight" hetzelfde vindt als
+   "downlight essence" en "venus 1000152" allebei gebruikt.
+   Volgorde: een artikelnummer dat precies klopt eerst - wie een nummer intypt
+   weet wat hij zoekt - dan naam die ermee begint, naam die het bevat, de rest.
+   Geeft per treffer ook het artikel dat het nummer aanwees, zodat de kiezer dát
+   artikel kan invullen in plaats van er zelf een te kiezen. */
 function zoekFamilies(term){
   const families=DATA?.families||[];
   const t=String(term||'').trim().toLowerCase();
-  if(!t) return families.slice();
+  if(!t) return families.map(f=>({fam:f,art:null}));
   const woorden=t.split(/\s+/);
   const raak=[];
   for(const f of families){
     const naam=String(f.naam||'').toLowerCase();
-    const hooiberg=[f.naam,f.merk,f.lijn,f.armatuurtype,...(f.zoektermen||[])]
+    const tekst=[f.naam,f.merk,f.lijn,f.armatuurtype,...(f.zoektermen||[])]
       .filter(Boolean).join(' ').toLowerCase();
-    if(!woorden.every(w=>hooiberg.includes(w))) continue;
-    const score = naam.startsWith(t) ? 0
+    const codes=codeRegel(f);
+    if(!woorden.every(w=>tekst.includes(w)||codes.includes(w))) continue;
+    let art=null;
+    for(const w of woorden){ const a=artikelVoorWoord(f,w); if(a){art=a;break} }
+    const precies = art && String(art.artikelcode||'').toLowerCase()===t;
+    const score = precies ? -2
+      : art ? -1
+      : naam.startsWith(t) ? 0
       : naam.includes(t) ? 1
       : (f.zoektermen||[]).some(z=>String(z).toLowerCase().startsWith(t)) ? 2 : 3;
-    raak.push([score,f]);
+    raak.push([score,f,art]);
   }
   raak.sort((a,b)=>a[0]-b[0] || String(a[1].naam).localeCompare(String(b[1].naam)));
-  return raak.map(x=>x[1]);
+  return raak.map(x=>({fam:x[1],art:x[2]}));
 }
 
 function familieKiezer(p,fam){
@@ -1068,16 +1109,20 @@ function familieKiezer(p,fam){
   doos.append(el('label','','Onze familie'));
   const inp=document.createElement('input');
   inp.type='text'; inp.autocomplete='off'; inp.spellcheck=false;
-  inp.placeholder='typ of kies een familie';
+  inp.placeholder='typ een naam of artikelnummer';
   inp.value=fam?fam.naam:'';
   const lijst=el('div','fam-lijst'); lijst.hidden=true;
   doos.append(inp,lijst);
 
   let treffers=[], aan=-1;
 
-  function kies(f){
+  /* art is het artikel dat het getypte nummer aanwees; dat wint van de
+     automatische keuze, want wie een artikelnummer intypt bedoelt dat artikel.
+     handmatig=true zorgt dat een latere kenmerkwijziging het niet overrulet. */
+  function kies(f,art){
     p.familieId=f?f.id:''; p.artikelcode=''; p.overrides={}; p.handmatig=false;
-    if(f){ const k=autoKies(f,p,null); if(k)p.artikelcode=k.artikelcode; }
+    if(f && art){ p.artikelcode=art.artikelcode; p.handmatig=true; }
+    else if(f){ const k=autoKies(f,p,null); if(k)p.artikelcode=k.artikelcode; }
     render();                       /* bouwt het hele blad opnieuw op */
   }
   function sluit(){ lijst.hidden=true; aan=-1; }
@@ -1090,24 +1135,27 @@ function familieKiezer(p,fam){
     lijst.innerHTML='';
     if(p.familieId){
       const geen=el('div','fam-op leeg'); geen.append(el('b','','— geen familie —'));
-      geen.onmousedown=e=>{e.preventDefault();kies(null)};
+      geen.onmousedown=e=>{e.preventDefault();kies(null,null)};
       lijst.append(geen);
     }
     if(!treffers.length){
       lijst.append(el('div','fam-niets','Geen familie gevonden voor "'+term+'".'));
     }
-    treffers.forEach(f=>{
+    treffers.forEach(({fam:f,art})=>{
       const r=el('div','fam-op');
       r.append(el('b','',f.naam||f.id));
-      const bij=[f.merk,f.armatuurtype,(f.varianten||[]).length+' artikelen'].filter(Boolean);
+      /* Is de familie op een artikelnummer gevonden, dan hoort erbij te staan
+         wélk artikel dat was - anders zie je niet waarom hij in de lijst staat. */
+      const bij=[art?'art. '+art.artikelcode:null,f.merk,f.armatuurtype,
+                 (f.varianten||[]).length+' artikelen'].filter(Boolean);
       r.append(el('span','',bij.join(' · ')));
       /* mousedown, want blur zou de lijst al sluiten voor de klik aankomt */
-      r.onmousedown=e=>{e.preventDefault();kies(f)};
+      r.onmousedown=e=>{e.preventDefault();kies(f,art)};
       lijst.append(r);
     });
     /* De familie die er nu staat licht op, zodat Enter niets omgooit. */
     const verschuiving = p.familieId ? 1 : 0;
-    const huidig = treffers.findIndex(f=>f.id===p.familieId);
+    const huidig = treffers.findIndex(x=>x.fam.id===p.familieId);
     aan = treffers.length ? (huidig>=0?huidig:0)+verschuiving : -1;
     lijst.hidden=false; merk();
   }
