@@ -472,14 +472,21 @@ function is(wat, gekregen, verwacht){
     {artikelcode:'1000152'}, {artikelcode:'1000152-DA'}, {artikelcode:'1000152-S'},
     {artikelcode:'WO1046761', basiscode:'WO1046761', barcode:'8712345678901'},
   ]};
-  is('kale code wint van de uitvoering eronder',
+  is('een exacte code wijst dat artikel aan',
     m.artikelVoorWoord(fam,'1000152')?.artikelcode, '1000152');
   is('code met uitvoering wijst die uitvoering aan',
     m.artikelVoorWoord(fam,'1000152-da')?.artikelcode, '1000152-DA');
-  is('een begin van een code is genoeg',
-    m.artikelVoorWoord(fam,'wo10467')?.artikelcode, 'WO1046761');
   is('de barcode telt ook mee',
     m.artikelVoorWoord(fam,'8712345678901')?.artikelcode, 'WO1046761');
+  /* Een artikelnummer moet een-op-een kloppen. Een half nummer wijst niets aan:
+     een bijna-treffer aanbieden betekent het verkeerde artikel offreren. */
+  is('een half nummer wijst niets aan',
+    m.artikelVoorWoord(fam,'100015'), null);
+  is('een begin van een code wijst niets aan',
+    m.artikelVoorWoord(fam,'wo10467'), null);
+  /* Een basiscode hoort bij meerdere uitvoeringen en kiest er dus geen. */
+  is('een basiscode kiest geen uitvoering',
+    m.artikelVoorWoord({varianten:[{artikelcode:'X-DA',basiscode:'X'}]},'x'), null);
   /* Zonder cijfer is het geen artikelnummer; anders wees "wit" het eerste het
      beste artikel aan en kreeg je dat in plaats van een vrije keuze. */
   is('een woord zonder cijfer wijst niets aan',

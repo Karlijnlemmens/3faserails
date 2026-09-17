@@ -1050,34 +1050,34 @@ function huidigeKenmerken(v){
   const o={}; KENMERKEN.forEach(([k])=>{ const w=kenmerkVan(v,k); if(w!=null&&w!=='') o[k]=w }); return o;
 }
 
-/* Alle codes van een familie als één doorzoekbare regel: artikelcode, basiscode
-   en barcode van elk artikel. Wordt één keer per familie berekend en op de
-   familie bewaard - de data verandert tijdens het gebruik niet, en dit draait
-   bij elke toetsaanslag over alle families heen. */
-const CODECACHE = new WeakMap();   /* buiten de data om: die is niet van ons */
-function codeRegel(f){
+/* Alle codes van een familie als VERZAMELING, niet als doorzoekbare regel:
+   artikelcode, basiscode en barcode van elk artikel. Een verzameling omdat een
+   artikelnummer een-op-een moet kloppen - in een regel zou "104751" meeliften
+   op 1047515 en zou de tool een artikel aanbieden dat je niet intypte. Wordt
+   eenmalig per familie berekend en buiten de data bewaard, want die is niet van
+   ons om in te schrijven; dit draait bij elke toetsaanslag over alle families. */
+const CODECACHE = new WeakMap();
+function codeSet(f){
   let r=CODECACHE.get(f);
   if(r==null){
-    r=(f.varianten||[]).flatMap(v=>[v.artikelcode,v.basiscode,v.barcode])
-      .filter(Boolean).join(' ').toLowerCase();
+    r=new Set((f.varianten||[]).flatMap(v=>[v.artikelcode,v.basiscode,v.barcode])
+      .filter(Boolean).map(c=>String(c).toLowerCase()));
     CODECACHE.set(f,r);
   }
   return r;
 }
 
-/* Welk artikel een getypt woord aanwijst. Alleen woorden met een cijfer erin
-   tellen mee: "s" of "wit" is geen artikelnummer, en zou anders het eerste het
-   beste artikel aanwijzen. Een code die met het woord begint gaat voor op een
-   code die het ergens bevat, zodat "1000152" het kale artikel aanwijst en niet
-   de -DA eronder. */
+/* Welk artikel een getypt woord aanwijst. Alleen een code die PRECIES klopt:
+   een half nummer wijst niets aan, want een bijna-treffer aanbieden betekent
+   het verkeerde artikel offreren. De artikelcode en de barcode horen bij één
+   artikel en wijzen er dus een aan; een basiscode hoort bij meerdere
+   uitvoeringen en wijst er daarom geen aan - die brengt alleen de familie in
+   beeld, waarna je zelf de uitvoering kiest. */
 function artikelVoorWoord(f,w){
   if(!/\d/.test(w)) return null;
   const vs=f.varianten||[];
   return vs.find(v=>String(v.artikelcode||'').toLowerCase()===w)
-      || vs.find(v=>String(v.artikelcode||'').toLowerCase().startsWith(w))
-      || vs.find(v=>String(v.basiscode||'').toLowerCase().startsWith(w))
       || vs.find(v=>String(v.barcode||'').toLowerCase()===w)
-      || vs.find(v=>String(v.artikelcode||'').toLowerCase().includes(w))
       || null;
 }
 
@@ -1098,13 +1098,20 @@ function zoekFamilies(term){
     const naam=String(f.naam||'').toLowerCase();
     const tekst=[f.naam,f.merk,f.lijn,f.armatuurtype,...(f.zoektermen||[])]
       .filter(Boolean).join(' ').toLowerCase();
-    const codes=codeRegel(f);
-    if(!woorden.every(w=>tekst.includes(w)||codes.includes(w))) continue;
+    /* Een woord telt als het in de tekstkant zit OF precies een code is. Een
+       woord dat geen van beide is sluit de familie uit - dat is wat een half
+       ingetypt artikelnummer geen enkele optie laat geven. */
+    const codes=codeSet(f);
+    let codetreffer=false;
+    if(!woorden.every(w=>{
+      if(codes.has(w)){ codetreffer=true; return true }
+      return tekst.includes(w);
+    })) continue;
     let art=null;
     for(const w of woorden){ const a=artikelVoorWoord(f,w); if(a){art=a;break} }
-    const precies = art && String(art.artikelcode||'').toLowerCase()===t;
-    const score = precies ? -2
-      : art ? -1
+    /* Een exact artikelnummer bovenaan, dan een exacte basiscode, dan de naam. */
+    const score = art ? -2
+      : codetreffer ? -1
       : naam.startsWith(t) ? 0
       : naam.includes(t) ? 1
       : (f.zoektermen||[]).some(z=>String(z).toLowerCase().startsWith(t)) ? 2 : 3;
@@ -1149,7 +1156,12 @@ function familieKiezer(p,fam){
       lijst.append(geen);
     }
     if(!treffers.length){
-      lijst.append(el('div','fam-niets','Geen familie gevonden voor "'+term+'".'));
+      /* Een artikelnummer moet een-op-een kloppen; zeg dat dan ook, want
+         "geen familie gevonden" laat je zoeken naar een tikfout in de naam. */
+      const alsNummer = /\d/.test(term) && !/\s/.test(term.trim());
+      lijst.append(el('div','fam-niets', alsNummer
+        ? 'Geen artikel met nummer "'+term.trim()+'". Een artikelnummer moet precies kloppen.'
+        : 'Geen familie gevonden voor "'+term+'".'));
     }
     treffers.forEach(({fam:f,art})=>{
       const r=el('div','fam-op');
