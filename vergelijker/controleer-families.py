@@ -42,8 +42,16 @@ PROEVEN = [
     ("paneel 30x120cm sigma g2", 1,
      "Een maat en een reeks samen zijn de familie; IP65 en CRI>90 zijn "
      "uitvoeringen."),
-    ("plafonniere / wandarmatuur lumio", 3,
-     "Lumio-S, -M en -L zijn drie armaturen van verschillend formaat."),
+    ("plafonniere / wandarmatuur lumio", 1,
+     "Lumio-S, -M en -L zijn drie formaten van dezelfde reeks: één familie, "
+     "het formaat is een keuze."),
+    # De aanleiding voor de reeks-sleutel: "sigma" gaf zes families die allemaal
+    # Sigma heetten - drie maten maal twee generaties. Nu één, met de maat en de
+    # generatie als keuze erachter.
+    ("paneel 30x120cm sigma", 1,
+     "Alle Sigma-panelen vallen onder Sigma; maat en generatie zijn keuzes."),
+    ("paneel 60x60cm sigma", 1,
+     "Idem - en het moet dezelfde familie zijn als de 30x120 (zie SAMEN)."),
     ("richtspot adjusto g2", 1,
      "De prijslijst schrijft dezelfde reeks met en zonder 'LED' ervoor."),
     # De Mondial is EEN armatuur met opties, geen reeks losse families: de
@@ -53,14 +61,15 @@ PROEVEN = [
     ("downlight mondial", 3,
      "Mondial, Mondial PIR en Mondial COB. Verdiept/standaard/plat, facet/"
      "hoogglans, wit/zwart en DALI zijn uitvoeringen van dezelfde Mondial."),
-    ("frame paneel conto", 2,
+    ("frame paneel conto", 1,
      "Een paneel MET frame is een armatuur; de 30x120 en de 60x60 zijn twee "
-     "maten. Een LOS frame noemt geen lichtstroom en valt daar al op af."),
+     "maten van dezelfde reeks. Een LOS frame noemt geen lichtstroom en valt "
+     "daar al op af."),
     ("essence g2 licht verdiepte frame", 0,
      "Een los frame is geen armatuur."),
-    ("waterdicht armatuur typhoon", 2,
-     "Typhoon en Typhoon G2 zijn twee generaties; de hoofdletters in "
-     "'LED TL waterdicht armatuur typhoon' maken geen derde."),
+    ("waterdicht armatuur typhoon", 1,
+     "Typhoon en Typhoon G2 zijn twee generaties van dezelfde reeks: één "
+     "familie, de generatie is een keuze."),
 ]
 
 # Paren die in DEZELFDE familie horen te vallen. Dat is iets anders dan een
@@ -74,6 +83,20 @@ SAMEN = [
      "De DALI-uitvoering hoort bij Venus G2 (code -DA naast de kale code)."),
     ("mado 240 matt", "mado 240 mat",
      "'Matt' is een typefout."),
+    ("paneel 30x120cm sigma", "paneel 60x60cm sigma",
+     "Twee maten van dezelfde reeks horen in dezelfde familie."),
+    ("mado 195 darklight", "mado 240 mat",
+     "Diameter en optiek zijn uitvoeringen van de Mado, geen eigen families."),
+]
+
+# Wat juist NIET mag samenvallen doordat de sleutel de reeks werd. Een kaal
+# getal in de naam gaat alleen weg als het artikel diezelfde maat ook noemt;
+# de 5 en de 7 hieronder zijn het armatuur waar de module in past.
+APART = [
+    ("ridi-vlsg-5", "ridi-vlsg-7",
+     "Twee Retroline-modules voor verschillende originele armaturen."),
+    ("t5/t8 2-voudig", "t5/t8 4-voudig",
+     "Een re-light kit met twee buizen is niet die met vier."),
 ]
 
 # Woorden die na de merkvoorrang uit de data horen te zijn verdwenen: hetzelfde
@@ -135,6 +158,18 @@ def main():
             print(f"       {waarom}")
             print(f"       links : {', '.join(f['naam'] for f in fa) or '(niets gevonden)'}")
             print(f"       rechts: {', '.join(f['naam'] for f in fb) or '(niets gevonden)'}")
+
+    for a, b, waarom in APART:
+        ids_a = {f["id"] for f in proef(fams, a, 0)}
+        ids_b = {f["id"] for f in proef(fams, b, 0)}
+        goed = bool(ids_a) and bool(ids_b) and not (ids_a & ids_b)
+        mis += not goed
+        print(f"{'goed ' if goed else 'FOUT '} \"{a}\" en \"{b}\" "
+              f"{'in aparte families' if goed else 'zitten in dezelfde familie'}")
+        if not goed:
+            print(f"       {waarom}")
+            print(f"       links : {', '.join(f['naam'] for f in proef(fams,a,0)) or '(niets gevonden)'}")
+            print(f"       rechts: {', '.join(f['naam'] for f in proef(fams,b,0)) or '(niets gevonden)'}")
 
     for woord, waarom in WEG:
         raak = proef(fams, woord, 0)

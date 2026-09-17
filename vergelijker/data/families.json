@@ -1,7 +1,7 @@
 [
   {
     "id": "essence-g2-downlight",
-    "naam": "LED Downlight Essence G2",
+    "naam": "LED Downlight Essence",
     "merk": "Pragmalux",
     "lijn": "Essence",
     "armatuurtype": "downlight",
@@ -40,13 +40,13 @@
     "alleen_codes_met_prefix": "^[WZ][SVO]\\d{7}",
     "presenter": "ag14",
     "namen": [
-      "LED Downlight Essence G2",
-      "LED Downlight Essence G2 PIR"
+      "LED Downlight Essence",
+      "LED Downlight Essence PIR"
     ]
   },
   {
     "id": "essence-g3-paneel",
-    "naam": "LED Paneel Essence G3",
+    "naam": "LED Paneel Essence",
     "merk": "Pragmalux",
     "lijn": "Essence",
     "armatuurtype": "paneel",
@@ -110,13 +110,12 @@
     "balvast": false,
     "presenter": "ag13",
     "namen": [
-      "LED Paneel 30x120cm Essence G3",
-      "LED Paneel 60x60cm Essence G3"
+      "LED Paneel Essence"
     ]
   },
   {
     "id": "essence-classic-g3-waterdicht",
-    "naam": "LED TL Waterdicht Armatuur Essence Classic G3 IP66",
+    "naam": "LED TL Waterdicht Armatuur Essence Classic",
     "merk": "Pragmalux",
     "lijn": "Essence",
     "armatuurtype": "waterdicht_tl",
@@ -168,7 +167,7 @@
     "dimbaar": false,
     "balvast": false,
     "namen": [
-      "LED TL Waterdicht Armatuur Essence Classic G3"
+      "LED TL Waterdicht Armatuur Essence Classic"
     ]
   }
 ]

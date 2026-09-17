@@ -53,10 +53,14 @@ const SCENARIOS = [
   { naam: 'vergelijker', url: 'vergelijking.html', knop: '#btnPdf',
     start: async (page) => page.evaluate(() => {
       S.project = { nr: 'P-001', naam: 'Testproject', inst: 'Installateur BV', datum: '2026-08-20', lagen: ['BG'], type: 'nieuwbouw' };
-      /* Een vaste familie, niet families[0]: die verschuift zodra er data
-         bij komt, en dan zegt een verschil in de PDF niets meer. */
-      const fam = DATA.families.find(f => f.id === 'led-downlight-essence-g2')
-                || DATA.families[0];
+      /* Een vaste familie, niet families[0]: die verschuift zodra er data bij
+         komt, en dan vergelijk je twee PDF's over twee verschillende armaturen.
+         Op de naam en niet op het id, want dat verschuift mee met een
+         hernoeming - en luid stuk als hij er niet is, want stil terugvallen op
+         een andere familie levert precies het verwarrende verschil op dat deze
+         controle hoort te vangen. */
+      const fam = DATA.families.find(f => /^LED Downlight Essence$/i.test(f.naam));
+      if(!fam) throw new Error('PDF-controle: familie "LED Downlight Essence" niet gevonden');
       const v = fam.varianten[0];
       const p = nieuwePositie('A');
       p.familieId = fam.id; p.artikelcode = v.artikelcode; p.aantallen = { BG: 10 };

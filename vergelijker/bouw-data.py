@@ -142,7 +142,7 @@ DIM_IN_TEKST = [
 OPTIEK = [
     (r"\bfacet\b",                        "Facet"),
     (r"\bhoogglans\w*\b",                 "Hoogglans"),
-    (r"\bmatte?\s+reflector\b",           "Mat"),
+    (r"\bmat(?:te)?\s+reflector\b|\bmat(?:te)?\b", "Mat"),
     (r"\bzwarte?\s+reflector\b",          "Zwarte reflector"),
     (r"\bmicroprism\w*\b",                "Microprismatisch"),
     (r"\bspiegel\w*\b",                   "Spiegeloptiek"),
@@ -289,6 +289,10 @@ def lees_omschrijving(o, merk=None):
             v["uitvoering"] = k
             break
 
+    m = GENERATIE.search(o)
+    if m:
+        v["generatie"] = m.group(0).upper().replace(" ", "")
+
     for patroon, naam in OPTIEK:
         if re.search(patroon, o, re.I):
             v["optiek"] = naam
@@ -428,25 +432,79 @@ def maatSleutel(m):
     return "x".join(str(n) for n in sorted(getallen, reverse=True)) + "cm"
 
 
-def familiesleutel(naam):
-    """Waarop artikelen tot een familie samenkomen. Zie de uitleg hierboven."""
+# De familie is de REEKS, niet de uitvoering. Wie "sigma" typt wil één keuze
+# zien en daarna de maat en het wattage kiezen, niet zes families die allemaal
+# Sigma heten. Alles wat een uitvoering van dezelfde reeks beschrijft gaat er
+# daarom uit en komt terug als keuze in de tool: de maat, de generatie, de
+# optiek en het formaat.
+GENERATIE = re.compile(r"\b[gv]\s?\d\b", re.I)
+# "-S", "-M", "-L", "-XL" achter een naam is een formaat: Lumio-S/M/L zijn
+# dezelfde reeks in drie maten. Voor de leestekens platgeslagen worden, want
+# daarna is het streepje een spatie en zou een losse "s" sneuvelen.
+FORMAAT = re.compile(r"(?<=[a-z])-(?:xl|s|m|l)\b(?:\s*/\s*(?:xl|s|m|l)\b)*", re.I)
+# De optiekwoorden uit OPTIEK, als één patroon voor de sleutel.
+OPTIEK_SLEUTEL = re.compile(
+    r"\b(facet|hoogglans\w*|mat(?:te)?|zwarte|microprism\w*|spiegel\w*|opaal|prisma\w*|"
+    r"darklight|kruis\s*rooster|louvre|reflector)\b", re.I)
+
+
+def familiesleutel(naam, maten=()):
+    """Waarop artikelen tot een familie samenkomen. Zie de uitleg hierboven.
+
+       maten zijn de afmetingen die het artikel zelf noemt. Een kaal getal in de
+       naam gaat alleen weg als het daarin voorkomt: "Mado 195" naast
+       "Ø195 Buitenmaat" is een maat en dus een uitvoering, maar de 5 en de 7 in
+       "Retroline RIDI-VLSG-5" en "-7" zijn de armaturen waar de module in past
+       en moeten uit elkaar blijven."""
     t = re.sub(r"^\s*led\b[\s-]*", "", naam.lower())
     for patroon, vervang in VERTAAL:
         t = re.sub(patroon, vervang, t)
     t = VARIANTWOORDEN.sub(" ", t)
-    t = MAAT_IN_NAAM.sub(lambda m: " " + maatSleutel(m) + " ", t)
+    t = FORMAAT.sub(" ", t)
+    t = MAAT_IN_NAAM.sub(" ", t)          # de maat is een keuze, geen familie
+    t = GENERATIE.sub(" ", t)
+    t = OPTIEK_SLEUTEL.sub(" ", t)
     # "inbouw/recessed" is na het vertalen "inbouw/inbouw": één woord.
     t = re.sub(r"\b(\w+)(?:\s*/\s*\1)+\b", r"\1", t)
     t = re.sub(r"[^a-z0-9°/]+", " ", t)
+    if maten:
+        t = " ".join(w for w in t.split() if not (w.isdigit() and int(w) in maten))
     return " ".join(t.split())
 
 
-def toonnaam(namen):
-    """Welke schrijfwijze de familie krijgt: die van de meeste artikelen. Bij
-       gelijk spel de kortste - het kenmerk dat we eruit halen maakte hem juist
-       langer - en daarna alfabetisch, zodat het antwoord niet van de
-       volgorde in het bestand afhangt."""
-    return sorted(namen.items(), key=lambda x: (-x[1], len(x[0]), x[0]))[0][0]
+def matenVan(v):
+    """De getallen die dit artikel als afmeting noemt, om ze uit de naam te
+       kunnen halen. Buitenmaat en zaagmaat in mm, de lengte in cm én mm."""
+    uit = set()
+    for k in ("buitenmaat_mm", "zaagmaat_mm"):
+        if isinstance(v.get(k), int):
+            uit.add(v[k])
+    if isinstance(v.get("lengte_cm"), int):
+        uit.add(v["lengte_cm"]); uit.add(v["lengte_cm"] * 10)
+    for m in MAAT_IN_NAAM.finditer(v.get("afmetingen_tekst") or ""):
+        for i in (1, 3, 5):
+            if m.group(i):
+                uit.add(round(float(m.group(i).replace(",", "."))))
+    return uit
+
+
+def toonnaam(namen, maten=()):
+    """De naam die de familie draagt: de REEKS. Begint bij de schrijfwijze van de
+       meeste artikelen - bij gelijk spel de kortste, dan alfabetisch, zodat het
+       antwoord niet van de volgorde in het bestand afhangt - en haalt daar
+       dezelfde stukken uit als de sleutel. Uit de echte naam en niet uit de
+       sleutel, zodat de hoofdletters blijven staan: "LED Paneel 60x60cm Sigma
+       G2" wordt "LED Paneel Sigma"."""
+    basis = sorted(namen.items(), key=lambda x: (-x[1], len(x[0]), x[0]))[0][0]
+    t = VARIANTWOORDEN.sub(" ", basis)
+    t = FORMAAT.sub(" ", t)
+    t = MAAT_IN_NAAM.sub(" ", t)
+    t = GENERATIE.sub(" ", t)
+    t = OPTIEK_SLEUTEL.sub(" ", t)
+    if maten:
+        t = " ".join(w for w in t.split() if not (w.isdigit() and int(w) in maten))
+    t = re.sub(r"\s*/\s*", " / ", " ".join(t.split()))
+    return " ".join(t.split()).strip(" -–—,;:/") or basis
 
 
 def slug(naam):
@@ -563,16 +621,29 @@ def catalogusfamilies(bestand):
         # Het merk hoort bij de sleutel: dezelfde spot onder twee labels
         # (Pragmalux en White Label) is niet één familie, en anders zou de rij
         # Leverancier op het blad willekeurig een van de twee tonen.
-        g = groepen.setdefault((merk.lower(), familiesleutel(naam)),
-                               {"merk": merk, "varianten": [], "namen": {}})
+        # De maat gaat uit de familienaam en komt terug als keuze op het artikel:
+        # eerst de familie, dan de afmeting. maatSleutel() geeft één schrijfwijze
+        # (grootste eerst, hele centimeters), zodat 1195mm en 120cm samenvallen.
+        mm = MAAT_IN_NAAM.search(naam)
+        if mm:
+            v["afmeting"] = maatSleutel(mm)
+        elif isinstance(v.get("buitenmaat_mm"), int):
+            v["afmeting"] = "\u00d8" + str(v["buitenmaat_mm"])
+        elif isinstance(v.get("lengte_cm"), int):
+            v["afmeting"] = str(v["lengte_cm"]) + "cm"
+
+        maten = matenVan(v)
+        g = groepen.setdefault((merk.lower(), familiesleutel(naam, maten)),
+                               {"merk": merk, "varianten": [], "namen": {}, "maten": set()})
         g["varianten"].append(v)
         g["namen"][naam] = g["namen"].get(naam, 0) + 1
+        g["maten"] |= maten
         if merk and not g["merk"]:
             g["merk"] = merk
 
     families = []
     for sleutel, g in sorted(groepen.items()):
-        naam = toonnaam(g["namen"])
+        naam = toonnaam(g["namen"], g["maten"])
         laag = naam.lower()
         fam = {"id": slug(naam), "naam": naam, "varianten":
                sorted(g["varianten"], key=lambda x: x["artikelcode"])}
