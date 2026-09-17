@@ -19,7 +19,7 @@ is. Een .xlsx blijft gewoon werken voor wie hem zo bij de hand heeft.
 Vereist: alleen de standaardbibliotheek voor .csv; openpyxl voor .xlsx.
 """
 
-import json, re, sys
+import collections, json, re, sys
 from pathlib import Path
 
 HIER   = Path(__file__).parent
@@ -76,7 +76,10 @@ MAATKERN = re.compile(r"Ø|\d\s*[x×]\s*\d|buitenmaat|gatmaat|zaagmaat|inbouwmaa
 
 # De kleurtemperatuur zoals de prijslijst hem schrijft: "4000K", "3000K-6000K",
 # "3000K/4000K/6000K", met daarachter soms het aantal standen ("3-CCT").
-CCT_TEKST = re.compile(r"\d{4}\s*K(?:\s*[-–/]\s*\d{4}\s*K)*(?:\s*\d?\s*-?\s*CCT)?", re.I)
+_CCT_GETAL = r"\d{1,2}[.]?\d{3}"
+CCT_TEKST = re.compile(
+    rf"(?:{_CCT_GETAL}\s*K?\s*[-–/]\s*)*{_CCT_GETAL}\s*K"
+    r"(?:\s*\d?\s*-?\s*CCT)?", re.I)
 
 # Waar de naam ophoudt en de opgave begint. Alles hierachter gaat niet meer over
 # wélk armatuur het is. "Inbouw/Opbouw" blijft er dus in, "IP44 12W/18W" niet.
@@ -184,7 +187,8 @@ def lees_omschrijving(o, merk=None):
     # "8W-18W", en zonder die W werd dat laatste gelezen als "tot 8W".
     m = re.search(r"(\d+[,.]?\d*)\s*W?\s*[-–]\s*(\d+[,.]?\d*)\s*W\b", o, re.I)
     if m:
-        v["vermogen_w"] = {"min": getal(m.group(1)), "max": getal(m.group(2))}
+        a, b = sorted([getal(m.group(1)), getal(m.group(2))])
+        v["vermogen_w"] = {"min": a, "max": b}
     else:
         # "12W/18W" en "12/18W" zijn een schakelbaar armatuur: twee standen, dus
         # een ondergrens en een bovengrens - geen enkel vermogen met een noot.
@@ -203,7 +207,8 @@ def lees_omschrijving(o, merk=None):
 
     m = re.search(r"(\d+)\s*(?:lm)?\s*[-–]\s*(\d+)\s*lm\b(?!\s*/)", o, re.I)
     if m:
-        v["lichtstroom_lm"] = {"min": int(m.group(1)), "max": int(m.group(2))}
+        a, b = sorted([int(m.group(1)), int(m.group(2))])
+        v["lichtstroom_lm"] = {"min": a, "max": b}
     else:
         m = (re.search(r"max\.?\s*(\d+)\s*lm\b(?!\s*/)", o, re.I)
              or re.search(r"\b(\d+)\s*lm\b(?!\s*/)", o, re.I))
@@ -301,12 +306,15 @@ CATALOGUS = "catalogus"
 # een onderdeel hooguit één van de twee.
 TOEBEHOREN_HARD = re.compile(
     r"\b(accessoire\w*|reserveonderdeel\w*|onderdeel|component|"
-    r"opbouwset|montageset|ophangset|schroefset|inbouwklemmen|[a-z]*frame|"
+    r"opbouwset|montageset|ophangset|schroefset|inbouwklemmen|"
     r"[a-z]*profiel|[a-z]*beugel|"
     r"afscherming|grill|muursteun|steun|afstandsbediening|daglichtsensor|"
     r"veiligheidskabel|voeding|snoerset|adapter|eindkap|verbinder|"
     r"opvulring|ring|blindplaat|fitting|noodmodule|schakelaar)\b", re.I)
-TOEBEHOREN_ZACHT = re.compile(r"\b(reflector|lens|kap|driver)\b", re.I)
+# "frame" hoort hier en niet bij HARD: een los frame noemt geen lichtstroom en
+# geen vermogen en valt daar al op af, maar "LED Frame Paneel Conto 30x120cm
+# 20-40W 2300-5000lm" is een paneel mét frame - 72 armaturen die anders wegvallen.
+TOEBEHOREN_ZACHT = re.compile(r"\b(reflector|lens|kap|driver)\b|[a-z]*frame\b", re.I)
 
 # Het soort armatuur en de montagewijze staan in de naam. Ze worden nergens uit
 # gerekend, maar de zoekbalk van de tool zoekt erop mee: wie "downlight" typt
@@ -417,6 +425,40 @@ def plat(s):
     return " ".join(str(s or "").lower().split())
 
 
+# Welk merk voorgaat als hetzelfde artikel onder twee merken in de lijst staat.
+# Wat hier niet in staat komt daarna, in de volgorde van de lijst zelf.
+MERK_VOORRANG = ["pragmalux"]
+
+
+def merkVoorrang(rijen, sleutel):
+    """Gooi de dubbelen eruit die alleen in hun merk verschillen. Een regel telt
+       als dubbel wanneer de omschrijving ZONDER het merkwoord ervoor gelijk is;
+       dat is streng met opzet. Twee merken die toevallig een productnaam delen
+       zijn geen dubbelen - een Pragmalux Inbouwspot Orion en een Interlight
+       3-Fase Track Orion zijn verschillende armaturen - en die moeten dus
+       allebei blijven staan. Geeft (overgebleven rijen, meldingen)."""
+    per = {}
+    for r in rijen:
+        per.setdefault(sleutel(r), []).append(r)
+    houd, meldingen = [], []
+    for _, groep in per.items():
+        merken = {r["merk"] for r in groep if r["merk"]}
+        if len(merken) < 2:
+            houd.extend(groep)
+            continue
+        rang = lambda m: (MERK_VOORRANG.index(m.lower())
+                          if m.lower() in MERK_VOORRANG else len(MERK_VOORRANG))
+        wint = min(merken, key=lambda m: (rang(m), m.lower()))
+        blijft = [r for r in groep if r["merk"] == wint]
+        weg = [r for r in groep if r["merk"] != wint]
+        houd.extend(blijft)
+        meldingen.append(
+            f"{wint} gaat voor: {blijft[0]['artikelcode']} houdt "
+            f"{', '.join(r['merk'] + ' ' + r['artikelcode'] for r in weg)} uit de lijst "
+            f"({blijft[0]['omschrijving'][:60]})")
+    return houd, meldingen
+
+
 def catalogusfamilies(bestand):
     """Groepeer een catalogusexport op de naam in de omschrijving.
        Geeft (families, overgeslagen, meldingen)."""
@@ -437,13 +479,26 @@ def catalogusfamilies(bestand):
     if i_code is None or i_oms is None:
         return [], 0, [f"{bestand.name}: kolommen Artikelcode/Omschrijving niet gevonden"]
 
-    groepen, overgeslagen, meldingen = {}, 0, []
+    # Eerst de regels uitlezen, dan de merkvoorrang toepassen, dan pas groeperen:
+    # anders zou een artikel dat afvalt toch al een familie gemaakt hebben.
+    uitgelezen = []
     for r in rijen[1:]:
         if not r or i_code >= len(r) or not r[i_code]:
             continue
-        code = str(r[i_code]).strip()
-        oms  = str(r[i_oms] or "") if i_oms < len(r) else ""
-        merk = str(r[i_merk]).strip() if (i_merk is not None and i_merk < len(r) and r[i_merk]) else ""
+        uitgelezen.append({
+            "artikelcode": str(r[i_code]).strip(),
+            "omschrijving": str(r[i_oms] or "") if i_oms < len(r) else "",
+            "merk": (str(r[i_merk]).strip()
+                     if (i_merk is not None and i_merk < len(r) and r[i_merk]) else ""),
+        })
+    zonderMerk = lambda x: " ".join(
+        re.sub(r"^\s*" + re.escape(x["merk"]) + r"\b[\s,-]*", "", x["omschrijving"], flags=re.I)
+        .lower().split()) if x["merk"] else " ".join(x["omschrijving"].lower().split())
+    uitgelezen, voorrangsmeldingen = merkVoorrang(uitgelezen, zonderMerk)
+
+    groepen, overgeslagen, meldingen = {}, 0, list(voorrangsmeldingen)
+    for rij in uitgelezen:
+        code, oms, merk = rij["artikelcode"], rij["omschrijving"], rij["merk"]
 
         if any(code.endswith(x) for x in SNOER):
             overgeslagen += 1
@@ -471,7 +526,10 @@ def catalogusfamilies(bestand):
         v.update(EXTRA.get(extra, {}))
         # Groeperen gaat op de genormaliseerde sleutel, niet op de naam zoals hij
         # er staat; welke schrijfwijze de familie krijgt beslist toonnaam().
-        g = groepen.setdefault(familiesleutel(naam),
+        # Het merk hoort bij de sleutel: dezelfde spot onder twee labels
+        # (Pragmalux en White Label) is niet één familie, en anders zou de rij
+        # Leverancier op het blad willekeurig een van de twee tonen.
+        g = groepen.setdefault((merk.lower(), familiesleutel(naam)),
                                {"merk": merk, "varianten": [], "namen": {}})
         g["varianten"].append(v)
         g["namen"][naam] = g["namen"].get(naam, 0) + 1
@@ -496,12 +554,21 @@ def catalogusfamilies(bestand):
             fam["montagewijzen"] = montage
         families.append(fam)
 
-    # Twee namen die naar hetzelfde id slaan zouden elkaar in de tool overschrijven.
-    gezien = {}
+    # Dragen twee families dezelfde naam, dan zijn ze in de keuzelijst niet uit
+    # elkaar te houden. Alleen dáár komt het merk ervoor - overal anders zou het
+    # 400 keer "Pragmalux" in de lijst zetten zonder iets te onderscheiden.
+    perNaam = collections.Counter(f["naam"] for f in families)
     for fam in families:
-        if fam["id"] in gezien:
-            fam["id"] = fam["id"] + "-" + str(len([f for f in families if f["id"].startswith(fam["id"])]))
-        gezien[fam["id"]] = True
+        if perNaam[fam["naam"]] > 1 and fam.get("merk"):
+            fam["naam"] = fam["merk"] + " " + fam["naam"]
+            fam["id"] = slug(fam["naam"])
+
+    # Twee namen die naar hetzelfde id slaan zouden elkaar in de tool overschrijven.
+    geteld = collections.Counter()
+    for fam in families:
+        geteld[fam["id"]] += 1
+        if geteld[fam["id"]] > 1:
+            fam["id"] = f"{fam['id']}-{geteld[fam['id']]}"
     return families, overgeslagen, meldingen
 
 

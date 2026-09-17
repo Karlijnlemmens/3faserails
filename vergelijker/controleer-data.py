@@ -142,11 +142,63 @@ LEESPROEVEN = [
       "lichtstroom_lm": {"min": 550, "max": 2250},
       "dimprotocol": "dali2"}),
 
+    # De prijslijst schrijft een dipswitch-bereik van hoog naar laag. Zonder
+    # sorteren werd min groter dan max en leverde het filteren op lichtstroom
+    # niets meer op - dat gold voor 655 artikelen.
+    ("Pragmalux PRX Uniline LED-module HO 1528mm 75-22W 13000-3800lm 5000K 30D", "Pragmalux",
+     {"vermogen_w": {"min": 22.0, "max": 75.0},
+      "lichtstroom_lm": {"min": 3800, "max": 13000}}),
+
+    # Twee schrijfwijzen van de kleurtemperatuur die eerder misgingen: de K maar
+    # een keer aan het eind, en de duizendpunt.
+    ("Pragmalux LED Inlegarmatuur Modul 15x150cm 30W 3000-4000K 2-CCT UGR<16 wit RAL9003",
+     "Pragmalux", {"cct_tekst": "3000-4000K 2-CCT"}),
+    ("LED Dream Sirius 42W 3.000/4.000/5.700K 800mm zwart", "Interlight",
+     {"cct_tekst": "3.000/4.000/5.700K", "type": "LED Dream Sirius"}),
+
     ("Essence Classic G3 IP66 60cm 11-19W 1400-2450lm 3CCT 3x2,5mm Doorvoerbedrading (2x18W)",
      "Pragmalux",
      {"type": "Essence Classic G3", "lengte_cm": 60, "ip": 66,
       "afmetingen_tekst": None, "cct_tekst": None}),
 ]
+
+
+def controleer_merkvoorrang(mod):
+    """merkVoorrang() gooit alleen ECHTE dubbelen weg: dezelfde omschrijving op
+       het merkwoord na. Twee merken die een productnaam delen zijn geen
+       dubbelen, en dat is niet met data te toetsen - er staat op dit moment
+       geen enkel paar in de catalogus - dus wordt de functie zelf getoetst."""
+    sleutel = lambda x: x["sleutel"]
+    rijen = [
+        # Dezelfde spot onder twee labels: Pragmalux wint.
+        {"artikelcode": "4600000", "merk": "Pragmalux",   "sleutel": "inbouwspot orion wit",
+         "omschrijving": "Pragmalux Inbouwspot Orion Rond Kantelbaar wit RAL9003"},
+        {"artikelcode": "260001",  "merk": "White Label", "sleutel": "inbouwspot orion wit",
+         "omschrijving": "White Label Inbouwspot Orion Rond Kantelbaar wit RAL9003"},
+        # Alleen de naam gedeeld, andere omschrijving: allebei blijven staan.
+        {"artikelcode": "4600017", "merk": "Pragmalux",   "sleutel": "inbouwspot orion kantelbaar",
+         "omschrijving": "Pragmalux Inbouwspot Orion Rond Kantelbaar Zwart RAL9004"},
+        {"artikelcode": "4375201", "merk": "Interlight",  "sleutel": "3-fase track orion 55w",
+         "omschrijving": "Interlight LED 3-Fase Track L Orion 55W 3000K CRI>80 5550lm Zwart"},
+        # Een merk dat niet in MERK_VOORRANG staat wint van een ander zulk merk
+        # op alfabet, zodat de uitkomst niet van de volgorde in het bestand afhangt.
+        {"artikelcode": "S1", "merk": "SLV", "sleutel": "spot x", "omschrijving": "SLV Spot X"},
+        {"artikelcode": "D1", "merk": "DLC", "sleutel": "spot x", "omschrijving": "DLC Spot X"},
+    ]
+    houd, meldingen = mod.merkVoorrang(rijen, sleutel)
+    codes = sorted(x["artikelcode"] for x in houd)
+    mis = 0
+    for wat, gekregen, verwacht in [
+        ("wat er overblijft", codes, ["4375201", "4600000", "4600017", "D1"]),
+        ("aantal meldingen", len(meldingen), 2),
+    ]:
+        if gekregen != verwacht:
+            mis += 1
+            print(f"     ! merkvoorrang, {wat}: {gekregen!r}, verwacht {verwacht!r}")
+    print(f"\n{'FOUT ' if mis else 'goed '} merkvoorrang  (2 proeven)")
+    if not mis:
+        print("       dubbelen weg, verschillende armaturen blijven staan")
+    return mis
 
 
 def lezer():
@@ -181,7 +233,10 @@ def main():
 
     data = json.loads(DATA.read_text(encoding="utf-8"))
     families = data.get("families", [])
-    totaal_kritiek = controleer_lezer()
+    lees_mod = importlib.util.module_from_spec(
+        importlib.util.spec_from_file_location("bouwdata2", HIER / "bouw-data.py"))
+    lees_mod.__spec__.loader.exec_module(lees_mod)
+    totaal_kritiek = controleer_lezer() + controleer_merkvoorrang(lees_mod)
 
     # Met een catalogus zijn het er honderden; alleen wat iets te melden heeft
     # komt in beeld, anders staat het antwoord onder een scherm vol "goed".

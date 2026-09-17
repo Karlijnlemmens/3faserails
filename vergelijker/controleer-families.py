@@ -46,6 +46,11 @@ PROEVEN = [
      "Lumio-S, -M en -L zijn drie armaturen van verschillend formaat."),
     ("richtspot adjusto g2", 1,
      "De prijslijst schrijft dezelfde reeks met en zonder 'LED' ervoor."),
+    ("frame paneel conto", 2,
+     "Een paneel MET frame is een armatuur; de 30x120 en de 60x60 zijn twee "
+     "maten. Een LOS frame noemt geen lichtstroom en valt daar al op af."),
+    ("essence g2 licht verdiepte frame", 0,
+     "Een los frame is geen armatuur."),
     ("waterdicht armatuur typhoon", 2,
      "Typhoon en Typhoon G2 zijn twee generaties; de hoofdletters in "
      "'LED TL waterdicht armatuur typhoon' maken geen derde."),
@@ -62,6 +67,13 @@ SAMEN = [
      "De DALI-uitvoering hoort bij Venus G2 (code -DA naast de kale code)."),
     ("mado 240 matt", "mado 240 mat",
      "'Matt' is een typefout."),
+]
+
+# Woorden die na de merkvoorrang uit de data horen te zijn verdwenen: hetzelfde
+# artikel onder twee merken levert er één op, en Pragmalux gaat voor.
+WEG = [
+    ("white label", "Dezelfde spots staan onder Pragmalux in de lijst; "
+                    "MERK_VOORRANG laat die winnen."),
 ]
 
 
@@ -116,6 +128,16 @@ def main():
             print(f"       {waarom}")
             print(f"       links : {', '.join(f['naam'] for f in fa) or '(niets gevonden)'}")
             print(f"       rechts: {', '.join(f['naam'] for f in fb) or '(niets gevonden)'}")
+
+    for woord, waarom in WEG:
+        raak = proef(fams, woord, 0)
+        mis += bool(raak)
+        print(f"{'goed ' if not raak else 'FOUT '} \"{woord}\" "
+              f"{'komt niet meer voor' if not raak else 'staat er nog in'}")
+        if raak:
+            print(f"       {waarom}")
+            for f in raak[:4]:
+                print(f"       - {f['naam']}  ({len(f.get('varianten', []))} art.)")
 
     n = collections.Counter(len(f.get("varianten", [])) for f in fams)
     klein = sum(v for k, v in n.items() if k <= 2)

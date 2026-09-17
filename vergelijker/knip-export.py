@@ -120,6 +120,10 @@ def knip(pad, naam, aanvullen=False):
             sys.exit(f"{uit.name} heeft andere kolommen ({', '.join(oudekop)}).\n"
                      f"Aanvullen kan alleen op een bestand met dezelfde kolommen.")
 
+    # gezien: codes die deze ronde al weggeschreven zijn. Een export noemt een
+    # artikel soms twee keer (de Interlight-lijst deed dat 57 keer); zonder dit
+    # kwam die regel dubbel in de catalogus en dus dubbel in de familie.
+    gezien = set()
     geschreven = nieuwe = overgeslagen = 0
     with uit.open("w", newline="", encoding="utf-8") as f:
         schrijver = csv.writer(f)
@@ -134,10 +138,11 @@ def knip(pad, naam, aanvullen=False):
                        for _, i in gekozen]
             if not waarden[0]:          # geen artikelcode: geen artikel
                 continue
-            if waarden[0] in al:
+            if waarden[0] in al or waarden[0] in gezien:
                 overgeslagen += 1
                 continue
             schrijver.writerow(waarden)
+            gezien.add(waarden[0])
             geschreven += 1
             nieuwe += 1
 
