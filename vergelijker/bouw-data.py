@@ -133,6 +133,27 @@ DIM_IN_TEKST = [
 ]
 
 
+# De optiek. Bij de Mondial is dit hét onderscheid: dezelfde downlight bestaat
+# met een facet- en met een hoogglansreflector, allebei in wit en zwart en
+# allebei in DALI. Die woorden staan achter de IP-klasse en vallen dus buiten de
+# naam - ze horen bij het artikel, niet bij de familie, en horen daarom in de
+# keuzebalk te staan waarmee je het juiste artikel opzoekt.
+# Volgorde telt: het specifiekste eerst ("matte reflector" voor "mat").
+OPTIEK = [
+    (r"\bfacet\b",                        "Facet"),
+    (r"\bhoogglans\w*\b",                 "Hoogglans"),
+    (r"\bmatte?\s+reflector\b",           "Mat"),
+    (r"\bzwarte?\s+reflector\b",          "Zwarte reflector"),
+    (r"\bmicroprism\w*\b",                "Microprismatisch"),
+    (r"\bspiegel\w*\b",                   "Spiegeloptiek"),
+    (r"\bopaal\b",                        "Opaal"),
+    (r"\bprisma\w*\b",                   "Prisma"),
+    (r"\bdarklight\b",                    "Darklight"),
+    (r"\bkruis\s*rooster\b",              "Kruisrooster"),
+    (r"\blouvre\b",                       "Louvre"),
+]
+
+
 def normaliseerOmschrijving(o):
     """De omschrijving zoals de rest van het script hem leest."""
     t = MAATLABEL.sub(" ", o)
@@ -255,9 +276,22 @@ def lees_omschrijving(o, merk=None):
         if re.search(r"\b" + k + r"\b", o, re.I):
             v["kleur"] = k
             break
-    for k in ("standaard", "verdiept", "opbouw", "inbouw", "pendel"):
-        if re.search(r"\b" + k + r"\w*\b", o, re.I):
+    # "plat" hoort erbij: bij de Mondial is dat de derde inbouwdiepte naast
+    # standaard en verdiept.
+    # De uitvoering: bij de Mondial vier inbouwdieptes/montagewijzen naast
+    # elkaar - standaard, verdiept, plat, opbouw - plus een 3-fase track-versie.
+    UITVOERINGEN = [("standaard", r"\bstandaard\w*"), ("verdiept", r"\bverdiept\w*"),
+                    ("plat", r"\bplat(te)?\b"), ("opbouw", r"\bopbouw\w*"),
+                    ("3-fase track", r"\b3[\s-]?fase\s+track\b"),
+                    ("inbouw", r"\binbouw\w*"), ("pendel", r"\bpendel\w*")]
+    for k, patroon in UITVOERINGEN:
+        if re.search(patroon, o, re.I):
             v["uitvoering"] = k
+            break
+
+    for patroon, naam in OPTIEK:
+        if re.search(patroon, o, re.I):
+            v["optiek"] = naam
             break
     # "Inbouw/Opbouw" noemt er twee: dan zegt de omschrijving niet welke van de
     # twee dit artikel is, en blijft de lijst van de familie staan.

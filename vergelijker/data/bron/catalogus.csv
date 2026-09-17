@@ -4192,3 +4192,625 @@ DLC-Omri-Pendant,DLC,Omri-Pendant
 5270164,Interlight,LED Dream Sirius 42W 3.000/4.000/5.700K 600mm zwart
 5270171,Interlight,LED Dream Sirius 42W 3.000/4.000/5.700K 800mm wit
 5270188,Interlight,LED Dream Sirius 42W 3.000/4.000/5.700K 800mm zwart
+1099545,Pragmalux,Pragmalux LED Downlight Essence G2/Mondial PIR IP54 wit frame Ø190 Buitenmaat
+2020634,Pragmalux,Pragmalux LED Downlight Mondial IP54 accessoire driepuntspendelset Ø120x25mm 2m wit
+2020641,Pragmalux,Pragmalux LED Downlight Mondial IP54 accessoire driepuntspendelset Ø120x25mm 2m zwart
+1092379,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet reflector max. 16W max. 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø120 excl. LED Driver en frame
+1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø150 excl. LED Driver en frame"
+1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø200 excl. LED Driver en frame"
+WPF1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector wit plat max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø168 Buitenmaat - Gatmaat Ø150 excl. LED Driver"
+WPF1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector wit plat max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø214 Buitenmaat - Gatmaat Ø200 excl. LED Driver"
+WSF1092379,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet reflector wit standaard max. 16W max. 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø146 Buitenmaat - Gatmaat Ø120-130 excl. LED Driver
+WSF1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector wit standaard max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø176 Buitenmaat - Gatmaat Ø150-160 excl. LED Driver"
+WSGF1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector wit standaard max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø200 Buitenmaat - Gatmaat Ø150-190 excl. LED Driver"
+WSGF1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector wit standaard max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D  Ø250 Buitenmaat - Gatmaat Ø200-240 excl. LED Driver"
+WSF1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector wit standaard max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø226 Buitenmaat - Gatmaat Ø200-210 excl. LED Driver"
+WSF1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver"
+WSGF1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver"
+WSF1092379-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit standaard 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips DALI2 driver
+WSF1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips DALI2 driver"
+WSGF1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips DALI2 driver"
+WSF1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips DALI2 driver"
+WSGF1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +Philips DALI2 driver"
+WSF1092379-PH,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver
+WSF1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver"
+WSGF1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver"
+WVF1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver"
+WVF1092379-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit verdiept 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips DALI2 driver
+WVF1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips DALI2 driver"
+WVF1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips DALI2 driver"
+WVF1092379-PH,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver
+WVF1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver"
+ZSF1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver"
+ZSGF1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver"
+ZSF1092379-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips DALI2 driver
+ZSF1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips DALI2 driver"
+ZSGF1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips DALI2 driver"
+ZSF1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips DALI2 driver"
+ZSGF1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +Philips DALI2 driver"
+ZSF1092379-PH,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver
+ZSF1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver"
+ZSGF1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver"
+ZVF1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver"
+ZVF1092379-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips DALI2 driver
+ZVF1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips DALI2 driver"
+ZVF1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips DALI2 driver"
+ZVF1092379-PH,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver
+ZVF1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver"
+1092577,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans reflector Ø150
+1092584,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans reflector Ø200
+WSH1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver"
+WSGH1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver"
+WSH1092379-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips DALI2 driver
+WSH1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips DALI2 driver"
+WSGH1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips DALI2 driver"
+WSH1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips DALI2 driver"
+WSGH1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +Philips DALI2 driver"
+WSH1092379-PH,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver
+WSH1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver"
+WSGH1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver"
+WVH1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver"
+WVH1092379-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips DALI2 driver
+WVH1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips DALI2 driver"
+WVH1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips DALI2 driver"
+WVH1092379-PH,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver
+WVH1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver"
+ZSH1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver"
+ZSGH1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver"
+ZSH1092379-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips DALI2 driver
+ZSH1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips DALI2 driver"
+ZSGH1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips DALI2 driver"
+ZSH1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips DALI2 driver"
+ZSGH1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +Philips DALI2 driver"
+ZSH1092379-PH,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver
+ZSH1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver"
+ZSGH1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver"
+ZVH1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver"
+ZVH1092379-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips DALI2 driver
+ZVH1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips DALI2 driver"
+ZVH1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips DALI2 driver"
+ZVH1092379-PH,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver
+ZVH1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver"
+1092430,Pragmalux,Pragmalux LED Downlight Mondial IP54 licht verdiepte frame alu wit Ø146 buitenmaat - gatmaat Ø120-130
+1092447,Pragmalux,Pragmalux LED Downlight Mondial IP54 licht verdiepte frame alu wit Ø176 buitenmaat - gatmaat Ø150-160
+1092454,Pragmalux,Pragmalux LED Downlight Mondial IP54 licht verdiepte frame alu wit Ø200 buitenmaat - gatmaat Ø150-190
+1092461,Pragmalux,Pragmalux LED Downlight Mondial IP54 licht verdiepte frame alu wit Ø226 buitenmaat - gatmaat Ø200-210
+1092478,Pragmalux,Pragmalux LED Downlight Mondial IP54 licht verdiepte frame alu wit Ø250 buitenmaat - gatmaat Ø200-240
+1092515,Pragmalux,Pragmalux LED Downlight Mondial IP54 licht verdiepte frame alu zwart Ø146 buitenmaat - gatmaat Ø120-130
+1092522,Pragmalux,Pragmalux LED Downlight Mondial IP54 licht verdiepte frame alu zwart Ø176 buitenmaat - gatmaat Ø150-160
+1092539,Pragmalux,Pragmalux LED Downlight Mondial IP54 licht verdiepte frame alu zwart Ø200 buitenmaat - gatmaat Ø150-190
+1092546,Pragmalux,Pragmalux LED Downlight Mondial IP54 licht verdiepte frame alu zwart Ø226 buitenmaat - gatmaat Ø200-210
+1092553,Pragmalux,Pragmalux LED Downlight Mondial IP54 licht verdiepte frame alu zwart Ø250 buitenmaat - gatmaat Ø200-240
+2013247,Pragmalux,Pragmalux LED Downlight Mondial IP54 opbouwframe Staal Ø180x140(H) Wit
+2013254,Pragmalux,Pragmalux LED Downlight Mondial IP54 opbouwframe Staal Ø180x140(H) Zwart
+2013261,Pragmalux,Pragmalux LED Downlight Mondial IP54 opbouwframe Staal Ø230x150(H) Wit
+2013278,Pragmalux,Pragmalux LED Downlight Mondial IP54 opbouwframe Staal Ø230x150(H) Zwart
+1092409,Pragmalux,Pragmalux LED Downlight Mondial IP54 platte frame alu wit Ø132 buitenmaat - gatmaat Ø120
+1092416,Pragmalux,Pragmalux LED Downlight Mondial IP54 platte frame alu wit Ø168 buitenmaat - gatmaat Ø150
+1092423,Pragmalux,Pragmalux LED Downlight Mondial IP54 platte frame alu wit Ø214 buitenmaat - gatmaat Ø200
+1092485,Pragmalux,Pragmalux LED Downlight Mondial IP54 platte frame alu zwart Ø132 buitenmaat - gatmaat Ø120
+1092492,Pragmalux,Pragmalux LED Downlight Mondial IP54 platte frame alu zwart Ø168 buitenmaat - gatmaat Ø150
+1092508,Pragmalux,Pragmalux LED Downlight Mondial IP54 platte frame alu zwart Ø214 buitenmaat - gatmaat Ø200
+1099866,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 facet 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D excl.Frame incl. LED Driver
+WF1098357,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 facet wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ176 - GØ150-160 +LED Driver
+WGF1099866,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 facet wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ190 - GØ150-165 +LED Driver
+ZF1098357,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 facet zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ176 - GØ150-160 +LED Driver
+ZF1098357-ST3,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 facet zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ176 - GØ150-160 +LED Driver incl.3P aansluitsnoer
+ZGF1099866,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 facet zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ190 - GØ150-165 +LED Driver
+ZGF1099866-ST3,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 facet zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ190 - GØ150-165 +LED Driver incl.3P aansluitsnoer
+1098524,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 LED Driver
+WPF1092379,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet reflector wit plat max. 16W max. 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø132 Buitenmaat - Gatmaat Ø120 excl. LED Driver
+WVF1092379,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet reflector wit verdiept max. 16W max. 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø146 Buitenmaat - Gatmaat Ø120-130 excl. LED Driver
+WVF1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector wit verdiept max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø176 Buitenmaat - Gatmaat Ø150-160 excl. LED Driver"
+WVF1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector wit verdiept max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø226 Buitenmaat - Gatmaat Ø200-210 excl. LED Driver"
+ZPF1092379,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet reflector zwart plat max. 16W max. 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø132 Buitenmaat - Gatmaat Ø120 excl. LED Driver
+ZPF1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector zwart plat max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø168 Buitenmaat - Gatmaat Ø150 excl. LED Driver"
+ZPF1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector zwart plat max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø214 Buitenmaat - Gatmaat Ø200 excl. LED Driver"
+ZSF1092379,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet reflector zwart standaard max. 16W max. 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø146 Buitenmaat - Gatmaat Ø120-130 excl. LED Driver
+ZSF1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector zwart standaard max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø176 Buitenmaat - Gatmaat Ø150-160 excl. LED Driver"
+ZSGF1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector zwart standaard max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø200 Buitenmaat - Gatmaat Ø150-190 excl. LED Driver"
+ZSGF1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector zwart standaard max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D  Ø250 Buitenmaat - Gatmaat Ø200-240 excl. LED Driver"
+ZSF1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector zwart standaard max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø226 Buitenmaat - Gatmaat Ø200-210 excl. LED Driver"
+ZVF1092379,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet reflector zwart verdiept max. 16W max. 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø146 Buitenmaat - Gatmaat Ø120-130 excl. LED Driver
+ZVF1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector zwart verdiept max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø176 Buitenmaat - Gatmaat Ø150-160 excl. LED Driver"
+ZVF1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet reflector zwart verdiept max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø226 Buitenmaat - Gatmaat Ø200-210 excl. LED Driver"
+WTSF1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit 3 fase track 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +Philips driver"
+WTSF1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit 3 fase track 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø180x140(H) Buitenmaat +TCI DALI Driver"
+WTSF1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit 3 fase track 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +TCI DALI Driver"
+WTSF1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit 3 fase track 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø180x140(H) Buitenmaat +Philips driver"
+WOSF1092393-PH-NA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit opbouw 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +Philips driver & Noodmodule 1uur autotest"
+WOSF1092393-DA-NA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit opbouw 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +DALI-2 Driver + DALI-2 Noodmodule 1uur autotest"
+WOSF1092386-PH-NA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit opbouw 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø180x140(H) Buitenmaat +Philips driver & Noodmodule 1uur autotest"
+WPF1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver"
+WPF1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver incl. eurosnoer 2m wit"
+WPF1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver incl.3P snoer"
+WPF1092379-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit plat 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips DALI2 driver
+WPF1092379-CA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit plat 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI Casambi Driver
+WPF1092379-CA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit plat 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI Casambi Driver incl. 3P snoer
+WPF1092379-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WPF1092379-TC-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit plat 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI DALI Driver
+WPF1092379-TC-DA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit plat 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI DALI Driver incl. 3P snoer
+WPF1092379-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WPF1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips DALI2 driver"
+WPF1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI Casambi Driver"
+WPF1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI Casambi Driver incl. 3P snoer"
+WPF1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WPF1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI DALI Driver"
+WPF1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI DALI Driver incl. 3P snoer"
+WPF1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WPF1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips DALI2 driver"
+WPF1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI Casambi Driver"
+WPF1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI Casambi Driver incl. 3P snoer"
+WPF1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WPF1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI DALI Driver"
+WPF1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI DALI Driver incl. 3P snoer"
+WPF1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WPF1092379-PH,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver
+WPF1092379-PH-EUR,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver incl. eurosnoer 2m wit
+WPF1092379-PH-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver incl.3P snoer
+WPF1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver"
+WPF1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver incl. eurosnoer 2m wit"
+WPF1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver incl.3P snoer"
+WSF1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl. eurosnoer 2m wit"
+WSF1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer"
+WSGF1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver incl. eurosnoer 2m wit"
+WSGF1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver incl.3P snoer"
+WSF1092379-CA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit standaard 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver
+WSF1092379-CA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit standaard 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer
+WSF1092379-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSF1092379-TC-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit standaard 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver
+WSF1092379-TC-DA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit standaard 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer
+WSF1092379-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSF1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver"
+WSF1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer"
+WSF1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSF1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver"
+WSF1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer"
+WSF1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSGF1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI Casambi Driver"
+WSGF1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI Casambi Driver incl. 3P snoer"
+WSGF1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSGF1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI DALI Driver"
+WSGF1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI DALI Driver incl. 3P snoer"
+WSGF1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSF1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver"
+WSF1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer"
+WSF1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSF1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver"
+WSF1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer"
+WSF1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSGF1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI Casambi Driver"
+WSGF1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI Casambi Driver incl. 3P snoer"
+WSGF1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSGF1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI DALI Driver"
+WSGF1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI DALI Driver incl. 3P snoer"
+WSGF1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSF1092379-PH-EUR,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl. eurosnoer 2m wit
+WSF1092379-PH-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer
+WSF1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl. eurosnoer 2m wit"
+WSF1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer"
+WSGF1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver incl. eurosnoer 2m wit"
+WSGF1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver incl.3P snoer"
+WVF1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl. eurosnoer 2m wit"
+WVF1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer"
+WVF1092379-CA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit verdiept 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver
+WVF1092379-CA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit verdiept 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer
+WVF1092379-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WVF1092379-TC-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit verdiept 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver
+WVF1092379-TC-DA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit verdiept 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer
+WVF1092379-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 16W 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WVF1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver"
+WVF1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer"
+WVF1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WVF1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver"
+WVF1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer"
+WVF1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 19,5W 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WVF1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver"
+WVF1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer"
+WVF1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WVF1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver"
+WVF1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer"
+WVF1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 25,5W 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WVF1092379-PH-EUR,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl. eurosnoer 2m wit
+WVF1092379-PH-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet wit verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer
+WVF1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl. eurosnoer 2m wit"
+WVF1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer"
+ZTSF1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart 3 fase track 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +Philips driver"
+ZTSF1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart 3 fase track 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø180x140(H) Buitenmaat +TCI DALI Driver"
+ZTSF1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart 3 fase track 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +TCI DALI Driver"
+ZTSF1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart 3 fase track 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø180x140(H) Buitenmaat +Philips driver"
+ZOSF1092393-PH-NA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart opbouw 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +Philips driver & Noodmodule 1uur autotest"
+ZOSF1092393-DA-NA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart opbouw 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +DALI-2 Driver + DALI-2 Noodmodule 1uur autotest"
+ZOSF1092386-PH-NA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart opbouw 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø180x140(H) Buitenmaat +Philips driver & Noodmodule 1uur autotest"
+ZPF1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver"
+ZPF1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver incl. eurosnoer 2m wit"
+ZPF1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver incl.3P snoer"
+ZPF1092379-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips DALI2 driver
+ZPF1092379-CA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI Casambi Driver
+ZPF1092379-CA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI Casambi Driver incl. 3P snoer
+ZPF1092379-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZPF1092379-TC-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI DALI Driver
+ZPF1092379-TC-DA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI DALI Driver incl. 3P snoer
+ZPF1092379-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZPF1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips DALI2 driver"
+ZPF1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI Casambi Driver"
+ZPF1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI Casambi Driver incl. 3P snoer"
+ZPF1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZPF1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI DALI Driver"
+ZPF1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI DALI Driver incl. 3P snoer"
+ZPF1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZPF1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips DALI2 driver"
+ZPF1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI Casambi Driver"
+ZPF1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI Casambi Driver incl. 3P snoer"
+ZPF1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZPF1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI DALI Driver"
+ZPF1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI DALI Driver incl. 3P snoer"
+ZPF1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZPF1092379-PH,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver
+ZPF1092379-PH-EUR,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver incl. eurosnoer 2m wit
+ZPF1092379-PH-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver incl.3P snoer
+ZPF1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver"
+ZPF1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver incl. eurosnoer 2m wit"
+ZPF1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver incl.3P snoer"
+ZSF1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl. eurosnoer 2m wit"
+ZSF1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer"
+ZSGF1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver incl. eurosnoer 2m wit"
+ZSGF1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver incl.3P snoer"
+ZSF1092379-CA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver
+ZSF1092379-CA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer
+ZSF1092379-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSF1092379-TC-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver
+ZSF1092379-TC-DA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer
+ZSF1092379-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSF1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver"
+ZSF1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer"
+ZSF1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSF1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver"
+ZSF1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer"
+ZSF1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSGF1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI Casambi Driver"
+ZSGF1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI Casambi Driver incl. 3P snoer"
+ZSGF1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSGF1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI DALI Driver"
+ZSGF1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI DALI Driver incl. 3P snoer"
+ZSGF1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSF1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver"
+ZSF1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer"
+ZSF1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSF1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver"
+ZSF1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer"
+ZSF1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSGF1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI Casambi Driver"
+ZSGF1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI Casambi Driver incl. 3P snoer"
+ZSGF1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSGF1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI DALI Driver"
+ZSGF1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI DALI Driver incl. 3P snoer"
+ZSGF1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSF1092379-PH-EUR,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl. eurosnoer 2m wit
+ZSF1092379-PH-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer
+ZSF1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl. eurosnoer 2m wit"
+ZSF1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer"
+ZSGF1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver incl. eurosnoer 2m wit"
+ZSGF1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver incl.3P snoer"
+ZVF1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl. eurosnoer 2m wit"
+ZVF1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer"
+ZVF1092379-CA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver
+ZVF1092379-CA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer
+ZVF1092379-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZVF1092379-TC-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver
+ZVF1092379-TC-DA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer
+ZVF1092379-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZVF1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver"
+ZVF1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer"
+ZVF1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZVF1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver"
+ZVF1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer"
+ZVF1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZVF1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver"
+ZVF1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer"
+ZVF1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZVF1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver"
+ZVF1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer"
+ZVF1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZVF1092379-PH-EUR,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl. eurosnoer 2m wit
+ZVF1092379-PH-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer
+ZVF1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl. eurosnoer 2m wit"
+ZVF1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer"
+1092560,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans reflector Ø120
+WPH1092379,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans reflector wit plat max. 16W max. 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø132 Buitenmaat - Gatmaat Ø120 excl. LED Driver
+WPH1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector wit plat max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø168 Buitenmaat - Gatmaat Ø150 excl. LED Driver"
+WPH1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector wit plat max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø214 Buitenmaat - Gatmaat Ø200 excl. LED Driver"
+WSH1092379,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans reflector wit standaard max. 16W max. 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø146 Buitenmaat - Gatmaat Ø120-130 excl. LED Driver
+WSH1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector wit standaard max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø176 Buitenmaat - Gatmaat Ø150-160 excl. LED Driver"
+WSGH1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector wit standaard max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø200 Buitenmaat - Gatmaat Ø150-190 excl. LED Driver"
+WSGH1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector wit standaard max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D  Ø250 Buitenmaat - Gatmaat Ø200-240 excl. LED Driver"
+WSH1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector wit standaard max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø226 Buitenmaat - Gatmaat Ø200-210 excl. LED Driver"
+WVH1092379,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans reflector wit verdiept max. 16W max. 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø146 Buitenmaat - Gatmaat Ø120-130 excl. LED Driver
+WVH1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector wit verdiept max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø176 Buitenmaat - Gatmaat Ø150-160 excl. LED Driver"
+WVH1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector wit verdiept max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø226 Buitenmaat - Gatmaat Ø200-210 excl. LED Driver"
+ZPH1092379,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans reflector zwart plat max. 16W max. 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø132 Buitenmaat - Gatmaat Ø120 excl. LED Driver
+ZPH1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector zwart plat max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø168 Buitenmaat - Gatmaat Ø150 excl. LED Driver"
+ZPH1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector zwart plat max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø214 Buitenmaat - Gatmaat Ø200 excl. LED Driver"
+ZSH1092379,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans reflector zwart standaard max. 16W max. 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø146 Buitenmaat - Gatmaat Ø120-130 excl. LED Driver
+ZSH1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector zwart standaard max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø176 Buitenmaat - Gatmaat Ø150-160 excl. LED Driver"
+ZSGH1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector zwart standaard max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø200 Buitenmaat - Gatmaat Ø150-190 excl. LED Driver"
+ZSGH1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector zwart standaard max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D  Ø250 Buitenmaat - Gatmaat Ø200-240 excl. LED Driver"
+ZSH1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector zwart standaard max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø226 Buitenmaat - Gatmaat Ø200-210 excl. LED Driver"
+ZVH1092379,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans reflector zwart verdiept max. 16W max. 1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø146 Buitenmaat - Gatmaat Ø120-130 excl. LED Driver
+ZVH1092386,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector zwart verdiept max. 19,5W max. 2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø176 Buitenmaat - Gatmaat Ø150-160 excl. LED Driver"
+ZVH1092393,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans reflector zwart verdiept max. 25,5W max. 3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø226 Buitenmaat - Gatmaat Ø200-210 excl. LED Driver"
+WTSH1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit 3 fase track 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +Philips driver"
+WTSH1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit 3 fase track 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø180x140(H) Buitenmaat +TCI DALI Driver"
+WTSH1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit 3 fase track 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +TCI DALI Driver"
+WTSH1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit 3 fase track 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø180x140(H) Buitenmaat +Philips driver"
+WOSH1092393-PH-NA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit opbouw 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +Philips driver & Noodmodule 1uur autotest"
+WOSH1092393-DA-NA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit opbouw 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +DALI-2 Driver + DALI-2 Noodmodule 1uur autotest"
+WOSH1092386-PH-NA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit opbouw 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø180x140(H) Buitenmaat +Philips driver & Noodmodule 1uur autotest"
+WPH1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver"
+WPH1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver incl. eurosnoer 2m wit"
+WPH1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver incl.3P snoer"
+WPH1092379-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips DALI2 driver
+WPH1092379-CA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI Casambi Driver
+WPH1092379-CA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI Casambi Driver incl. 3P snoer
+WPH1092379-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WPH1092379-TC-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI DALI Driver
+WPH1092379-TC-DA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI DALI Driver incl. 3P snoer
+WPH1092379-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WPH1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips DALI2 driver"
+WPH1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI Casambi Driver"
+WPH1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI Casambi Driver incl. 3P snoer"
+WPH1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WPH1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI DALI Driver"
+WPH1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI DALI Driver incl. 3P snoer"
+WPH1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WPH1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips DALI2 driver"
+WPH1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI Casambi Driver"
+WPH1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI Casambi Driver incl. 3P snoer"
+WPH1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WPH1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI DALI Driver"
+WPH1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI DALI Driver incl. 3P snoer"
+WPH1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WPH1092379-PH,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver
+WPH1092379-PH-EUR,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver incl. eurosnoer 2m wit
+WPH1092379-PH-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver incl.3P snoer
+WPH1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver"
+WPH1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver incl. eurosnoer 2m wit"
+WPH1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver incl.3P snoer"
+WSH1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl. eurosnoer 2m wit"
+WSH1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer"
+WSGH1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver incl. eurosnoer 2m wit"
+WSGH1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver incl.3P snoer"
+WSH1092379-CA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver
+WSH1092379-CA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer
+WSH1092379-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSH1092379-TC-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver
+WSH1092379-TC-DA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer
+WSH1092379-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSH1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver"
+WSH1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer"
+WSH1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSH1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver"
+WSH1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer"
+WSH1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSGH1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI Casambi Driver"
+WSGH1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI Casambi Driver incl. 3P snoer"
+WSGH1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSGH1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI DALI Driver"
+WSGH1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI DALI Driver incl. 3P snoer"
+WSGH1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSH1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver"
+WSH1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer"
+WSH1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSH1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver"
+WSH1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer"
+WSH1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSGH1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI Casambi Driver"
+WSGH1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI Casambi Driver incl. 3P snoer"
+WSGH1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSGH1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI DALI Driver"
+WSGH1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI DALI Driver incl. 3P snoer"
+WSGH1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WSH1092379-PH-EUR,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl. eurosnoer 2m wit
+WSH1092379-PH-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer
+WSH1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl. eurosnoer 2m wit"
+WSH1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer"
+WSGH1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver incl. eurosnoer 2m wit"
+WSGH1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver incl.3P snoer"
+WVH1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl. eurosnoer 2m wit"
+WVH1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer"
+WVH1092379-CA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver
+WVH1092379-CA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer
+WVH1092379-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WVH1092379-TC-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver
+WVH1092379-TC-DA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer
+WVH1092379-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WVH1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver"
+WVH1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer"
+WVH1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WVH1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver"
+WVH1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer"
+WVH1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WVH1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver"
+WVH1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer"
+WVH1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WVH1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver"
+WVH1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer"
+WVH1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+WVH1092379-PH-EUR,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl. eurosnoer 2m wit
+WVH1092379-PH-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer
+WVH1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl. eurosnoer 2m wit"
+WVH1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer"
+ZTSH1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart 3 fase track 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +Philips driver"
+ZTSH1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart 3 fase track 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø180x140(H) Buitenmaat +TCI DALI Driver"
+ZTSH1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart 3 fase track 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +TCI DALI Driver"
+ZTSH1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart 3 fase track 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø180x140(H) Buitenmaat +Philips driver"
+ZOSH1092393-PH-NA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart opbouw 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +Philips driver & Noodmodule 1uur autotest"
+ZOSH1092393-DA-NA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart opbouw 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø230x150(H) Buitenmaat +DALI-2 Driver + DALI-2 Noodmodule 1uur autotest"
+ZOSH1092386-PH-NA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart opbouw 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø180x140(H) Buitenmaat +Philips driver & Noodmodule 1uur autotest"
+ZPH1092393-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver"
+ZPH1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver incl. eurosnoer 2m wit"
+ZPH1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver incl.3P snoer"
+ZPH1092379-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips DALI2 driver
+ZPH1092379-CA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI Casambi Driver
+ZPH1092379-CA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI Casambi Driver incl. 3P snoer
+ZPH1092379-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZPH1092379-TC-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI DALI Driver
+ZPH1092379-TC-DA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI DALI Driver incl. 3P snoer
+ZPH1092379-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZPH1092386-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips DALI2 driver"
+ZPH1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI Casambi Driver"
+ZPH1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI Casambi Driver incl. 3P snoer"
+ZPH1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZPH1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI DALI Driver"
+ZPH1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI DALI Driver incl. 3P snoer"
+ZPH1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZPH1092393-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips DALI2 driver"
+ZPH1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI Casambi Driver"
+ZPH1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI Casambi Driver incl. 3P snoer"
+ZPH1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZPH1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI DALI Driver"
+ZPH1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI DALI Driver incl. 3P snoer"
+ZPH1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZPH1092379-PH,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver
+ZPH1092379-PH-EUR,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver incl. eurosnoer 2m wit
+ZPH1092379-PH-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver incl.3P snoer
+ZPH1092386-PH,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver"
+ZPH1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver incl. eurosnoer 2m wit"
+ZPH1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver incl.3P snoer"
+ZSH1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl. eurosnoer 2m wit"
+ZSH1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer"
+ZSGH1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver incl. eurosnoer 2m wit"
+ZSGH1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver incl.3P snoer"
+ZSH1092379-CA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver
+ZSH1092379-CA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer
+ZSH1092379-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSH1092379-TC-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver
+ZSH1092379-TC-DA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer
+ZSH1092379-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSH1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver"
+ZSH1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer"
+ZSH1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSH1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver"
+ZSH1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer"
+ZSH1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSGH1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI Casambi Driver"
+ZSGH1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI Casambi Driver incl. 3P snoer"
+ZSGH1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSGH1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI DALI Driver"
+ZSGH1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI DALI Driver incl. 3P snoer"
+ZSGH1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSH1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver"
+ZSH1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer"
+ZSH1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSH1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver"
+ZSH1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer"
+ZSH1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSGH1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI Casambi Driver"
+ZSGH1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI Casambi Driver incl. 3P snoer"
+ZSGH1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSGH1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI DALI Driver"
+ZSGH1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI DALI Driver incl. 3P snoer"
+ZSGH1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ250 - GØ200-240 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZSH1092379-PH-EUR,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl. eurosnoer 2m wit
+ZSH1092379-PH-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer
+ZSH1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl. eurosnoer 2m wit"
+ZSH1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer"
+ZSGH1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver incl. eurosnoer 2m wit"
+ZSGH1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver incl.3P snoer"
+ZVH1092393-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl. eurosnoer 2m wit"
+ZVH1092393-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer"
+ZVH1092379-CA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver
+ZVH1092379-CA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer
+ZVH1092379-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZVH1092379-TC-DA,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver
+ZVH1092379-TC-DA-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer
+ZVH1092379-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 16W 1700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZVH1092386-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver"
+ZVH1092386-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer"
+ZVH1092386-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZVH1092386-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver"
+ZVH1092386-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer"
+ZVH1092386-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 19,5W 2275-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZVH1092393-CA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver"
+ZVH1092393-CA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer"
+ZVH1092393-CA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI Casambi Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZVH1092393-TC-DA,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver"
+ZVH1092393-TC-DA-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer"
+ZVH1092393-TC-DA-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 25,5W 3050-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +TCI DALI Driver incl. 3P snoer/splitter, 1 in 2 uit"
+ZVH1092379-PH-EUR,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl. eurosnoer 2m wit
+ZVH1092379-PH-ST3,Pragmalux,Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer
+ZVH1092386-PH-EUR,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl. eurosnoer 2m wit"
+ZVH1092386-PH-ST3,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer"
+WF1098357-EUR,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 facet wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ176 - GØ150-160 +LED Driver incl. eurosnoer 2m wit
+WGF1099866-EUR,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 facet wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ190 - GØ150-165+LED Driver incl. eurosnoer 2m wit
+ZF1098357-EUR,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 facet zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ176 - GØ150-160 +LED Driver incl. eurosnoer 2m zwart
+ZF1098357-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial PIR IP54 facet zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ176 - GØ150-160 +LED Driver incl.3P aansluitsnoer en splitter en TO, 1 in 2 uit"
+ZGF1099866-EUR,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 facet zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ190 - GØ150-165 +LED Driver incl. eurosnoer 2m zwart
+ZGF1099866-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial PIR IP54 facet zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ190 - GØ150-165 +LED Driver incl.3P aansluitsnoer en splitter en TO, 1 in 2 uit"
+WO1098357,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 opaal wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ176 - GØ150-160 +LED Driver
+WO1098357-ST3,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 opaal wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ176 - GØ150-160 +LED Driver incl.3P aansluitsnoer
+WOGF1099866,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 opaal wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ190 - GØ150-165 +LED Driver
+WOGF1099866-ST3,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 opaal wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ190 - GØ150-165 +LED Driver incl.3P aansluitsnoer
+ZO1098357,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 opaal zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ176 - GØ150-160 +LED Driver
+ZO1098357-ST3,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 opaal zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ176 - GØ150-160 +LED Driver incl.3P aansluitsnoer
+ZOGF1099866,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 opaal zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ190 - GØ150-165 +LED Driver
+ZOGF1099866-ST3,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 opaal zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ190 - GØ150-165 +LED Driver incl.3P aansluitsnoer
+WPF1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WPF1092379-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WPF1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WSF1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WSGF1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WSF1092379-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WSF1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WSGF1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WVF1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WVF1092379-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WVF1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet wit verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZPF1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZPF1092379-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZPF1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZSF1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZSGF1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZSF1092379-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZSF1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZSGF1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZVF1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZVF1092379-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZVF1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 facet zwart verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WPH1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WPH1092379-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WPH1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WSH1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WSGH1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WSH1092379-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WSH1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WSGH1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WVH1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WVH1092379-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WVH1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans wit verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZPH1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ214 - GØ200 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZPH1092379-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ132 - GØ120 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZPH1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart plat 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ168 - GØ150 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZSH1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZSGH1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D Ø250 - GØ200-240 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZSH1092379-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZSH1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZSGH1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart standaard 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ200 - GØ150-190 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZVH1092393-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 13,5-25,5W 1700-3200lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZVH1092379-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 6-16W 700-1800lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ146 - GØ120-130 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+ZVH1092386-PH-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 6-19,5W 725-2450lm 3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D BØ176 - GØ150-160 +Philips driver incl.3P snoer/splitter, 1 in 2 uit"
+WF1098357-ST3,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 facet wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ176 - GØ150-160 +LED Driver incl.3P aansluitsnoer
+WF1098357-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial PIR IP54 facet wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ176 - GØ150-160 +LED Driver incl.3P aansluitsnoer en splitter en TO, 1 in 2 uit"
+WGF1099866-ST3,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 facet wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ190 - GØ150-165 +LED Driver incl.3P aansluitsnoer
+WGF1099866-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial PIR IP54 facet wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT UGR<19 60D BØ190 - GØ150-165 +LED Driver incl.3P aansluitsnoer en splitter en TO, 1 in 2 uit"
+1099873,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 opaal 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D excl.Frame incl. LED Driver
+WO1098357-EUR,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 opaal wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ176 - GØ150-160 +LED Driver incl. eurosnoer 2m wit
+WO1098357-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial PIR IP54 opaal wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ176 - GØ150-160 +LED Driver incl.3P aansluitsnoer en splitter en TO, 1 in 2 uit"
+WOGF1099866-EUR,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 opaal wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ190 - GØ150-165 +LED Driver incl. eurosnoer 2m wit
+WOGF1099866-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial PIR IP54 opaal wit 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ190 - GØ150-165 +LED Driver incl.3P aansluitsnoer en splitter en TO, 1 in 2 uit"
+ZO1098357-EUR,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 opaal zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ176 - GØ150-160 +LED Driver incl. eurosnoer 2m zwart
+ZO1098357-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial PIR IP54 opaal zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ176 - GØ150-160 +LED Driver incl.3P aansluitsnoer en splitter en TO, 1 in 2 uit"
+ZOGF1099866-EUR,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 opaal zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ190 - GØ150-165 +LED Driver incl. eurosnoer 2m zwart
+ZOGF1099866-ST3S,Pragmalux,"Pragmalux LED Downlight Mondial PIR IP54 opaal zwart 13-18W 1400-2100lm 3000K-3500K-4000K 3-CCT 100D BØ190 - GØ150-165 +LED Driver incl.3P aansluitsnoer en splitter en TO, 1 in 2 uit"
+1098609,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 wit frame Ø176 Buitenmaat
+1098517,Pragmalux,Pragmalux LED Downlight Mondial PIR IP54 zwart frame Ø176 Buitenmaat

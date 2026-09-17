@@ -149,6 +149,16 @@ LEESPROEVEN = [
      {"vermogen_w": {"min": 22.0, "max": 75.0},
       "lichtstroom_lm": {"min": 3800, "max": 13000}}),
 
+    # De Mondial. De artikelcode bevestigt de lezing onafhankelijk:
+    # WVF = Wit Verdiept Facet, ZSGH = Zwart Standaard hoogGlans Hoogglans.
+    ("Pragmalux LED Downlight Mondial IP54 hoogglans zwart verdiept 16W 1800lm "
+     "3000K-3500K-4000K 3-CCT CRI>90 UGR<19 60D", "Pragmalux",
+     {"uitvoering": "verdiept", "optiek": "Hoogglans", "kleur": "zwart"}),
+    ("Pragmalux LED Downlight Mondial IP54 facet wit plat 16W 1800lm 3000K-3500K-4000K",
+     "Pragmalux", {"uitvoering": "plat", "optiek": "Facet", "kleur": "wit"}),
+    ("Pragmalux LED Downlight Mondial IP54 facet wit 3 fase track 19,5W 2450lm 3000K",
+     "Pragmalux", {"uitvoering": "3-fase track", "optiek": "Facet"}),
+
     # Twee schrijfwijzen van de kleurtemperatuur die eerder misgingen: de K maar
     # een keer aan het eind, en de duizendpunt.
     ("Pragmalux LED Inlegarmatuur Modul 15x150cm 30W 3000-4000K 2-CCT UGR<16 wit RAL9003",

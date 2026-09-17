@@ -46,6 +46,13 @@ PROEVEN = [
      "Lumio-S, -M en -L zijn drie armaturen van verschillend formaat."),
     ("richtspot adjusto g2", 1,
      "De prijslijst schrijft dezelfde reeks met en zonder 'LED' ervoor."),
+    # De Mondial is EEN armatuur met opties, geen reeks losse families: de
+    # inbouwdiepte, de reflector, de kleur en DALI staan allemaal achter de
+    # IP-klasse en horen dus bij het artikel. Alleen PIR en COB zijn eigen
+    # families - die hebben een eigen familieblad.
+    ("downlight mondial", 3,
+     "Mondial, Mondial PIR en Mondial COB. Verdiept/standaard/plat, facet/"
+     "hoogglans, wit/zwart en DALI zijn uitvoeringen van dezelfde Mondial."),
     ("frame paneel conto", 2,
      "Een paneel MET frame is een armatuur; de 30x120 en de 60x60 zijn twee "
      "maten. Een LOS frame noemt geen lichtstroom en valt daar al op af."),

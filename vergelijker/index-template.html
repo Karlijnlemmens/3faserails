@@ -287,7 +287,14 @@ const REF_VELDEN = [
   ['afmetingen','Afmetingen'],['montage','Montage'],['kleur','Kleur'],['ip','IP-klasse'],['ik','IK-klasse'],
   ['nood','Noodverlichting']
 ];
-const KENMERKEN = [['uitvoering','Uitvoering'],['kleur','Kleur'],['wattage','Wattage'],
+/* De keuzebalk waarmee je binnen een familie het juiste artikel opzoekt. Optiek
+   staat erbij omdat dat bij sommige families hét onderscheid is: de Mondial
+   bestaat met een facet- en met een hoogglansreflector, allebei in wit en zwart,
+   in drie inbouwdieptes en allemaal ook in DALI - 252 artikelen waar je anders
+   alleen op wattage doorheen komt. Aansturing idem: DALI of aan/uit is een
+   keuze die de installateur maakt, geen gevolg van de andere velden. */
+const KENMERKEN = [['uitvoering','Uitvoering'],['optiek','Optiek'],['kleur','Kleur'],
+                   ['wattage','Wattage'],['aansturing','Aansturing'],
                    ['driver','Driver'],['sensor','Sensor'],['noodverlichting','Noodverlichting']];
 
 /* Wattage staat niet als los veld in de data maar als bereik in vermogen_w.
@@ -303,7 +310,9 @@ function wattLabel(v){
   if(w.max==null || w.min===w.max) return kort(w.min)+'W';
   return kort(w.min)+'-'+kort(w.max)+'W';
 }
-const KENMERK_AFLEIDING = {wattage: wattLabel};
+/* aansturing staat niet als veld op de variant: die komt uit dimprotocol,
+   in de schrijfwijze van een installateur. */
+const KENMERK_AFLEIDING = {wattage: wattLabel, aansturing: aansturingVan};
 
 /* De waarde van een kenmerk: uit het veld, of afgeleid als het geen veld is. */
 function kenmerkVan(v,key){
@@ -668,7 +677,8 @@ function montageVan(fam,v){
    en dat is aan-uit. */
 const DIMNAMEN = {dali2:'DALI-2', 'dali-2':'DALI-2', dali:'DALI', '1-10v':'1-10V',
   '0-10v':'0-10V', 'push-dim':'push-dim', push:'push-dim', casambi:'Casambi',
-  triac:'TRIAC', zigbee:'Zigbee', bluetooth:'Bluetooth', geen:'Aan/uit'};
+  triac:'TRIAC', zigbee:'Zigbee', bluetooth:'Bluetooth', d4i:'D4i',
+  'dim-to-warm':'Dim to Warm', geen:'Aan/uit'};
 function aansturingVan(v){
   const p = v && v.dimprotocol;
   if(p==null) return '';
