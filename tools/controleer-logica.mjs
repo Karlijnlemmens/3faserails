@@ -461,7 +461,8 @@ function is(wat, gekregen, verwacht){
 
 /* ==================== waarden uit de productdata ==================== */
 {
-  const m = await laadUit('vergelijker/index-template.html', ['typeVan','artikelVoorWoord']);
+  const m = await laadUit('vergelijker/index-template.html',
+    ['typeVan','artikelVoorWoord','REF_VELDEN','PDF_VERBORGEN']);
 
   console.log('\nwaarden uit de productdata');
 
@@ -516,6 +517,16 @@ function is(wat, gekregen, verwacht){
     m.artikelVoorWoord(fam,'wit'), null);
   is('een nummer dat niet bestaat wijst niets aan',
     m.artikelVoorWoord(fam,'9999999'), null);
+
+  /* Leverancier en artikelnummer staan wel op het blad in de tool - de
+     binnendienst moet de positie kunnen terugzoeken - maar niet op de PDF die
+     naar buiten gaat. Een sleutel die in REF_VELDEN niet bestaat verbergt niets
+     en valt nergens op, vandaar de derde controle. */
+  const bladsleutels = m.REF_VELDEN.map(r => r[0]);
+  is('de leverancier blijft van de PDF', m.PDF_VERBORGEN.includes('leverancier'), true);
+  is('het artikelnummer blijft van de PDF', m.PDF_VERBORGEN.includes('artikelnummer'), true);
+  is('elke verborgen sleutel is een echte rij',
+    m.PDF_VERBORGEN.filter(k => !bladsleutels.includes(k)), []);
 }
 
 /* ---------------------------------------------------------------- verslag ---- */

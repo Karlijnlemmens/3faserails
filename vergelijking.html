@@ -277,6 +277,14 @@ const REF_VELDEN = [
   ['afmetingen','Afmetingen'],['montage','Montage'],['kleur','Kleur'],['ip','IP-klasse'],['ik','IK-klasse'],
   ['nood','Noodverlichting']
 ];
+/* Deze rijen staan wel op het blad in de tool maar niet op de PDF. Het blad is
+   voor de binnendienst: daar hoort bij te staan van wie het referentie-armatuur
+   is en welk artikelnummer erbij hoort, anders is de positie niet terug te
+   zoeken. De PDF gaat naar buiten, en daar hoort geen van beide op - niet de
+   naam van de leverancier (in een bestek "fabricaat") en niet het
+   artikelnummer. Wat het armatuur IS blijft staan: de rij Type noemt het
+   armatuur zelf, en alle technische rijen blijven ongemoeid. */
+const PDF_VERBORGEN = ['leverancier','artikelnummer'];
 /* De keuzebalk waarmee je binnen een familie het juiste artikel opzoekt. Optiek
    staat erbij omdat dat bij sommige families hét onderscheid is: de Mondial
    bestaat met een facet- en met een hoogglansreflector, allebei in wit en zwart,
@@ -1568,6 +1576,7 @@ async function bouwPdf(){
 
     /* de velden van het blad */
     REF_VELDEN.forEach(([k,lbl])=>{
+      if(PDF_VERBORGEN.includes(k)) return;
       const ov=p.overrides[k];
       rij(lbl, p.ref[k]||'', ov!=null?ov:(waarden[k]||''));
     });
