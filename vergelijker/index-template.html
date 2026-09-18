@@ -400,15 +400,20 @@ function varByCode(fam,code){return (fam?.varianten||[]).find(v=>v.artikelcode==
 const SECTIE=/^(elektrisch|lichttechniek|controle|bescherming|energie|materiaal|montage|afmeting|verpakking|algemeen|optiek|garantie|akoestiek|overig|electric|photometric|light tech|lighting|optical|control|dimming|protection|energy|material|mounting|dimension|packaging|general|warranty|acoustic)/i;
 
 const VELDMAP=[
+  /* Leverancier en Toepassing staan als rij op het blad maar hadden geen enkel
+     label: die waren dus alleen met de hand te vullen. "Fabricaat" is de
+     schrijfwijze die in een bestek het meest voorkomt, "Locatie" idem. */
+  {v:'leverancier', l:/^(leverancier|fabricaat|fabrikant|merk|brand|manufacturer|make|supplier)$/i},
+  {v:'toepassing',  l:/^(toepassing|locatie|ruimte|application|location|room|area)$/i},
   {v:'artikelnummer',l:/^(artikelcode|artikelnummer|item ?number|article ?(code|number)|bestelnummer|productcode|sku)$/i},
   {v:'vermogen',   l:/^(systeem\s?wattage|wattage|vermogen|opgenomen vermogen|system power|power|max(imum)? bulb wattage)$/i},
-  {v:'lumen',      l:/^(luminous flux|lichtstroom|nuttige lichtstroom|armatuurlichtstroom|lichtstroom armatuur|output)$/i},
-  {v:'cct',        l:/^(kleur\s?temperatuur|kleurtemperatuur|colour temperature|color temperature|cct)$/i},
+  {v:'lumen',      l:/^(luminous flux|lichtstroom|nuttige lichtstroom|armatuurlichtstroom|lichtstroom armatuur|lumen|lm|output)$/i},
+  {v:'cct',        l:/^(kleur\s?temp(eratuur)?\.?|colour temp(erature)?|color temp(erature)?|cct)$/i},
   /* Dimbaar en aansturing zijn twee dingen: OF er gedimd kan worden, en WAARMEE.
      "Dimbaar: ja" zegt het eerste, "Aansturing: DALI-2" het tweede - en uit dat
      tweede volgt het eerste meestal vanzelf (zie naarBladvelden). */
   {v:'dimbaar',    l:/^(dimbaar|dimbaarheid|dimmable)$/i},
-  {v:'aansturing', l:/^(aansturing|besturing|sturing|bediening|control|dimwijze|dimprotocol|protocol)$/i},
+  {v:'aansturing', l:/^(aansturing|besturing|sturing|bediening|schakeling|control|dimwijze|dimprotocol|protocol)$/i},
   /* Een kale "Type" telt alleen als aansturing onder een dim- of besturingskopje. */
   {v:'aansturing', l:/^(type|dimmen|dimming)$/i, s:/controle|dim/i},
   {v:'sensor',     l:/^(sensor|sensoren|bewegingssensor|bewegingsmelder|aanwezigheidssensor|aanwezigheidsdetectie|daglichtsensor|daglichtregeling|detectie|motion ?sensor|presence ?detection|occupancy)/i},
@@ -436,7 +441,8 @@ const VELDMAP=[
   {v:'kleur',      l:/^(kleur|behuizingskleur|kleur behuizing|kast ?kleur|colou?r|housing colou?r|body colou?r|finish)$/i},
   {v:'montage',    l:/^(montage|montagewijze|bevestiging|mounting|installation)$/i},
   {v:'bundel',     l:/^(lichtbundel|bundelhoek|stralingshoek|uitstralingshoek|spreidingshoek|openingshoek|beam)/i},
-  {v:'_optiek',    l:/^(optiek|optic|optics|lens)$/i},
+  {v:'_optiek',    l:/^(optiek|optic|optics|lens|reflector|afscherming|diffuser)$/i},
+  {v:'_uitvoering',l:/^(uitvoering|variant|execution|version)$/i},
   {v:'levensduur', l:/^(levensduur|lifetime|life ?time|lifespan|service life|rated life)/i},
   {v:'_klasse',    l:/^(isolatieklasse|beschermingsklasse|class|klasse|protection class)$/i},
   {v:'aansluiting',l:/^aansluiting/i},
@@ -552,6 +558,8 @@ const leesSpecs = t => LEZER.lees(t);
 /* Vertaal de uitgelezen waarden naar de velden van het vergelijkingsblad. */
 function naarBladvelden(u){
   const r={};
+  if(u.leverancier)   r.leverancier=u.leverancier;
+  if(u.toepassing)    r.toepassing=u.toepassing;
   if(u.omschrijving)  r.omschrijving=u.omschrijving;
   if(u.artikelnummer) r.artikelnummer=u.artikelnummer;
   if(u.type)     r.type=u.type;

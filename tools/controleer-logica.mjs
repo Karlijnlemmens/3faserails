@@ -429,6 +429,29 @@ function is(wat, gekregen, verwacht){
       blad('LED Downlight, 15 W, 1650 lm, 226, IP44'), undefined);
   }
 
+  /* Een bestekregel zoals de binnendienst hem uit een bestek plakt: korte,
+     Nederlandse labels, niet de schrijfwijze van een leverancierstabel.
+     Leverancier en Toepassing zijn rijen op het blad die geen enkel label
+     hadden - die waren dus alleen met de hand te vullen. */
+  {
+    const bestek = [
+      'Fabricaat: Glamox', 'Montage: Inbouw / Opbouw', 'Type: D70-R195 G2',
+      'Uitvoering: LED', 'Schakeling: Dali/ Dim', 'Reflector: Zilvermat (SM)',
+      'Lumen: 2220LM', 'Kleur temp: 4000K', 'Locatie: Gangen', 'Kleur: Wit',
+    ].join('\n');
+    const r = lees(bestek);
+    is('bestekregels vullen het blad', m.naarBladvelden(r.uit),
+      {leverancier:'Glamox', toepassing:'Gangen', type:'D70-R195 G2',
+       lumen:'2220LM', cct:'4000K', montage:'Inbouw / Opbouw', kleur:'Wit',
+       aansturing:'Dali/ Dim', dimbaar:'Ja'});
+    /* "Uitvoering" en "Reflector" hebben geen eigen rij op het blad, maar worden
+       wel gelezen - anders meldt de tool ze als onbekend en gaat de gebruiker
+       zoeken naar een fout die er niet is. */
+    is('uitvoering wordt gelezen zonder eigen rij', r.uit._uitvoering, 'LED');
+    is('reflector wordt gelezen zonder eigen rij', r.uit._optiek, 'Zilvermat (SM)');
+    is('een bestek laat niets liggen', r.onbekend, []);
+  }
+
   /* Een echt label weet meer dan een patroon en wordt niet overschreven. */
   {
     const r = lees('Lichtstroom: 1650 lm\nWit, 3600 lm, 26 W, 4000 K, IP20, UGR<19');
