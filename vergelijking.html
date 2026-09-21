@@ -110,6 +110,19 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hint.warn{color:var(--warn);font-weight:700}
 .hint.err{color:var(--err);font-weight:700}
 
+.akkoord{background:var(--bg);border-top:1px solid var(--line);padding:11px 14px;
+  display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-start}
+.akkoord-kop{flex:0 0 100%;display:flex;align-items:center;gap:10px}
+.akkoord-uit{flex:0 0 100%;font-size:12px;color:var(--muted);margin:-4px 0 2px}
+.akkoord-status{font-size:11.5px;font-weight:800;border-radius:999px;padding:1px 9px;
+  border:1px solid var(--line);color:var(--muted)}
+.akkoord-status.ja{color:var(--ok);border-color:var(--ok)}
+.akkoord-status.nee{color:var(--err);border-color:var(--err)}
+.akkoord .f.breed{flex:1 1 320px}
+.akkoord .f input,.akkoord .f select,.akkoord .f textarea{background:#fff}
+.posbtn .vink{font-weight:800;font-size:13px;flex:none}
+.posbtn .vink.ja{color:var(--ok)} .posbtn .vink.nee{color:var(--err)}
+.rail-stand{font-size:11.5px;color:var(--muted);margin:0 0 8px}
 .picker{background:var(--blue-soft);border-top:1px solid var(--blue-line);padding:11px 14px;
   display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;border-radius:0 0 var(--r) var(--r)}
 .picker .f select,.picker .f input{background:#fff}
@@ -192,7 +205,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .pdfprev-bezig{color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;flex:1}
 
 @media print{
-  .suite,.top,.projbar,.rail,.bar,.picker,.hint{display:none!important}
+  .suite,.top,.projbar,.rail,.bar,.picker,.akkoord,.hint{display:none!important}
   .wrap{display:block}.main{padding:0;max-width:none}
   .sheet{page-break-after:always;border:none}
   .row input,.row textarea,.row select{border:none!important;background:none!important}
@@ -245,6 +258,7 @@ button,input,select,textarea{font:inherit;color:inherit}
   <nav class="rail">
     <h2>Posities</h2>
     <ul class="poslist" id="posList"></ul>
+    <div class="rail-stand" id="railStand" hidden></div>
     <button class="pill acc" id="btnAdd" style="width:100%">Positie toevoegen</button>
   </nav>
   <main class="main" id="main"></main>
@@ -331,7 +345,8 @@ function sorteerKenmerk(waarden){
 
 function nieuwePositie(code){
   return {code:code||volgendeCode(), aantallen:{}, bestaandeZaagmaat:'',
-          ref:{}, fotoRef:'', fotoOns:'', familieId:'', artikelcode:'', overrides:{}, opmerking:''};
+          ref:{}, fotoRef:'', fotoOns:'', familieId:'', artikelcode:'', overrides:{}, opmerking:'',
+          voorstel:'', akkoord:'', reactie:''};
 }
 function volgendeCode(){
   const g=['A','B','C','D','E','F','G','H','J','K','L','M'];
@@ -946,9 +961,20 @@ function renderRail(){
     const st = p.artikelcode ? 'done' : (p.ref.type||p.ref.leverancier ? 'part':'');
     b.append(Object.assign(el('span','dot '+st),{}), el('span','code',p.code),
              el('span','art', p.artikelcode || '—'));
+    /* Het oordeel van de manager staat naast de positie, of je moet elke
+       positie openklappen om te zien wat er nog ligt. */
+    if(p.akkoord) b.append(el('span','vink '+p.akkoord, p.akkoord==='ja' ? '\u2713' : '\u2717'));
     b.onclick=()=>{S.actief=i;render()};
     li.append(b); ul.append(li);
   });
+  /* De stand van de akkoordronde, maar alleen zodra die ronde loopt: in een
+     project waar niemand een voorstel heeft ingevuld is het ruis. */
+  const stand=document.getElementById('railStand');
+  const loopt=S.posities.some(p=>p.voorstel||p.akkoord);
+  const open=S.posities.filter(p=>!p.akkoord).length;
+  stand.hidden=!loopt;
+  stand.textContent = open ? open+' van '+S.posities.length+' nog te beoordelen'
+                           : 'alle posities beoordeeld';
 }
 
 function veldRij(lblTxt, links, rechts){
@@ -1150,6 +1176,9 @@ function renderSheet(){
     invoer(p.ref.opmerking,x=>p.ref.opmerking=x,'','area'),
     invoer(p.opmerking,x=>p.opmerking=x,'Toelichting bij afwijkingen','area')));
 
+  /* voorstel en akkoord: eerst afspreken wat het wordt, dan pas het artikel */
+  sheet.append(bouwAkkoord(p));
+
   /* keuzeblok */
   sheet.append(bouwPicker(p,fam,v));
   main.append(sheet);
@@ -1313,6 +1342,57 @@ function familieKiezer(p,fam){
     }
   });
   return doos;
+}
+
+/* ---------- voorstel & akkoord ------------------------------------------
+   Tussen het invullen van de referentie en het kiezen van het artikel zit een
+   ronde langs de manager. De binnendienst schrijft op wat zij als alternatief
+   in gedachten heeft ("Sigma DALI"); hij zet er een vinkje of een kruisje bij
+   en schrijft er bij een kruisje bij welke familie het dan moet worden. Pas
+   daarna wordt het artikelnummer ingevuld - want pas dan staat vast in welke
+   familie je dat moet zoeken.
+
+   De uitwisseling loopt over "Project opslaan": dat bakt de hele stand in een
+   kopie van deze pagina, dus de manager opent hetzelfde bestand, vult hier in,
+   slaat op en mailt het terug. Geen server, geen tweede bestandsvorm, en niets
+   om over te typen. Hij ziet de volledige referentiekolom eronder staan, en dat
+   is ook wat hij nodig heeft: zonder de specificaties valt niet te beoordelen
+   of het alternatief past.
+
+   Dit blijft van de PDF af, om dezelfde reden als Leverancier en Artikelnummer
+   (zie PDF_VERBORGEN): het is intern overleg en de PDF gaat naar buiten. */
+const AKKOORD = [['','Nog niet beoordeeld'],['ja','Akkoord'],['nee','Niet akkoord']];
+
+function bouwAkkoord(p){
+  const box=el('div','akkoord');
+  const kop=el('div','akkoord-kop');
+  kop.append(el('b','','Voorstel & akkoord'));
+  kop.append(el('span','akkoord-status '+(p.akkoord||''),
+    (AKKOORD.find(x=>x[0]===(p.akkoord||''))||AKKOORD[0])[1]));
+  box.append(kop);
+  box.append(el('div','akkoord-uit',
+    'Vul je voorstel in, sla het project op en mail dat bestand. Je manager opent '
+    +'hetzelfde bestand, zet hier een vinkje of een kruisje, en mailt het terug.'));
+
+  const f1=el('div','f breed'); f1.append(el('label','','Voorstel (binnendienst)'));
+  f1.append(invoer(p.voorstel,x=>{p.voorstel=x;renderRail()},'bijv. Sigma DALI'));
+  box.append(f1);
+
+  const f2=el('div','f'); f2.append(el('label','','Beoordeling (manager)'));
+  const sel=el('select');
+  AKKOORD.forEach(([w,l])=>sel.append(new Option(l,w)));
+  sel.value=p.akkoord||'';
+  /* render() en niet renderRail(): de kop, de placeholder eronder en het vinkje
+     in de lijst hangen alle drie aan deze keuze. */
+  sel.onchange=()=>{p.akkoord=sel.value; render()};
+  f2.append(sel); box.append(f2);
+
+  const f3=el('div','f breed'); f3.append(el('label','','Reactie manager'));
+  f3.append(invoer(p.reactie,x=>{p.reactie=x},
+    p.akkoord==='nee' ? 'welke familie het dan moet zijn, of wat er anders aan moet'
+                      : 'opmerking bij de beoordeling','area'));
+  box.append(f3);
+  return box;
 }
 
 function bouwPicker(p,fam,v){
@@ -1709,6 +1789,13 @@ async function bouwPdf(){
     }
   };
 
+  /* De ronde langs de manager blokkeert niets - een blad mag ook zonder - maar
+     wat er nog ligt hoor je te weten voordat het naar buiten gaat. */
+  const afgekeurd=posities.filter(p=>p.akkoord==='nee').map(p=>p.code);
+  const open=posities.filter(p=>p.voorstel && !p.akkoord).map(p=>p.code);
+  if(afgekeurd.length) meldingen.push('Niet akkoord bevonden: '+afgekeurd.join(', '));
+  if(open.length) meldingen.push('Nog niet beoordeeld: '+open.join(', '));
+
   const metPresenter=gebruikt.filter(f=>presenterAanwezig(f.presenter));
   const zonder=gebruikt.filter(f=>!presenterAanwezig(f.presenter));
   if(zonder.length){
@@ -1789,13 +1876,25 @@ document.addEventListener('paste',e=>{
 if(DATA) dataTag(DATA); else dataTag(null);
 /* Een opgeslagen project (dubbelgeklikt .html-bestand, zie slaProjectOp()) herstellen
    i.p.v. een lege startpositie aan te maken. */
-const PROJECT_VERSIE = 1;
+/* 2: voorstel/akkoord/reactie per positie. Een ouder bestand opent gewoon (die
+   velden worden aangevuld); een nieuwer bestand in een oudere kopie van de tool
+   krijgt de waarschuwing van ProjectOpslag.controleer(), en terecht - daar zou
+   het oordeel van de manager onzichtbaar zijn. */
+const PROJECT_VERSIE = 2;
 /* Een heel project in de tool zetten: uit het ingebakken bestand hieronder, of uit de
    balk van project-opslag.js die vraagt of je verder wilt waar je gebleven was. */
 function herstelProject(bron){
     const s = bron.S || {};
     if(s.project) S.project = Object.assign({}, S.project, s.project);
     if(s.posities) S.posities = s.posities;
+    /* Een project van v\u00f3\u00f3r de akkoordronde kent die drie velden niet. Aanvullen,
+       zodat de rest van de tool er niet op hoeft te letten en een opgeslagen
+       kopie er altijd hetzelfde uitziet. */
+    S.posities.forEach(p=>{
+      if(p.voorstel==null) p.voorstel='';
+      if(p.akkoord==null)  p.akkoord='';
+      if(p.reactie==null)  p.reactie='';
+    });
     if(typeof s.actief==='number') S.actief = s.actief;
 }
 if(OPGESLAGEN_PROJECT){

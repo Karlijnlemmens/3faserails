@@ -563,7 +563,7 @@ function is(wat, gekregen, verwacht){
 {
   const m = await laadUit('vergelijker/index-template.html',
     ['typeVan','artikelVoorWoord','rendementVan','ugrVan','criVan',
-     'REF_VELDEN','PDF_VERBORGEN']);
+     'nieuwePositie','AKKOORD','REF_VELDEN','PDF_VERBORGEN']);
 
   console.log('\nwaarden uit de productdata');
 
@@ -681,6 +681,25 @@ function is(wat, gekregen, verwacht){
   is('het artikelnummer blijft van de PDF', m.PDF_VERBORGEN.includes('artikelnummer'), true);
   is('elke verborgen sleutel is een echte rij',
     m.PDF_VERBORGEN.filter(k => !bladsleutels.includes(k)), []);
+
+  /* De akkoordronde: de binnendienst schrijft haar voorstel op, de manager zet
+     er een vinkje of een kruisje bij, en pas daarna wordt het artikel gekozen.
+     Die drie velden reizen mee in het opgeslagen projectbestand - dat is de
+     hele uitwisseling - dus ze horen bij de vorm die nieuwePositie() neerzet.
+     Een positie zonder die sleutels zou na opslaan en heropenen leeg terugkomen
+     zonder dat iemand dat merkt. */
+  const pos = m.nieuwePositie('A1');
+  is('een nieuwe positie kent de akkoordvelden',
+    ['voorstel','akkoord','reactie'].map(k => pos[k]), ['','','']);
+  /* De lege staat is "nog niet beoordeeld" en staat vooraan: dat is wat een
+     positie is zolang niemand ernaar gekeken heeft. */
+  is('nog niet beoordeeld is de eerste stand', m.AKKOORD[0][0], '');
+  is('en er zijn er drie', m.AKKOORD.map(x => x[0]), ['','ja','nee']);
+  /* Intern overleg hoort niet op het blad en dus ook niet in de PDF - dezelfde
+     reden als bij PDF_VERBORGEN, maar hier hoeft er niets verborgen te worden
+     omdat het nooit een rij is geweest. */
+  is('het overleg staat niet op het blad',
+    ['voorstel','akkoord','reactie'].filter(k => bladsleutels.includes(k)), []);
 }
 
 /* ---------------------------------------------------------------- verslag ---- */
