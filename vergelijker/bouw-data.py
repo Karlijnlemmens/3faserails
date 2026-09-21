@@ -254,6 +254,23 @@ def lees_omschrijving(o, merk=None):
     if m:
         v["cct_tekst"] = " ".join(m.group(0).split())
 
+    # UGR en kleurweergave staan gewoon in de omschrijving - "UGR<19 CRI>90" -
+    # maar werden nergens gelezen. Die twee rijen op het vergelijkingsblad kwamen
+    # dus alleen uit de handgeschreven overlay, en dus alleen bij de families die
+    # daar een blok hebben: de Sigma noemt op elke regel UGR<19 en had de rij
+    # toch leeg. Gemeten op deze catalogus noemen 2211 van de 5062 regels een UGR
+    # en 1449 een CRI.
+    #
+    # Het teken hoort erbij en wordt overgenomen zoals het er staat: "<19" is
+    # niet hetzelfde als "19", en ">90" niet hetzelfde als ">=90". Allebei in
+    # dezelfde vorm als het familieveld ugr, zodat de tool ze gelijk behandelt.
+    m = re.search(r"\bUGR\s*([<>]?=?)\s*(\d{1,2})\b", o, re.I)
+    if m:
+        v["ugr"] = (m.group(1) or "") + m.group(2)
+    m = re.search(r"\b(?:CRI|Ra)\s*([<>]?=?)\s*(\d{2,3})\b", o, re.I)
+    if m:
+        v["cri"] = (m.group(1) or "") + m.group(2)
+
     # "Buitenmaat - Gatmaat Ø90" is de gebruikelijke schrijfwijze, maar in de
     # prijslijst staat het soms afgekort als "B - G Ø150". Beide meenemen,
     # anders blijft de gatmaat leeg zonder dat er een melding komt: de

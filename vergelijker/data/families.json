@@ -68,6 +68,7 @@
     ],
     "ip": "IP20",
     "ik": "IK02",
+    "optiek": "Prisma",
     "ugr": "<19",
     "cri_min": 80,
     "cct": [
@@ -111,6 +112,17 @@
     "presenter": "ag13",
     "namen": [
       "LED Paneel Essence"
+    ]
+  },
+  {
+    "id": "sigma-paneel",
+    "naam": "LED Paneel Sigma",
+    "merk": "Pragmalux",
+    "lijn": "Sigma",
+    "armatuurtype": "paneel",
+    "optiek": "Prisma",
+    "namen": [
+      "LED Paneel Sigma"
     ]
   },
   {

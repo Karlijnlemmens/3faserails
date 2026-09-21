@@ -562,7 +562,8 @@ function is(wat, gekregen, verwacht){
 /* ==================== waarden uit de productdata ==================== */
 {
   const m = await laadUit('vergelijker/index-template.html',
-    ['typeVan','artikelVoorWoord','rendementVan','REF_VELDEN','PDF_VERBORGEN']);
+    ['typeVan','artikelVoorWoord','rendementVan','ugrVan','criVan',
+     'REF_VELDEN','PDF_VERBORGEN']);
 
   console.log('\nwaarden uit de productdata');
 
@@ -613,6 +614,34 @@ function is(wat, gekregen, verwacht){
     m.rendementVan({lichtstroom_lm:{min:3600,max:3600}}), '');
   is('nul watt levert geen deling op',
     m.rendementVan({vermogen_w:{min:0,max:0}, lichtstroom_lm:{min:3600,max:3600}}), '');
+
+  /* UGR en kleurweergave staan in de omschrijving van het artikel zélf en
+     daarnaast bij de familie. Het artikel gaat voor: de Sigma noemt op elke
+     regel UGR<19 en had die rij toch leeg, omdat er voor die serie geen blok in
+     de overlay stond. */
+  is('het artikel gaat voor de familie',
+    m.ugrVan({ugr:'<22'}, {ugr:'<19'}), 'UGR<19');
+  is('zonder opgave bij het artikel telt de familie',
+    m.ugrVan({ugr:'<22'}, {}), 'UGR<22');
+  is('zegt geen van beide iets, dan niets',
+    m.ugrVan({}, {}), '');
+  /* Een waterdicht armatuur heeft die opgave niet; dan hoort er geen kale
+     "UGR" op het blad te staan. */
+  is('geen familie en geen artikel', m.ugrVan(null, null), '');
+  /* Het teken hoort bij het getal en wordt getoond zoals het er staat. */
+  is('het teken blijft staan', m.ugrVan({}, {ugr:'<=22'}), 'UGR\u226422');
+
+  /* Bij de kleurweergave verschillen de twee bronnen van vorm: de prijslijst
+     schrijft ">90", de overlay een ondergrens. Allebei zeggen ze iets anders,
+     dus allebei worden ze getoond zoals ze bedoeld zijn. */
+  is('het teken uit de omschrijving blijft staan',
+    m.criVan({cri_min:80}, {cri:'>90'}), 'CRI>90');
+  is('de ondergrens uit de overlay is een ondergrens',
+    m.criVan({cri_min:80}, {}), 'CRI\u226580');
+  is('zonder opgave niets', m.criVan({}, {}), '');
+  /* cri_min 0 bestaat niet, maar null en undefined moeten wel onderscheiden
+     worden van "niets ingevuld" - anders komt er "CRIundefined" te staan. */
+  is('een familie zonder cri_min levert niets', m.criVan({cri_min:null}, {}), '');
 
   /* Zoeken op artikelnummer. artikelVoorWoord() is het stuk dat beslist wélk
      artikel een getypt nummer aanwijst; zoekFamilies() eromheen leest de

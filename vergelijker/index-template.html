@@ -728,11 +728,24 @@ function ipVan(fam,v){
    over gaat, dus zetten we het teken ervoor. Het scherm krijgt het echte <= en >=
    teken; pdfTxt() maakt daar in de PDF weer ASCII van. Een familie zonder UGR
    (een waterdicht armatuur heeft die opgave niet) levert niets, geen "UGR". */
-function ugrVan(fam){
-  const u = fam && fam.ugr ? String(fam.ugr).trim() : '';
-  return u ? 'UGR'+u.replace(/<=/,'\u2264').replace(/>=/,'\u2265') : '';
+/* Allebei staan ze in de omschrijving van het artikel z\u00e9lf ("UGR<19 CRI>90")
+   en daarnaast bij de familie, uit de handgeschreven overlay. Het artikel gaat
+   voor: dat is waar deze positie over gaat, en de familieopgave geldt voor de
+   hele serie. Anders dan bij ipVan() draagt de familieopgave hier geen nuance
+   die rijker is dan wat de omschrijving zegt - het is aan beide kanten een kale
+   vergelijking - dus is voorrang genoeg en hoeven ze niet vergeleken te worden.
+   Een familie zonder opgave en een artikel dat er geen noemt levert niets, geen
+   kale "UGR": een waterdicht armatuur heeft die opgave gewoon niet. */
+function ugrVan(fam,v){
+  const u = (v && v.ugr) || (fam && fam.ugr) || '';
+  return u ? 'UGR'+String(u).trim().replace(/<=/,'\u2264').replace(/>=/,'\u2265') : '';
 }
-function criVan(fam){
+function criVan(fam,v){
+  /* De prijslijst schrijft ">90", de overlay een ondergrens (cri_min: 80). Het
+     teken wordt overgenomen zoals het er staat: ">90" is niet hetzelfde als
+     ">=90", en de ondergrens uit de overlay is dat juist w\u00e9l. */
+  const t = v && v.cri;
+  if(t) return 'CRI'+String(t).trim().replace(/<=/,'\u2264').replace(/>=/,'\u2265');
   const c = fam ? fam.cri_min : null;
   return c==null ? '' : 'CRI\u2265'+c;
 }
@@ -829,9 +842,12 @@ function onzeWaarden(fam,v){
     aansturing: aansturingVan(v),
     sensor: sensorVan(v),
     /* De optiek staat als eigen veld bij de variant: bij de Mondial is dat het
-       verschil tussen de facet- en de hoogglansreflector. Niet elke familie
-       noemt er een; dan blijft de rij leeg. */
-    optiek: v.optiek || '',
+       verschil tussen de facet- en de hoogglansreflector. Staat er bij het
+       artikel niets, dan mag de familie het zeggen: een Sigma- of
+       Essence-paneel is altijd prismatisch, maar de prijslijst schrijft dat
+       nergens in de omschrijving, dus komt het uit de overlay
+       (families.json). Zegt geen van beide iets, dan blijft de rij leeg. */
+    optiek: v.optiek || (fam && fam.optiek) || '',
     rendement: rendementVan(v),
     ip: ipVan(fam,v),
     ik: fam.ik || '',
@@ -844,8 +860,8 @@ function onzeWaarden(fam,v){
        en wordt met de hand ingevuld, net als Toepassing. */
     nood: noodVan(v),
     bundel: bundelVan(v),
-    ugr: ugrVan(fam),
-    cri: criVan(fam),
+    ugr: ugrVan(fam,v),
+    cri: criVan(fam,v),
     levensduur: fam.levensduur || '',
     /* De maatopgave zoals hij in de prijslijst staat gaat voor op de losse
        getallen: alleen daar staat de reeks nog in ("Gatmaat Ø65-185") en staat
