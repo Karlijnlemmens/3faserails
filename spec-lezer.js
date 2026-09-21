@@ -179,20 +179,55 @@ function maak(opt){
   }
 
   /* Bestekteksten zetten meerdere "Label: waarde"-paren op één regel met komma's
-     ertussen; die halen we uit elkaar. Alleen knippen waar na de komma een label
-     staat dat we KENNEN - anders valt "Reflector, spot" uit elkaar, wordt
-     "L70/B50>50,000" halverwege afgekapt, en gaat een waarde als
+     ertussen; die halen we uit elkaar. Alleen knippen waar na het scheidingsteken
+     een label staat dat we KENNEN - anders valt "Reflector, spot" uit elkaar,
+     wordt "L70/B50>50,000" halverwege afgekapt, en gaat een waarde als
      "B10: 30, B16: 47, C10: 50, C16: 80" in vieren terwijl het één opgave is. */
-  function splitsLabelparen(regel){
-    const delen = regel.split(/,\s*(?=[^,:]{2,40}:)/);
-    if(delen.length < 2) return delen;
+  function knipOpLabel(regel, teken, terug){
+    const delen = regel.split(teken);
+    if(delen.length < 2) return [regel];
     const uit = [delen[0]];
     for(let i=1;i<delen.length;i++){
       const kop = delen[i].slice(0, delen[i].indexOf(':')).trim();
       if(pastLabel(schoonLabel(kop)) || SECTIE.test(kop)) uit.push(delen[i]);
-      else uit[uit.length-1] += ', ' + delen[i];
+      else uit[uit.length-1] += terug + delen[i];
     }
     return uit;
+  }
+  /* Een verkooptekst zet die paren niet achter een komma maar midden in de
+     lopende tekst, achter een punt: "... may not burn at a speed of more than
+     50mm per minute. Light color temperature: 4000K Cool White". Zonder deze
+     tweede knip loopt de waarde van het vorige label door tot het volgende
+     bekende label - dan slikt "lifespan:" er drie zinnen bij in.
+
+     Het voorbehoud is hetzelfde als bij de komma, en doet hier het meeste werk:
+     alleen knippen waar een BEKEND label volgt, zodat een gewone zin niet uit
+     elkaar valt en de omschrijving heel blijft. Het patroon kijkt bovendien niet
+     over een punt heen ([^,:.]), zodat een hele tussenzin geen label kan worden,
+     en eist een spatie achter de punt, zodat "2.2kg" en "50.000" niet knippen. */
+  /* En binnen zo'n paar houdt de waarde op aan het eind van zijn ZIN. Anders
+     loopt er in een verkooptekst van alles achteraan mee: "weight: 2.2kg. For
+     using EM kits 0046600-01 please order connector 0047523." zette dat hele
+     bestelzinnetje in het veld Gewicht.
+
+     Alleen waar er echt een bekend label v\u00f3\u00f3r staat, en wat erachter stond
+     verdwijnt niet: het wordt een eigen regel, en valt die nergens onder dan
+     meldt de tool hem als niet herkend. In een tabel staan geen zinnen, dus
+     daar verandert dit niets - de punt moet een spatie achter zich hebben, zodat
+     "2.2kg", "50.000 uur" en "L80/B20>50,000" heel blijven. */
+  function knipNaZin(stuk){
+    const d = stuk.indexOf(':');
+    if(d < 1 || d > 40 || !pastLabel(schoonLabel(stuk.slice(0, d)))) return [stuk];
+    const m = stuk.slice(d + 1).match(/\.\s+(?=\S)/);
+    if(!m) return [stuk];
+    const knip = d + 1 + m.index;
+    return [stuk.slice(0, knip), stuk.slice(knip + m[0].length)];
+  }
+
+  function splitsLabelparen(regel){
+    return knipOpLabel(regel, /,\s*(?=[^,:]{2,40}:)/, ', ')
+      .flatMap(d => knipOpLabel(d, /\.\s+(?=[^,:.]{2,40}:)/, '. '))
+      .flatMap(knipNaZin);
   }
 
   function lees(tekst){
@@ -334,6 +369,7 @@ function maak(opt){
        eerst uit, want de tekst is vaak midden in een zin afgebroken. */
     if(VRIJ.length){
       const vlak = ontHtml(tekst).replace(/\s*\n\s*/g,' ').replace(/\s{2,}/g,' ');
+      const voorRondes = Object.keys(uit).length;
       VRIJ.forEach(r=>{
         if(uit[r.v]!=null) return;
         const m = vlak.match(r.p);
@@ -347,9 +383,14 @@ function maak(opt){
       });
       /* Bij een verkooptekst is bijna elke regel proza. Die allemaal als "niet
          herkend" tonen is ruis; alleen regels met een dubbele punt zijn een
-         zichtbare poging tot een label, en die horen wel gemeld te worden. */
-      if(herkend.some(h=>h.sectie==='uit de tekst'))
-        onbekend = onbekend.filter(r=>r.includes(':'));
+         zichtbare poging tot een label, en die horen wel gemeld te worden.
+
+         Maar alleen als de lopende tekst ook echt de bron is. Leverde de gewone
+         ronde meer velden dan deze, dan is het een blad met een paar losse
+         zinnen erin, en zijn juist die zinnen het bekijken waard - daar staat de
+         bestelaanwijzing in die de leverancier achter de specificatie zette. */
+      const uitTekst = Object.keys(uit).length - voorRondes;
+      if(uitTekst > voorRondes) onbekend = onbekend.filter(r=>r.includes(':'));
     }
     return {uit,herkend,onbekend,bijgezet};
   }

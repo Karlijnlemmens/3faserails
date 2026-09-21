@@ -414,9 +414,9 @@ const VELDMAP=[
   {v:'leverancier', l:/^(leverancier|fabricaat|fabrikant|merk|brand|manufacturer|make|supplier)$/i},
   {v:'toepassing',  l:/^(toepassing|locatie|ruimte|application|location|room|area)$/i},
   {v:'artikelnummer',l:/^(artikelcode|artikelnummer|item ?number|article ?(code|number)|bestelnummer|productcode|sku)$/i},
-  {v:'vermogen',   l:/^(systeem\s?wattage|wattage|vermogen|opgenomen vermogen|system power|power|max(imum)? bulb wattage)$/i},
-  {v:'lumen',      l:/^(luminous flux|lichtstroom|nuttige lichtstroom|armatuurlichtstroom|lichtstroom armatuur|lumen|lm|output)$/i},
-  {v:'cct',        l:/^(kleur\s?temp(eratuur)?\.?|colour temp(erature)?|color temp(erature)?|cct)$/i},
+  {v:'vermogen',   l:/^((totaa?l|total)\s)?(systeem\s?wattage|wattage|vermogen|opgenomen vermogen|system power|power|max(imum)? bulb wattage)$/i},
+  {v:'lumen',      l:/^((totaa?l|total)\s)?(luminous flux|lichtstroom|nuttige lichtstroom|armatuurlichtstroom|lichtstroom armatuur|lumen|lm|(fixture|luminaire|light) output|output)$/i},
+  {v:'cct',        l:/^((light|licht)\s)?(kleur\s?temp(eratuur)?\.?|colou?r temp(erature)?|cct)$/i},
   /* Dimbaar en aansturing zijn twee dingen: OF er gedimd kan worden, en WAARMEE.
      "Dimbaar: ja" zegt het eerste, "Aansturing: DALI-2" het tweede - en uit dat
      tweede volgt het eerste meestal vanzelf (zie naarBladvelden). */
@@ -431,7 +431,7 @@ const VELDMAP=[
   {v:'nood',       l:/^(noodverlichting|noodmodule|noodlumen|nood lumen|emergency|nood)/i},
   {v:'cri',        l:/^(kleurweergave|cri|colour rendering|color rendering|ra)$/i},
   {v:'ugr',        l:/^ugr/i},
-  {v:'ip',         l:/^(ip[\s-]?(klasse|class|degree|rating|code)|beschermingsgraad|ip)$/i},
+  {v:'ip',         l:/^(ip[\s-]?(klasse|class|degree|rating|code)|beschermingsgraad|degree of protection|protection degree|ip)$/i},
   {v:'ik',         l:/^(ik[\s-]?(klasse|class)|ik)$/i},
   /* De zaagmaat staat BOVEN de diameter: "inbouwdiameter" en "zaagdiameter" zijn
      in het vak het gat dat je moet zagen, niet de maat van het armatuur. Wie ze
@@ -444,15 +444,15 @@ const VELDMAP=[
   /* Een blad dat de maat in één veld geeft ("600x600x11 mm"). Staat het label
      boven een lijst losse maten, dan is het een kopje en niet dit veld - dat
      onderscheid maakt de lezer zelf, aan wat eronder staat. */
-  {v:'afmetingen', l:/^(afmetingen|afmeting|maten|buitenmaat|buitenafmeting|dimensions|overall dimensions|outer dimensions|size)$/i},
+  {v:'afmetingen', l:/^((nominale?|nominal)\s)?(afmetingen|afmeting|maten|buitenmaat|buitenafmeting|dimensions|overall dimensions|outer dimensions|size)$/i},
   {v:'_diepte',    l:/^(inbouwdiepte|recess(ed)? depth|installation depth)/i},
   {v:'kleur',      l:/^(kleur|behuizingskleur|kleur behuizing|kast ?kleur|colou?r|housing colou?r|body colou?r|finish)$/i},
   {v:'montage',    l:/^(montage|montagewijze|bevestiging|mounting|installation)$/i},
   {v:'bundel',     l:/^(lichtbundel|bundelhoek|stralingshoek|uitstralingshoek|spreidingshoek|openingshoek|beam)/i},
-  {v:'_optiek',    l:/^(optiek|optic|optics|lens|reflector|afscherming|diffuser)$/i},
+  {v:'_optiek',    l:/^(optiek|optisch systeem|optical system|optic|optics|lens|reflector|afscherming|diffuser)$/i},
   {v:'_uitvoering',l:/^(uitvoering|variant|execution|version)$/i},
   {v:'levensduur', l:/^(levensduur|lifetime|life ?time|lifespan|service life|rated life)/i},
-  {v:'_klasse',    l:/^(isolatieklasse|beschermingsklasse|class|klasse|protection class)$/i},
+  {v:'_klasse',    l:/^(isolatieklasse|beschermingsklasse|class|klasse|protection class|electrical protection)$/i},
   {v:'aansluiting',l:/^aansluiting/i},
   /* Een kabel IS de aansluiting van dit armatuur; hij hoort niet in een eigen veld. */
   {v:'aansluiting',l:/^(kabel|aansluitkabel|voedingskabel|snoer|cable|connection)$/i},
@@ -461,13 +461,13 @@ const VELDMAP=[
      "Ook bewaard" - beter dan als "niet herkend" te eindigen. */
   {v:'_lichtbron',  l:/^(soort lichtbron|lichtbron|lichtbrontype|light source|lamp ?type)$/i},
   {v:'_rendement',  l:/^(armatuur ?effici|lichtrendement|systeemrendement|rendement|efficacy|luminaire efficacy)/i},
-  {v:'_sdcm',       l:/^(macadam|sdcm|kleurconsistentie|binning)/i},
+  {v:'_sdcm',       l:/^(macadam|sdcm|kleurconsistentie|binning|(led )?chromaticity)/i},
   {v:'_verdeling',  l:/^(lichtverdeling|verdeling|light distribution|bundeltype)$/i},
   {v:'_risicogroep',l:/^(fotobiologisch|photobiological|risicogroep|risk group)/i},
   {v:'_ulor',       l:/^ulor/i},
   {v:'_energie',    l:/energiecla|energiekla|energielabel|energy class/i},
   {v:'_materiaal',  l:/^(behuizing|materiaal|afwerking|housing|material|body)$/i},
-  {v:'_spanning',   l:/^(spanning|netspanning|ingangsspanning|voltage|input voltage)$/i},
+  {v:'_spanning',   l:/^(spanning|netspanning|ingangsspanning|bedrijfsspanning|voltage|input voltage|operating voltage|supply voltage)$/i},
   {v:'_frequentie', l:/^(frequentie|frequency)$/i},
   {v:'_zekering',   l:/^max\.? ?(aantal )?armaturen per|stroomonderbreker|leidingbeveiliging|circuit breaker/i},
   {v:'_gewicht',    l:/^(gewicht|weight)/i},
@@ -552,6 +552,43 @@ const FRAGMENTEN=[
    p:/^(?:led[\s-]?)?(armatuur|down-?light|paneel|panel|spot|luminaire|bollard|sokkelarmatuur|wandarmatuur|plafonni\u00e8re|plafonniere|pendelarmatuur|gevelarmatuur|breedstraler|schijnwerper|floodlight|highbay|lichtlijn|inbouwspot|opbouwarmatuur|tl-?armatuur)$/i},
 ];
 
+/* Derde ronde: lopende tekst. Een deel van de leveranciers stuurt geen tabel maar
+   een verkooptekst met de gegevens erin - "Low glaring UGR<19. RG0, 100-degree
+   beam angle, optical system: prismatic diffuser ... total system power: 37W".
+   Wat achter een label staat leest de gewone ronde; wat MIDDEN in een zin staat
+   las niemand, en dat is bij zo'n tekst de helft van de opgave.
+
+   Het anker is weer de eenheid of het begrip, net als bij de fragmentronde, maar
+   hier mag een patroon midden in een zin toeslaan. Daarom ligt de lat hoger:
+   alleen wat maar een ding kan betekenen. Een kaal getal blijft liggen - dat zou
+   raden zijn. En deze ronde vult alleen velden die de gewone ronde leeg liet:
+   een echt label weet meer dan een patroon. */
+const VRIJE_TEKST=[
+  {v:'vermogen', l:'Vermogen', p:/(?<![\w.,])(\d[\d.,]*)\s*W(?![a-z\/])/i, uit:m=>m[1]+'W'},
+  /* Niet "119lm/W": dat is het rendement, niet de lichtstroom. */
+  {v:'lumen', l:'Lichtstroom', p:/(?<![\w.,])(\d[\d.,]*)\s*lm(?![a-z]|\s*\/)/i, uit:m=>m[1]+'lm'},
+  {v:'cct', l:'Kleurtemperatuur', p:/(?<![\w.,])(\d{4})\s*K(?![a-z])/, uit:m=>m[1]+'K'},
+  {v:'ip', l:'IP-klasse', p:/\bIP\s?(\d{2})\b/i, uit:m=>'IP'+m[1]},
+  {v:'ik', l:'IK-klasse', p:/\bIK\s?(\d{2})\b/i, uit:m=>'IK'+m[1]},
+  {v:'ugr', l:'UGR', p:/\bUGR\s*([<>=\u2264\u2265]?\s*\d{1,2})\b/i,
+   uit:m=>'UGR'+m[1].replace(/\s+/g,'')},
+  {v:'cri', l:'Kleurweergave', p:/\b(?:Ra|CRI)\s*([<>=\u2264\u2265]?\s*\d{2})\b/i,
+   uit:m=>'Ra'+m[1].replace(/\s+/g,'')},
+  /* "100-degree beam angle" en "90\u00b0" zeggen allebei de bundelhoek. \u00b0C en \u00b0K niet,
+     en "Degree of Protection" ook niet: daar staat geen getal voor. */
+  {v:'bundel', l:'Lichtbundel',
+   p:/(?<![\w.,])(\d{1,3})\s*(?:\u00b0(?![CFK])|[-\s]?degrees?\b)/i, uit:m=>m[1]+'\u00b0'},
+  {v:'aansturing', l:'Aansturing',
+   p:/\b(dali[-\s]?2|dali|casambi|zigbee|[01]\s*-\s*10\s?v|push[-\s]?dim|triac|trailing edge|leading edge)\b/i,
+   uit:m=>m[1].toUpperCase().replace(/DALI[-\s]?2/,'DALI-2')},
+  {v:'kleur', l:'Kleur', p:/\bRAL\s?(\d{3,4})\b/i, uit:m=>'RAL'+m[1]},
+  /* "White color frame", "wit van kleur" - het woord kleur ernaast is het anker;
+     een kleurnaam alleen komt in een verkooptekst te vaak voor om iets te zijn. */
+  {v:'kleur', l:'Kleur',
+   p:/\b(wit|zwart|grijs|antraciet|zilver|white|black|gr[ae]y|silver)\s+(?:van\s+)?(?:colou?r|kleur)/i,
+   uit:m=>m[1].charAt(0).toUpperCase()+m[1].slice(1)},
+];
+
 function mm(s){const n=parseGetal(s);return n==null?null:Math.round(n)}
 function zaagTekst(w){
   const z = String(w).replace(/^\s*Ø\s*/,'').replace(/\s*mm\s*$/i,'').trim();
@@ -560,7 +597,8 @@ function zaagTekst(w){
 
 /* De parser zelf staat in spec-lezer.js, met VELDMAP hierboven als kaart; de
    DLC-tool gebruikt dezelfde lezer met een eigen kaart. */
-const LEZER = SpecLezer.maak({veldmap:VELDMAP, sectie:SECTIE, kop:true, fragmenten:FRAGMENTEN});
+const LEZER = SpecLezer.maak({veldmap:VELDMAP, sectie:SECTIE, kop:true,
+                             fragmenten:FRAGMENTEN, vrijeTekst:VRIJE_TEKST});
 const leesSpecs = t => LEZER.lees(t);
 
 /* Vertaal de uitgelezen waarden naar de velden van het vergelijkingsblad. */

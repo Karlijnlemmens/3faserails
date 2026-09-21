@@ -145,9 +145,11 @@ function is(wat, gekregen, verwacht){
      FRAGMENTEN komen uit de echte template van de vergelijker. */
   const lezer = readFileSync(join(root, 'spec-lezer.js'), 'utf8');
   const m = await laadUit('vergelijker/index-template.html',
-    ['SECTIE', 'VELDMAP', 'FRAGMENTEN', 'parseGetal', 'mm', 'zaagTekst', 'naarBladvelden'],
+    ['SECTIE', 'VELDMAP', 'FRAGMENTEN', 'VRIJE_TEKST', 'parseGetal', 'mm', 'zaagTekst',
+     'naarBladvelden'],
     'const window = {};\n' + lezer + '\n'
-    + 'const LEZER = window.SpecLezer.maak({veldmap:VELDMAP, sectie:SECTIE, kop:true, fragmenten:FRAGMENTEN});\n'
+    + 'const LEZER = window.SpecLezer.maak({veldmap:VELDMAP, sectie:SECTIE, kop:true,\n'
+    + '                                     fragmenten:FRAGMENTEN, vrijeTekst:VRIJE_TEKST});\n'
     + 'const ONTHTML = window.SpecLezer.ontHtml;',
     ['LEZER', 'ONTHTML']);
   const lees = (t) => m.LEZER.lees(t);
@@ -163,7 +165,7 @@ function is(wat, gekregen, verwacht){
       'Inbouwdownlight met microprismatische afdekking voor kantoren');
     is('tabel vult de velden', m.naarBladvelden(r.uit),
       {omschrijving:'Inbouwdownlight met microprismatische afdekking voor kantoren',
-       vermogen:'15 W', lumen:'1650 lm', cct:'3000 K', dimbaar:'Ja', aansturing:'DALI'});
+       vermogen:'15 W', lumen:'1650 lm', cct:'3000 K', aansturing:'DALI', dimbaar:'Ja'});
   }
 
   /* Een rij losse waarden zonder ook maar één label - zo levert een deel van de
@@ -450,6 +452,92 @@ function is(wat, gekregen, verwacht){
     is('uitvoering wordt gelezen zonder eigen rij', r.uit._uitvoering, 'LED');
     is('reflector wordt gelezen zonder eigen rij', r.uit._optiek, 'Zilvermat (SM)');
     is('een bestek laat niets liggen', r.onbekend, []);
+  }
+
+  /* Een verkooptekst in plaats van een blad: alles in lopende tekst, de opgave
+     half achter een label en half midden in een zin. Zo levert een deel van de
+     leveranciers zijn bestekpositie aan. Hiervoor kwam er twee rijen uit - de
+     rest liep als bijzin mee in "lifespan:" of stond nergens.
+
+     De drie stukken die dit aankan staan hieronder los uit elkaar getrokken;
+     deze proef is de hele tekst zoals hij binnenkomt. */
+  {
+    const verkoop =
+      'The Panel IP65 CR is a range of backlit LED panels tested by 3rd party to ensure '
+      + 'they meet ISO 14644-1 Class 3-9 cleanroom classification. Ideal for healthcare, '
+      + 'hospitals, laboratories and pharmaceutical industry, it meets the IFS requirements '
+      + 'by offering impact resistant cover and good cleanability. Easy-to-clean luminaires '
+      + 'with a high protection class to avoid vapors and dust entry. Low glaring UGR<19. '
+      + 'RG0, 100-degree beam angle, optical system: prismatic diffuser with powder coating '
+      + 'finish. Tp(b) rated diffuser that may not burn at a speed of more than 50mm per '
+      + 'minute. Light color temperature: 4000K Cool White, total system power: 37W, '
+      + 'total fixture output: 4400lm, efficacy: 119lm/W, Ra80 typical, LED chromaticity: '
+      + '3 step MacAdam ellipse (SDCM3), lifespan: 100,000 hours at 70% of the original '
+      + 'output (L70B50), operating voltage: 220-240V / 50-60Hz, low flicker, DALI-2 '
+      + 'dimmable IP65 driver, electrical protection: Class I. Degree of Protection: IP65 '
+      + '(both front and back) - able to protect against water jets. Nominal size: '
+      + '595x595mm, Loop in / loop out wiring with accessory box, safety cables included, '
+      + '34mm nominal height, White color frame, weight: 2.2kg. For using EM kits '
+      + '0046600-01 please order connector 0047523.';
+    const r = lees(verkoop), b = m.naarBladvelden(r.uit);
+    /* Achter een Engels label - de schrijfwijzen die een verkooptekst gebruikt. */
+    is('total system power is het vermogen',  b.vermogen, '37W');
+    is('total fixture output is de lichtstroom', b.lumen, '4400lm');
+    is('light color temperature is de kleurtemperatuur', b.cct, '4000K Cool White');
+    /* En midden in een zin, waar geen label bij staat. */
+    is('UGR uit de lopende tekst',            b.ugr, 'UGR<19');
+    is('kleurweergave uit de lopende tekst',  b.cri, 'Ra80');
+    is('100-degree is de bundelhoek',         b.bundel, '100\u00b0');
+    is('DALI-2 uit de lopende tekst',         b.aansturing, 'DALI-2');
+    is('en daarmee is hij dimbaar',           b.dimbaar, 'Ja');
+    is('de kleur staat bij het woord kleur',  b.kleur, 'White');
+    /* De levensduur hield op waar de volgende opgave begon; hiervoor slikte hij
+       de netspanning, "low flicker" en de driver er alledrie bij in. */
+    is('de levensduur houdt op bij het volgende label',
+      b.levensduur, '100,000 hours at 70% of the original output (L70B50)');
+    /* De omschrijving is de tekst tot de eerste opgave. */
+    is('de verkooptekst blijft de omschrijving',
+      /^The Panel IP65 CR is a range/.test(b.omschrijving||''), true);
+    /* En wat nergens onder viel blijft zichtbaar: de bestelaanwijzing achterin is
+       precies wat de binnendienst moet lezen. */
+    is('de losse zinnen blijven zichtbaar', r.onbekend,
+      ['Tp(b) rated diffuser that may not burn at a speed of more than 50mm per minute',
+       'For using EM kits 0046600-01 please order connector 0047523.']);
+  }
+
+  /* Stuk 1: een waarde houdt op aan het eind van zijn zin. Wat erachter stond
+     verdwijnt niet - het wordt een eigen regel en komt in `onbekend`. */
+  {
+    const r = lees('Gewicht: 2.2kg. For using EM kits 0046600-01 please order connector 0047523.');
+    is('de waarde houdt op bij de punt', r.uit._gewicht, '2.2kg');
+    is('en de zin erachter blijft zichtbaar', r.onbekend,
+      ['For using EM kits 0046600-01 please order connector 0047523.']);
+    /* Maar een punt zonder spatie hoort bij het getal, en die mag niet knippen. */
+    is('een punt in een getal knipt niet',
+      lees('Levensduur: 50.000 uur L80B10').uit.levensduur, '50.000 uur L80B10');
+    is('en een komma in een getal ook niet',
+      lees('Levensduur: L80/B20>50,000').uit.levensduur, 'L80/B20>50,000');
+  }
+
+  /* Stuk 2: een nieuw label achter een punt begint een nieuw paar. Zonder deze
+     knip liep de waarde van het vorige label door tot het volgende BEKENDE label
+     en slikte er hele zinnen bij in. */
+  {
+    const r = lees('Type: LED paneel. Vermogen: 26 W. Lichtstroom: 3600 lm');
+    is('een label achter een punt is een nieuw paar', m.naarBladvelden(r.uit),
+      {type:'LED paneel', vermogen:'26 W', lumen:'3600 lm'});
+    /* Een gewone zin met een punt erin valt niet uit elkaar: er volgt geen label. */
+    const zin = 'Inbouwdownlight voor kantoren. Geschikt voor systeemplafonds';
+    is('een zin zonder label blijft heel', lees(zin + '\nVermogen: 15 W').uit.omschrijving, zin);
+  }
+
+  /* Stuk 3: de lopende-tekstronde vult alleen wat de gewone ronde leeg liet. */
+  {
+    const r = lees('Lichtstroom: 1650 lm\nDe armatuur geeft 3600 lm bij 26 W.');
+    is('het label wint van de lopende tekst', r.uit.lumen, '1650 lm');
+    is('en wat leeg was wordt wel gevuld', r.uit.vermogen, '26W');
+    /* "119lm/W" is het rendement, niet de lichtstroom. */
+    is('lm/W is geen lichtstroom', lees('Een efficiency van 119lm/W.').uit.lumen, undefined);
   }
 
   /* Een echt label weet meer dan een patroon en wordt niet overschreven. */
