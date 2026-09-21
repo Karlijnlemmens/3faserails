@@ -361,14 +361,22 @@ SOORTEN = [
     ("downlight", r"downlight"), ("paneel", r"paneel|panel"),
     ("inlegarmatuur", r"inlegarmatuur"), ("opbouwarmatuur", r"opbouwarmatuur"),
     ("bandrasterarmatuur", r"bandraster"), ("railspot", r"railspot|3-?fase"),
-    ("spot", r"\bspot\b|inbouwspot|richtspot|halve-?inbouwspot"),
-    ("wandarmatuur", r"wandarmatuur"), ("plafonnière", r"plafonni"),
+    ("spot", r"\bspot\b|inbouwspot|richtspot|halve-?inbouwspot|spotlight"),
+    ("wandarmatuur", r"wandarmatuur|wandlamp"), ("plafonnière", r"plafonni"),
     ("pendelarmatuur", r"pendelarmatuur|pendel"), ("bulkhead", r"bulkhead"),
     ("highbay", r"highbay"), ("gevelarmatuur", r"gevelarmatuur"),
     ("waterdicht armatuur", r"waterdicht"), ("lichtlijn", r"lichtlijn|line\b"),
     ("led-strip", r"\bstrip\b"), ("led-module", r"\bmodule\b"),
-    ("sporthalarmatuur", r"sporthal|balvast"), ("straatarmatuur", r"streetlight|area\b"),
+    ("sporthalarmatuur", r"sporthal|balvast"),
+    ("straatarmatuur", r"streetlight|straatverlichting|area\b"),
     ("portiekarmatuur", r"portiek"), ("noodverlichting", r"noodverlichting|vluchtweg"),
+    # Soorten die de prijslijst wel noemt maar die hier ontbraken: wie "batten"
+    # of "spiegelarmatuur" typt vond ze niet, en ze telden ook niet mee als
+    # bewijs dat een regel een armatuur is (zie de toebehorentoets hieronder).
+    ("batten", r"\bbatten\b"), ("wallwasher", r"wallwasher|wall.?washer"),
+    ("spiegelarmatuur", r"spiegelarmatuur|spiegellamp"),
+    ("breedstraler", r"breedstraler|floodlight"), ("lowbay", r"lowbay"),
+    ("montagebalk", r"montagebalk"),
 ]
 MONTAGE = [("inbouw", r"inbouw"), ("opbouw", r"opbouw"), ("pendel", r"pendel"),
            ("wand", r"wandarmatuur|gevelarmatuur"), ("inleg", r"inleg")]
@@ -606,6 +614,28 @@ def catalogusfamilies(bestand):
         toebehoren = bool(naam) and (TOEBEHOREN_HARD.search(naam)
                                      or (TOEBEHOREN_HARD.search(oms) and not volledig)
                                      or (TOEBEHOREN_ZACHT.search(naam) and not volledig))
+        # En een regel die een toebehoren noemt maar zelf geen licht geeft, IS
+        # dat toebehoren. "Pragmalux LED Paneel Sigma G2 20W Universele LED
+        # Driver (DALI2, 1-10V, Push-dim)" is de driver bij het paneel, niet het
+        # paneel; zonder deze toets stonden er vijf van die drivers tussen de
+        # Sigma-panelen en maakten de twee die alleen naar de serie heten er een
+        # eigen familie "Sigma" bij.
+        #
+        # Het woord staat buiten de naamzone, dus de toetsen hierboven zien het
+        # niet, en de zone breedtrekken kan niet: 60 echte panelen worden "Excl.
+        # LED Driver" verkocht en zouden dan meevallen. Wat die 60 wel hebben is
+        # een lichtopgave - een lichtstroom of een kleurtemperatuur - en een
+        # driver of een losse reflector heeft die niet. Gemeten over de hele
+        # catalogus haalt dit er 18 regels uit en ze zijn alle 18 toebehoren:
+        # drivers voor het Sigma-, Easy- en Fora-assortiment, drivers voor
+        # ledstrip, en de losse reflectoren van de Railspot Piccolo - die laatste
+        # stonden in CLAUDE.md al als het voorbeeld van wat eruit hoort, maar
+        # vielen er tot nu toe niet uit omdat "Reflector" achter het vermogen
+        # staat en dus buiten de naam valt.
+        geen_lichtopgave = ("lichtstroom_lm" not in v) and ("cct_tekst" not in v)
+        if not toebehoren and naam and geen_lichtopgave \
+           and (TOEBEHOREN_HARD.search(oms) or TOEBEHOREN_ZACHT.search(oms)):
+            toebehoren = True
         if not naam or toebehoren or not bruikbaar:
             overgeslagen += 1
             if "lichtstroom_lm" in v and naam:

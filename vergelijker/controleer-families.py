@@ -67,6 +67,14 @@ PROEVEN = [
      "daar al op af."),
     ("essence g2 licht verdiepte frame", 0,
      "Een los frame is geen armatuur."),
+    ("sigma", 1,
+     "Alle Sigma's horen onder \u00e9\u00e9n familie. De losse LED-drivers van die serie "
+     "heten alleen naar de serie ('Sigma G2 20W Universele LED Driver') en maakten "
+     "er een tweede van - precies de versnippering die de sleutel moet voorkomen."),
+    ("sigma g2 20w universele led driver", 0,
+     "Een driver is geen armatuur. Het woord staat buiten de naamzone, dus de "
+     "toebehorentoets op de naam ziet het niet; wat deze regel eruit houdt is dat "
+     "hij niet zegt w\u00e1t voor armatuur het is."),
     ("waterdicht armatuur typhoon", 1,
      "Typhoon en Typhoon G2 zijn twee generaties van dezelfde reeks: één "
      "familie, de generatie is een keuze."),

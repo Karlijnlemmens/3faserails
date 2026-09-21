@@ -3066,54 +3066,6 @@
         {
           "vermogen_w": {
             "min": null,
-            "max": 15.0,
-            "opmerking": "ondergrens afhankelijk van gekozen driver"
-          },
-          "type": "LED 3-Fase Railspot Piccolo",
-          "artikelcode": "9140229",
-          "basiscode": "9140229",
-          "omschrijving": "Pragmalux LED 3-Fase Railspot Piccolo 15W 24D Reflector",
-          "driver_inbegrepen": false
-        },
-        {
-          "vermogen_w": {
-            "min": null,
-            "max": 15.0,
-            "opmerking": "ondergrens afhankelijk van gekozen driver"
-          },
-          "type": "LED 3-Fase Railspot Piccolo",
-          "artikelcode": "9140231",
-          "basiscode": "9140231",
-          "omschrijving": "Pragmalux LED 3-Fase Railspot Piccolo 15W 60D Reflector",
-          "driver_inbegrepen": false
-        },
-        {
-          "vermogen_w": {
-            "min": null,
-            "max": 27.0,
-            "opmerking": "ondergrens afhankelijk van gekozen driver"
-          },
-          "type": "LED 3-Fase Railspot Piccolo",
-          "artikelcode": "9140232",
-          "basiscode": "9140232",
-          "omschrijving": "Pragmalux LED 3-Fase Railspot Piccolo 27W 15D Reflector",
-          "driver_inbegrepen": false
-        },
-        {
-          "vermogen_w": {
-            "min": null,
-            "max": 27.0,
-            "opmerking": "ondergrens afhankelijk van gekozen driver"
-          },
-          "type": "LED 3-Fase Railspot Piccolo",
-          "artikelcode": "9140233",
-          "basiscode": "9140233",
-          "omschrijving": "Pragmalux LED 3-Fase Railspot Piccolo 27W 24D Reflector",
-          "driver_inbegrepen": false
-        },
-        {
-          "vermogen_w": {
-            "min": null,
             "max": 7.0,
             "opmerking": "ondergrens afhankelijk van gekozen driver"
           },
@@ -10550,7 +10502,8 @@
           "afmeting": "150cm"
         }
       ],
-      "merk": "Pragmalux"
+      "merk": "Pragmalux",
+      "armatuurtype": "batten"
     },
     {
       "id": "led-batten-lumea",
@@ -11005,7 +10958,8 @@
           "afmeting": "150cm"
         }
       ],
-      "merk": "Pragmalux"
+      "merk": "Pragmalux",
+      "armatuurtype": "batten"
     },
     {
       "id": "led-breedstraler-auva",
@@ -11187,7 +11141,8 @@
           "driver_inbegrepen": false
         }
       ],
-      "merk": "Pragmalux"
+      "merk": "Pragmalux",
+      "armatuurtype": "breedstraler"
     },
     {
       "id": "led-bulkhead-ovalo",
@@ -13020,23 +12975,6 @@
         {
           "vermogen_w": {
             "min": null,
-            "max": 15.0,
-            "opmerking": "ondergrens afhankelijk van gekozen driver"
-          },
-          "buitenmaat_mm": 125,
-          "afmetingen_tekst": "Ø125-150",
-          "type": "LED Downlight Fora",
-          "dimprotocol": "geen",
-          "ip": 65,
-          "artikelcode": "1007205",
-          "basiscode": "1007205",
-          "omschrijving": "Pragmalux LED Downlight Fora IP65 driver niet dimbaar 15W 350mA 30-40Vdc Ø125-150-200",
-          "driver_inbegrepen": false,
-          "afmeting": "Ø125"
-        },
-        {
-          "vermogen_w": {
-            "min": null,
             "max": 25.0,
             "opmerking": "ondergrens afhankelijk van gekozen driver"
           },
@@ -13467,40 +13405,6 @@
           "omschrijving": "Pragmalux LED Downlight Fora IP65 Ø235 - Ø200 25-35W 2400-3550lm 3000K-4000K 2-CCT wit +Universele LED Driver (DALI2, 1-10V, Push-dim) incl. GST18i5 en splitter en trekontlasting, 1 in 2 uit",
           "driver_inbegrepen": false,
           "afmeting": "Ø235"
-        },
-        {
-          "vermogen_w": {
-            "min": null,
-            "max": 25.0,
-            "opmerking": "ondergrens afhankelijk van gekozen driver"
-          },
-          "buitenmaat_mm": 150,
-          "afmetingen_tekst": "Ø150-200",
-          "type": "LED Downlight Fora",
-          "dimprotocol": "geen",
-          "ip": 65,
-          "artikelcode": "1028750",
-          "basiscode": "1028750",
-          "omschrijving": "Pragmalux LED Downlight Fora IP65 driver niet dimbaar 25W 580mA 30-40Vdc Ø150-200",
-          "driver_inbegrepen": false,
-          "afmeting": "Ø150"
-        },
-        {
-          "vermogen_w": {
-            "min": null,
-            "max": 40.0,
-            "opmerking": "ondergrens afhankelijk van gekozen driver"
-          },
-          "buitenmaat_mm": 200,
-          "afmetingen_tekst": "Ø200",
-          "type": "LED Downlight Fora",
-          "dimprotocol": "geen",
-          "ip": 65,
-          "artikelcode": "1028767",
-          "basiscode": "1028767",
-          "omschrijving": "Pragmalux LED Downlight Fora IP65 driver niet dimbaar 40W 1000mA 30-40Vdc Ø200",
-          "driver_inbegrepen": false,
-          "afmeting": "Ø200"
         },
         {
           "vermogen_w": {
@@ -31016,7 +30920,8 @@
           "driver_inbegrepen": false
         }
       ],
-      "merk": "Pragmalux"
+      "merk": "Pragmalux",
+      "armatuurtype": "lowbay"
     },
     {
       "id": "mico-led-module",
@@ -31243,7 +31148,8 @@
           "afmeting": "60cm"
         }
       ],
-      "merk": "Pragmalux"
+      "merk": "Pragmalux",
+      "armatuurtype": "montagebalk"
     },
     {
       "id": "neo",
@@ -37225,19 +37131,6 @@
           "omschrijving": "Pragmalux LED Paneel 30x120cm Easy G2 26-36W 3000K-6000K 3-CCT 2850-4200lm +Universele Driver (DALI2, 1-10V, Push-dim) (2x28W) incl. GST18i5 en splitter en trekontlasting, 1 in 2 uit",
           "driver_inbegrepen": false,
           "afmeting": "120x30cm"
-        },
-        {
-          "vermogen_w": {
-            "min": null,
-            "max": 40.0,
-            "opmerking": "ondergrens afhankelijk van gekozen driver"
-          },
-          "type": "LED Paneel Easy V2",
-          "generatie": "V2",
-          "artikelcode": "1046464",
-          "basiscode": "1046464",
-          "omschrijving": "Pragmalux LED Paneel Easy V2 40W LED Driver",
-          "driver_inbegrepen": false
         }
       ],
       "merk": "Pragmalux",
@@ -38783,6 +38676,49 @@
         },
         {
           "vermogen_w": {
+            "min": null,
+            "max": 20.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 2400,
+            "max": 2500
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x60",
+          "type": "LED Paneel 30x60cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "casambi",
+          "ip": 44,
+          "artikelcode": "1000923-CA",
+          "basiscode": "1000923",
+          "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP44 20W 3000K-4000K 2-CCT 2400-2500lm UGR<19 +TCI Casambi Driver (2x14W)",
+          "driver": "Casambi",
+          "driver_inbegrepen": true,
+          "afmeting": "60x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": 11.0,
+            "max": 20.0
+          },
+          "lichtstroom_lm": {
+            "min": 1250,
+            "max": 2500
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x60",
+          "type": "LED Paneel 30x60cm Sigma G2",
+          "generatie": "G2",
+          "ip": 44,
+          "artikelcode": "1000923-OS",
+          "basiscode": "1000923-OS",
+          "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP44 11-20W 3000K-4000K 2-CCT 1250-2500lm UGR<19 +Osram Driver (2x14W)",
+          "driver_inbegrepen": false,
+          "afmeting": "60x30cm"
+        },
+        {
+          "vermogen_w": {
             "min": 11.0,
             "max": 20.0
           },
@@ -38871,6 +38807,29 @@
         {
           "vermogen_w": {
             "min": null,
+            "max": 20.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 2400,
+            "max": 2500
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x60",
+          "type": "LED Paneel 30x60cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "dali",
+          "ip": 44,
+          "artikelcode": "1000923-TC-DA",
+          "basiscode": "1000923",
+          "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP44 20W 3000K-4000K 2-CCT 2400-2500lm UGR<19 +TCI DALI Driver (2x14W)",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true,
+          "afmeting": "60x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
             "max": 38.0,
             "opmerking": "ondergrens afhankelijk van gekozen driver"
           },
@@ -38882,6 +38841,49 @@
           "artikelcode": "1000930",
           "basiscode": "1000930",
           "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP44 38W 3000K-4000K 2-CCT UGR<19 (4x14W) Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 38.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 5000,
+            "max": 5100
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "casambi",
+          "ip": 44,
+          "artikelcode": "1000930-CA",
+          "basiscode": "1000930",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP44 38W 3000K-4000K 2-CCT 5000-5100lm UGR<19 +TCI Casambi Driver (4x14W/4x18W)",
+          "driver": "Casambi",
+          "driver_inbegrepen": true,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": 18.0,
+            "max": 26.0
+          },
+          "lichtstroom_lm": {
+            "min": 2400,
+            "max": 3650
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Sigma G2",
+          "generatie": "G2",
+          "ip": 44,
+          "artikelcode": "1000930-OS",
+          "basiscode": "1000930-OS",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP44 18-26W 3000K-4000K 2-CCT 2400-3650lm UGR<19 +Osram Driver (4x14W)",
           "driver_inbegrepen": false,
           "afmeting": "60x60cm"
         },
@@ -39020,6 +39022,29 @@
             "max": 38.0,
             "opmerking": "ondergrens afhankelijk van gekozen driver"
           },
+          "lichtstroom_lm": {
+            "min": 5000,
+            "max": 5100
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "dali",
+          "ip": 44,
+          "artikelcode": "1000930-TC-DA",
+          "basiscode": "1000930",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP44 38W 3000K-4000K 2-CCT 5000-5100lm UGR<19 +TCI DALI Driver (4x14W/4x18W)",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 38.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
           "cct_tekst": "3000K-4000K 2-CCT",
           "afmetingen_tekst": "30x120",
           "type": "LED Paneel 30x120cm Sigma G2",
@@ -39028,6 +39053,49 @@
           "artikelcode": "1000947",
           "basiscode": "1000947",
           "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP44 38W 3000K-4000K 2-CCT UGR<19 (2x28W) Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 38.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 5000,
+            "max": 5100
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "casambi",
+          "ip": 44,
+          "artikelcode": "1000947-CA",
+          "basiscode": "1000947",
+          "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP44 38W 3000K-4000K 2-CCT 5000-5100lm UGR<19 +TCI Casambi Driver(2x28W)",
+          "driver": "Casambi",
+          "driver_inbegrepen": true,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": 18.0,
+            "max": 26.0
+          },
+          "lichtstroom_lm": {
+            "min": 2400,
+            "max": 3650
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Sigma G2",
+          "generatie": "G2",
+          "ip": 44,
+          "artikelcode": "1000947-OS",
+          "basiscode": "1000947-OS",
+          "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP44 18-26W 3000K-4000K 2-CCT 2400-3650lm UGR<19 +Osram Driver (2x28W)",
           "driver_inbegrepen": false,
           "afmeting": "120x30cm"
         },
@@ -39163,30 +39231,25 @@
         {
           "vermogen_w": {
             "min": null,
-            "max": 20.0,
+            "max": 38.0,
             "opmerking": "ondergrens afhankelijk van gekozen driver"
           },
-          "type": "LED Paneel Sigma G2",
-          "generatie": "G2",
-          "dimprotocol": "dali2",
-          "artikelcode": "1001036",
-          "basiscode": "1001036",
-          "omschrijving": "Pragmalux LED Paneel Sigma G2 20W Universele LED Driver (DALI2, 1-10V, Push-dim)",
-          "driver_inbegrepen": false
-        },
-        {
-          "vermogen_w": {
-            "min": null,
-            "max": 40.0,
-            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          "lichtstroom_lm": {
+            "min": 5000,
+            "max": 5100
           },
-          "type": "LED Paneel Sigma G2",
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Sigma G2",
           "generatie": "G2",
-          "dimprotocol": "dali2",
-          "artikelcode": "1001043",
-          "basiscode": "1001043",
-          "omschrijving": "Pragmalux LED Paneel Sigma G2 40W Universele LED Driver (DALI2, 1-10V, Push-dim)",
-          "driver_inbegrepen": false
+          "dimprotocol": "dali",
+          "ip": 44,
+          "artikelcode": "1000947-TC-DA",
+          "basiscode": "1000947",
+          "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP44 38W 3000K-4000K 2-CCT 5000-5100lm UGR<19 +TCI DALI Driver(2x28W)",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true,
+          "afmeting": "120x30cm"
         },
         {
           "vermogen_w": {
@@ -39203,6 +39266,51 @@
           "artikelcode": "1042527",
           "basiscode": "1042527",
           "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 Zwart IP44 20W 3000K-4000K 2-CCT UGR<19 (2x14W) Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "60x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 20.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 2400,
+            "max": 2500
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x60",
+          "type": "LED Paneel 30x60cm Sigma G2",
+          "kleur": "zwart",
+          "generatie": "G2",
+          "dimprotocol": "casambi",
+          "ip": 44,
+          "artikelcode": "1042527-CA",
+          "basiscode": "1042527",
+          "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 Zwart IP44 20W 3000K-4000K 2-CCT 2400-2500lm UGR<19 +TCI Casambi Driver (2x14W)",
+          "driver": "Casambi",
+          "driver_inbegrepen": true,
+          "afmeting": "60x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": 11.0,
+            "max": 20.0
+          },
+          "lichtstroom_lm": {
+            "min": 1250,
+            "max": 2500
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x60",
+          "type": "LED Paneel 30x60cm Sigma G2",
+          "kleur": "zwart",
+          "generatie": "G2",
+          "ip": 44,
+          "artikelcode": "1042527-OS",
+          "basiscode": "1042527-OS",
+          "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 Zwart IP44 11-20W 3000K-4000K 2-CCT 1250-2500lm UGR<19 +Osram Driver (2x14W)",
           "driver_inbegrepen": false,
           "afmeting": "60x30cm"
         },
@@ -39276,6 +39384,30 @@
         {
           "vermogen_w": {
             "min": null,
+            "max": 20.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 2400,
+            "max": 2500
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x60",
+          "type": "LED Paneel 30x60cm Sigma G2",
+          "kleur": "zwart",
+          "generatie": "G2",
+          "dimprotocol": "dali",
+          "ip": 44,
+          "artikelcode": "1042527-TC-DA",
+          "basiscode": "1042527",
+          "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 Zwart IP44 20W 3000K-4000K 2-CCT 2400-2500lm UGR<19 +TCI DALI Driver (2x14W)",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true,
+          "afmeting": "60x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
             "max": 38.0,
             "opmerking": "ondergrens afhankelijk van gekozen driver"
           },
@@ -39288,6 +39420,51 @@
           "artikelcode": "1042534",
           "basiscode": "1042534",
           "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2  Zwart IP44 38W 3000K-4000K 2-CCT UGR<19 (4x14W) Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 38.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 5000,
+            "max": 5100
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Sigma G2",
+          "kleur": "zwart",
+          "generatie": "G2",
+          "dimprotocol": "casambi",
+          "ip": 44,
+          "artikelcode": "1042534-CA",
+          "basiscode": "1042534",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 Zwart IP44 38W 3000K-4000K 2-CCT 5000-5100lm UGR<19 +TCI Casambi Driver (4x14W/4x18W)",
+          "driver": "Casambi",
+          "driver_inbegrepen": true,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": 18.0,
+            "max": 26.0
+          },
+          "lichtstroom_lm": {
+            "min": 2400,
+            "max": 3650
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Sigma G2",
+          "kleur": "zwart",
+          "generatie": "G2",
+          "ip": 44,
+          "artikelcode": "1042534-OS",
+          "basiscode": "1042534-OS",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 Zwart IP44 18-26W 3000K-4000K 2-CCT 2400-3650lm UGR<19 +Osram Driver (4x14W)",
           "driver_inbegrepen": false,
           "afmeting": "60x60cm"
         },
@@ -39408,6 +39585,30 @@
             "max": 38.0,
             "opmerking": "ondergrens afhankelijk van gekozen driver"
           },
+          "lichtstroom_lm": {
+            "min": 5000,
+            "max": 5100
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Sigma G2",
+          "kleur": "zwart",
+          "generatie": "G2",
+          "dimprotocol": "dali",
+          "ip": 44,
+          "artikelcode": "1042534-TC-DA",
+          "basiscode": "1042534",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 Zwart IP44 38W 3000K-4000K 2-CCT 5000-5100lm UGR<19 +TCI DALI Driver (4x14W/4x18W)",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 38.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
           "cct_tekst": "3000K-4000K 2-CCT",
           "afmetingen_tekst": "30x120",
           "type": "LED Paneel 30x120cm Sigma G2",
@@ -39417,6 +39618,51 @@
           "artikelcode": "1042541",
           "basiscode": "1042541",
           "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2  Zwart IP44 38W 3000K-4000K 2-CCT UGR<19 (2x28W) Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 38.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 5000,
+            "max": 5100
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Sigma G2",
+          "kleur": "zwart",
+          "generatie": "G2",
+          "dimprotocol": "casambi",
+          "ip": 44,
+          "artikelcode": "1042541-CA",
+          "basiscode": "1042541",
+          "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 Zwart IP44 38W 3000K-4000K 2-CCT 5000-5100lm UGR<19 +TCI Casambi Driver (2x28W)",
+          "driver": "Casambi",
+          "driver_inbegrepen": true,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": 18.0,
+            "max": 26.0
+          },
+          "lichtstroom_lm": {
+            "min": 2400,
+            "max": 3650
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Sigma G2",
+          "kleur": "zwart",
+          "generatie": "G2",
+          "ip": 44,
+          "artikelcode": "1042541-OS",
+          "basiscode": "1042541-OS",
+          "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 Zwart IP44 18-26W 3000K-4000K 2-CCT 2400-3650lm UGR<19 +Osram Driver (2x28W)",
           "driver_inbegrepen": false,
           "afmeting": "120x30cm"
         },
@@ -39534,6 +39780,30 @@
         {
           "vermogen_w": {
             "min": null,
+            "max": 38.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 5000,
+            "max": 5100
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Sigma G2",
+          "kleur": "zwart",
+          "generatie": "G2",
+          "dimprotocol": "dali",
+          "ip": 44,
+          "artikelcode": "1042541-TC-DA",
+          "basiscode": "1042541",
+          "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 Zwart IP44 38W 3000K-4000K 2-CCT 5000-5100lm UGR<19 +TCI DALI Driver (2x28W)",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
             "max": 20.0,
             "opmerking": "ondergrens afhankelijk van gekozen driver"
           },
@@ -39545,6 +39815,49 @@
           "artikelcode": "1043203",
           "basiscode": "1043203",
           "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP65 CRI>90 20W 3000K-4000K 2-CCT UGR<19 (2x14W/2X18W) Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "60x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 20.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 2400,
+            "max": 2500
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x60",
+          "type": "LED Paneel 30x60cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "casambi",
+          "ip": 65,
+          "artikelcode": "1043203-CA",
+          "basiscode": "1043203",
+          "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP65 CRI>90 20W 3000K-4000K 2-CCT 2400-2500lm UGR<19 +TCI Casambi Driver (2x14W/2X18W)",
+          "driver": "Casambi",
+          "driver_inbegrepen": true,
+          "afmeting": "60x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": 6.0,
+            "max": 20.0
+          },
+          "lichtstroom_lm": {
+            "min": 700,
+            "max": 2500
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x60",
+          "type": "LED Paneel 30x60cm Sigma G2",
+          "generatie": "G2",
+          "ip": 65,
+          "artikelcode": "1043203-OS",
+          "basiscode": "1043203-OS",
+          "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP65 CRI>90 6-20W 3000K-4000K 2-CCT 700-2500lm UGR<19 +Osram Driver (2x14W/2X18W)",
           "driver_inbegrepen": false,
           "afmeting": "60x30cm"
         },
@@ -39639,6 +39952,29 @@
             "max": 20.0,
             "opmerking": "ondergrens afhankelijk van gekozen driver"
           },
+          "lichtstroom_lm": {
+            "min": 2400,
+            "max": 2500
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x60",
+          "type": "LED Paneel 30x60cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "dali",
+          "ip": 65,
+          "artikelcode": "1043203-TC-DA",
+          "basiscode": "1043203",
+          "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP65 CRI>90 20W 3000K-4000K 2-CCT 2400-2500lm UGR<19 +TCI DALI Driver (2x14W/2X18W)",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true,
+          "afmeting": "60x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 20.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
           "cct_tekst": "5000K-6500K 2-CCT",
           "afmetingen_tekst": "30x60",
           "type": "LED Paneel 30x60cm Sigma G2",
@@ -39647,6 +39983,49 @@
           "artikelcode": "1043210",
           "basiscode": "1043210",
           "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP65 CRI>90 20W 5000K-6500K 2-CCT UGR<19 (2x14W/2X18W) Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "60x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 20.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 2600
+          },
+          "cct_tekst": "5000K-6500K 2-CCT",
+          "afmetingen_tekst": "30x60",
+          "type": "LED Paneel 30x60cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "casambi",
+          "ip": 65,
+          "artikelcode": "1043210-CA",
+          "basiscode": "1043210",
+          "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP65 CRI>90 20W 5000K-6500K 2-CCT 2550--2600lm UGR<19 +TCI Casambi Driver (2x14W/2X18W)",
+          "driver": "Casambi",
+          "driver_inbegrepen": true,
+          "afmeting": "60x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": 6.0,
+            "max": 20.0
+          },
+          "lichtstroom_lm": {
+            "min": 800,
+            "max": 2600
+          },
+          "cct_tekst": "5000K-6500K 2-CCT",
+          "afmetingen_tekst": "30x60",
+          "type": "LED Paneel 30x60cm Sigma G2",
+          "generatie": "G2",
+          "ip": 65,
+          "artikelcode": "1043210-OS",
+          "basiscode": "1043210-OS",
+          "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP65 CRI>90 6-20W 5000K-6500K 2-CCT 800-2600lm UGR<19 +Osram Driver (2x14W/2X18W)",
           "driver_inbegrepen": false,
           "afmeting": "60x30cm"
         },
@@ -39738,6 +40117,29 @@
         {
           "vermogen_w": {
             "min": null,
+            "max": 20.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 2600
+          },
+          "cct_tekst": "5000K-6500K 2-CCT",
+          "afmetingen_tekst": "30x60",
+          "type": "LED Paneel 30x60cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "dali",
+          "ip": 65,
+          "artikelcode": "1043210-TC-DA",
+          "basiscode": "1043210",
+          "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP65 CRI>90 20W 5000K-6500K 2-CCT 2550--2600lm UGR<19 +TCI DALI Driver (2x14W/2X18W)",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true,
+          "afmeting": "60x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
             "max": 38.0,
             "opmerking": "ondergrens afhankelijk van gekozen driver"
           },
@@ -39749,6 +40151,49 @@
           "artikelcode": "1043227",
           "basiscode": "1043227",
           "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP65 CRI>90 38W 3000K-4000K 2-CCT UGR<19 (4x14W/4x18W) Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 37.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4950,
+            "max": 5000
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "casambi",
+          "ip": 65,
+          "artikelcode": "1043227-CA",
+          "basiscode": "1043227",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP65 CRI>90 37W 3000K-4000K 2-CCT 4950-5000lm UGR<19 +TCI Casambi Driver (4x14W/4x18W)",
+          "driver": "Casambi",
+          "driver_inbegrepen": true,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": 13.0,
+            "max": 26.0
+          },
+          "lichtstroom_lm": {
+            "min": 1700,
+            "max": 3600
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Sigma G2",
+          "generatie": "G2",
+          "ip": 65,
+          "artikelcode": "1043227-OS",
+          "basiscode": "1043227-OS",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP65 CRI>90 13-26W 3000K-4000K 2-CCT 1700-3600lm UGR<19 +Osram Driver (4x14W/4X18W)",
           "driver_inbegrepen": false,
           "afmeting": "60x60cm"
         },
@@ -39840,6 +40285,29 @@
         {
           "vermogen_w": {
             "min": null,
+            "max": 37.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4950,
+            "max": 5000
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "dali",
+          "ip": 65,
+          "artikelcode": "1043227-TC-DA",
+          "basiscode": "1043227",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP65 CRI>90 37W 3000K-4000K 2-CCT 4950-5000lm UGR<19 +TCI DALI Driver (4x14W/4x18W)",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
             "max": 38.0,
             "opmerking": "ondergrens afhankelijk van gekozen driver"
           },
@@ -39851,6 +40319,49 @@
           "artikelcode": "1043234",
           "basiscode": "1043234",
           "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP65 CRI>90 38W 5000K-6500K 2-CCT UGR<19 (4x14W/4x18W) Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 37.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 5200,
+            "max": 5300
+          },
+          "cct_tekst": "5000K-6500K 2-CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "casambi",
+          "ip": 65,
+          "artikelcode": "1043234-CA",
+          "basiscode": "1043234",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP65 CRI>90 37W 5000K-6500K 2-CCT 5200-5300lm UGR<19 +TCI Casambi Driver (4x14W/4x18W)",
+          "driver": "Casambi",
+          "driver_inbegrepen": true,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": 13.0,
+            "max": 26.0
+          },
+          "lichtstroom_lm": {
+            "min": 1800,
+            "max": 3800
+          },
+          "cct_tekst": "5000K-6500K 2-CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Sigma G2",
+          "generatie": "G2",
+          "ip": 65,
+          "artikelcode": "1043234-OS",
+          "basiscode": "1043234-OS",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP65 CRI>90 13-26W 5000K-6500K 2-CCT 1800-3800lm UGR<19 +Osram Driver (4x14W/4X18W)",
           "driver_inbegrepen": false,
           "afmeting": "60x60cm"
         },
@@ -39942,6 +40453,29 @@
         {
           "vermogen_w": {
             "min": null,
+            "max": 37.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 5200,
+            "max": 5300
+          },
+          "cct_tekst": "5000K-6500K 2-CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "dali",
+          "ip": 65,
+          "artikelcode": "1043234-TC-DA",
+          "basiscode": "1043234",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP65 CRI>90 37W 5000K-6500K 2-CCT 5200-5300lm UGR<19 +TCI DALI Driver (4x14W/4x18W)",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
             "max": 38.0,
             "opmerking": "ondergrens afhankelijk van gekozen driver"
           },
@@ -39953,6 +40487,49 @@
           "artikelcode": "1043241",
           "basiscode": "1043241",
           "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP65 CRI>90 38W 3000K-4000K 2-CCT UGR<19 (2x28W/2x36W) Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 37.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4950,
+            "max": 5000
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "casambi",
+          "ip": 65,
+          "artikelcode": "1043241-CA",
+          "basiscode": "1043241",
+          "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP65 CRI>90 37W 3000K-4000K 2-CCT 4950-5000lm UGR<19 +TCI Casambi Driver (2x28W/2x36W)",
+          "driver": "Casambi",
+          "driver_inbegrepen": true,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": 13.0,
+            "max": 26.0
+          },
+          "lichtstroom_lm": {
+            "min": 1700,
+            "max": 3600
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Sigma G2",
+          "generatie": "G2",
+          "ip": 65,
+          "artikelcode": "1043241-OS",
+          "basiscode": "1043241-OS",
+          "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP65 CRI>90 13-26W 3000K-4000K 2-CCT 1700-3600lm UGR<19 +Osram Driver (2x28W/2x36W)",
           "driver_inbegrepen": false,
           "afmeting": "120x30cm"
         },
@@ -40044,6 +40621,29 @@
         {
           "vermogen_w": {
             "min": null,
+            "max": 37.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4950,
+            "max": 5000
+          },
+          "cct_tekst": "3000K-4000K 2-CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "dali",
+          "ip": 65,
+          "artikelcode": "1043241-TC-DA",
+          "basiscode": "1043241",
+          "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP65 CRI>90 37W 3000K-4000K 2-CCT 4950-5000lm UGR<19 +TCI DALI Driver (2x28W/2x36W)",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
             "max": 38.0,
             "opmerking": "ondergrens afhankelijk van gekozen driver"
           },
@@ -40055,6 +40655,49 @@
           "artikelcode": "1043258",
           "basiscode": "1043258",
           "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP65 CRI>90 38W 5000K-6500K 2-CCT UGR<19 (2x28W/2x36W) Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 37.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 5200,
+            "max": 5300
+          },
+          "cct_tekst": "5000K-6500K 2-CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "casambi",
+          "ip": 65,
+          "artikelcode": "1043258-CA",
+          "basiscode": "1043258",
+          "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP65 CRI>90 37W 5000K-6500K 2-CCT 5200-5300lm UGR<19 +TCI Casambi Driver(2x28W/2x36W)",
+          "driver": "Casambi",
+          "driver_inbegrepen": true,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": 13.0,
+            "max": 26.0
+          },
+          "lichtstroom_lm": {
+            "min": 1800,
+            "max": 3800
+          },
+          "cct_tekst": "5000K-6500K 2-CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Sigma G2",
+          "generatie": "G2",
+          "ip": 65,
+          "artikelcode": "1043258-OS",
+          "basiscode": "1043258-OS",
+          "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP65 CRI>90 13-26W 5000K-6500K 2-CCT 1800-3800lm UGR<19 +Osram Driver (2x28W/2x36W)",
           "driver_inbegrepen": false,
           "afmeting": "120x30cm"
         },
@@ -40141,6 +40784,29 @@
           "basiscode": "1043258-PR65",
           "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP65 CRI>90 37W 5000K-6500K 2-CCT 5100-5150lm UGR<19 +IP65 Driver (2x28W/2x36W)",
           "driver_inbegrepen": false,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 37.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 5200,
+            "max": 5300
+          },
+          "cct_tekst": "5000K-6500K 2-CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Sigma G2",
+          "generatie": "G2",
+          "dimprotocol": "dali",
+          "ip": 65,
+          "artikelcode": "1043258-TC-DA",
+          "basiscode": "1043258",
+          "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP65 CRI>90 37W 5000K-6500K 2-CCT 5200-5300lm UGR<19 +TCI DALI Driver(2x28W/2x36W)",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true,
           "afmeting": "120x30cm"
         },
         {
@@ -65483,7 +66149,8 @@
           "driver_inbegrepen": false
         }
       ],
-      "merk": "Pragmalux"
+      "merk": "Pragmalux",
+      "armatuurtype": "spot"
     },
     {
       "id": "led-straatverlichting-area",
@@ -65617,7 +66284,8 @@
           "afmeting": "Ø60"
         }
       ],
-      "merk": "Pragmalux"
+      "merk": "Pragmalux",
+      "armatuurtype": "straatarmatuur"
     },
     {
       "id": "led-straatverlichting-strada",
@@ -65774,48 +66442,13 @@
           "afmeting": "Ø60"
         }
       ],
-      "merk": "Pragmalux"
+      "merk": "Pragmalux",
+      "armatuurtype": "straatarmatuur"
     },
     {
       "id": "led-strip",
       "naam": "LED Strip",
       "varianten": [
-        {
-          "vermogen_w": {
-            "min": null,
-            "max": 35.0,
-            "opmerking": "ondergrens afhankelijk van gekozen driver"
-          },
-          "type": "LED Strip",
-          "artikelcode": "9100284",
-          "basiscode": "9100284",
-          "omschrijving": "Pragmalux LED Strip 24V LED Driver Max. 35W",
-          "driver_inbegrepen": false
-        },
-        {
-          "vermogen_w": {
-            "min": null,
-            "max": 60.0,
-            "opmerking": "ondergrens afhankelijk van gekozen driver"
-          },
-          "type": "LED Strip",
-          "artikelcode": "9100748",
-          "basiscode": "9100748",
-          "omschrijving": "Pragmalux LED Strip 24V LED Driver Max. 60W Primair Dimbaar",
-          "driver_inbegrepen": false
-        },
-        {
-          "vermogen_w": {
-            "min": null,
-            "max": 30.0,
-            "opmerking": "ondergrens afhankelijk van gekozen driver"
-          },
-          "type": "LED Strip",
-          "artikelcode": "9100797",
-          "basiscode": "9100797",
-          "omschrijving": "Pragmalux LED Strip 24V LED Driver Max. 30W Primair Dimbaar",
-          "driver_inbegrepen": false
-        },
         {
           "vermogen_w": {
             "min": null,
@@ -70525,7 +71158,8 @@
           "afmeting": "Ø238"
         }
       ],
-      "merk": "Pragmalux"
+      "merk": "Pragmalux",
+      "armatuurtype": "wallwasher"
     },
     {
       "id": "led-wandarmatuur-blocq-halfrond-up-down",
@@ -71031,7 +71665,8 @@
           "driver_inbegrepen": false
         }
       ],
-      "merk": "Pragmalux"
+      "merk": "Pragmalux",
+      "armatuurtype": "wandarmatuur"
     },
     {
       "id": "led-wandlamp-up-down-lota-vierkant",
@@ -71182,7 +71817,8 @@
           "driver_inbegrepen": false
         }
       ],
-      "merk": "Pragmalux"
+      "merk": "Pragmalux",
+      "armatuurtype": "wandarmatuur"
     }
   ]
 }
