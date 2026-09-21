@@ -36,6 +36,15 @@ DRIVERS = {
     "-PH-DA":  {"driver": "Philips DALI2", "dimprotocol": "dali2/push-dim", "driver_inbegrepen": True},
     "-TC-DA":  {"driver": "TCI DALI",  "dimprotocol": "dali",    "driver_inbegrepen": True},
     "-CA":     {"driver": "Casambi",   "dimprotocol": "casambi", "driver_inbegrepen": True},
+    # De prijslijst schrijft "+Osram Driver" en "+Philips Driver" net zo goed
+    # achter deze suffixen; zonder deze vier regels bleef het veld Driver leeg
+    # bij 140 artikelen, waaronder de 45 Osram-uitvoeringen van de Sigma.
+    # De drie Philips-vormen noemen de stroomsterkte van de driver (350mA,
+    # 700mA) en zijn verder dezelfde uitvoering als -PH.
+    "-OS":     {"driver": "Osram",     "dimprotocol": "geen",    "driver_inbegrepen": True},
+    "-PH-350": {"driver": "Philips",   "dimprotocol": "geen",    "driver_inbegrepen": True},
+    "-PH-700": {"driver": "Philips",   "dimprotocol": "geen",    "driver_inbegrepen": True},
+    "-PH30-700": {"driver": "Philips", "dimprotocol": "geen",    "driver_inbegrepen": True},
 }
 SNOER = ("-GST3", "-GST3S", "-EUR", "-ST3", "-ST3S", "-ST5", "-ST5S")
 

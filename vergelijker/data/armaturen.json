@@ -13031,9 +13031,11 @@
           "kleur": "wit",
           "ip": 65,
           "artikelcode": "1028477-PH30-700",
-          "basiscode": "1028477-PH30-700",
+          "basiscode": "1028477",
           "omschrijving": "Pragmalux LED Downlight Fora IP65 Ø150 - Ø125 20-25W 1850-2550lm 3000K-4000K 2-CCT wit +Philips Driver",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "Ø150"
         },
         {
@@ -13139,9 +13141,11 @@
           "kleur": "wit",
           "ip": 65,
           "artikelcode": "1028484-PH30-700",
-          "basiscode": "1028484-PH30-700",
+          "basiscode": "1028484",
           "omschrijving": "Pragmalux LED Downlight Fora IP65 Ø172 - Ø150 20-26W 1850-2800lm 3000K-4000K 2-CCT wit +Philips Driver",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "Ø172"
         },
         {
@@ -13291,9 +13295,11 @@
           "kleur": "wit",
           "ip": 65,
           "artikelcode": "1028491-PH30-700",
-          "basiscode": "1028491-PH30-700",
+          "basiscode": "1028491",
           "omschrijving": "Pragmalux LED Downlight Fora IP65 Ø235 - Ø200 20-26W 1850-2800lm 3000K-4000K 2-CCT wit +Philips Driver",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "Ø235"
         },
         {
@@ -13508,9 +13514,11 @@
           "kleur": "zwart",
           "ip": 65,
           "artikelcode": "Z1028484-PH30-700",
-          "basiscode": "Z1028484-PH30-700",
+          "basiscode": "Z1028484",
           "omschrijving": "Pragmalux LED Downlight Fora IP65 Ø172 - Ø150 20-26W 1850-2800lm 3000K-4000K 2-CCT zwart +Philips Driver(700mA)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "Ø172"
         },
         {
@@ -13660,9 +13668,11 @@
           "kleur": "zwart",
           "ip": 65,
           "artikelcode": "Z1028491-PH30-700",
-          "basiscode": "Z1028491-PH30-700",
+          "basiscode": "Z1028491",
           "omschrijving": "Pragmalux LED Downlight Fora IP65 Ø235 - Ø200 20-26W 1850-2800lm 3000K-4000K 2-CCT zwart +Philips Driver (700mA)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "Ø235"
         },
         {
@@ -24076,9 +24086,11 @@
           "type": "LED Downlight Spectre SR",
           "ip": 54,
           "artikelcode": "1000343-PH-350",
-          "basiscode": "1000343-PH-350",
+          "basiscode": "1000343",
           "omschrijving": "Pragmalux LED Downlight Spectre SR IP54 10-14W 3000K-5700K 3-CCT 1050-1550lm Ø145 Buitenmaat - Gatmaat Ø125-135 +Philips Driver (1x18W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "Ø145"
         },
         {
@@ -24189,9 +24201,11 @@
           "type": "LED Downlight Spectre SR",
           "ip": 54,
           "artikelcode": "1000350-PH-350",
-          "basiscode": "1000350-PH-350",
+          "basiscode": "1000350",
           "omschrijving": "Pragmalux LED Downlight Spectre SR IP54 10-20W 3000K-5700K 3-CCT 1150-2200lm Ø172 Buitenmaat - Gatmaat Ø150-165 +Philips Driver (2x18W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "Ø172"
         },
         {
@@ -24303,9 +24317,11 @@
           "type": "LED Downlight Spectre SR",
           "ip": 54,
           "artikelcode": "1000367-PH-350",
-          "basiscode": "1000367-PH-350",
+          "basiscode": "1000367",
           "omschrijving": "Pragmalux LED Downlight Spectre SR IP54 10-20W 3000K-5700K 3-CCT 1150-2300lm Ø228 Buitenmaat - Gatmaat Ø200-210 +Philips Driver (2x26W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "Ø228"
         },
         {
@@ -24396,9 +24412,11 @@
           "kleur": "zwart",
           "ip": 54,
           "artikelcode": "Z1000343-PH-350",
-          "basiscode": "Z1000343-PH-350",
+          "basiscode": "Z1000343",
           "omschrijving": "Pragmalux LED Downlight Spectre SR IP54 10-14W 3000K-5700K 3-CCT 1050-1550lm zwart Ø145 Buitenmaat - Gatmaat Ø125-135 +Philips Driver (1x18W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "Ø145"
         },
         {
@@ -24465,9 +24483,11 @@
           "kleur": "zwart",
           "ip": 54,
           "artikelcode": "Z1000350-PH-350",
-          "basiscode": "Z1000350-PH-350",
+          "basiscode": "Z1000350",
           "omschrijving": "Pragmalux LED Downlight Spectre SR IP54 10-20W 3000K-5700K 3-CCT 1150-2200lm zwart Ø172 Buitenmaat - Gatmaat Ø150-165 +Philips Driver (2x18W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "Ø172"
         },
         {
@@ -24535,9 +24555,11 @@
           "kleur": "zwart",
           "ip": 54,
           "artikelcode": "Z1000367-PH-350",
-          "basiscode": "Z1000367-PH-350",
+          "basiscode": "Z1000367",
           "omschrijving": "Pragmalux LED Downlight Spectre SR IP54 10-20W 3000K-5700K 3-CCT 1150-2300lm zwart Ø228 Buitenmaat - Gatmaat Ø200-210 +Philips Driver (2x26W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "Ø228"
         },
         {
@@ -29702,9 +29724,11 @@
           "type": "LED Inlegarmatuur Modul 60x60cm",
           "kleur": "wit",
           "artikelcode": "1037042-PH30-700",
-          "basiscode": "1037042-PH30-700",
+          "basiscode": "1037042",
           "omschrijving": "Pragmalux LED Inlegarmatuur Modul 60x60cm 13-26W 1750-3700lm 3000K-4000K 2CCT UGR<16 wit RAL9003 +Philips driver",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x60cm"
         },
         {
@@ -29819,9 +29843,11 @@
           "type": "LED Inlegarmatuur Modul 30x120cm",
           "kleur": "wit",
           "artikelcode": "1037059-PH30-700",
-          "basiscode": "1037059-PH30-700",
+          "basiscode": "1037059",
           "omschrijving": "Pragmalux LED Inlegarmatuur Modul 30x120cm 13-26W 1750-3700lm 3000K-4000K 2CCT UGR<16 wit RAL9003 +Philips driver",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "120x30cm"
         },
         {
@@ -29936,9 +29962,11 @@
           "type": "LED Inlegarmatuur Modul 15x150cm",
           "kleur": "wit",
           "artikelcode": "1037066-PH30-700",
-          "basiscode": "1037066-PH30-700",
+          "basiscode": "1037066",
           "omschrijving": "Pragmalux LED Inlegarmatuur Modul 15x150cm 13-26W 1750-3700lm 3000K-4000K 2CCT UGR<16 wit RAL9003 +Philips driver",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "150x15cm"
         },
         {
@@ -30053,9 +30081,11 @@
           "type": "LED Inlegarmatuur Modul 30x150cm",
           "kleur": "wit",
           "artikelcode": "1037073-PH30-700",
-          "basiscode": "1037073-PH30-700",
+          "basiscode": "1037073",
           "omschrijving": "Pragmalux LED Inlegarmatuur Modul 30x150cm 13-26W 1750-3700lm 3000K-4000K 2CCT UGR<16 wit RAL9003 +Philips driver",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "150x30cm"
         },
         {
@@ -30227,9 +30257,11 @@
           "type": "LED Inlegarmatuur Modul 60x60cm",
           "kleur": "zwart",
           "artikelcode": "1037097-PH30-700",
-          "basiscode": "1037097-PH30-700",
+          "basiscode": "1037097",
           "omschrijving": "Pragmalux LED Inlegarmatuur Modul 60x60cm 13-26W 1750-3700lm 3000K-4000K 2CCT UGR<16 zwart RAL9005 +Philips driver",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x60cm"
         },
         {
@@ -30344,9 +30376,11 @@
           "type": "LED Inlegarmatuur Modul 30x120cm",
           "kleur": "zwart",
           "artikelcode": "1037103-PH30-700",
-          "basiscode": "1037103-PH30-700",
+          "basiscode": "1037103",
           "omschrijving": "Pragmalux LED Inlegarmatuur Modul 30x120cm 13-26W 1750-3700lm 3000K-4000K 2CCT UGR<16 zwart RAL9005 +Philips driver",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "120x30cm"
         },
         {
@@ -30461,9 +30495,11 @@
           "type": "LED Inlegarmatuur Modul 15x150cm",
           "kleur": "zwart",
           "artikelcode": "1037110-PH30-700",
-          "basiscode": "1037110-PH30-700",
+          "basiscode": "1037110",
           "omschrijving": "Pragmalux LED Inlegarmatuur Modul 15x150cm 13-26W 1750-3700lm 3000K-4000K 2CCT UGR<16 zwart RAL9005 +Philips driver",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "150x15cm"
         },
         {
@@ -30578,9 +30614,11 @@
           "type": "LED Inlegarmatuur Modul 30x150cm",
           "kleur": "zwart",
           "artikelcode": "1037127-PH30-700",
-          "basiscode": "1037127-PH30-700",
+          "basiscode": "1037127",
           "omschrijving": "Pragmalux LED Inlegarmatuur Modul 30x150cm 13-26W 1750-3700lm 3000K-4000K 2CCT UGR<16 zwart RAL9005 +Philips driver",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "150x30cm"
         },
         {
@@ -38712,9 +38750,11 @@
           "generatie": "G2",
           "ip": 44,
           "artikelcode": "1000923-OS",
-          "basiscode": "1000923-OS",
+          "basiscode": "1000923",
           "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP44 11-20W 3000K-4000K 2-CCT 1250-2500lm UGR<19 +Osram Driver (2x14W)",
-          "driver_inbegrepen": false,
+          "driver": "Osram",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x30cm"
         },
         {
@@ -38732,9 +38772,11 @@
           "generatie": "G2",
           "ip": 44,
           "artikelcode": "1000923-PH-350",
-          "basiscode": "1000923-PH-350",
+          "basiscode": "1000923",
           "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP44 11-20W 3000K-4000K 2-CCT 1250-2500lm UGR<19 +Philips Driver (2x14W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x30cm"
         },
         {
@@ -38882,9 +38924,11 @@
           "generatie": "G2",
           "ip": 44,
           "artikelcode": "1000930-OS",
-          "basiscode": "1000930-OS",
+          "basiscode": "1000930",
           "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP44 18-26W 3000K-4000K 2-CCT 2400-3650lm UGR<19 +Osram Driver (4x14W)",
-          "driver_inbegrepen": false,
+          "driver": "Osram",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x60cm"
         },
         {
@@ -38902,9 +38946,11 @@
           "generatie": "G2",
           "ip": 44,
           "artikelcode": "1000930-PH-700",
-          "basiscode": "1000930-PH-700",
+          "basiscode": "1000930",
           "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP44 18-26W 3000K-4000K 2-CCT 2400-3650lm UGR<19 +Philips Driver (4x14W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x60cm"
         },
         {
@@ -39094,9 +39140,11 @@
           "generatie": "G2",
           "ip": 44,
           "artikelcode": "1000947-OS",
-          "basiscode": "1000947-OS",
+          "basiscode": "1000947",
           "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP44 18-26W 3000K-4000K 2-CCT 2400-3650lm UGR<19 +Osram Driver (2x28W)",
-          "driver_inbegrepen": false,
+          "driver": "Osram",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "120x30cm"
         },
         {
@@ -39114,9 +39162,11 @@
           "generatie": "G2",
           "ip": 44,
           "artikelcode": "1000947-PH-700",
-          "basiscode": "1000947-PH-700",
+          "basiscode": "1000947",
           "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP44 18-26W 3000K-4000K 2-CCT 2400-3650lm UGR<19 +Philips Driver (2x28W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "120x30cm"
         },
         {
@@ -39309,9 +39359,11 @@
           "generatie": "G2",
           "ip": 44,
           "artikelcode": "1042527-OS",
-          "basiscode": "1042527-OS",
+          "basiscode": "1042527",
           "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 Zwart IP44 11-20W 3000K-4000K 2-CCT 1250-2500lm UGR<19 +Osram Driver (2x14W)",
-          "driver_inbegrepen": false,
+          "driver": "Osram",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x30cm"
         },
         {
@@ -39330,9 +39382,11 @@
           "generatie": "G2",
           "ip": 44,
           "artikelcode": "1042527-PH-350",
-          "basiscode": "1042527-PH-350",
+          "basiscode": "1042527",
           "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 Zwart IP44 11-20W 3000K-4000K 2-CCT 1250-2500lm UGR<19 +Philips Driver (2x14W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x30cm"
         },
         {
@@ -39463,9 +39517,11 @@
           "generatie": "G2",
           "ip": 44,
           "artikelcode": "1042534-OS",
-          "basiscode": "1042534-OS",
+          "basiscode": "1042534",
           "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 Zwart IP44 18-26W 3000K-4000K 2-CCT 2400-3650lm UGR<19 +Osram Driver (4x14W)",
-          "driver_inbegrepen": false,
+          "driver": "Osram",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x60cm"
         },
         {
@@ -39484,9 +39540,11 @@
           "generatie": "G2",
           "ip": 44,
           "artikelcode": "1042534-PH-700",
-          "basiscode": "1042534-PH-700",
+          "basiscode": "1042534",
           "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 Zwart IP44 18-26W 3000K-4000K 2-CCT 2400-3650lm UGR<19 +Philips Driver (4x14W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x60cm"
         },
         {
@@ -39661,9 +39719,11 @@
           "generatie": "G2",
           "ip": 44,
           "artikelcode": "1042541-OS",
-          "basiscode": "1042541-OS",
+          "basiscode": "1042541",
           "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 Zwart IP44 18-26W 3000K-4000K 2-CCT 2400-3650lm UGR<19 +Osram Driver (2x28W)",
-          "driver_inbegrepen": false,
+          "driver": "Osram",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "120x30cm"
         },
         {
@@ -39682,9 +39742,11 @@
           "generatie": "G2",
           "ip": 44,
           "artikelcode": "1042541-PH-700",
-          "basiscode": "1042541-PH-700",
+          "basiscode": "1042541",
           "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 Zwart IP44 18-26W 3000K-4000K 2-CCT 2400-3650lm UGR<19 +Philips Driver (2x28W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "120x30cm"
         },
         {
@@ -39856,9 +39918,11 @@
           "generatie": "G2",
           "ip": 65,
           "artikelcode": "1043203-OS",
-          "basiscode": "1043203-OS",
+          "basiscode": "1043203",
           "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP65 CRI>90 6-20W 3000K-4000K 2-CCT 700-2500lm UGR<19 +Osram Driver (2x14W/2X18W)",
-          "driver_inbegrepen": false,
+          "driver": "Osram",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x30cm"
         },
         {
@@ -39876,9 +39940,11 @@
           "generatie": "G2",
           "ip": 65,
           "artikelcode": "1043203-PH-350",
-          "basiscode": "1043203-PH-350",
+          "basiscode": "1043203",
           "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP65 CRI>90 6-20W 3000K-4000K 2-CCT 700-2500lm UGR<19 +Philips Driver (2x14W/2X18W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x30cm"
         },
         {
@@ -40024,9 +40090,11 @@
           "generatie": "G2",
           "ip": 65,
           "artikelcode": "1043210-OS",
-          "basiscode": "1043210-OS",
+          "basiscode": "1043210",
           "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP65 CRI>90 6-20W 5000K-6500K 2-CCT 800-2600lm UGR<19 +Osram Driver (2x14W/2X18W)",
-          "driver_inbegrepen": false,
+          "driver": "Osram",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x30cm"
         },
         {
@@ -40044,9 +40112,11 @@
           "generatie": "G2",
           "ip": 65,
           "artikelcode": "1043210-PH-350",
-          "basiscode": "1043210-PH-350",
+          "basiscode": "1043210",
           "omschrijving": "Pragmalux LED Paneel 30x60cm Sigma G2 IP65 CRI>90 6-20W 5000K-6500K 2-CCT 800-2600lm UGR<19 +Philips Driver (2x14W/2X18W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x30cm"
         },
         {
@@ -40192,9 +40262,11 @@
           "generatie": "G2",
           "ip": 65,
           "artikelcode": "1043227-OS",
-          "basiscode": "1043227-OS",
+          "basiscode": "1043227",
           "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP65 CRI>90 13-26W 3000K-4000K 2-CCT 1700-3600lm UGR<19 +Osram Driver (4x14W/4X18W)",
-          "driver_inbegrepen": false,
+          "driver": "Osram",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x60cm"
         },
         {
@@ -40212,9 +40284,11 @@
           "generatie": "G2",
           "ip": 65,
           "artikelcode": "1043227-PH-700",
-          "basiscode": "1043227-PH-700",
+          "basiscode": "1043227",
           "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP65 CRI>90 13-26W 3000K-4000K 2-CCT 1700-3600lm UGR<19 +Philips Driver (4x14W/4X18W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x60cm"
         },
         {
@@ -40360,9 +40434,11 @@
           "generatie": "G2",
           "ip": 65,
           "artikelcode": "1043234-OS",
-          "basiscode": "1043234-OS",
+          "basiscode": "1043234",
           "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP65 CRI>90 13-26W 5000K-6500K 2-CCT 1800-3800lm UGR<19 +Osram Driver (4x14W/4X18W)",
-          "driver_inbegrepen": false,
+          "driver": "Osram",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x60cm"
         },
         {
@@ -40380,9 +40456,11 @@
           "generatie": "G2",
           "ip": 65,
           "artikelcode": "1043234-PH-700",
-          "basiscode": "1043234-PH-700",
+          "basiscode": "1043234",
           "omschrijving": "Pragmalux LED Paneel 60x60cm Sigma G2 IP65 CRI>90 13-26W 5000K-6500K 2-CCT 1800-3800lm UGR<19 +Philips Driver (4x14W/4X18W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "60x60cm"
         },
         {
@@ -40528,9 +40606,11 @@
           "generatie": "G2",
           "ip": 65,
           "artikelcode": "1043241-OS",
-          "basiscode": "1043241-OS",
+          "basiscode": "1043241",
           "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP65 CRI>90 13-26W 3000K-4000K 2-CCT 1700-3600lm UGR<19 +Osram Driver (2x28W/2x36W)",
-          "driver_inbegrepen": false,
+          "driver": "Osram",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "120x30cm"
         },
         {
@@ -40548,9 +40628,11 @@
           "generatie": "G2",
           "ip": 65,
           "artikelcode": "1043241-PH-700",
-          "basiscode": "1043241-PH-700",
+          "basiscode": "1043241",
           "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP65 CRI>90 13-26W 3000K-4000K 2-CCT 1700-3600lm UGR<19 +Philips Driver (2x28W/2x36W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "120x30cm"
         },
         {
@@ -40696,9 +40778,11 @@
           "generatie": "G2",
           "ip": 65,
           "artikelcode": "1043258-OS",
-          "basiscode": "1043258-OS",
+          "basiscode": "1043258",
           "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP65 CRI>90 13-26W 5000K-6500K 2-CCT 1800-3800lm UGR<19 +Osram Driver (2x28W/2x36W)",
-          "driver_inbegrepen": false,
+          "driver": "Osram",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "120x30cm"
         },
         {
@@ -40716,9 +40800,11 @@
           "generatie": "G2",
           "ip": 65,
           "artikelcode": "1043258-PH-700",
-          "basiscode": "1043258-PH-700",
+          "basiscode": "1043258",
           "omschrijving": "Pragmalux LED Paneel 30x120cm Sigma G2 IP65 CRI>90 13-26W 5000K-6500K 2-CCT 1800-3800lm UGR<19 +Philips Driver (2x28W/2x36W)",
-          "driver_inbegrepen": false,
+          "driver": "Philips",
+          "dimprotocol": "geen",
+          "driver_inbegrepen": true,
           "afmeting": "120x30cm"
         },
         {
