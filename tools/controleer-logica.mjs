@@ -178,11 +178,12 @@ function is(wat, gekregen, verwacht){
       + 'IP 20/44 | Bescherming tegen vingers, bescherming tegen draden, spatwaterdicht, '
       + 'IK02 | 0,2 J standaard, Veiligheidsklasse II, Insteekconnector, 4-polig, SC | Veiligheidskabel');
     is('waardenrij vult het blad', m.naarBladvelden(r.uit),
-      {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K', ip:'IP 20/44',
+      {vermogen:'26 W', lumen:'3600 lm', rendement:'140 lm/W', cct:'4000 K', ip:'IP 20/44',
        ik:'IK02, 0,2 J standaard', ugr:'UGR19',
        montage:'Visible profile ceiling version', kleur:'Signaalwit (RAL9003)',
        aansluiting:'Insteekconnector, 4-polig',
-       bundel:'90\u00b0', aansturing:'Voedingsunit met DALI-interface', dimbaar:'Ja',
+       bundel:'90\u00b0', optiek:'Microprismatische lens',
+       aansturing:'Voedingsunit met DALI-interface', dimbaar:'Ja',
        afmetingen:'600\u00d7600 mm'});
     is('waardenrij wordt geen omschrijving', r.uit.omschrijving, undefined);
     /* IP en IK staan sinds kort op het blad zelf, niet meer alleen in de
@@ -239,13 +240,15 @@ function is(wat, gekregen, verwacht){
     ].join('\n');
     const r = lees(blad);
     is('label-boven-waarde vult het blad', m.naarBladvelden(r.uit),
-      {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', cct:'3000/4000K',
+      {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', rendement:'73/78/72/76lm/W',
+       cct:'3000/4000K',
        ip:'IP65', ik:'IK06', ugr:'UGR<22/25', cri:'Ra>80',
        montage:'Paal, wand, sokkel of aardstaaf, Buiten', aansluiting:'Kabel 2x1mm\u00b2 5,0m',
+       optiek:'Glas',
        levensduur:'L80/B20>50,000', aansturing:'Fase afsnijding', dimbaar:'Ja',
        afmetingen:'342\u00d7182 \u00d7 H144'});
     /* "Optiek" is zowel een kopje als een veldnaam; wat eronder staat beslist. */
-    is('Optiek als veldnaam, niet als kopje', r.uit._optiek, 'Glas');
+    is('Optiek als veldnaam, niet als kopje', r.uit.optiek, 'Glas');
     /* "Type" telt alleen als dimwijze onder een dimsectie. */
     is('Type onder Controle/dimmen is de aansturing', r.uit.aansturing, 'Fase afsnijding');
     /* Een waarde met dubbele punten erin blijft heel: dit is \u00e9\u00e9n opgave,
@@ -285,13 +288,15 @@ function is(wat, gekregen, verwacht){
     ].join('\n');
     const r = lees(blad);
     is('engels blad vult het blad', m.naarBladvelden(r.uit),
-      {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', cct:'3000/4000K',
+      {vermogen:'8W/17W', lumen:'580/620/1220/1300lm', rendement:'73/78/72/76lm/W',
+       cct:'3000/4000K',
        ip:'IP65', ik:'IK06', ugr:'UGR<22/25', cri:'Ra>80',
        montage:'Pole, wall, base or ground spike, Outdoor', aansluiting:'Cable 2x1mm\u00b2 5.0m',
+       optiek:'Glass',
        levensduur:'L80/B20>50,000', aansturing:'Trailing edge', dimbaar:'Ja',
        afmetingen:'342\u00d7182 \u00d7 H144'});
     is('Type onder Control/dimming is de dimwijze', r.uit.type, undefined);
-    is('Optic als veldnaam, niet als kopje', r.uit._optiek, 'Glass');
+    is('Optic als veldnaam, niet als kopje', r.uit.optiek, 'Glass');
     is('engels blad laat niets liggen', r.onbekend, []);
   }
 
@@ -303,11 +308,12 @@ function is(wat, gekregen, verwacht){
       + 'IP 20/44 | Protection against fingers, IK02 | 0.2 J standard, '
       + 'Safety class II, Plug connector, 4-pole');
     is('engelse waardenrij vult het blad', m.naarBladvelden(r.uit),
-      {vermogen:'26 W', lumen:'3600 lm', cct:'4000 K', ip:'IP 20/44',
+      {vermogen:'26 W', lumen:'3600 lm', rendement:'140 lm/W', cct:'4000 K', ip:'IP 20/44',
        ik:'IK02, 0.2 J standard', ugr:'UGR19',
        montage:'Visible profile ceiling version', kleur:'Signal white (RAL9003)',
        aansluiting:'Plug connector, 4-pole',
-       bundel:'90\u00b0', aansturing:'Power supply with DALI interface', dimbaar:'Ja',
+       bundel:'90\u00b0', optiek:'Micro-prismatic lens',
+       aansturing:'Power supply with DALI interface', dimbaar:'Ja',
        afmetingen:'600\u00d7600 mm'});
     is('engelse klasse-aanduiding', r.uit._klasse, 'Safety class II');
     is('engelse materialen schuiven aan', r.uit._materiaal, 'Steel, Polystyrene');
@@ -333,12 +339,13 @@ function is(wat, gekregen, verwacht){
       + '1270 \u00d7 113 \u00d7 106 mm,  IP65, IK08.');
     is('zinsvorm vult het blad', m.naarBladvelden(r.uit),
       {type:'LED-armatuur', vermogen:'19 W', lumen:'2200 lm', ip:'IP65', ik:'IK08',
+       optiek:'heldere polycarbonaat afdekking met prismastructuur',
        afmetingen:'1270\u00d7113\u00d7106 mm'});
     /* De punt van de zin hoort niet bij de waarde. */
     is('punt aan het eind gaat eraf', r.uit.ik, 'IK08');
     /* Het materiaal staat hier in een zinsdeel, niet als los woord. */
     is('materiaal uit een zinsdeel', r.uit._materiaal, 'grijze spuitgietpolycarbonaat behuizing');
-    is('optiek gaat voor materiaal', r.uit._optiek, 'heldere polycarbonaat afdekking met prismastructuur');
+    is('optiek gaat voor materiaal', r.uit.optiek, 'heldere polycarbonaat afdekking met prismastructuur');
     is('zinsvorm laat niets liggen', r.onbekend, []);
   }
 
@@ -445,12 +452,12 @@ function is(wat, gekregen, verwacht){
     is('bestekregels vullen het blad', m.naarBladvelden(r.uit),
       {leverancier:'Glamox', toepassing:'Gangen', type:'D70-R195 G2',
        lumen:'2220LM', cct:'4000K', montage:'Inbouw / Opbouw', kleur:'Wit',
-       aansturing:'Dali/ Dim', dimbaar:'Ja'});
-    /* "Uitvoering" en "Reflector" hebben geen eigen rij op het blad, maar worden
-       wel gelezen - anders meldt de tool ze als onbekend en gaat de gebruiker
-       zoeken naar een fout die er niet is. */
+       optiek:'Zilvermat (SM)', aansturing:'Dali/ Dim', dimbaar:'Ja'});
+    /* "Reflector" is de optiek, en die heeft sinds kort een eigen rij. "Uitvoering"
+       heeft er geen, maar wordt wel gelezen - anders meldt de tool hem als
+       onbekend en gaat de gebruiker zoeken naar een fout die er niet is. */
     is('uitvoering wordt gelezen zonder eigen rij', r.uit._uitvoering, 'LED');
-    is('reflector wordt gelezen zonder eigen rij', r.uit._optiek, 'Zilvermat (SM)');
+    is('de reflector is de optiek', r.uit.optiek, 'Zilvermat (SM)');
     is('een bestek laat niets liggen', r.onbekend, []);
   }
 
@@ -491,6 +498,11 @@ function is(wat, gekregen, verwacht){
     is('DALI-2 uit de lopende tekst',         b.aansturing, 'DALI-2');
     is('en daarmee is hij dimbaar',           b.dimbaar, 'Ja');
     is('de kleur staat bij het woord kleur',  b.kleur, 'White');
+    is('de optiek krijgt zijn eigen rij',     b.optiek,
+      'prismatic diffuser with powder coating finish');
+    /* "efficacy: 119lm/W, Ra80 typical" - het rendement houdt op bij lm/W, en de
+       Ra die erachter stond komt in zijn eigen rij terecht. */
+    is('het rendement houdt op bij lm/W',     b.rendement, '119lm/W');
     /* De levensduur hield op waar de volgende opgave begon; hiervoor slikte hij
        de netspanning, "low flicker" en de driver er alledrie bij in. */
     is('de levensduur houdt op bij het volgende label',
@@ -550,7 +562,7 @@ function is(wat, gekregen, verwacht){
 /* ==================== waarden uit de productdata ==================== */
 {
   const m = await laadUit('vergelijker/index-template.html',
-    ['typeVan','artikelVoorWoord','REF_VELDEN','PDF_VERBORGEN']);
+    ['typeVan','artikelVoorWoord','rendementVan','REF_VELDEN','PDF_VERBORGEN']);
 
   console.log('\nwaarden uit de productdata');
 
@@ -576,6 +588,31 @@ function is(wat, gekregen, verwacht){
     m.typeVan({naam:'LED Downlight Mondial'}, {}), 'LED Downlight Mondial');
   is('zonder familienaam wint de uitgelezen naam',
     m.typeVan({}, {type:'LED Downlight Mondial'}), 'LED Downlight Mondial');
+
+  /* Het rendement staat niet in de prijslijst maar volgt uit de lichtstroom
+     gedeeld door het vermogen. Bij een dipswitch-armatuur zijn dat allebei
+     bereiken, en die horen per stand bij elkaar. */
+  is('lichtstroom gedeeld door vermogen',
+    m.rendementVan({vermogen_w:{min:26,max:26}, lichtstroom_lm:{min:3600,max:3600}}),
+    '138 lm/W');
+  is('de uiteinden van een dipswitch horen bij elkaar',
+    m.rendementVan({vermogen_w:{min:50,max:70}, lichtstroom_lm:{min:7279,max:10191}}),
+    '146 lm/W');
+  is('verschillen ze, dan is het een bereik',
+    m.rendementVan({vermogen_w:{min:50,max:80}, lichtstroom_lm:{min:8000,max:12500}}),
+    '156-160 lm/W');
+  /* Staat er alleen een bovengrens, dan is dat de stand waar het getal bij hoort. */
+  is('alleen een bovengrens rekent met die grens',
+    m.rendementVan({vermogen_w:{min:null,max:6}, lichtstroom_lm:{min:null,max:690}}),
+    '115 lm/W');
+  /* Ontbreekt een van de twee, dan valt er niets te delen en blijft de rij leeg -
+     een rendement verzinnen is erger dan een lege rij. */
+  is('zonder lichtstroom geen rendement',
+    m.rendementVan({vermogen_w:{min:26,max:26}}), '');
+  is('zonder vermogen geen rendement',
+    m.rendementVan({lichtstroom_lm:{min:3600,max:3600}}), '');
+  is('nul watt levert geen deling op',
+    m.rendementVan({vermogen_w:{min:0,max:0}, lichtstroom_lm:{min:3600,max:3600}}), '');
 
   /* Zoeken op artikelnummer. artikelVoorWoord() is het stuk dat beslist wélk
      artikel een getypt nummer aanwijst; zoekFamilies() eromheen leest de

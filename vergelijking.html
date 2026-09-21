@@ -270,8 +270,8 @@ const S = {
 const REF_VELDEN = [
   ['leverancier','Leverancier'],['type','Type'],['artikelnummer','Artikelnummer'],
   ['omschrijving','Omschrijving'],['toepassing','Toepassing'],['vermogen','Vermogen'],
-  ['cct','Kleurtemperatuur'],['lumen','Nuttige lichtstroom'],
-  ['bundel','Lichtbundel'],['ugr','UGR'],['cri','Kleurweergave'],
+  ['cct','Kleurtemperatuur'],['lumen','Nuttige lichtstroom'],['rendement','Rendement'],
+  ['bundel','Lichtbundel'],['optiek','Optiek'],['ugr','UGR'],['cri','Kleurweergave'],
   ['levensduur','Levensduur'],['dimbaar','Dimbaar'],
   ['aansturing','Aansturing'],['sensor','Sensor'],['aansluiting','Aansluiting'],
   ['afmetingen','Afmetingen'],['montage','Montage'],['kleur','Kleur'],['ip','IP-klasse'],['ik','IK-klasse'],
@@ -439,7 +439,7 @@ const VELDMAP=[
   {v:'kleur',      l:/^(kleur|behuizingskleur|kleur behuizing|kast ?kleur|colou?r|housing colou?r|body colou?r|finish)$/i},
   {v:'montage',    l:/^(montage|montagewijze|bevestiging|mounting|installation)$/i},
   {v:'bundel',     l:/^(lichtbundel|bundelhoek|stralingshoek|uitstralingshoek|spreidingshoek|openingshoek|beam)/i},
-  {v:'_optiek',    l:/^(optiek|optisch systeem|optical system|optic|optics|lens|reflector|afscherming|diffuser)$/i},
+  {v:'optiek',     l:/^(optiek|optisch systeem|optical system|optic|optics|lens|reflector|afscherming|diffuser)$/i},
   {v:'_uitvoering',l:/^(uitvoering|variant|execution|version)$/i},
   {v:'levensduur', l:/^(levensduur|lifetime|life ?time|lifespan|service life|rated life)/i},
   {v:'_klasse',    l:/^(isolatieklasse|beschermingsklasse|class|klasse|protection class|electrical protection)$/i},
@@ -450,7 +450,7 @@ const VELDMAP=[
      vergelijkingsblad, maar worden wel bewaard bij de positie en getoond onder
      "Ook bewaard" - beter dan als "niet herkend" te eindigen. */
   {v:'_lichtbron',  l:/^(soort lichtbron|lichtbron|lichtbrontype|light source|lamp ?type)$/i},
-  {v:'_rendement',  l:/^(armatuur ?effici|lichtrendement|systeemrendement|rendement|efficacy|luminaire efficacy)/i},
+  {v:'rendement',   l:/^(armatuur ?effici|lichtrendement|systeemrendement|rendement|efficacy|luminaire efficacy)/i},
   {v:'_sdcm',       l:/^(macadam|sdcm|kleurconsistentie|binning|(led )?chromaticity)/i},
   {v:'_verdeling',  l:/^(lichtverdeling|verdeling|light distribution|bundeltype)$/i},
   {v:'_risicogroep',l:/^(fotobiologisch|photobiological|risicogroep|risk group)/i},
@@ -467,9 +467,8 @@ const VELDMAP=[
 /* Labels voor de velden die WEL bewaard worden maar niet op het blad staan;
    IP en IK staan er sinds kort wel op en halen hun label uit REF_VELDEN. */
 const LABELS={
-  _optiek:'Optiek',
   _klasse:'Isolatieklasse',_diepte:'Inbouwdiepte',_cutout:'Cut-out',
-  _materiaal:'Materiaal',_rendement:'Rendement',_sdcm:'Kleurconsistentie',
+  _materiaal:'Materiaal',_sdcm:'Kleurconsistentie',
   _lichtbron:'Lichtbron',_verdeling:'Lichtverdeling',_risicogroep:'Fotobiologische veiligheid',
   _ulor:'ULOR',_energie:'Energieklasse',_spanning:'Spanning',_frequentie:'Frequentie',
   _zekering:'Max. armaturen per groep',_gewicht:'Gewicht',_model:'Model',_verpakking:'Verpakking',
@@ -487,7 +486,7 @@ const LABELS={
    boven algemeen. */
 const FRAGMENTEN=[
   /* Eenheid als anker. Let op de volgorde: 140 lm/W moet vóór lm en vóór W. */
-  {v:'_rendement',  l:'Rendement',        p:/^(\d[\d.,]*)\s*lm\s*\/\s*w$/i},
+  {v:'rendement',   l:'Rendement',        p:/^(\d[\d.,]*)\s*lm\s*\/\s*w$/i},
   {v:'lumen',       l:'Lichtstroom',      p:/^\d[\d.,]*\s*(?:lm|lumen)$/i},
   {v:'vermogen',    l:'Vermogen',         p:/^\d[\d.,]*\s*(?:w|watt)$/i},
   {v:'cct',         l:'Kleurtemperatuur', p:/^\d{3,5}\s*k$/i},
@@ -524,7 +523,7 @@ const FRAGMENTEN=[
   {v:'nood',        l:'Noodverlichting',  p:/^(?:\+\s*)?(?:nood(?:module|verlichting|unit|armatuur)|emergency)\b/i},
   {v:'sensor',      l:'Sensor',           p:/^(?:\+\s*)?(?:[a-z\u00e0-\u00ff]*(?:sensor|melder|detectie|detector)|pir|hf|microgolf|microwave)\b/i},
   {v:'aansturing',  l:'Aansturing',       p:/\b(dali[-\s]?2|dali|casambi|zigbee|bluetooth|triac|dim(?:baar|ming|bar|mable)?|[01]-?10\s?v|push[-\s]?dim|push|fase(?:af|aan)snijding|trailing edge|leading edge|mains dim|aan-?uit|on\/off|niet dimbaar|non-?dim)\b/i},
-  {v:'_optiek',     l:'Optiek',           p:/(prisma|opaal|opal|reflector|lens|diffus|louvre|lamel|darklight|honingraat|satine|frosted|gesatineerd)/i},
+  {v:'optiek',      l:'Optiek',           p:/(prisma|opaal|opal|reflector|lens|diffus|louvre|lamel|darklight|honingraat|satine|frosted|gesatineerd)/i},
   {v:'kleur',       l:'Kleur',            p:/ral\s?\d{3,4}/i, wint:true},
   {v:'kleur',       l:'Kleur',            p:/^(?:signaal|verkeers|zuiver|gebroken)?(wit|zwart|grijs|antraciet|zilver|goud|brons|white|black|gr[ae]y|silver)$/i},
   {v:'montage',     l:'Montage',          p:/\b(inbouw|opbouw|pendel|recessed|surface|ceiling|plafond|wand|wall|suspended|trunking)\b/i},
@@ -571,6 +570,14 @@ const VRIJE_TEKST=[
   {v:'aansturing', l:'Aansturing',
    p:/\b(dali[-\s]?2|dali|casambi|zigbee|[01]\s*-\s*10\s?v|push[-\s]?dim|triac|trailing edge|leading edge)\b/i,
    uit:m=>m[1].toUpperCase().replace(/DALI[-\s]?2/,'DALI-2')},
+  {v:'rendement', l:'Rendement', p:/(?<![\w.,])(\d[\d.,]*)\s*lm\s*\/\s*W\b/i,
+   uit:m=>m[1]+'lm/W'},
+  /* "een hoogwaardige opaal diffuser", "prismatic diffuser with powder coating".
+     Het zelfstandig naamwoord is het anker; de woorden ervoor horen erbij. */
+  {v:'optiek', l:'Optiek',
+   p:/([^.;,()]{0,40}\b(?:diffuser|diffusor|prisma\w*|prismatic|opaal|opal|reflector|lens|louvre|darklight|honingraat)\b)/i,
+   uit:m=>{const t=m[1].trim().replace(/^(?:with|met|een|a|an)\s+/i,'');
+           return t.charAt(0).toUpperCase()+t.slice(1);}},
   {v:'kleur', l:'Kleur', p:/\bRAL\s?(\d{3,4})\b/i, uit:m=>'RAL'+m[1]},
   /* "White color frame", "wit van kleur" - het woord kleur ernaast is het anker;
      een kleurnaam alleen komt in een verkooptekst te vaak voor om iets te zijn. */
@@ -601,6 +608,16 @@ function naarBladvelden(u){
   if(u.type)     r.type=u.type;
   if(u.vermogen) r.vermogen=u.vermogen;
   if(u.lumen)    r.lumen=u.lumen;
+  /* "efficacy: 119lm/W, Ra80 typical" - de leverancier zette twee opgaven achter
+     elkaar in één zin. Daar valt in het algemeen niet op te knippen zonder
+     "Paal, wand, sokkel of aardstaaf" ook te slopen, maar hier weten we wél waar
+     de waarde ophoudt: het rendement is één getal met lm/W erachter. Wat erachter
+     stond raakt niet kwijt - de lopende-tekstronde leest "Ra80" alsnog als
+     kleurweergave. */
+  if(u.rendement){
+    const e=String(u.rendement).match(/^\s*[\d.,]+\s*lm\s*\/\s*w/i);
+    r.rendement = e ? e[0].trim() : String(u.rendement).trim();
+  }
   if(u.cct)      r.cct=u.cct;
   if(u.ip)       r.ip=u.ip;
   if(u.ik)       r.ik=u.ik;
@@ -613,6 +630,7 @@ function naarBladvelden(u){
   if(u.aansluiting) r.aansluiting=u.aansluiting;
   if(u.nood)     r.nood=u.nood;
   if(u.bundel)   r.bundel=String(u.bundel).replace(/\s+°/,'°');
+  if(u.optiek)   r.optiek=u.optiek;
   if(u.levensduur) r.levensduur=u.levensduur;
   /* Alleen "Ja" zeggen als de leverancier dat zegt of een dimwijze noemt.
      Staat er iets anders, dan nemen we het over zoals het er staat: bij
@@ -654,6 +672,26 @@ function naarBladvelden(u){
   if(u._diepte) a+=(a?', ':'')+'inbouwdiepte '+mm(u._diepte)+'mm';
   if(a) r.afmetingen=a;
   return r;
+}
+/* Het rendement staat niet in de prijslijst, maar volgt uit twee velden die er
+   wél in staan: de armatuurlichtstroom gedeeld door het systeemvermogen. Dat is
+   een definitie, geen aanname - zolang de twee bij elkaar horen.
+
+   Bij een dipswitch-armatuur zijn het allebei bereiken, en die horen per stand
+   bij elkaar: de laagste stand bij de laagste, de hoogste bij de hoogste. Dat is
+   nagemeten op de catalogus - 50-70W met 7279-10191lm geeft aan beide kanten 146
+   lm/W - dus rekenen we de uiteinden apart uit en maken er een bereik van zodra
+   ze na afronding verschillen. Ontbreekt een van de twee opgaven, dan blijft de
+   rij leeg: dan valt er niets te delen. */
+function rendementVan(v){
+  const w=v&&v.vermogen_w, l=v&&v.lichtstroom_lm;
+  if(!w||!l) return '';
+  const deel=(a,b)=> (a==null||b==null||!(b>0)) ? null : Math.round(a/b);
+  const een=deel(l.min!=null?l.min:l.max, w.min!=null?w.min:w.max);
+  const twee=deel(l.max!=null?l.max:l.min, w.max!=null?w.max:w.min);
+  if(een==null||twee==null) return '';
+  const a=Math.min(een,twee), b=Math.max(een,twee);
+  return (a===b ? String(a) : a+'-'+b)+' lm/W';
 }
 function bereik(o,eh){
   if(!o) return '';
@@ -780,6 +818,11 @@ function onzeWaarden(fam,v){
     dimbaar: v.dimprotocol==null ? '' : (v.dimprotocol==='geen' ? 'Nee' : 'Ja'),
     aansturing: aansturingVan(v),
     sensor: sensorVan(v),
+    /* De optiek staat als eigen veld bij de variant: bij de Mondial is dat het
+       verschil tussen de facet- en de hoogglansreflector. Niet elke familie
+       noemt er een; dan blijft de rij leeg. */
+    optiek: v.optiek || '',
+    rendement: rendementVan(v),
     ip: ipVan(fam,v),
     ik: fam.ik || '',
     montage: montageVan(fam,v),
