@@ -509,6 +509,261 @@
       "armatuurtype": "led-module"
     },
     {
+      "id": "led-paneel-easyfit-next",
+      "naam": "LED Paneel Easyfit Next",
+      "varianten": [
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 30.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 3925
+          },
+          "cct_tekst": "3000K",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Easyfit Next",
+          "artikelcode": "4378370",
+          "basiscode": "4378370",
+          "omschrijving": "Interlight LED Paneel 60x60cm Easyfit Next 30W 3000K 3925lm UGR<22",
+          "driver_inbegrepen": false,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 30.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 3990
+          },
+          "cct_tekst": "4000K",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Easyfit Next",
+          "artikelcode": "4378387",
+          "basiscode": "4378387",
+          "omschrijving": "Interlight LED Paneel 60x60cm Easyfit Next 30W 4000K 3990lm UGR<22",
+          "driver_inbegrepen": false,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 30.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 3920
+          },
+          "cct_tekst": "3000K",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Easyfit Next",
+          "artikelcode": "4378394",
+          "basiscode": "4378394",
+          "omschrijving": "Interlight LED Paneel 30x120cm Easyfit Next 30W 3000K 3920lm UGR<22",
+          "driver_inbegrepen": false,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 30.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 3940
+          },
+          "cct_tekst": "4000K",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Easyfit Next",
+          "artikelcode": "4378400",
+          "basiscode": "4378400",
+          "omschrijving": "Interlight LED Paneel 30x120cm Easyfit Next 30W 4000K 3940lm UGR<22",
+          "driver_inbegrepen": false,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 30.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 3750
+          },
+          "cct_tekst": "3000K",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Easyfit Next",
+          "artikelcode": "4378417",
+          "basiscode": "4378417",
+          "omschrijving": "Interlight LED Paneel 60x60cm Easyfit Next+ 30W 3000K 3750lm UGR<19",
+          "driver_inbegrepen": false,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 30.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 3865
+          },
+          "cct_tekst": "4000K",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Easyfit Next",
+          "artikelcode": "4378424",
+          "basiscode": "4378424",
+          "omschrijving": "Interlight LED Paneel 60x60cm Easyfit Next+ 30W 4000K 3865lm UGR<19",
+          "driver_inbegrepen": false,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 30.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 3660
+          },
+          "cct_tekst": "3000K",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Easyfit Next",
+          "artikelcode": "4378431",
+          "basiscode": "4378431",
+          "omschrijving": "Interlight LED Paneel 30x120cm Easyfit Next+ 30W 3000K 3660lm UGR<19",
+          "driver_inbegrepen": false,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 30.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 3700
+          },
+          "cct_tekst": "4000K",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Easyfit Next",
+          "artikelcode": "4378448",
+          "basiscode": "4378448",
+          "omschrijving": "Interlight LED Paneel 30x120cm Easyfit Next+ 30W 4000K 3700lm UGR<19",
+          "driver_inbegrepen": false,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 30.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 3750
+          },
+          "cct_tekst": "3000K",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Easyfit Next",
+          "artikelcode": "4378455",
+          "basiscode": "4378455",
+          "omschrijving": "Interlight LED Paneel 60x60cm Easyfit Next+ 30W 3000K 3750lm UGR<19 Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 30.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 3865
+          },
+          "cct_tekst": "4000K",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Easyfit Next",
+          "artikelcode": "4378462",
+          "basiscode": "4378462",
+          "omschrijving": "Interlight LED Paneel 60x60cm Easyfit Next+ 30W 4000K 3865lm UGR<19 Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 30.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 3660
+          },
+          "cct_tekst": "3000K",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Easyfit Next",
+          "artikelcode": "4378479",
+          "basiscode": "4378479",
+          "omschrijving": "Interlight LED Paneel 30x120cm Easyfit Next+ 30W 3000K 3660lm UGR<19 Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 30.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 3700
+          },
+          "cct_tekst": "4000K",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Easyfit Next",
+          "artikelcode": "4378486",
+          "basiscode": "4378486",
+          "omschrijving": "Interlight LED Paneel 30x120cm Easyfit Next+ 30W 4000K 3700lm UGR<19 Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 30.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": null,
+            "max": 3920
+          },
+          "cct_tekst": "3000K/3500K/4000K",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Easyfit Next",
+          "artikelcode": "5277699",
+          "basiscode": "5277699",
+          "omschrijving": "Interlight LED Paneel 30x120cm Easyfit Next 30W 3000K/3500K/4000K 3920lm UGR<22",
+          "driver_inbegrepen": false,
+          "afmeting": "120x30cm"
+        }
+      ],
+      "merk": "Interlight",
+      "armatuurtype": "paneel"
+    },
+    {
       "id": "led-paneel-orion",
       "naam": "LED Paneel Orion",
       "varianten": [
@@ -36891,6 +37146,36 @@
         {
           "vermogen_w": {
             "min": null,
+            "max": 38.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "cct_tekst": "4000K",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Easy",
+          "artikelcode": "1001135",
+          "basiscode": "1001135",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Easy 38W 4000K (4x14W) Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 38.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "cct_tekst": "4000K",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Easy",
+          "artikelcode": "1001159",
+          "basiscode": "1001159",
+          "omschrijving": "Pragmalux LED Paneel 30x120cm Easy 38W 4000K (2x28W) Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
             "max": 36.0,
             "opmerking": "ondergrens afhankelijk van gekozen driver"
           },
@@ -37196,6 +37481,28 @@
         },
         {
           "vermogen_w": {
+            "min": null,
+            "max": 34.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4250,
+            "max": 4350
+          },
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Essence G3",
+          "generatie": "G3",
+          "dimprotocol": "casambi",
+          "artikelcode": "1044507-CA",
+          "basiscode": "1044507",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Essence G3 34W 3000K-6000K 3-CCT 4250-4350lm UGR<19 +TCI Casambi Driver (4x14W)",
+          "driver": "Casambi",
+          "driver_inbegrepen": true,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
             "min": 27.0,
             "max": 34.0
           },
@@ -37255,6 +37562,28 @@
           "omschrijving": "Pragmalux LED Paneel 60x60cm Essence G3 25-34W 3000K-6000K 3-CCT 3050-4350lm UGR<19 +Driver (4x14W)",
           "driver": "Pragmalux",
           "dimprotocol": "geen",
+          "driver_inbegrepen": true,
+          "afmeting": "60x60cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 34.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4250,
+            "max": 4350
+          },
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Essence G3",
+          "generatie": "G3",
+          "dimprotocol": "dali",
+          "artikelcode": "1044507-TC-DA",
+          "basiscode": "1044507",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Essence G3 34W 3000K-6000K 3-CCT 4250-4350lm UGR<19 +TCI DALI Driver (4x14W)",
+          "driver": "TCI DALI",
           "driver_inbegrepen": true,
           "afmeting": "60x60cm"
         },
@@ -37337,6 +37666,28 @@
         },
         {
           "vermogen_w": {
+            "min": null,
+            "max": 34.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4250,
+            "max": 4350
+          },
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Essence G3",
+          "generatie": "G3",
+          "dimprotocol": "casambi",
+          "artikelcode": "1044514-CA",
+          "basiscode": "1044514",
+          "omschrijving": "Pragmalux LED Paneel 30x120cm Essence G3 34W 3000K-6000K 3-CCT 4250-4350lm UGR<19 +TCI Casambi Driver (2x28W)",
+          "driver": "Casambi",
+          "driver_inbegrepen": true,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
             "min": 27.0,
             "max": 34.0
           },
@@ -37401,6 +37752,28 @@
         },
         {
           "vermogen_w": {
+            "min": null,
+            "max": 34.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4250,
+            "max": 4350
+          },
+          "cct_tekst": "3000K-6000K 3-CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel 30x120cm Essence G3",
+          "generatie": "G3",
+          "dimprotocol": "dali",
+          "artikelcode": "1044514-TC-DA",
+          "basiscode": "1044514",
+          "omschrijving": "Pragmalux LED Paneel 30x120cm Essence G3 34W 3000K-6000K 3-CCT 4250-4350lm UGR<19 +TCI DALI Driver (2x28W)",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true,
+          "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
             "min": 25.0,
             "max": 34.0
           },
@@ -37459,6 +37832,22 @@
           "omschrijving": "Pragmalux LED Paneel 30x120cm Essence G3 25-34W 3000K-6000K 3-CCT 3050-4350lm UGR<19 +Universele Driver (DALI2, 1-10V, Push-dim) (2x28W) incl. GST18i5 en splitter en trekontlasting, 1 in 2 uit",
           "driver_inbegrepen": false,
           "afmeting": "120x30cm"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 34.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "cct_tekst": "4000K",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel 60x60cm Essence G2",
+          "generatie": "G2",
+          "artikelcode": "4607726",
+          "basiscode": "4607726",
+          "omschrijving": "Pragmalux LED Paneel 60x60cm Essence G2 34W 4000K UGR<19 (4x14W) Excl. LED Driver",
+          "driver_inbegrepen": false,
+          "afmeting": "60x60cm"
         }
       ],
       "merk": "Pragmalux",
@@ -37549,6 +37938,28 @@
         },
         {
           "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4850,
+            "max": 5100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "dimprotocol": "casambi",
+          "ip": 44,
+          "artikelcode": "1048949-CA",
+          "basiscode": "1048949",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 60x60cm 36W 4850-5100lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003 +TCI Casambi Driver",
+          "driver": "Casambi",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
             "min": 26.0,
             "max": 39.0
           },
@@ -37631,6 +38042,28 @@
         },
         {
           "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4850,
+            "max": 5100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "dimprotocol": "dali",
+          "ip": 44,
+          "artikelcode": "1048949-TC-DA",
+          "basiscode": "1048949",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 60x60cm 36W 4850-5100lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003 +TCI DALI Driver",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
             "min": 26.0,
             "max": 39.0
           },
@@ -37647,6 +38080,28 @@
           "basiscode": "1048956",
           "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI >90 UGR<19 wit RAL9003 excl. led driver",
           "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4850,
+            "max": 5100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "dimprotocol": "casambi",
+          "ip": 44,
+          "artikelcode": "1048956-CA",
+          "basiscode": "1048956",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 36W 4850-5100lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003 +TCI Casambi Driver",
+          "driver": "Casambi",
+          "driver_inbegrepen": true
         },
         {
           "vermogen_w": {
@@ -37732,6 +38187,28 @@
         },
         {
           "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4850,
+            "max": 5100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "dimprotocol": "dali",
+          "ip": 44,
+          "artikelcode": "1048956-TC-DA",
+          "basiscode": "1048956",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 36W 4850-5100lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003 +TCI DALI Driver",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
             "min": 26.0,
             "max": 39.0
           },
@@ -37748,6 +38225,28 @@
           "basiscode": "1048963",
           "omschrijving": "Pragmalux LED Paneel Flexcore IP44 60x60cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI >90 UGR<19 zwart RAL9005 excl. led driver",
           "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4850,
+            "max": 5100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Flexcore",
+          "kleur": "zwart",
+          "dimprotocol": "casambi",
+          "ip": 44,
+          "artikelcode": "1048963-CA",
+          "basiscode": "1048963",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 60x60cm 36W 4850-5100lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 zwart RAL9005 +TCI Casambi Driver",
+          "driver": "Casambi",
+          "driver_inbegrepen": true
         },
         {
           "vermogen_w": {
@@ -37833,6 +38332,28 @@
         },
         {
           "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4850,
+            "max": 5100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Flexcore",
+          "kleur": "zwart",
+          "dimprotocol": "dali",
+          "ip": 44,
+          "artikelcode": "1048963-TC-DA",
+          "basiscode": "1048963",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 60x60cm 36W 4850-5100lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 zwart RAL9005 +TCI DALI Driver",
+          "driver": "TCI DALI",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
             "min": 26.0,
             "max": 39.0
           },
@@ -37849,6 +38370,28 @@
           "basiscode": "1048970",
           "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI >90 UGR<19 zwart RAL9005 excl. led driver",
           "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4850,
+            "max": 5100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "zwart",
+          "dimprotocol": "casambi",
+          "ip": 44,
+          "artikelcode": "1048970-CA",
+          "basiscode": "1048970",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 36W 4850-5100lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 zwart RAL9005 +TCI Casambi Driver",
+          "driver": "Casambi",
+          "driver_inbegrepen": true
         },
         {
           "vermogen_w": {
@@ -37930,6 +38473,28 @@
           "basiscode": "1048970-PR",
           "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 zwart RAL9005+universele driver (DALI2, 1-10V, Push-dim)",
           "driver": "Universeel",
+          "driver_inbegrepen": true
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 36.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 4850,
+            "max": 5100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "zwart",
+          "dimprotocol": "dali",
+          "ip": 44,
+          "artikelcode": "1048970-TC-DA",
+          "basiscode": "1048970",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 36W 4850-5100lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 zwart RAL9005 +TCI DALI Driver",
+          "driver": "TCI DALI",
           "driver_inbegrepen": true
         },
         {
@@ -38086,6 +38651,82 @@
         },
         {
           "vermogen_w": {
+            "min": 24.0,
+            "max": 34.0
+          },
+          "lichtstroom_lm": {
+            "min": 3400,
+            "max": 4700
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "1495x180",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "1085364",
+          "basiscode": "1085364",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 1495x180cm 24-34W 3400-4700lm 3000K-3500K-4000K 3CCT CRI >90 UGR<19 wit RAL9003 excl.led driver",
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 24.0,
+            "max": 34.0
+          },
+          "lichtstroom_lm": {
+            "min": 3400,
+            "max": 4700
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "1200x180",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "1085371",
+          "basiscode": "1085371",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 1200x180cm 24-34W 3400-4700lm 3000K-3500K-4000K 3CCT CRI >90 UGR<19 wit RAL9003 excl.led driver",
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 24.0,
+            "max": 34.0
+          },
+          "lichtstroom_lm": {
+            "min": 3400,
+            "max": 4700
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "1495x150",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "1085388",
+          "basiscode": "1085388",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 1495x150cm 24-34W 3400-4700lm 3000K-3500K-4000K 3CCT CRI >90 UGR<19 wit RAL9003 excl.led driver",
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 24.0,
+            "max": 34.0
+          },
+          "lichtstroom_lm": {
+            "min": 3400,
+            "max": 4700
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "1545x175",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "2003408",
+          "basiscode": "2003408",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 1545x175mm 24-34W 3400-4700lm 3000K-3500K-4000K 3CCT CRI >90 UGR<19 wit RAL9003 excl. driver",
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
             "min": 26.0,
             "max": 39.0
           },
@@ -38139,6 +38780,177 @@
           "artikelcode": "2036253-PH-800",
           "basiscode": "2036253-PH-800",
           "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003 PLENUM +Philips driver",
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x150",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "25187-78849-1-1",
+          "basiscode": "25187-78849-1-1",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x150cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003+driver",
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x150",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "25187-78849-2-2",
+          "basiscode": "25187-78849-2-2",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x150cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003 incl. ActiveAhead Node",
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x150",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "25187-78849-3",
+          "basiscode": "25187-78849-3",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x150cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003 incl. ActiveAhead Node Sense",
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "25187-78850-1-1",
+          "basiscode": "25187-78850-1-1",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI >90 UGR<19 wit RAL9003 incl. ActiveAhead Node",
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "30x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "25187-78850-1-2",
+          "basiscode": "25187-78850-1-2",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 30x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI >90 UGR<19 wit RAL9003 incl. ActiveAhead Node Sense",
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "15x150",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "25187-83352-1-1",
+          "basiscode": "25187-83352-1-1",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 15x150cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI >90 UGR<19 wit RAL9003",
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "15x150",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "25187-83352-1-2",
+          "basiscode": "25187-83352-1-2",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 15x150cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI >90 UGR<19 wit RAL9003 incl. ActiveAhead Node",
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 26.0,
+            "max": 39.0
+          },
+          "lichtstroom_lm": {
+            "min": 3600,
+            "max": 5500
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "15x120",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "25187-83352-1-3",
+          "basiscode": "25187-83352-1-3",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 15x120cm 26-39W 3600-5500lm 3000K-3500K-4000K 3CCT CRI >90 UGR<19 wit RAL9003 incl. ActiveAhead Node",
+          "driver_inbegrepen": false
+        },
+        {
+          "vermogen_w": {
+            "min": 24.0,
+            "max": 34.0
+          },
+          "lichtstroom_lm": {
+            "min": 3010,
+            "max": 4350
+          },
+          "cct_tekst": "3000K-3500K-4000K 3CCT",
+          "afmetingen_tekst": "60x60",
+          "type": "LED Paneel Flexcore",
+          "kleur": "wit",
+          "ip": 44,
+          "artikelcode": "25187-83352-1-4",
+          "basiscode": "25187-83352-1-4",
+          "omschrijving": "Pragmalux LED Paneel Flexcore IP44 60x60cm 24-34W 3010-4350lm 3000K-3500K-4000K 3CCT CRI>90 UGR<19 wit RAL9003 incl. ActiveAhead Node",
           "driver_inbegrepen": false
         }
       ],
