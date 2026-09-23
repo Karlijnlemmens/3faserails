@@ -194,7 +194,7 @@ anders uitziet. Een data-URI mag ook, maar een pad houdt het bestand klein.
 
 ```
 voorblad -> per bestekpositie een vergelijking -> tussenblad Armaturen
--> presenter van elk gebruikt armatuur -> AB achterpagina's
+-> elke gebruikte presenter, één keer -> AB achterpagina's
 ```
 
 Opmaak en maten komen uit de installateur-PDF van de 3-fase railtool, zodat de
@@ -202,18 +202,33 @@ twee documenten als één set ogen: hetzelfde voorblad, hetzelfde tussenblad, de
 blauwe kopbalk met ruitpatroon en de lichtgrijze schuine voet. In het voorbeeld
 zit een knop **Downloaden**.
 
-Welke presenter bij een familie hoort staat in `families.json`:
+Welke presenter achter een positie komt, beslist `presenterVan()` in deze
+volgorde:
 
-```json
-{ "id": "essence-g3-paneel", "presenter": "ag13" }
-```
+1. wat bij de positie gekozen is, in de keuzelijst **Presenter in het boek**
+   onder het gekozen artikel — een presenter, of "Geen presenter";
+2. wat `families.json` voor de familie zegt:
+
+   ```json
+   { "id": "essence-g3-paneel", "presenter": "ag13" }
+   ```
+
+3. anders herkent de tool hem uit de omschrijving van het gekozen artikel, met
+   dezelfde herkenning als het armaturenboek (`armatuur-groepen.js`). Alleen bij
+   Pragmalux, en nooit een presenter van een andere soort: een paneel krijgt
+   geen downlightpresenter.
+
+`families.json` hoeft dus alleen nog een presenter te noemen waar de herkenning
+het mis heeft of niets vindt. De bovenste regel van de keuzelijst laat zien wat
+de tool zelf kiest, en de regel eronder waar dat vandaan komt.
 
 De ids staan in `presenters-data.js` in de hoofdmap, met de naam erachter.
-Elke familie komt één keer in het boek, in de volgorde waarin hij in het
-project voor het eerst voorkomt. Ontbreekt de presenter, dan meldt het
-voorbeeld dat boven de pagina en blijft dat armatuur uit het boek. Is er van
-geen enkele familie een presenter, dan vervallen het tussenblad en de
-achterpagina's ook — dan is er geen boek om in te leiden.
+Elke presenter komt één keer in het boek, in de volgorde waarin hij in het
+project voor het eerst voorkomt; twee posities met hetzelfde armatuur delen
+hem. Heeft een positie geen presenter, dan meldt het voorbeeld dat boven de
+pagina en blijft dat armatuur uit het boek. Is er van geen enkele positie een
+presenter, dan vervallen het tussenblad en de achterpagina's ook — dan is er
+geen boek om in te leiden.
 
 De PDF wordt met `vendor/pdf-lib.min.js` getekend, met de huisstijl­lettertypen
 en het ruitpatroon uit `merk/merk-data.js`. Die drie bestanden zijn samen ruim

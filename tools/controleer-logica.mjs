@@ -858,6 +858,64 @@ function is(wat, gekregen, verwacht){
   is('stekker is de schuko-adapter', onderdelen('stekker'), ['Schuko Adapter']);
 }
 
+/* ====================== presenters in de vergelijker ====================== */
+{
+  /* families.json noemde met de hand een presenter bij 3 van de 209 Pragmalux-
+     families; de rest eindigde als "Nog geen presenter voor ...". presenterVan()
+     valt nu terug op dezelfde herkenning als het armaturenboek. */
+  const m = await laadUit('vergelijker/index-template.html',
+    ['FAMILIEGROEP', 'familieGroep', 'presenterVan', 'presenterNaam'],
+    readFileSync(join(root, 'armatuur-groepen.js'), 'utf8'),
+    ['ARM_GROEPEN', 'ARM_GROEP_SOORT', 'armSoorten', 'armTokens']);
+  const venster = {};
+  new Function('window', readFileSync(join(root, 'presenters-data.js'), 'utf8'))(venster);
+  const beschikbaar = new Set(venster.PRESENTER_FILES || []);
+  const data = JSON.parse(readFileSync(join(root, 'vergelijker/data/armaturen.json'), 'utf8'));
+  const leeg = {presenter: ''};
+  const soortVan = id => m.ARM_GROEP_SOORT.get(m.ARM_GROEPEN.find(g => g.id === id)) || new Set();
+
+  console.log('\npresenters in de vergelijker');
+  let fams = 0, arts = 0, alle = 0; const tegenspraak = [], anderMerk = [];
+  for(const f of data.families){
+    const pragma = /pragmalux/i.test(f.merk || '');
+    const famSoort = m.armSoorten(m.armTokens(f.armatuurtype || ''));
+    let raak = false;
+    for(const v of f.varianten){
+      const {id} = m.presenterVan(leeg, f, v);
+      if(pragma) alle++;
+      if(!id) continue;
+      if(!pragma && !f.presenter) anderMerk.push(f.naam);
+      if(beschikbaar.has(id)){ raak = true; if(pragma) arts++; }
+      /* de soort van de familie en die van de presenter mogen elkaar niet tegenspreken */
+      const gs = soortVan(id);
+      if(famSoort.size && gs.size && ![...gs].some(x => famSoort.has(x)))
+        tegenspraak.push(f.naam + ' -> ' + m.presenterNaam(id));
+    }
+    if(raak && pragma) fams++;
+  }
+  is('geen presenter van een andere soort (paneel achter downlight e.d.)', [...new Set(tegenspraak)], []);
+  is('geen Pragmalux-presenter bij een ander merk', [...new Set(anderMerk)], []);
+  /* gemeten bij de invoering: 152 families, 2760 artikelen; mag omhoog, niet omlaag */
+  is('families met een presenter: ondergrens 150', fams >= 150, true);
+  console.log('  ' + fams + ' Pragmalux-families en ' + arts + ' van de ' + alle
+            + ' artikelen hebben een presenter (was 3 families, 47 artikelen).');
+
+  const fam = naam => data.families.find(f => f.naam === naam);
+  const art = (f, code) => f.varianten.find(v => v.artikelcode === code);
+  const pir = fam('LED Downlight Essence PIR');
+  is('Essence PIR krijgt de PIR-presenter', m.presenterVan(leeg, pir, pir.varianten[0]).id, 'ag17');
+  const sigma = fam('LED Paneel Sigma');
+  const ip65 = sigma.varianten.find(v => /IP65/.test(v.omschrijving));
+  const gewoon = sigma.varianten.find(v => !/IP65/.test(v.omschrijving));
+  is('een Sigma-artikel krijgt de Sigma G2', m.presenterNaam(m.presenterVan(leeg, sigma, gewoon).id), 'Paneel Sigma G2');
+  is('een Sigma IP65 krijgt die van de IP65', m.presenterNaam(m.presenterVan(leeg, sigma, ip65).id), 'Paneel Sigma G2 IP65');
+  is('zonder artikel en oneens: geen', m.presenterVan(leeg, sigma, null).id, null);
+  is('herkend staat erbij', m.presenterVan(leeg, sigma, gewoon).bron, 'herkend');
+  is('families.json wint', m.presenterVan(leeg, pir, pir.varianten[0]).bron, 'familie');
+  is('zelf gekozen wint van alles', m.presenterVan({presenter: 'ag01'}, pir, pir.varianten[0]), {id: 'ag01', bron: 'handmatig'});
+  is('geen presenter is een keuze', m.presenterVan({presenter: '-'}, pir, pir.varianten[0]), {id: null, bron: 'geen'});
+}
+
 /* ---------------------------------------------------------------- verslag ---- */
 console.log('\n' + gedaan + ' controles, ' + (mis ? mis + ' MIS' : 'alles goed') + '.');
 process.exit(mis ? 1 : 0);

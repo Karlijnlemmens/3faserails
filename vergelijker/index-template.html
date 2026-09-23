@@ -275,6 +275,11 @@ button,input,select,textarea{font:inherit;color:inherit}
 </div>
 
 <script src="pdf-huisstijl.js"></script>
+<!-- De lijst met presenters (5 kB) en de herkenning van het armatuurtype zijn
+     nodig om bij elke positie te laten zien welke presenter erachter komt; de
+     presenters zelf worden pas bij de PDF opgehaald. -->
+<script src="presenters-data.js"></script>
+<script src="armatuur-groepen.js"></script>
 <script src="spec-lezer.js"></script>
 <script src="zoeken.js"></script>
 <script src="info-teken.js"></script>
@@ -357,7 +362,7 @@ function sorteerKenmerk(waarden){
 function nieuwePositie(code){
   return {code:code||volgendeCode(), aantallen:{}, bestaandeZaagmaat:'',
           ref:{}, fotoRef:'', fotoOns:'', familieId:'', artikelcode:'', overrides:{}, opmerking:'',
-          voorstel:'', akkoord:'', reactie:''};
+          voorstel:'', akkoord:'', reactie:'', presenter:''};
 }
 function volgendeCode(){
   const g=['A','B','C','D','E','F','G','H','J','K','L','M'];
@@ -413,6 +418,44 @@ function parseGetal(s){
 }
 function famById(id){return (DATA?.families||[]).find(f=>f.id===id)||null}
 function varByCode(fam,code){return (fam?.varianten||[]).find(v=>v.artikelcode===code)||null}
+
+/* ======================= presenter ======================= */
+/* Welke presenter er achter een positie in het boek komt. families.json noemt er
+   met de hand maar een paar - bij 3 van de 209 Pragmalux-families - dus eindigde
+   vrijwel elke PDF met "Nog geen presenter voor ...", terwijl de presenter er
+   meestal gewoon was. Nu, in deze volgorde:
+   - wat bij de positie gekozen is: een presenter, of '-' voor geen;
+   - wat families.json voor de familie zegt: handwerk wint van herkenning;
+   - wat matchArmGroep() (armatuur-groepen.js, dezelfde herkenning als in het
+     armaturenboek) uit de omschrijving van het gekozen ARTIKEL haalt. Het artikel
+     en niet de familie, omdat één familie twee presenters kan hebben: de Sigma G2
+     en de Sigma G2 IP65 zijn in de prijslijst één reeks. De soort vooraan in die
+     omschrijving houdt een paneel weg van een downlightpresenter;
+   - is er nog geen artikel, dan de presenter waar alle artikelen van de familie
+     het over eens zijn, en anders geen.
+   Alleen voor Pragmalux: de presenters zijn Pragmalux-bladen, en een Interlight
+   3-Fase Track Orion is een ander armatuur dan de Pragmalux Orion.
+   bron zegt waar het vandaan komt, zodat de tool dat kan laten zien. */
+const FAMILIEGROEP = new WeakMap();
+function familieGroep(fam){
+  if(!FAMILIEGROEP.has(fam)){
+    const ids=new Set();
+    (fam.varianten||[]).forEach(x=>{ const g=matchArmGroep(x.omschrijving||''); if(g) ids.add(g.id); });
+    FAMILIEGROEP.set(fam, ids.size===1 ? [...ids][0] : null);
+  }
+  return FAMILIEGROEP.get(fam);
+}
+function presenterVan(p,fam,v){
+  if(p && p.presenter==='-') return {id:null, bron:'geen'};
+  if(p && p.presenter) return {id:p.presenter, bron:'handmatig'};
+  if(!fam) return {id:null, bron:''};
+  if(fam.presenter) return {id:fam.presenter, bron:'familie'};
+  if(!/pragmalux/i.test(fam.merk||'')) return {id:null, bron:''};
+  const g = v ? matchArmGroep(v.omschrijving||'') : null;
+  const id = g ? g.id : familieGroep(fam);
+  return id ? {id, bron:'herkend'} : {id:null, bron:''};
+}
+function presenterNaam(id){ const g=ARM_GROEPEN.find(x=>x.id===id); return g ? g.naam : id; }
 
 /* ======================= specificaties uitlezen ======================= */
 /* Kopregels van leveranciersbladen: geven context, hebben zelf geen waarde. */
@@ -1584,6 +1627,8 @@ function bouwPicker(p,fam,v){
     vs.onchange=()=>{p.artikelcode=vs.value;p.handmatig=true;p.overrides={};render()};
     vf.append(vs); box.append(vf);
 
+    box.append(presenterKeuze(p,fam,v));
+
     /* renovatie: bestaande zaagmaat */
     if(S.project.type==='renovatie'){
       const zf=el('div','f xs'); zf.append(el('label','','Bestaand gat Ø'));
@@ -1615,6 +1660,36 @@ function bouwPicker(p,fam,v){
   }
   return box;
 }
+/* Welke presenter er achter de positie komt, met een keuzelijst om dat te
+   overrulen of "Geen presenter" te kiezen - hetzelfde als in het armaturenboek.
+   De bovenste regel zegt wat de tool zelf zou kiezen. */
+function presenterKeuze(p,fam,v){
+  const f=el('div','f'); f.append(el('label','','Presenter in het boek'));
+  const s=el('select'); s.style.minWidth='250px';
+  const auto=presenterVan(Object.assign({},p,{presenter:''}),fam,v);
+  s.append(new Option(auto.id ? 'automatisch: '+presenterNaam(auto.id) : 'automatisch: geen gevonden', ''));
+  const groepen=ARM_GROEPEN.filter(g=>presenterAanwezig(g.id))
+    .sort((a,b)=>a.naam.localeCompare(b.naam,'nl'));
+  /* een eerder gekozen presenter waarvan het bestand weg is blijft zichtbaar */
+  if(p.presenter && p.presenter!=='-' && !groepen.some(g=>g.id===p.presenter))
+    groepen.unshift({id:p.presenter, naam:presenterNaam(p.presenter)+' (bestand ontbreekt)'});
+  groepen.forEach(g=>s.append(new Option(g.naam, g.id)));
+  s.append(new Option('Geen presenter', '-'));
+  s.value=p.presenter||'';
+  s.onchange=()=>{ p.presenter=s.value; render(); };
+  f.append(s);
+  const nu=presenterVan(p,fam,v), h=el('div','hint');
+  if(nu.bron==='geen') h.textContent='Deze positie krijgt geen presenter in het boek.';
+  else if(!nu.id){ h.className='hint warn';
+    h.textContent='Geen presenter herkend. Kies er een, of kies “Geen presenter”.'; }
+  else if(!presenterAanwezig(nu.id)){ h.className='hint warn';
+    h.textContent='De presenter van '+presenterNaam(nu.id)+' ontbreekt nog in presenters-data.js.'; }
+  else h.textContent={handmatig:'Zelf gekozen.', familie:'Uit de productdata (families.json).',
+    herkend:'Herkend uit de omschrijving van het artikel.'}[nu.bron];
+  f.append(h);
+  return f;
+}
+
 function kort(v){
   const b=[]; if(v.uitvoering)b.push(v.uitvoering); if(v.kleur)b.push(v.kleur);
   if(v.lengte_cm)b.push(v.lengte_cm+'cm'); if(v.maat)b.push(v.maat);
@@ -1720,9 +1795,8 @@ let pdfSpul=null;
 function pdfOnderdelen(){
   if(!pdfSpul){
     pdfSpul=(async()=>{
-      await Promise.all([laadScript('vendor/pdf-lib.min.js'),
-                         laadScript('presenters-data.js'),
-                         merkData()]);
+      /* presenters-data.js staat al vooraan in de pagina, zie de <script>-regels */
+      await Promise.all([laadScript('vendor/pdf-lib.min.js'), merkData()]);
       if(!window.PDFLib) throw new Error('vendor/pdf-lib.min.js kon niet geladen worden.');
     })();
   }
@@ -1922,13 +1996,19 @@ async function bouwPdf(){
   }
 
   /* --- armaturenboek ----------------------------------------------------------
-     Na de vergelijkingen het tussenblad, daarna van elk gebruikt armatuur de
-     presenter, en tot slot de vaste achterpagina's. Elke familie komt één keer
-     voor, in de volgorde waarin hij in het project voor het eerst voorkomt. */
-  const gebruikt=[];
+     Na de vergelijkingen het tussenblad, daarna de presenter van elke positie
+     (presenterVan()), en tot slot de vaste achterpagina's. Elke presenter komt
+     één keer voor, in de volgorde waarin hij in het project voor het eerst
+     voorkomt: twee posities met hetzelfde armatuur delen hem. */
+  const boek=[], zonder=[], ontbreekt=[];
   posities.forEach(p=>{
     const fam=famById(p.familieId);
-    if(fam && !gebruikt.some(f=>f.id===fam.id)) gebruikt.push(fam);
+    if(!fam) return;
+    const {id,bron}=presenterVan(p,fam,varByCode(fam,p.artikelcode));
+    if(bron==='geen') return;
+    const lijst = !id ? zonder : !presenterAanwezig(id) ? ontbreekt : boek;
+    const wat = !id ? (fam.naam||fam.id) : lijst===boek ? id : presenterNaam(id);
+    if(!lijst.includes(wat)) lijst.push(wat);
   });
 
   const plakPresenter=async id=>{
@@ -1952,15 +2032,16 @@ async function bouwPdf(){
   if(afgekeurd.length) meldingen.push('Niet akkoord bevonden: '+afgekeurd.join(', '));
   if(open.length) meldingen.push('Nog niet beoordeeld: '+open.join(', '));
 
-  const metPresenter=gebruikt.filter(f=>presenterAanwezig(f.presenter));
-  const zonder=gebruikt.filter(f=>!presenterAanwezig(f.presenter));
   if(zonder.length){
-    meldingen.push('Nog geen presenter voor '+zonder.map(f=>f.naam||f.id).join(', ')+
-      ' — dat armatuur ontbreekt in het boek.');
+    meldingen.push('Nog geen presenter voor '+zonder.join(', ')+
+      ' — dat armatuur ontbreekt in het boek. Kies er een bij de positie, of kies “Geen presenter”.');
   }
-  if(metPresenter.length){
+  if(ontbreekt.length){
+    meldingen.push('De presenter van '+ontbreekt.join(', ')+' ontbreekt nog in presenters-data.js.');
+  }
+  if(boek.length){
     tussenblad();
-    for(const fam of metPresenter) await plakPresenter(fam.presenter);
+    for(const id of boek) await plakPresenter(id);
     await plakPresenter('achterpaginas');
   }
 
@@ -2050,6 +2131,8 @@ function herstelProject(bron){
       if(p.voorstel==null) p.voorstel='';
       if(p.akkoord==null)  p.akkoord='';
       if(p.reactie==null)  p.reactie='';
+      /* ook de presenterkeuze is later gekomen; leeg is "automatisch" */
+      if(p.presenter==null) p.presenter='';
     });
     if(typeof s.actief==='number') S.actief = s.actief;
 }

@@ -240,7 +240,7 @@ families je blok geraakt heeft, en klaagt als het er nul zijn.
 | `id` | verzin je, kleine letters met streepjes. Moet uniek zijn. |
 | `namen` | exact de familienamen uit de catalogus |
 | `ip` `ik` `ugr` `cri_min` `levensduur` `garantie_jaar` | uit het familieblad van die serie |
-| `presenter` | het `ag`-nummer van dat familieblad, te vinden in de map `presenters\` |
+| `presenter` | het `ag`-nummer van dat familieblad, te vinden in de map `presenters\`. Alleen nodig als de tool de verkeerde of geen presenter kiest — dat zie je in de vergelijker onder het gekozen artikel, bij *Presenter in het boek* |
 | `zoektermen` | extra woorden waarop jullie die familie zoeken |
 | `cct` | alleen nodig als de omschrijvingen geen kleurtemperatuur noemen |
 
