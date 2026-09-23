@@ -1,16 +1,29 @@
 # Controles
 
-Er is geen testrunner in dit project. In plaats daarvan staan hier vier scripts die
-je met de hand draait; samen vangen ze wat anders pas opvalt als een collega het
-meldt. Alle vier eindigen met afsluitcode 1 als er iets mis is.
+Er is geen testrunner in dit project. In plaats daarvan staan hier scripts die
+samen vangen wat anders pas opvalt als een collega het meldt. Ze eindigen allemaal
+met afsluitcode 1 als er iets mis is. **Draai ze in één keer:**
+
+```
+node tools/controleer-alles.mjs          # de vijf controles, ongeveer een minuut
+node tools/controleer-alles.mjs --pdf    # plus de PDF-regressie tegen de laatste commit
+```
+
+Dat geeft per controle één regel en onderaan één uitslag; wat misgaat krijgt zijn
+volledige uitvoer eronder (`--uitgebreid` laat ook de rest zien). `--pdf` zet de
+laatste commit in een tijdelijke git-worktree, laat daar én in de werkmap elke tool
+een PDF maken en vergelijkt die op inhoud - het vangnet hieronder, zonder dat je
+zelf een "voor"-map hoeft te maken. Met `--pdf-tegen <map>` vergelijk je in plaats
+daarvan met een map die je eerder met `pdfbaseline.mjs` maakte.
 
 | script | wat het nakijkt |
 |---|---|
-| `node tools/controleer-logica.mjs` | de rekenkern: armatuurherkenning, de bandrasterberekening tegen het voorbeeld uit de werkmap, en het uitlezen van geplakte specificaties |
-| `node tools/controleer-suite.mjs` | wat over meerdere bestanden gelijk moet blijven: armatuurtabel, tabbladenrij, palet, geen netwerkverzoeken, gedeelde scripts |
+| `node tools/controleer-logica.mjs` | de rekenkern: armatuurherkenning, de bandrasterberekening tegen het voorbeeld uit de werkmap, het uitlezen van geplakte specificaties, de zoekers en de presenterkeuze van de vergelijker |
+| `node tools/controleer-suite.mjs` | wat over meerdere bestanden gelijk moet blijven: armatuurtabel, tabbladenrij, palet, geen netwerkverzoeken, gedeelde scripts, en dat de ingebakken productdata bij `armaturen.json` hoort |
 | `node tools/controleer-presenters.mjs` | de ingebakken presenters: lege pagina's, uitschieters in grootte, lijst en map uit de pas |
-| `node tools/pdfbaseline.mjs` + `vergelijk.mjs` | dat een wijziging niets aan de PDF's verandert (hieronder) |
 | `python3 vergelijker/controleer-families.py` | dat de productdata in de juiste families valt: nagekeken gevallen, en hoeveel families er uit één artikel bestaan |
+| `python3 vergelijker/controleer-data.py` | of `armaturen.json` compleet genoeg is om op te kiezen. Er zijn 14 bekende punten - families waarvan de prijslijst nergens een lichtstroom noemt - dus `controleer-alles` draait hem met `--hoogstens 14`: een vijftiende maakt het rood |
+| `node tools/pdfbaseline.mjs` + `vergelijk.mjs` | dat een wijziging niets aan de PDF's verandert (hieronder) |
 
 `controleer-logica.mjs` draait de échte code van de tools: het snijdt de declaraties
 die het nodig heeft uit het HTML-bestand en importeert die als module via een

@@ -5,7 +5,7 @@ De tool draait als tabblad van de Distrilight tools-suite en staat daarom in de
 hoofdmap, naast index.html: de koptekst verwijst naar de andere pagina's en naar
 merk/Distrilight logo donker.png.
 """
-import json, sys
+import hashlib, json, sys
 from pathlib import Path
 
 HIER = Path(__file__).parent
@@ -19,6 +19,15 @@ NOTITIE = ("<!-- Gegenereerd door vergelijker/bouw-tool.py — niet met de hand 
 if not DATA.exists():
     sys.exit("data/armaturen.json ontbreekt. Draai eerst: python bouw-data.py")
 
+
+def vinger(pad):
+    """Vingerafdruk van een bronbestand, zodat tools/controleer-suite.mjs kan zien
+       of vergelijking.html nog bij zijn bronnen hoort - vergeten opnieuw te bouwen
+       na een wijziging in de data of het sjabloon ging anders stil. Regeleinden
+       gelijkgetrokken: git zet ze op Windows om, en dat maakt de bron niet anders."""
+    tekst = pad.read_text(encoding="utf-8").replace("\r\n", "\n")
+    return hashlib.sha256(tekst.encode("utf-8")).hexdigest()[:16]
+
 html = TPL.read_text(encoding="utf-8")
 if MERK not in html:
     sys.exit(f"Plaatshouder niet gevonden in {TPL.name}. Is het bestand aangepast?")
@@ -30,6 +39,7 @@ import re
 html = html.replace(MERK, json.dumps(data, ensure_ascii=False))
 html = re.sub(r"\n*<!--SJABLOON-->.*?<!--/SJABLOON-->\n*", "\n", html, flags=re.S)   # sjabloontekst weg
 html = re.sub(r"<title>.*?</title>", "<title>Armatuurvergelijker \u2014 Distrilight</title>", html, flags=re.S)
-html = html.replace("<head>", "<head>\n" + NOTITIE, 1)
+html = html.replace("<head>", "<head>\n" + NOTITIE + "\n"
+                    f"<!-- bron-vingerafdruk armaturen.json={vinger(DATA)} index-template.html={vinger(TPL)} -->", 1)
 UIT.write_text(html, encoding="utf-8")
 print(f"{UIT.name} geschreven — {len(data.get('families', []))} families, {n} artikelen, {UIT.stat().st_size//1024} kB")

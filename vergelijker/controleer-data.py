@@ -8,6 +8,14 @@ gevonden is maar de gatmaat niet, levert daar geen melding op en valt hier wel o
 
 Draaien: python controleer-data.py
 Afsluitcode 1 als er kritieke gaten zijn, zodat je het in een controle kunt hangen.
+
+    python controleer-data.py --hoogstens 14
+
+laat een bekend aantal punten toe en slaat alleen alarm als het er meer worden.
+Zo draait tools/controleer-alles.mjs hem: de huidige catalogus heeft 14 families
+waarvan de prijslijst nergens een lichtstroom noemt (LED-strips, een paar
+modules en spots). Dat valt niet op te lossen zonder gegevens te verzinnen,
+maar een vijftiende punt hoort wel op te vallen.
 """
 
 import importlib.util, json, sys
@@ -266,10 +274,18 @@ def main():
             print(f"     - {r}")
 
     print(f"\n{len(families)} families gecontroleerd, {schoon} zonder opmerking.")
+    hoogstens = 0
+    if "--hoogstens" in sys.argv:
+        hoogstens = int(sys.argv[sys.argv.index("--hoogstens") + 1])
     if totaal_kritiek:
         print(f"{totaal_kritiek} punt(en) met een uitroepteken: die moeten eerst opgelost, "
               f"anders kiest de tool daar niet betrouwbaar.")
-        sys.exit(1)
+        if totaal_kritiek > hoogstens:
+            if hoogstens:
+                print(f"Dat zijn er meer dan de {hoogstens} die al bekend waren.")
+            sys.exit(1)
+        print(f"Niet meer dan de {hoogstens} die al bekend waren.")
+        return
     print("Geen kritieke gaten. De punten met een streepje maken alleen een rij in het blad leeg.")
 
 

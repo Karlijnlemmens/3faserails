@@ -13,11 +13,13 @@
  *   3. elke pagina gebruikt hetzelfde palet voor de kleuren die ze allebei kennen;
  *   4. niemand haalt nog iets van het netwerk (geen http(s) in een src/href);
  *   5. de gedeelde scripts worden overal ingeladen waar ze gebruikt worden;
- *   6. de GROEPEN-tabel van maak-presenters.mjs kent elke ag-groep uit index.html.
+ *   6. de GROEPEN-tabel van maak-presenters.mjs kent elke groep uit armatuur-groepen.js;
+ *   7. armaturen-data.js en vergelijking.html zijn gebouwd uit de huidige bronnen.
  *
  * Eindigt met afsluitcode 1 als er iets niet klopt. Geen pakketten nodig, alleen Node.
  */
 import { readFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -159,9 +161,41 @@ PAGINAS.forEach(p => {
 {
   const script = lees('tools/maak-presenters.mjs');
   const idsInScript = new Set([...script.matchAll(/\['(ag\d+|rail|achterpaginas|lichtlijn-[a-z]+)'/g)].map(m => m[1]));
-  const idsInTool = [...lees('index.html').matchAll(/\{id:'(ag\d+)'/g)].map(m => m[1]);
+  /* De tabel staat sinds de opsplitsing in armatuur-groepen.js; deze controle las
+     nog index.html, vond daar niets meer en keurde zo elke tabel goed. Daarom ook
+     de ondergrens: een tabel waar niets uit komt is geen goedgekeurde tabel. */
+  const idsInTool = [...lees('armatuur-groepen.js').matchAll(/\{id:'(ag\d+|lichtlijn-[a-z]+)'/g)].map(m => m[1]);
+  if(idsInTool.length < 100) meld('armatuur-groepen.js: maar ' + idsInTool.length + ' groepen gevonden - is de tabel verhuisd?');
   [...new Set(idsInTool)].filter(id => !idsInScript.has(id))
-    .forEach(id => meld('tools/maak-presenters.mjs kent ' + id + ' niet, index.html wel'));
+    .forEach(id => meld('tools/maak-presenters.mjs kent ' + id + ' niet, armatuur-groepen.js wel'));
+}
+
+/* ---------- 7. de gebouwde productdata hoort bij zijn bronnen ---------- */
+{
+  /* armaturen-data.js en vergelijking.html zijn gebouwd, niet geschreven. Wie
+     armaturen.json, families.json of het sjabloon aanpast en vergeet opnieuw te
+     bouwen, krijgt een tool die stil de oude data toont. De bouwscripts zetten een
+     vingerafdruk van elke bron in het bestand; die rekenen we hier na, met de
+     regeleinden gelijkgetrokken zoals de bouwscripts ook doen. */
+  const vinger = (p) => existsSync(join(root, p))
+    ? createHash('sha256').update(lees(p).replace(/\r\n/g, '\n'), 'utf8').digest('hex').slice(0, 16) : '-';
+  const bronnen = {
+    'armaturen-data.js': [['armaturen.json', 'vergelijker/data/armaturen.json'], ['families.json', 'vergelijker/data/families.json'],
+                          'python3 vergelijker/bouw-armaturen-data.py'],
+    'vergelijking.html': [['armaturen.json', 'vergelijker/data/armaturen.json'], ['index-template.html', 'vergelijker/index-template.html'],
+                          'python3 vergelijker/bouw-tool.py'],
+  };
+  for(const [bestand, lijst] of Object.entries(bronnen)){
+    const kop = lees(bestand).slice(0, 2000);
+    const m = /bron-vingerafdruk ([^*\n]*?)\s*(?:\*\/|-->)/.exec(kop);
+    const commando = lijst.pop();
+    if(!m){ meld(bestand + ' heeft geen bron-vingerafdruk - draai ' + commando); continue; }
+    const staat = Object.fromEntries(m[1].trim().split(/\s+/).map(x => x.split('=')));
+    for(const [naam, pad] of lijst){
+      if(staat[naam] !== vinger(pad))
+        meld(bestand + ' is niet gebouwd uit de huidige ' + pad + ' - draai ' + commando);
+    }
+  }
 }
 
 /* ---------- verslag ---------- */

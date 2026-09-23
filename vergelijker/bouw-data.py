@@ -655,7 +655,7 @@ def catalogusfamilies(bestand):
         # catalogus haalt dit er 18 regels uit en ze zijn alle 18 toebehoren:
         # drivers voor het Sigma-, Easy- en Fora-assortiment, drivers voor
         # ledstrip, en de losse reflectoren van de Railspot Piccolo - die laatste
-        # stonden in CLAUDE.md al als het voorbeeld van wat eruit hoort, maar
+        # stonden in de documentatie (nu docs/vergelijker.md) al als het voorbeeld van wat eruit hoort, maar
         # vielen er tot nu toe niet uit omdat "Reflector" achter het vermogen
         # staat en dus buiten de naam valt.
         geen_lichtopgave = ("lichtstroom_lm" not in v) and ("cct_tekst" not in v)
