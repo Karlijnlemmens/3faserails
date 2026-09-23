@@ -14,14 +14,15 @@
    armatuur-groepen.js, zodat tools/controleer-logica.mjs ze kan uitsnijden. */
 
 /* Kleine letters, accenten eraf, en de schrijfwijzen van maten en eenheden
-   gelijk: "60 x 60" en "60×60" worden "60x60", "4000 K" wordt "4000k". Zo
+   gelijk: "60 x 60" en "60×60" worden "60x60", "4000 K" wordt "4000k" en
+   "3 m" wordt "3m". Zo
    vinden invoer en tekst elkaar ongeacht hoe een van beide getypt is. */
 function zoekNormaal(s){
-  let t = String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .toLowerCase().replace(/×/g, 'x');
+  let t = String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/\u00d7/g, 'x');
   /* twee keer, want bij "60 x 60 x 10" slaat de eerste ronde de tweede x over */
   for(let i = 0; i < 2; i++) t = t.replace(/(\d)\s*x\s*(\d)/g, '$1x$2');
-  return t.replace(/(\d)\s+(k|w|lm|mm|cm|v|ma)\b/g, '$1$2')
+  return t.replace(/(\d)\s+(k|w|lm|mm|cm|m|v|ma)\b/g, '$1$2')
     .replace(/\s+/g, ' ').trim();
 }
 
@@ -110,4 +111,15 @@ function besteSuggestie(w, woordenlijst){
     }
   }
   return afstand <= max ? beste : null;
+}
+
+/* Past de invoer bij deze tekst? Elk woord moet erin staan, in welke volgorde
+   ook - of een van zijn synoniemen. Zo vindt "wit rail" hetzelfde als "rail wit",
+   en vindt "t-stuk" het T-koppelstuk als de tool dat als synoniem opgeeft.
+   `synoniemen` is een object van woord naar een lijst woorden die hetzelfde
+   bedoelen; de tool houdt die lijst zelf bij, want vakwoorden verschillen per
+   tool. Beide kanten horen door zoekNormaal() te zijn gegaan. */
+function tekstPast(tekst, woorden, synoniemen){
+  return woorden.every(w => [w, ...((synoniemen && synoniemen[w]) || [])]
+    .some(x => maatLezingen(x).some(y => bevatWoord(tekst, y))));
 }

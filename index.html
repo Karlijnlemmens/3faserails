@@ -933,6 +933,7 @@
 <script src="presenters-data.js"></script>
 <script src="pdf-huisstijl.js"></script>
 <script src="armatuur-groepen.js"></script>
+<script src="zoeken.js"></script>
 <script src="info-teken.js"></script>
 <script src="melding.js"></script>
 <script src="project-opslag.js"></script>
@@ -1144,12 +1145,32 @@ const cats = [...new Set(parts.map(p=>p.cat))];
 const catFilter = document.getElementById('partCatFilter');
 cats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; catFilter.appendChild(o); });
 
+/* Vakwoorden die de binnendienst gebruikt voor wat in de lijst anders heet. Eén
+   plek, voor de onderdelen en de artikelzoeker allebei. Een woord vindt het
+   onderdeel als het er zelf in staat óf een van de woorden hierachter. */
+const RAIL_SYNONIEMEN = {
+  't-stuk':['t-koppelstuk'], 'tstuk':['t-koppelstuk'], 't-splitser':['t-koppelstuk'],
+  'kruisstuk':['kruis'], 'x-stuk':['kruis'],
+  'eindstuk':['eindkap'], 'afsluitkap':['eindkap'], 'afsluiter':['eindkap'],
+  'hoek':['bocht'], 'hoekstuk':['bocht','hoek'],
+  'voeding':['aansluitstuk','voeding'], 'voedingsstuk':['aansluitstuk'], 'inspeelstuk':['aansluitstuk'],
+  'koppeling':['koppelstuk'], 'verbinder':['koppelstuk'], 'doorverbinder':['koppelstuk'],
+  'stekker':['schuko'], 'stopcontact':['schuko'],
+  'ophanging':['ophang','pendel'], 'plafondbeugel':['montagebeugel'],
+  '3fase':['3-fase'], 'driefase':['3-fase'],
+  'white':['wit'], 'black':['zwart'], 'grey':['grijs'], 'gray':['grijs'], 'silver':['zilver'],
+};
+/* De doorzoekbare tekst van een onderdeel: naam, soort, en elk artikelnummer
+   met zijn uitvoering - zodat "2000766" en "rail 3m" de kaart vinden. */
+const onderdeelTekst = p => zoekNormaal([p.name, p.cat,
+  ...p.LCODES.flatMap(c=>[c.code, c.v])].join(' '));
+
 function renderParts(){
-  const q = document.getElementById('partSearchInput').value.toLowerCase();
+  const woorden = zoekWoorden(document.getElementById('partSearchInput').value);
   const cat = catFilter.value;
   const grid = document.getElementById('partGrid');
   grid.innerHTML='';
-  parts.filter(p=> (!cat || p.cat===cat) && (p.name.toLowerCase().includes(q) || p.cat.toLowerCase().includes(q)) )
+  parts.filter(p=> (!cat || p.cat===cat) && tekstPast(onderdeelTekst(p), woorden, RAIL_SYNONIEMEN) )
   .forEach(p=>{
     const div = document.createElement('div');
     div.className='part-card';
@@ -1231,17 +1252,24 @@ function renderTs(){
 renderTs();
 
 /* =================== ARTIKELZOEKER (full table) =================== */
-let allArticles = [];
-parts.forEach(p=>{ p.LCODES.forEach(c=>{ allArticles.push({code:c.code, name:`${p.name} ${c.v!=='—'?c.v:''}`.trim(), cat:p.cat, color:c.color}); }); });
+const allArticles = parts.flatMap(p=>p.LCODES.map(c=>
+  ({code:c.code, name:`${p.name} ${c.v!=='—'?c.v:''}`.trim(), cat:p.cat, color:c.color})));
+/* Wat de artikelzoeker per rij doorzoekt. */
+const artikelRijTekst = a => zoekNormaal([a.code, a.name, a.cat, a.color].join(' '));
 
 const artCatFilter = document.getElementById('artCatFilter');
 [...new Set(allArticles.map(a=>a.cat))].forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; artCatFilter.appendChild(o); });
 
+/* Per woord zoeken, in willekeurige volgorde: "rail wit" en "wit rail" vonden
+   eerst allebei niets, omdat de hele invoer als één stuk tekst werd gezocht.
+   Een artikelnummer mag half getypt zijn - dit is een tabel die meefiltert
+   terwijl je typt, geen keuze die een artikel aanwijst. */
 function renderArtTable(){
-  const q = document.getElementById('artSearchInput').value.toLowerCase();
+  const woorden = zoekWoorden(document.getElementById('artSearchInput').value);
   const cat = artCatFilter.value;
   const body = document.getElementById('artFullBody');
-  body.innerHTML = allArticles.filter(a=> (!cat||a.cat===cat) && (a.code.includes(q)||a.name.toLowerCase().includes(q)||a.color.includes(q)) )
+  body.innerHTML = allArticles.filter(a=> (!cat||a.cat===cat)
+      && tekstPast(artikelRijTekst(a), woorden, RAIL_SYNONIEMEN) )
     .map(a=>`<tr><td class="code">${a.code}</td><td>${a.name}</td><td>${a.cat}</td><td><span class="dot ${a.color}" style="display:inline-block;vertical-align:middle;margin-right:6px;"></span>${a.color}</td></tr>`).join('');
 }
 document.getElementById('artSearchInput').addEventListener('input', renderArtTable);

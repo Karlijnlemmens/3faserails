@@ -113,12 +113,21 @@ PAGINAS.forEach(p => {
 
 /* ---------- 5. gedeelde scripts ingeladen waar ze gebruikt worden ---------- */
 {
+  /* De zoekhulp staat op één plek. Een tool die weer een eigen zoekNormaal() of
+     bevatWoord() krijgt, gaat vroeg of laat anders zoeken dan de rest - precies
+     hoe "rail wit" in de ene tool niets vond en in de andere wel. */
+  PAGINAS.concat(['vergelijker/index-template.html']).forEach(p => {
+    const t = zonderCommentaar(lees(p));
+    for(const f of ['zoekNormaal','zoekWoorden','bevatWoord','tekstPast','codeSleutel','lijktCode','maatLezingen','bewerkAfstand','besteSuggestie'])
+      if(new RegExp('function\\s+' + f + '\\s*\\(').test(t)) meld(p + ' heeft een eigen ' + f + '(); die hoort alleen in zoeken.js');
+  });
   const gedeeld = [
     ['info-teken.js',    /InfoTeken\./],
     ['project-opslag.js',/ProjectOpslag\./],
     ['pdf-huisstijl.js', /PdfHuisstijl\./],
     ['spec-lezer.js',    /SpecLezer\./],
     ['melding.js',       /Melding\./],
+    ['zoeken.js',        /\b(zoekNormaal|zoekWoorden|tekstPast|bevatWoord|codeSleutel|lijktCode|besteSuggestie)\(/],
   ];
   PAGINAS.forEach(p => {
     const t = lees(p);

@@ -773,6 +773,35 @@ function is(wat, gekregen, verwacht){
   is('geen suggestie bij een nummer', v.zoekSuggestie('104322', F), null);
 }
 
+/* ============================ zoeken in de railtool ============================ */
+{
+  /* De artikelzoeker en de onderdelen zochten de invoer als één stuk tekst:
+     "rail wit" en "wit rail" vonden niets, "t-stuk" ook niet (het heet
+     T-koppelstuk), en Onderdelen zocht niet op artikelnummer. */
+  const r = await laadUit('index.html', ['parts', 'RAIL_SYNONIEMEN', 'onderdeelTekst', 'allArticles',
+    'artikelRijTekst'], readFileSync(join(root, 'zoeken.js'), 'utf8'), ['zoekWoorden', 'tekstPast']);
+  const artikelen = (q) => r.allArticles.filter(a =>
+    r.tekstPast(r.artikelRijTekst(a), r.zoekWoorden(q), r.RAIL_SYNONIEMEN)).map(a => a.name);
+  const onderdelen = (q) => r.parts.filter(p =>
+    r.tekstPast(r.onderdeelTekst(p), r.zoekWoorden(q), r.RAIL_SYNONIEMEN)).map(p => p.name);
+
+  console.log('\nzoeken in de railtool');
+  is('rail wit vindt de witte rails', artikelen('rail wit'),
+    ['Rail 1m Wit', 'Rail 2m Wit', 'Rail 3m Wit', 'Rail 4m Wit', 'Rail beugel + snelspanner Wit']);
+  is('de volgorde van de woorden telt niet', artikelen('wit rail'), artikelen('rail wit'));
+  is('3 m met spatie is 3m', artikelen('rail 3 m'), ['Rail 3m Wit', 'Rail 3m Zwart', 'Rail 3m Grijs']);
+  is('t-stuk vindt het T-koppelstuk', artikelen('t-stuk').every(n => /^T-Koppelstuk/.test(n)), true);
+  is('en vindt er iets', artikelen('t-stuk').length > 0, true);
+  is('een artikelnummer precies', artikelen('2000766'), ['Rail 1m Wit']);
+  /* Een tabel die meefiltert mag een half nummer tonen: hier wijst niets een
+     artikel aan, je ziet de rijen die ermee beginnen. */
+  is('een begin van een nummer filtert mee', artikelen('20007').length, 6);
+  is('maar niet midden in een nummer', artikelen('00766'), []);
+  is('onderdelen vindt een artikelnummer', onderdelen('2000766'), ['Rail']);
+  is('onderdelen vindt een uitvoering', onderdelen('rail 3m'), ['Rail']);
+  is('stekker is de schuko-adapter', onderdelen('stekker'), ['Schuko Adapter']);
+}
+
 /* ---------------------------------------------------------------- verslag ---- */
 console.log('\n' + gedaan + ' controles, ' + (mis ? mis + ' MIS' : 'alles goed') + '.');
 process.exit(mis ? 1 : 0);
