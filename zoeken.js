@@ -76,19 +76,25 @@ function maatLezingen(w){
   return [...uit];
 }
 
-/* Levenshtein-afstand met een plafond: boven `max` stoppen we met rekenen. */
+/* Bewerkafstand met een plafond: boven `max` stoppen we met rekenen. Twee
+   verwisselde buurletters tellen als één fout ("mondail" is één tikfout van
+   "mondial", niet twee) - dat is de tikfout die het vaakst gemaakt wordt. */
 function bewerkAfstand(a, b, max){
   if(Math.abs(a.length - b.length) > max) return max + 1;
-  let vorige = Array.from({length: b.length + 1}, (_, j) => j);
+  let twee = null, vorige = Array.from({length: b.length + 1}, (_, j) => j);
   for(let i = 1; i <= a.length; i++){
     const rij = [i]; let laagste = i;
     for(let j = 1; j <= b.length; j++){
       rij[j] = Math.min(vorige[j] + 1, rij[j - 1] + 1,
                         vorige[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      if(twee && i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1])
+        rij[j] = Math.min(rij[j], twee[j - 2] + 1);
       if(rij[j] < laagste) laagste = rij[j];
     }
-    if(laagste > max) return max + 1;
-    vorige = rij;
+    /* een verwisseling kijkt twee rijen terug, dus pas stoppen als ook de
+       vorige rij al boven het plafond zat */
+    if(laagste > max && Math.min(...vorige) > max) return max + 1;
+    twee = vorige; vorige = rij;
   }
   return vorige[b.length];
 }

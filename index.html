@@ -479,6 +479,8 @@
   .c2-armrecog.ok{background:var(--green-light); color:var(--green);}
   .c2-armrecog.miss{background:#FDECEC; color:#B0362B;}
   .c2-armrecog.warn{background:#FFF4E0; color:#95651A;}
+  .c2-armrecog.sug{cursor:pointer; text-decoration:underline dotted; text-underline-offset:2px;}
+  .c2-armrecog.sug:hover{background:#F9D9D6;}
 
   .c2-armspecial{display:none; align-items:center; gap:4px;}
   .c2-armspecial.show{display:inline-flex;}
@@ -3258,6 +3260,7 @@ function buildArmList(){
     }
     specialWrap.appendChild(specialBtn); specialWrap.appendChild(specialX); specialWrap.appendChild(specialFileInp);
     function paintBadge(){
+      badge.removeAttribute('tabindex'); badge.removeAttribute('role'); badge.dataset.tekst='';
       if(isSpecial(s)){ badge.textContent=''; badge.className='c2-armrecog'; badge.title=''; return; }
       const g = armGroepVan(s, a.id);
       if(g){
@@ -3269,11 +3272,28 @@ function buildArmList(){
       } else if(!nameInp.value.trim()){
         badge.textContent=''; badge.className='c2-armrecog'; badge.title='';
       } else {
+        /* Een tikfout in de naam ("Esence", "Mondail") krijgt een voorstel dat je
+           met één klik overneemt - zie armSuggestie() voor waarom die zo streng is. */
+        const sug = armSuggestie(nameInp.value);
+        if(sug){
+          badge.textContent='Bedoelde je '+sug.suggestie+'?'; badge.className='c2-armrecog miss sug';
+          badge.title='Klik om de naam te verbeteren tot "'+sug.tekst+'" — dan wordt het '+sug.groep.naam+'.';
+          badge.dataset.tekst=sug.tekst; badge.tabIndex=0; badge.setAttribute('role','button');
+          return;
+        }
         badge.textContent='Kies type'; badge.className='c2-armrecog miss';
         badge.title='Type niet herkend uit de naam — pas de omschrijving aan zodat het type duidelijk wordt, of typ "special" in het artikelcodeveld om zelf een PDF te uploaden.';
       }
     }
     paintBadge(); updateSpecialUI();
+    function neemSuggestieOver(){
+      if(!badge.dataset.tekst) return;
+      nameInp.value = badge.dataset.tekst;
+      nameInp.dispatchEvent(new Event('input'));
+      nameInp.dispatchEvent(new Event('change'));
+    }
+    badge.addEventListener('click', neemSuggestieOver);
+    badge.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); neemSuggestieOver(); } });
     nameInp.addEventListener('input', paintBadge);
     nameInp.addEventListener('change', ()=>{ s.name=nameInp.value; paintBadge(); refresh(); });
     const codeInp=document.createElement('input'); codeInp.type='text'; codeInp.className='c2-textinp';

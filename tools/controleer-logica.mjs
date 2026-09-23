@@ -56,7 +56,10 @@ function is(wat, gekregen, verwacht){
   const m = await laadUit('armatuur-groepen.js',
     ['ARM_GROEPEN', 'ARM_STOPWOORDEN', 'ARM_GETAL', 'ARM_CODE', 'armTokens', 'ARM_GROEP_TOKENS',
      'ARM_VOCAB', 'armSchoon', 'armZinvolleTokens', 'ARM_TYPEWOORDEN', 'ARM_TUSSENWOORDEN',
-     'ARM_NAAMWOORDEN', 'armNaamZone', 'armBesteGroep', 'matchArmGroep']);
+     'ARM_NAAMWOORDEN', 'armNaamZone', 'ARM_SOORT', 'armSoorten', 'ARM_GROEP_SOORT', 'armBeginSoorten',
+     'armBesteGroep', 'matchArmGroep', 'ARM_SCHRIJFWIJZE', 'armSuggestie'],
+    /* armSuggestie() rekent met bewerkAfstand() uit zoeken.js, dat de tools ook laden */
+    readFileSync(join(root, 'zoeken.js'), 'utf8'), ['bewerkAfstand']);
   const groep = (t) => { const g = m.matchArmGroep(t); return g ? g.id : null; };
 
   console.log('armatuurherkenning');
@@ -92,6 +95,59 @@ function is(wat, gekregen, verwacht){
   is('elke groepsnaam komt bij zichzelf uit (of nergens)', fout, []);
   console.log('  ' + raak + ' van de ' + m.ARM_GROEPEN.length + ' groepen herkend, '
             + geweigerd + ' te dubbelzinnig om te kiezen.');
+
+  /* De soort vooraan spreekt de groep tegen: dan valt die groep af. Alle vijf zijn
+     echte omschrijvingen uit de catalogus die de verkeerde presenter kregen. */
+  is('een paneel Essence G2 is geen downlight',
+    groep('Pragmalux LED Paneel 60x60cm Essence G2 34W 4000K UGR<19 (4x14W) Excl. LED Driver'), 'ag13');
+  is('een paneel Clean is geen highbay',
+    groep('Pragmalux LED Paneel 60x60cm Clean IP65 Prisma 39W 3000K 4236lm UGR<19'), null);
+  is('een highbay Essence is geen waterdichte Essence',
+    groep('Pragmalux LED Highbay Essence IP65 100-200W 3000K-5000K 3CCT 15500-32000lm 90D Zwart'), null);
+  /* Paneel en bandraster zijn één soort: de Flexcore-presenter heet zelf zo. */
+  is('bandraster Flexcore houdt de Flexcore-presenter',
+    groep('Pragmalux LED Bandrasterarmatuur Flexcore Microprisma 185x1542mm 26-36W 3600-4800lm'), 'ag30');
+  /* Een soortwoord alleen wijst niets aan; er moet een naamwoord raken. */
+  is('Polo is niet Qube omdat beide wandarmatuur zijn',
+    groep('Pragmalux LED Plafonnière / Wandarmatuur Polo IP64 8W 3000K 650lm Ø180 (1x18W)'),
+    m.ARM_GROEPEN.find(g => g.naam === 'Polo G3').id);
+  is('Aludisc is geen Qube', groep('Pragmalux LED Plafonnière / Wandarmatuur Aludisc-M Zwart Ø340 IP66 IK10'), null);
+  is('een bandraster zonder naam is geen Miro',
+    groep('Pragmalux LED Bandraster Opaal 295x1560mm 43W 6000lm 4000K wit RAL9003'), null);
+
+  /* Een tikfout krijgt een voorstel, een echte productnaam die de tabel niet kent niet. */
+  const sug = (t) => { const x = m.armSuggestie(t); return x ? [x.suggestie, x.groep.id] : null; };
+  is('verwisseling telt als één fout', m.bewerkAfstand('mondail', 'mondial', 2), 1);
+  is('Esence wordt Essence', sug('Esence G2 downlight 9W'), ['Essence', 'ag14']);
+  is('Mondail wordt Mondial', sug('Mondail opbouw'), ['Mondial', groep('Mondial opbouw')]);
+  is('Lumoi wordt Lumio', sug('Plafonniere Lumoi'), ['Lumio', 'ag39']);
+  is('Horizon wordt niet Orion', sug('Pragmalux LED Highbay Horizon 100W 4000K 14000lm'), null);
+  is('Area wordt niet Arda', sug('Pragmalux LED Straatverlichting Area 100W 4000K 14000lm'), null);
+  is('herkend geeft geen suggestie', sug('Punto 15W zwart'), null);
+
+  /* De meting over de hele catalogus: alle artikelen van één Pragmalux-familie horen
+     bij dezelfde presenter uit te komen. Een familie die over twee groepen valt is
+     een aanwijzing voor een verkeerde herkenning - op de drie na die hieronder
+     staan, waar de tabel echt twee presenters heeft voor wat de prijslijst één
+     serie noemt. De ondergrens mag omhoog, nooit omlaag. En een suggestie mag op
+     geen enkel echt artikel afgaan: dat zou een bestaande naam "verbeteren". */
+  const data = JSON.parse(readFileSync(join(root, 'vergelijker/data/armaturen.json'), 'utf8'));
+  let eens = 0, zonder = 0, onterecht = 0; const gesplitst = [];
+  for(const f of data.families){
+    if(!/pragmalux/i.test(f.merk || '')) continue;
+    const ids = new Set();
+    for(const v of f.varianten){
+      const g = m.matchArmGroep(v.omschrijving || '');
+      if(g) ids.add(g.id); else if(m.armSuggestie(v.omschrijving || '')) onterecht++;
+    }
+    if(!ids.size) zonder++; else if(ids.size === 1) eens++; else gesplitst.push(f.naam);
+  }
+  is('families die over groepen vallen', gesplitst.sort(),
+    ['LED Paneel Sigma', 'LED Portiek Port PKVW', 'LED TL Waterdicht Armatuur Essence Classic']);
+  is('families met één presenter: ondergrens 151', eens >= 151, true);
+  is('geen suggestie op een echt artikel', onterecht, 0);
+  console.log('  catalogus: ' + eens + ' families eenduidig, ' + gesplitst.length + ' gesplitst, '
+            + zonder + ' zonder presenter.');
 }
 
 /* ========================== bandrasterberekening =========================== */

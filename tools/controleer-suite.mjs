@@ -128,6 +128,8 @@ PAGINAS.forEach(p => {
     ['spec-lezer.js',    /SpecLezer\./],
     ['melding.js',       /Melding\./],
     ['zoeken.js',        /\b(zoekNormaal|zoekWoorden|tekstPast|bevatWoord|codeSleutel|lijktCode|besteSuggestie)\(/],
+    /* armSuggestie() staat in armatuur-groepen.js maar rekent met bewerkAfstand() uit zoeken.js */
+    ['zoeken.js',        /\barmSuggestie\(/],
   ];
   PAGINAS.forEach(p => {
     const t = lees(p);

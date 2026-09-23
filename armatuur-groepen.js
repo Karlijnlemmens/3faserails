@@ -225,14 +225,62 @@ function armNaamZone(txt){
      paneel, opbouw, spot) staan al in ARM_STOPWOORDEN en blijven eruit. */
   return naam.concat(soort.filter(t=>!ARM_STOPWOORDEN.has(t)));
 }
-function armBesteGroep(toks){
+/* De soort armatuur, voor zover die elkaar uitsluit: een paneel is geen
+   downlight. Alleen de soortwoorden die echt een ander armatuur betekenen -
+   niet opbouw/inbouw (dat is montage: "Downlight Mondial Opbouw" is de
+   Mondial Opbouw Pendel), en niet spot, plafonnière of wandarmatuur (de
+   Lumio is plafonnière én wandarmatuur). Paneel en bandraster zijn hier één
+   soort, het systeemplafond: de presenter van de Flexcore heet zelf "Paneel &
+   bandraster Flexcore" en die van de Optic noemt bandrasterformaten als
+   uitvoering. Waterdicht is wel een eigen soort: een Highbay Essence werd
+   anders de Waterdicht Essence Classic G2, zodra de paneel- en
+   downlightgroepen van de Essence afvielen. */
+const ARM_SOORT = {
+  downlight:'downlight', downlights:'downlight',
+  paneel:'raster', paneelarmatuur:'raster',
+  bandraster:'raster', bandrasterarmatuur:'raster',
+  waterdicht:'waterdicht', waterdichte:'waterdicht',
+  highbay:'highbay', lowbay:'lowbay', lichtlijn:'lichtlijn',
+  breedstraler:'breedstraler', schijnwerper:'breedstraler',
+  railspot:'railspot', railspots:'railspot'
+};
+function armSoorten(toks){ return new Set(toks.map(t=>ARM_SOORT[t]).filter(Boolean)); }
+/* De soort van een groep volgt uit zijn eigen naam: "Paneel Essence G3" is een
+   paneel, "Downlight Essence G2" een downlight, "Punto" zegt niets. */
+const ARM_GROEP_SOORT = new Map(ARM_GROEPEN.map(g=>[g, armSoorten(armTokens(g.naam))]));
+/* De soortwoorden vooraan in een omschrijving - dezelfde plek waar armNaamZone()
+   de naam begint te zoeken: "Pragmalux LED Paneel 60x60cm Essence G2 ...". */
+function armBeginSoorten(txt){
+  const toks = armTokens(armSchoon(txt)), soort = [];
+  let i = 0;
+  while(i<toks.length && !ARM_TYPEWOORDEN.has(toks[i]) && !ARM_SOORT[toks[i]] &&
+        (ARM_TUSSENWOORDEN.has(toks[i]) || !ARM_NAAMWOORDEN.has(toks[i]))) i++;
+  while(i<toks.length && (ARM_TYPEWOORDEN.has(toks[i]) || ARM_SOORT[toks[i]] || ARM_TUSSENWOORDEN.has(toks[i]))){
+    soort.push(toks[i]); i++;
+  }
+  return armSoorten(soort);
+}
+/* Twee regels bovenop de score, allebei gevonden door na te kijken of alle
+   artikelen van één catalogusfamilie bij dezelfde presenter uitkomen:
+   - Spreekt de soort vooraan de soort van de groep tegen, dan valt die groep af.
+     "LED Paneel 60x60cm Essence G2" werd de presenter van Downlight Essence G2,
+     omdat G2 daar in de zoektermen staat en bij het paneel niet.
+   - Een soortwoord alleen wijst geen presenter aan; er moet ook een naamwoord
+     raken. "Plafonnière / Wandarmatuur Polo" werd Wandarmatuur Qube IP65, op
+     niets anders dan het woord "wandarmatuur" - de Polo heet in de tabel
+     "Polo G3" en haalde daardoor net minder punten. Een soortwoord telt wel mee
+     náást de naam: "Pendelarmatuur Orion" wint nog steeds van "Orion". */
+function armBesteGroep(toks, soorten){
   if(!toks || !toks.length) return null;
   const heeft = new Set(toks);
   let best=null, bestScore=0, gelijk=false;
   ARM_GROEP_TOKENS.forEach(({g,varianten})=>{
+    const gs = ARM_GROEP_SOORT.get(g);
+    if(soorten && soorten.size && gs.size && ![...gs].some(x=>soorten.has(x))) return;
     let score=0;
     varianten.forEach(v=>{
       if(!heeft.has(v[0])) return;
+      if(!v.some(t=>heeft.has(t) && !ARM_TYPEWOORDEN.has(t) && !ARM_SOORT[t])) return;
       const hits = v.filter(t=>heeft.has(t)).length;
       const s = hits*100 + (hits===v.length?50:0) + v.join('').length;
       if(s>score) score=s;
@@ -244,5 +292,51 @@ function armBesteGroep(toks){
   return gelijk ? null : best;
 }
 function matchArmGroep(txt){
-  return armBesteGroep(armNaamZone(txt)) || armBesteGroep(armZinvolleTokens(txt));
+  const soorten = armBeginSoorten(txt);
+  return armBesteGroep(armNaamZone(txt), soorten) || armBesteGroep(armZinvolleTokens(txt), soorten);
+}
+/* Hoe een naamwoord in de tabel geschreven staat, zodat een suggestie "Essence"
+   voorstelt en niet "essence". */
+const ARM_SCHRIJFWIJZE = (()=>{ const m=new Map();
+  ARM_GROEPEN.forEach(g=>[g.naam].concat(g.zoektermen||[]).forEach(z=>
+    String(z).normalize('NFD').replace(/[̀-ͯ]/g,'').split(/[^A-Za-z0-9]+/)
+      .forEach(w=>{ const t=w.toLowerCase(); if(t && !m.has(t)) m.set(t, w); })));
+  return m; })();
+/* Wordt een naam niet herkend, dan kan het een tikfout zijn: "Esence G2" of
+   "Mondail opbouw". Dan stelt deze functie de verbeterde naam voor - maar veel
+   strenger dan de familiezoeker van de vergelijker, want hier staan de
+   productnamen die de tabel niet kent gewoon in de invoer. Over de hele
+   catalogus gemeten wees een ruime regel (twee fouten, zoals besteSuggestie())
+   bij 87 van de 733 onherkende artikelen een verkeerd type aan: Highbay
+   Horizon werd "Orion", Straatverlichting Area "Arda", Rondisc "Rondix". Dus:
+   - alleen woorden uit de naam, niet uit de specificatie erachter;
+   - minstens vijf letters, en dezelfde eerste letter;
+   - precies één tikfout (een verwisseling telt als één, zie bewerkAfstand());
+   - precies één woord uit de tabel op die afstand, anders is het gokken;
+   - en de verbeterde naam moet wél een groep opleveren.
+   Zonder zoeken.js geeft ze niets. */
+function armSuggestie(txt){
+  if(typeof bewerkAfstand!=='function' || !String(txt||'').trim() || matchArmGroep(txt)) return null;
+  const toks = armTokens(armSchoon(txt));
+  let zone = armNaamZone(txt);
+  if(!zone){
+    /* geen soortwoord vooraan ("Pnto 15W zwart"): de naam loopt tot de specificatie */
+    zone = [];
+    for(const t of toks){
+      if(ARM_GETAL.test(t) || ARM_CODE.test(t) || (ARM_STOPWOORDEN.has(t) && !ARM_TUSSENWOORDEN.has(t))) break;
+      zone.push(t);
+    }
+  }
+  for(const w of new Set(zone)){
+    if(w.length < 5 || /\d/.test(w) || ARM_NAAMWOORDEN.has(w) || ARM_STOPWOORDEN.has(w) ||
+       ARM_TYPEWOORDEN.has(w) || ARM_TUSSENWOORDEN.has(w)) continue;
+    const kandidaten = [...ARM_VOCAB].filter(t=>
+      t[0]===w[0] && !/\d/.test(t) && bewerkAfstand(w, t, 1) <= 1);
+    if(kandidaten.length !== 1) continue;
+    const goed = ARM_SCHRIJFWIJZE.get(kandidaten[0]) || kandidaten[0];
+    const tekst = String(txt).replace(/[\p{L}\p{N}]+/gu, x=>armTokens(x).join('')===w ? goed : x);
+    const groep = matchArmGroep(tekst);
+    if(groep) return {woord:w, suggestie:goed, tekst, groep};
+  }
+  return null;
 }
