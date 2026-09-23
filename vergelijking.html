@@ -266,6 +266,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 <script src="pdf-huisstijl.js"></script>
 <script src="spec-lezer.js"></script>
+<script src="zoeken.js"></script>
 <script src="info-teken.js"></script>
 <script src="melding.js"></script>
 <script src="project-opslag.js"></script>
@@ -1193,75 +1194,199 @@ function huidigeKenmerken(v){
   const o={}; KENMERKEN.forEach(([k])=>{ const w=kenmerkVan(v,k); if(w!=null&&w!=='') o[k]=w }); return o;
 }
 
-/* Alle codes van een familie als VERZAMELING, niet als doorzoekbare regel:
-   artikelcode, basiscode en barcode van elk artikel. Een verzameling omdat een
-   artikelnummer een-op-een moet kloppen - in een regel zou "104751" meeliften
-   op 1047515 en zou de tool een artikel aanbieden dat je niet intypte. Wordt
-   eenmalig per familie berekend en buiten de data bewaard, want die is niet van
-   ons om in te schrijven; dit draait bij elke toetsaanslag over alle families. */
-const CODECACHE = new WeakMap();
-function codeSet(f){
-  let r=CODECACHE.get(f);
-  if(r==null){
-    r=new Set((f.varianten||[]).flatMap(v=>[v.artikelcode,v.basiscode,v.barcode])
-      .filter(Boolean).map(c=>String(c).toLowerCase()));
-    CODECACHE.set(f,r);
+/* ---------- zoeken naar een familie ------------------------------------
+   Wat de binnendienst typt is de serie plus wat ze ervan wil: "sigma dali",
+   "sigma 60x60", "mondial verdiept facet". Sinds de familie de reeks is en niet
+   de uitvoering, staat DALI of 60x60 niet meer in de familienaam - en omdat elk
+   woord in de familietekst moest staan, vond precies dat niets. Gemeten op de
+   hele catalogus: "sigma dali", "sigma 60x60", "sigma g2", "mondial facet" en
+   "plafonniere" (zonder accent) gaven allemaal 0 families.
+
+   Nu mag een woord ook in een ARTIKEL van de familie staan, maar dan moet één
+   artikel alle woorden dekken: "sigma zwart dali" past alleen als er een zwart
+   DALI-artikel is, niet als het ene artikel zwart is en een ander DALI. Die
+   artikelen worden meegegeven, zodat de kiezer er meteen een uit kan nemen.
+
+   Invoer en tekst gaan door zoekNormaal() (zoeken.js): accenten, hoofdletters
+   en de schrijfwijze van maten en eenheden tellen niet meer mee. */
+
+/* De doorzoekbare tekst van een familie en van een artikel, eenmalig per object
+   gemaakt en buiten de data bewaard - die is niet van ons om in te schrijven,
+   en dit draait bij elke toetsaanslag over alle 3500 artikelen. */
+const FAMILIETEKST = new WeakMap();
+const ARTIKELTEKST = new WeakMap();
+function familieTekst(f){
+  let t=FAMILIETEKST.get(f);
+  if(t==null){
+    t=zoekNormaal([f.naam,f.merk,f.lijn,f.armatuurtype,...(f.zoektermen||[])].filter(Boolean).join(' '));
+    FAMILIETEKST.set(f,t);
   }
-  return r;
+  return t;
+}
+function artikelTekst(v){
+  let t=ARTIKELTEKST.get(v);
+  if(t==null){
+    /* De artikelcode staat erin met spaties voor de streepjes, zodat
+       "1043227 tc da" de TC-DA-uitvoering vindt. */
+    t=zoekNormaal([v.omschrijving, v.type, v.kleur, v.optiek, v.uitvoering, v.generatie,
+      v.dimprotocol && String(v.dimprotocol).replace(/\//g,' '), v.driver, v.afmeting,
+      v.ip!=null ? 'ip'+v.ip : '', v.artikelcode && String(v.artikelcode).replace(/[-_.]/g,' ')]
+      .filter(Boolean).join(' '));
+    ARTIKELTEKST.set(v,t);
+  }
+  return t;
 }
 
-/* Welk artikel een getypt woord aanwijst. Alleen een code die PRECIES klopt:
-   een half nummer wijst niets aan, want een bijna-treffer aanbieden betekent
-   het verkeerde artikel offreren. De artikelcode en de barcode horen bij één
-   artikel en wijzen er dus een aan; een basiscode hoort bij meerdere
+/* Klopt deze code met het getypte woord? Eerst precies, in kleine letters - dat
+   is de regel. Is het getypt zonder streepjes of met spaties ("1043227TCDA"),
+   dan mag de kale sleutel ook, maar alleen als die in de hele catalogus maar één
+   code aanwijst: 4030-P-HO en 4030-PHO verschillen alleen in een streepje en
+   zijn twee artikelen, dus "4030pho" wijst geen van beide aan. `index` telt per
+   kale sleutel hoeveel verschillende codes erbij horen (zie codeIndex). */
+const CODEINDEX = new WeakMap();
+function codeIndex(families){
+  let m=CODEINDEX.get(families);
+  if(m==null){
+    m=new Map();
+    for(const f of families) for(const v of (f.varianten||[]))
+      for(const c of [v.artikelcode,v.basiscode,v.barcode]){
+        if(!c) continue;
+        const k=codeSleutel(c);
+        if(!m.has(k)) m.set(k,new Set());
+        m.get(k).add(String(c).toLowerCase());
+      }
+    CODEINDEX.set(families,m);
+  }
+  return m;
+}
+function codeKlopt(code,w,index){
+  if(!code) return false;
+  const c=String(code).toLowerCase(), l=String(w).toLowerCase();
+  if(c===l) return true;
+  const k=codeSleutel(l);
+  if(!k || codeSleutel(c)!==k) return false;
+  const s=index.get(k);
+  return !!s && s.size===1;
+}
+
+/* Welk artikel een getypt woord aanwijst. Alleen een code die klopt (zie
+   codeKlopt): een half nummer wijst niets aan, want een bijna-treffer aanbieden
+   betekent het verkeerde artikel offreren. De artikelcode en de barcode horen
+   bij één artikel en wijzen er dus een aan; een basiscode hoort bij meerdere
    uitvoeringen en wijst er daarom geen aan - die brengt alleen de familie in
    beeld, waarna je zelf de uitvoering kiest. */
-function artikelVoorWoord(f,w){
+function artikelVoorWoord(f,w,index){
   if(!/\d/.test(w)) return null;
+  index=index||codeIndex([f]);
   const vs=f.varianten||[];
-  return vs.find(v=>String(v.artikelcode||'').toLowerCase()===w)
-      || vs.find(v=>String(v.barcode||'').toLowerCase()===w)
+  return vs.find(v=>codeKlopt(v.artikelcode,w,index))
+      || vs.find(v=>codeKlopt(v.barcode,w,index))
       || null;
 }
 
-/* Zoeken op naam, merk, lijn, armatuurtype, zoektermen én artikelnummer. Elk
-   getypt woord moet ergens raken, zodat "essence downlight" hetzelfde vindt als
-   "downlight essence" en "venus 1000152" allebei gebruikt.
+/* Welke artikelen van de familie horen bij dit woord? Eerst als code: precies
+   (in kleine letters), en pas als geen enkele code precies klopt op de kale
+   sleutel - "4030pho" vindt dan zowel 4030-PHO als 4030-P-HO, en dat is goed:
+   dat brengt de familie met die twee in beeld zonder er een aan te wijzen (dat
+   doet artikelVoorWoord(), strenger). Een woord met een cijfer kan een code zijn
+   zonder dat het er een lijkt: 4030-PHO heeft maar vier cijfers.
+   Is het geen code, dan in de tekst van het artikel - een maat ook omgedraaid
+   of in millimeters. Wat eruitziet als een artikelnummer (lijktCode) wordt
+   nooit als los stuk tekst gezocht: dan zou "104322" meeliften op 1043227. */
+function artikelenBijWoord(vs,w,index){
+  if(/\d/.test(w)){
+    const codes=v=>[v.artikelcode,v.basiscode,v.barcode].filter(Boolean);
+    const l=String(w).toLowerCase(), k=codeSleutel(w);
+    /* Bestaat de code precies zo ergens in de catalogus, dan geldt alleen die:
+       wie 4030-PHO typt bedoelt niet ook 4030-P-HO. */
+    const ergensPrecies=!!(index.get(k) && index.get(k).has(l));
+    let bij=vs.filter(v=>codes(v).some(c=>String(c).toLowerCase()===l));
+    if(!bij.length && !ergensPrecies) bij=vs.filter(v=>codes(v).some(c=>codeSleutel(c)===k));
+    if(bij.length || lijktCode(w)) return {bij, code:bij.length>0};
+  }
+  return {bij:vs.filter(v=>{ const t=artikelTekst(v);
+                             return maatLezingen(w).some(x=>bevatWoord(t,x)); }), code:false};
+}
+
+/* Zoekt families bij wat er getypt is. Geeft per treffer de familie, het artikel
+   dat een getypt nummer aanwees (art), en de artikelen die bij de invoer passen
+   als dat er minder zijn dan de hele familie (passend) - anders null.
+
    Volgorde: een artikelnummer dat precies klopt eerst - wie een nummer intypt
-   weet wat hij zoekt - dan naam die ermee begint, naam die het bevat, de rest.
-   Geeft per treffer ook het artikel dat het nummer aanwees, zodat de kiezer dát
-   artikel kan invullen in plaats van er zelf een te kiezen. */
-function zoekFamilies(term){
-  const families=DATA?.families||[];
-  const t=String(term||'').trim().toLowerCase();
-  if(!t) return families.map(f=>({fam:f,art:null}));
-  const woorden=t.split(/\s+/);
+   weet wat hij zoekt - dan een basiscode, dan naam die ermee begint, naam die
+   het bevat, en tot slot wat alleen via een artikel gevonden is. */
+function zoekFamilies(term,families){
+  families=families||DATA?.families||[];
+  const woorden=zoekWoorden(term);
+  if(!woorden.length) return families.map(f=>({fam:f,art:null,passend:null}));
+  const t=woorden.join(' ');
+  const index=codeIndex(families);
   const raak=[];
   for(const f of families){
-    const naam=String(f.naam||'').toLowerCase();
-    const tekst=[f.naam,f.merk,f.lijn,f.armatuurtype,...(f.zoektermen||[])]
-      .filter(Boolean).join(' ').toLowerCase();
-    /* Een woord telt als het in de tekstkant zit OF precies een code is. Een
-       woord dat geen van beide is sluit de familie uit - dat is wat een half
-       ingetypt artikelnummer geen enkele optie laat geven. */
-    const codes=codeSet(f);
-    let codetreffer=false;
-    if(!woorden.every(w=>{
-      if(codes.has(w)){ codetreffer=true; return true }
-      return tekst.includes(w);
-    })) continue;
+    const vs=f.varianten||[];
+    const ftekst=familieTekst(f);
+    /* Per woord de artikelen waar het in staat. Een woord dat in geen enkel
+       artikel staat moet in de familietekst staan (een zoekterm als "backlit"),
+       anders valt de familie af. Een artikelnummer staat nooit "in de tekst". */
+    let passend=vs, versmald=false, uit=false, codetreffer=false;
+    for(const w of woorden){
+      const {bij,code}=artikelenBijWoord(vs,w,index);
+      if(bij.length){
+        if(code) codetreffer=true;
+        const in_=new Set(bij);
+        passend=passend.filter(v=>in_.has(v));
+        if(bij.length<vs.length) versmald=true;
+      } else if(lijktCode(w) || !bevatWoord(ftekst,w)){ uit=true; break; }
+    }
+    /* Eén artikel moet alle woorden dekken: verspreid over artikelen telt niet. */
+    if(uit || !passend.length) continue;
+    /* Het aangewezen artikel moet bij de hele invoer passen. De hele invoer als
+       één code eerst - "1043227 TC DA" bedoelt 1043227-TC-DA, niet het kale
+       artikel 1043227 dat toevallig ook een code in die invoer is. */
+    const kandidaat=[...(woorden.length>1?[woorden.join('')]:[]), ...woorden];
     let art=null;
-    for(const w of woorden){ const a=artikelVoorWoord(f,w); if(a){art=a;break} }
-    /* Een exact artikelnummer bovenaan, dan een exacte basiscode, dan de naam. */
+    for(const w of kandidaat){
+      const a=artikelVoorWoord(f,w,index);
+      if(a && passend.includes(a)){ art=a; break; }
+    }
+    const naam=zoekNormaal(f.naam);
     const score = art ? -2
       : codetreffer ? -1
       : naam.startsWith(t) ? 0
       : naam.includes(t) ? 1
-      : (f.zoektermen||[]).some(z=>String(z).toLowerCase().startsWith(t)) ? 2 : 3;
-    raak.push([score,f,art]);
+      : (f.zoektermen||[]).some(z=>zoekNormaal(z).startsWith(t)) ? 2 : 3;
+    raak.push([score,f,art,versmald?passend:null]);
   }
   raak.sort((a,b)=>a[0]-b[0] || String(a[1].naam).localeCompare(String(b[1].naam)));
-  return raak.map(x=>({fam:x[1],art:x[2]}));
+  return raak.map(x=>({fam:x[1],art:x[2],passend:x[3]}));
+}
+
+/* Geeft een zoekopdracht niets, dan is het vaak een tikfout in de serienaam:
+   "sigmaa", "esence". Dan bieden we de invoer aan met dat ene woord verbeterd -
+   maar alleen als die verbeterde invoer ook echt iets vindt, en nooit voor een
+   artikelnummer. Geen stille correctie: de gebruiker ziet de suggestie en
+   klikt er zelf op. */
+const SUGGESTIEWOORDEN = new WeakMap();
+function zoekSuggestie(term,families){
+  families=families||DATA?.families||[];
+  const woorden=zoekWoorden(term);
+  if(!woorden.length || zoekFamilies(term,families).length) return null;
+  let lijst=SUGGESTIEWOORDEN.get(families);
+  if(lijst==null){
+    lijst=[...new Set(families.flatMap(f=>zoekWoorden(
+      [f.naam,f.lijn,f.armatuurtype,...(f.zoektermen||[])].filter(Boolean).join(' '))))]
+      .filter(w=>w.length>=3 && !/\d/.test(w));
+    SUGGESTIEWOORDEN.set(families,lijst);
+  }
+  const beter=woorden.map(w=>{
+    if(lijktCode(w) || /\d/.test(w)) return w;
+    const ergens=families.some(f=>bevatWoord(familieTekst(f),w)
+      || (f.varianten||[]).some(v=>bevatWoord(artikelTekst(v),w)));
+    return ergens ? w : (besteSuggestie(w,lijst) || w);
+  });
+  const voorstel=beter.join(' ');
+  if(voorstel===woorden.join(' ')) return null;
+  return zoekFamilies(voorstel,families).length ? voorstel : null;
 }
 
 function familieKiezer(p,fam){
@@ -1279,10 +1404,18 @@ function familieKiezer(p,fam){
   /* art is het artikel dat het getypte nummer aanwees; dat wint van de
      automatische keuze, want wie een artikelnummer intypt bedoelt dat artikel.
      handmatig=true zorgt dat een latere kenmerkwijziging het niet overrulet. */
-  function kies(f,art){
+  /* passend: de artikelen die bij de getypte woorden horen ("sigma dali" geeft
+     de DALI-uitvoeringen). Is dat er één, dan is dat het artikel dat bedoeld is;
+     zijn het er meer, dan kiest autoKies() binnen die artikelen, zodat de keuze
+     de getypte eigenschappen al heeft en de keuzelijsten eronder ze tonen. */
+  function kies(f,art,passend){
     p.familieId=f?f.id:''; p.artikelcode=''; p.overrides={}; p.handmatig=false;
     if(f && art){ p.artikelcode=art.artikelcode; p.handmatig=true; }
-    else if(f){ const k=autoKies(f,p,null); if(k)p.artikelcode=k.artikelcode; }
+    else if(f && passend && passend.length===1){ p.artikelcode=passend[0].artikelcode; p.handmatig=true; }
+    else if(f){
+      const k=(passend && autoKies({varianten:passend},p,null)) || autoKies(f,p,null);
+      if(k) p.artikelcode=k.artikelcode;
+    }
     render();                       /* bouwt het hele blad opnieuw op */
   }
   function sluit(){ lijst.hidden=true; aan=-1; }
@@ -1301,21 +1434,34 @@ function familieKiezer(p,fam){
     if(!treffers.length){
       /* Een artikelnummer moet een-op-een kloppen; zeg dat dan ook, want
          "geen familie gevonden" laat je zoeken naar een tikfout in de naam. */
-      const alsNummer = /\d/.test(term) && !/\s/.test(term.trim());
+      const alsNummer = zoekWoorden(term).some(lijktCode);
       lijst.append(el('div','fam-niets', alsNummer
         ? 'Geen artikel met nummer "'+term.trim()+'". Een artikelnummer moet precies kloppen.'
         : 'Geen familie gevonden voor "'+term+'".'));
+      /* Bij een tikfout in de serienaam: de verbeterde invoer aanbieden, als die
+         iets vindt. Klikken zet hem in het veld; niets gaat vanzelf. */
+      const voorstel = alsNummer ? null : zoekSuggestie(term);
+      if(voorstel){
+        const r=el('div','fam-op');
+        r.append(el('b','','Bedoelde je: '+voorstel+'?'));
+        r.onmousedown=e=>{e.preventDefault(); inp.value=voorstel; open(voorstel);};
+        lijst.append(r);
+      }
     }
-    treffers.forEach(({fam:f,art})=>{
+    treffers.forEach(({fam:f,art,passend})=>{
       const r=el('div','fam-op');
       r.append(el('b','',f.naam||f.id));
       /* Is de familie op een artikelnummer gevonden, dan hoort erbij te staan
-         wélk artikel dat was - anders zie je niet waarom hij in de lijst staat. */
-      const bij=[art?'art. '+art.artikelcode:null,f.merk,f.armatuurtype,
-                 (f.varianten||[]).length+' artikelen'].filter(Boolean);
+         wélk artikel dat was - anders zie je niet waarom hij in de lijst staat.
+         Versmallen de woorden de familie, dan zeggen we met hoeveel artikelen. */
+      const totaal=(f.varianten||[]).length;
+      const aantal = art ? null
+        : passend ? passend.length+' van '+totaal+' artikelen passen'
+        : totaal+' artikelen';
+      const bij=[art?'art. '+art.artikelcode:null,f.merk,f.armatuurtype,aantal].filter(Boolean);
       r.append(el('span','',bij.join(' · ')));
       /* mousedown, want blur zou de lijst al sluiten voor de klik aankomt */
-      r.onmousedown=e=>{e.preventDefault();kies(f,art)};
+      r.onmousedown=e=>{e.preventDefault();kies(f,art,passend)};
       lijst.append(r);
     });
     /* De familie die er nu staat licht op, zodat Enter niets omgooit. */

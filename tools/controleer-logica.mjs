@@ -562,8 +562,9 @@ function is(wat, gekregen, verwacht){
 /* ==================== waarden uit de productdata ==================== */
 {
   const m = await laadUit('vergelijker/index-template.html',
-    ['typeVan','artikelVoorWoord','rendementVan','ugrVan','criVan',
-     'nieuwePositie','AKKOORD','REF_VELDEN','PDF_VERBORGEN']);
+    ['typeVan','CODEINDEX','codeIndex','codeKlopt','artikelVoorWoord','rendementVan','ugrVan','criVan',
+     'nieuwePositie','AKKOORD','REF_VELDEN','PDF_VERBORGEN'],
+    readFileSync(join(root, 'zoeken.js'), 'utf8'));
 
   console.log('\nwaarden uit de productdata');
 
@@ -700,6 +701,76 @@ function is(wat, gekregen, verwacht){
      omdat het nooit een rij is geweest. */
   is('het overleg staat niet op het blad',
     ['voorstel','akkoord','reactie'].filter(k => bladsleutels.includes(k)), []);
+}
+
+/* ============================== zoeken =============================== */
+{
+  const zoek = readFileSync(join(root, 'zoeken.js'), 'utf8');
+  /* zoeken.js is een gewoon script met functies op het hoogste niveau; zo
+     laden we het als module, net als armatuur-groepen.js hierboven. */
+  const z = await import('data:text/javascript;base64,' + Buffer.from(zoek
+    + '\nexport {zoekNormaal, zoekWoorden, codeSleutel, lijktCode, bevatWoord, maatLezingen, bewerkAfstand, besteSuggestie};\n')
+    .toString('base64'));
+
+  console.log('\nzoeken');
+
+  /* Invoer gelijktrekken: accenten, hoofdletters, maten en eenheden. */
+  is('accenten eraf', z.zoekNormaal('Plafonnière'), 'plafonniere');
+  is('maat met spaties en \u00d7', z.zoekNormaal('60 x 60 \u00d7 10'), '60x60x10');
+  is('getal en eenheid aan elkaar', z.zoekNormaal('4000 K 26 W'), '4000k 26w');
+  /* Een woord met een cijfer mag niet achter een ander cijfer beginnen. */
+  is('15w vindt geen 115W', z.bevatWoord('led 115w', '15w'), false);
+  is('4000k vindt het in een reeks', z.bevatWoord('3000k-4000k', '4000k'), true);
+  is('zonder cijfer mag het midden in een woord', z.bevatWoord('microprismatisch', 'prisma'), true);
+  is('600x600 is ook 60x60', z.maatLezingen('600x600').includes('60x60'), true);
+  is('120x30 is ook 30x120', z.maatLezingen('120x30').includes('30x120'), true);
+  /* Een artikelnummer herkennen, en een meetwaarde niet. */
+  is('een artikelnummer lijkt een code', z.lijktCode('1043227-tc-da'), true);
+  is('een lichtstroom niet', z.lijktCode('13000lm'), false);
+  /* Suggesties: tikfouten in woorden, nooit in nummers. */
+  is('een letter te veel', z.besteSuggestie('sigmaa', ['sigma','essence']), 'sigma');
+  is('een letter verwisseld', z.besteSuggestie('essense', ['sigma','essence']), 'essence');
+  is('nooit bij een nummer', z.besteSuggestie('104322', ['1043227']), null);
+  is('te ver weg is geen suggestie', z.besteSuggestie('xyzzy', ['sigma']), null);
+
+  /* De familiezoeker van de vergelijker, op de echte catalogus. Elke regel hier
+     gaf vóór deze ronde 0 families - behalve de laatste drie, die moeten nul
+     blijven: een artikelnummer klopt een-op-een of het wijst niets aan. */
+  const v = await laadUit('vergelijker/index-template.html',
+    ['FAMILIETEKST','ARTIKELTEKST','familieTekst','artikelTekst','CODEINDEX','codeIndex','codeKlopt',
+     'artikelVoorWoord','artikelenBijWoord','zoekFamilies','SUGGESTIEWOORDEN','zoekSuggestie'],
+    zoek + '\nconst DATA = null;');
+  const F = JSON.parse(readFileSync(join(root, 'vergelijker/data/armaturen.json'), 'utf8')).families;
+  const eerste = (q) => { const r = v.zoekFamilies(q, F)[0]; return r ? r.fam.naam : null; };
+  const lijst = (q) => v.zoekFamilies(q, F);
+  for(const [q, fam] of [
+    ['sigma dali', 'LED Paneel Sigma'], ['sigma 60x60', 'LED Paneel Sigma'],
+    ['sigma 600x600', 'LED Paneel Sigma'], ['sigma g2', 'LED Paneel Sigma'],
+    ['sigma zwart', 'LED Paneel Sigma'], ['sigma 4000 K', 'LED Paneel Sigma'],
+    ['mondial verdiept', 'LED Downlight Mondial'], ['mondial zwart dali', 'LED Downlight Mondial'],
+  ]) is('"' + q + '" vindt ' + fam, eerste(q), fam);
+  /* Een artikel moet alle woorden dekken; wat terugkomt past ook echt. */
+  const dali = lijst('sigma dali')[0];
+  is('"sigma dali" geeft alleen DALI-artikelen',
+    dali.passend.every(a => /dali/i.test(a.dimprotocol || a.omschrijving)), true);
+  is('en niet de hele familie', dali.passend.length < dali.fam.varianten.length, true);
+  is('plafonniere zonder accent = met accent',
+    lijst('plafonniere').length, lijst('plafonni\u00e8re').length);
+  is('plafonniere vindt iets', lijst('plafonniere').length > 0, true);
+  /* Artikelnummers: met spaties, zonder streepjes, en het aangewezen artikel. */
+  for(const q of ['1043227-TC-DA', '1043227 TC DA', '1043227TCDA'])
+    is('"' + q + '" wijst 1043227-TC-DA aan', lijst(q)[0]?.art?.artikelcode, '1043227-TC-DA');
+  /* 4030-P-HO en 4030-PHO zijn twee artikelen die alleen een streepje schelen. */
+  is('4030-PHO precies', lijst('4030-PHO').map(x => x.art?.artikelcode), ['4030-PHO']);
+  is('4030pho wijst geen van beide aan', lijst('4030pho').every(x => !x.art), true);
+  is('maar vindt ze wel allebei', lijst('4030pho').length, 2);
+  is('een half nummer vindt niets', lijst('104322').length, 0);
+  is('een onbekend nummer vindt niets', lijst('9999999').length, 0);
+  /* Een tikfout geeft een suggestie, geen stille correctie. */
+  is('sigmaa vindt niets', lijst('sigmaa').length, 0);
+  is('maar stelt sigma voor', v.zoekSuggestie('sigmaa', F), 'sigma');
+  is('esence stelt essence voor', v.zoekSuggestie('esence', F), 'essence');
+  is('geen suggestie bij een nummer', v.zoekSuggestie('104322', F), null);
 }
 
 /* ---------------------------------------------------------------- verslag ---- */
