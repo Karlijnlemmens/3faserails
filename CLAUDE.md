@@ -45,7 +45,7 @@ A suite of standalone HTML tools, in Dutch, for Distrilight's inside-sales staff
 | `merk/`, `vendor/` | brand assets (`merk-data.js`); `pdf-lib` and `fontkit` |
 | `vergelijker/` | the vergelijker's sources: template, product data (`data/`), the Python data pipeline and its checks |
 | `tools/` | check scripts and data-prep utilities (Node/Python on a dev machine, never loaded by the app) |
-| `docs/` | the per-tool documentation and the design/verification documents |
+| `docs/` | the per-tool documentation (`<tool>.md`, `gedeeld.md`); `ontwerp/` the supplied designs (the briefing page, the Word template of the armaturenboek), `verificatie/` the railconfigurator's design and verification documents, `bronnen/` the source workbooks (the bandraster intake, the PCODES/LCODES table) |
 
 ## Working in this codebase
 

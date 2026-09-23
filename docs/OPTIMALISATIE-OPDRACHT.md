@@ -5,6 +5,13 @@ Elk getal hieronder is gemeten, niet geschat; de meetscripts staan onder
 "Uitgangsmeting". Geef dit bestand aan een nieuwe sessie met: "Voer
 docs/OPTIMALISATIE-OPDRACHT.md uit."*
 
+> **Status: uitgevoerd op 23-9-2026**, in zeven commits op `main` (WP1 `01744ec`,
+> WP3 `6553004`, WP4 `185ff1e`, WP2 `1f96293`, WP5 `822c753`, WP6 `911f6f8`, WP7
+> de commit die deze regel toevoegde). Dit bestand blijft staan als de opdracht
+> zoals hij was; de paden erin zijn die van vóór WP7 (de ontwerp-, verificatie- en
+> bronbestanden staan nu in `docs/ontwerp/`, `docs/verificatie/` en `docs/bronnen/`).
+> Nog open: twee beslissingen voor de gebruiker (WP6.4, en of de Word-template weg mag).
+
 ---
 
 ## Wie je bent en hoe je werkt

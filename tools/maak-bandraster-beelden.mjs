@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Haalt de celafbeeldingen uit Bandraster_Intake_Nieuw_V3.xlsx en schrijft ze als
+/* Haalt de celafbeeldingen uit docs/bronnen/Bandraster_Intake_Nieuw_V3.xlsx en schrijft ze als
  * bandraster-beelden.js, het beeldbestand dat bandrasters.html inleest.
  *
  * Gebruik, vanuit de hoofdmap van het project:
@@ -36,7 +36,7 @@ import { inflateRawSync } from 'node:zlib';
 import { chromium } from '/opt/node22/lib/node_modules/playwright/index.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const werkboek = process.argv[2] || join(root, 'Bandraster_Intake_Nieuw_V3.xlsx');
+const werkboek = process.argv[2] || join(root, 'docs/bronnen/Bandraster_Intake_Nieuw_V3.xlsx');
 const uitBestand = join(root, 'bandraster-beelden.js');
 const MAX = 440;   /* langste zijde; de tool toont ze als duimnagel en op ~680px vergroot */
 const KWALITEIT = 0.88;
