@@ -794,8 +794,9 @@ function is(wat, gekregen, verwacht){
      blijven: een artikelnummer klopt een-op-een of het wijst niets aan. */
   const v = await laadUit('vergelijker/index-template.html',
     ['FAMILIETEKST','ARTIKELTEKST','familieTekst','artikelTekst','CODEINDEX','codeIndex','codeKlopt',
-     'artikelVoorWoord','artikelenBijWoord','zoekFamilies','SUGGESTIEWOORDEN','zoekSuggestie'],
-    zoek + '\nconst DATA = null;');
+     'artikelVoorWoord','artikelenBijWoord','zoekFamilies','SUGGESTIEWOORDEN','zoekSuggestie',
+     'REEKSWOORDEN','LOSSE_WOORDEN','GEEN_REEKSBEGIN','reeksWoorden','reeksZoekterm'],
+    zoek + '\n' + readFileSync(join(root, 'armatuur-groepen.js'), 'utf8') + '\nconst DATA = null;');
   const F = JSON.parse(readFileSync(join(root, 'vergelijker/data/armaturen.json'), 'utf8')).families;
   const eerste = (q) => { const r = v.zoekFamilies(q, F)[0]; return r ? r.fam.naam : null; };
   const lijst = (q) => v.zoekFamilies(q, F);
@@ -827,6 +828,18 @@ function is(wat, gekregen, verwacht){
   is('maar stelt sigma voor', v.zoekSuggestie('sigmaa', F), 'sigma');
   is('esence stelt essence voor', v.zoekSuggestie('esence', F), 'essence');
   is('geen suggestie bij een nummer', v.zoekSuggestie('104322', F), null);
+
+  /* De akkoordronde: uit de reactie van de manager (in gewone zinnen) haalt de
+     tool een zoekopdracht die de binnendienst met één klik in de zoeker zet. */
+  for(const [zin, term] of [
+    ['nee, dit moet de Mondial verdiept worden', 'mondial verdiept'],
+    ['Neem liever de Sigma DALI', 'sigma dali'],
+    ['Nee, te duur. Essence G2 inbouw is beter', 'essence g2 inbouw'],
+    ['Luna G2 met sensor', 'luna g2'],
+    ['Moet een downlight worden, wit', null],
+    ['Geen idee, bel me even', null],
+    ['nee rond de 3000 lumen moet het zijn', null],
+  ]) is('reactie "' + zin + '"', v.reeksZoekterm(zin, F), term);
 }
 
 /* ============================ zoeken in de railtool ============================ */

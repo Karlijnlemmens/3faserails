@@ -55,7 +55,10 @@
 
   /* --- kaarten --- */
   .werkblad{display:grid; grid-template-columns:minmax(720px,1fr) minmax(300px,380px); gap:20px; align-items:start;}
-  @media (max-width:1180px){ .werkblad{grid-template-columns:1fr;} }
+  /* minmax(0,1fr) en niet 1fr: een kolom van 1fr is nooit smaller dan zijn breedste
+     inhoud, en dan dwong het intakeformulier op telefoonbreedte de hele pagina naar
+     606 px - de kaarten erboven en eronder werden mee uitgerekt. */
+  @media (max-width:1180px){ .werkblad{grid-template-columns:minmax(0,1fr);} }
   .kaart{
     background:var(--white); border:1px solid var(--border); border-radius:var(--radius);
     padding:18px 20px; margin-bottom:16px;
@@ -91,6 +94,19 @@
   }
   .intake .cel{padding:4px 6px 8px;}
   .intake .cel.leeg{opacity:0;}
+  /* Op telefoonbreedte passen bestaand | veldnaam | alternatief niet naast elkaar.
+     De veldnaam gaat dan boven het linkervak staan (data-veld, gezet in
+     tekenIntake()); rechts staat hij onzichtbaar, zodat beide vakken op dezelfde
+     hoogte beginnen. Op een laptop verandert er niets. */
+  @media (max-width:640px){
+    .intake{grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:0 8px;}
+    .intake .kop.mid, .intake .veldnaam{display:none;}
+    .intake .cel{padding:4px 0 8px;}
+    .intake .cel::before{content:attr(data-veld); display:block; font-size:11px; font-weight:700;
+      color:var(--navy-900); margin-bottom:3px; line-height:1.25;}
+    .intake .cel.rechts::before{visibility:hidden;}
+    .intake .duo, .intake .duo.smal, .intake .tweeling{grid-template-columns:minmax(0,1fr);}
+  }
   .rij-even{background:#F8FBFE;}
   .duo{display:grid; grid-template-columns:1fr 74px; gap:6px;}
   .duo.smal{grid-template-columns:1fr 96px;}
@@ -231,12 +247,12 @@
       <a class="badge" href="armaturenboek.html">Armaturenboek</a>
       <a class="badge" href="dlc.html">DLC specials</a>
       <a class="badge" href="index.html">3 fase rail</a>
-      <a class="badge" href="lichtlijn.html">Lichtlijn</a>
+      <a class="badge binnenkort" href="lichtlijn.html" title="Deze tool komt er nog aan">Lichtlijn</a>
       <a class="badge active" href="bandrasters.html">Bandrasters</a>
       <a class="badge" href="presenters.html">Presenters</a>
       <a class="badge" href="vergelijking.html">Vergelijking</a>
-      <a class="badge" href="intake.html">Intake</a>
-      <a class="badge" href="snoerenplan.html">Snoerenplan</a>
+      <a class="badge binnenkort" href="intake.html" title="Deze tool komt er nog aan">Intake</a>
+      <a class="badge binnenkort" href="snoerenplan.html" title="Deze tool komt er nog aan">Snoerenplan</a>
     </div>
   </div>
   <div class="title-row">
@@ -1090,7 +1106,9 @@ function tekenIntake(){
     const zebra = i % 2 === 1 ? ' rij-even' : '';
     const links  = el('div', 'cel'+zebra);
     const midden = el('div', 'veldnaam'+zebra, rij.label);
-    const rechtsCel = el('div', 'cel'+zebra);
+    const rechtsCel = el('div', 'cel rechts'+zebra);
+    /* de veldnaam boven elk vak, voor telefoonbreedte - zie .intake in de stijl */
+    links.dataset.veld = rechtsCel.dataset.veld = rij.label;
 
     /* --- linkerkant --- */
     switch(rij.soort){

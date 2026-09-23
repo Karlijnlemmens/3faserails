@@ -68,6 +68,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible{
 }
 .badge:hover{border-color:var(--blue);}
 .badge.active{background:var(--blue); border-color:var(--blue); color:#fff;}
+/* Een tool die er nog niet is ziet er in de rij niet uit als een echte: gedimd en met
+   een streepjesrand, en "komt er nog aan" als tooltip. Geen label erachter: dat
+   maakte de rij zo breed dat hij op een laptop onder het logo zakte en de hele
+   pagina meenam. Hij blijft een link - de pagina zegt zelf ook dat hij eraan komt. */
+.badge.binnenkort{background:transparent; border-style:dashed; border-color:var(--blue); opacity:.6;}
+.badge.binnenkort:hover{opacity:.9;}
+.badge.binnenkort.active{background:var(--blue); border-style:solid; opacity:1;}
 
 /* Een knop die iets weggooit hoort er anders uit te zien dan een knop die iets maakt,
    en niet in dezelfde kleur pal naast "opslaan" te staan. */

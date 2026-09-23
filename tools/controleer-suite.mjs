@@ -53,7 +53,10 @@ const zonderCommentaar = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*
   const rij = (t) => {
     const m = /<div class="badges">([\s\S]*?)<\/div>/.exec(t);
     if(!m) return null;
-    return [...m[1].matchAll(/href="([^"]+)"[^>]*>([^<]*)</g)].map(x => x[2].trim() + ' -> ' + x[1]);
+    /* "binnenkort" hoort bij het tabblad: een tool die op de ene pagina nog komt en
+       op de andere al bestaat, is een rij die uit de pas loopt */
+    return [...m[1].matchAll(/class="([^"]*)"\s+href="([^"]+)"[^>]*>([^<]*)</g)].map(x =>
+      x[3].trim() + ' -> ' + x[2] + (/\bbinnenkort\b/.test(x[1]) ? ' (binnenkort)' : ''));
   };
   const eerste = rij(lees(PAGINAS[0]));
   if(!eerste) meld('tabbladenrij: niet gevonden in ' + PAGINAS[0]);
@@ -67,6 +70,16 @@ const zonderCommentaar = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*
          + (mist.length ? ' - mist: ' + mist.join(', ') : '')
          + (extra.length ? ' - extra: ' + extra.join(', ') : ''));
     }
+  });
+  /* En "binnenkort" moet kloppen met de pagina zelf: een tabblad dat zo gemarkeerd
+     is wijst naar een pagina die "Binnenkort beschikbaar" zegt, en omgekeerd. */
+  if(eerste) eerste.forEach(x => {
+    const [, doel] = / -> (\S+)/.exec(x);
+    if(!existsSync(join(root, doel))) return meld('tabblad wijst naar ' + doel + ', dat niet bestaat');
+    const leeg = /Binnenkort beschikbaar/.test(lees(doel));
+    if(leeg !== x.endsWith('(binnenkort)'))
+      meld('tabblad ' + x + (leeg ? ' opent een lege pagina maar heet niet "binnenkort"'
+                                  : ' heet "binnenkort" maar de pagina bestaat al'));
   });
 }
 

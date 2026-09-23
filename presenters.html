@@ -164,12 +164,12 @@
       <a class="badge" href="armaturenboek.html">Armaturenboek</a>
       <a class="badge" href="dlc.html">DLC specials</a>
       <a class="badge" href="index.html">3 fase rail</a>
-      <a class="badge" href="lichtlijn.html">Lichtlijn</a>
+      <a class="badge binnenkort" href="lichtlijn.html" title="Deze tool komt er nog aan">Lichtlijn</a>
       <a class="badge" href="bandrasters.html">Bandrasters</a>
       <a class="badge active" href="presenters.html">Presenters</a>
       <a class="badge" href="vergelijking.html">Vergelijking</a>
-      <a class="badge" href="intake.html">Intake</a>
-      <a class="badge" href="snoerenplan.html">Snoerenplan</a>
+      <a class="badge binnenkort" href="intake.html" title="Deze tool komt er nog aan">Intake</a>
+      <a class="badge binnenkort" href="snoerenplan.html" title="Deze tool komt er nog aan">Snoerenplan</a>
     </div>
   </div>
   <div class="title-row">
@@ -216,7 +216,11 @@
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="pdf-huisstijl.js"></script>
 <script src="armaturen-data.js"></script>
-<script src="armatuur-beelden.js"></script>
+<!-- armatuur-beelden.js schrijft deze tool zelf (knop "Beeldbestand opslaan"); zolang
+     het er niet is, onthoudt onerror dat, zodat de kaart Productfoto's het kan zeggen.
+     De regel "Failed to load resource" in de console houdt dat niet tegen: die
+     schrijft de browser zelf bij elk bestand dat er niet is. -->
+<script src="armatuur-beelden.js" onerror="window.ARMATUUR_BEELDEN_ONTBREEKT=true"></script>
 <script src="info-teken.js"></script>
 <script src="melding.js"></script>
 <script>
@@ -654,6 +658,11 @@ function tekenPaneel(){
     'Een foto per zichtbaar verschillende uitvoering; wattage en dimprotocol maken '+
     'voor de foto niets uit. Deze '+fam.varianten.length+' artikelen hebben er '+uitv.length+' nodig. '+
     'Klik een vak om een bestand te kiezen, of klik en plak met Ctrl+V.'));
+  if(window.ARMATUUR_BEELDEN_ONTBREEKT && !beeldenGewijzigd)
+    kFoto.append(el('p','hint',
+      'Er staat nog geen armatuur-beelden.js in de hoofdmap, dus nog geen enkele foto. '+
+      'Wat je hier toevoegt bewaar je met Beeldbestand opslaan; zet dat bestand daarna '+
+      'naast presenters.html.'));
   const fotoRooster=el('div','beeldrooster');
   /* familiefoto: vangt alles op waar geen eigen foto voor is */
   fotoRooster.append(fotoVak(fam.id, 'Hele serie', BEELDEN[fam.id]));
