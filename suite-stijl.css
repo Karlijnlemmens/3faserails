@@ -72,9 +72,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible{
    een streepjesrand, en "komt er nog aan" als tooltip. Geen label erachter: dat
    maakte de rij zo breed dat hij op een laptop onder het logo zakte en de hele
    pagina meenam. Hij blijft een link - de pagina zegt zelf ook dat hij eraan komt. */
-.badge.binnenkort{background:transparent; border-style:dashed; border-color:var(--blue); opacity:.6;}
-.badge.binnenkort:hover{opacity:.9;}
-.badge.binnenkort.active{background:var(--blue); border-style:solid; opacity:1;}
+/* Een tool die al werkt maar nog niet af is (in-ontwikkeling) ziet er net zo uit;
+   alleen de tooltip zegt iets anders, en de pagina erachter is een echte tool. */
+.badge.binnenkort, .badge.in-ontwikkeling{background:transparent; border-style:dashed; border-color:var(--blue); opacity:.6;}
+.badge.binnenkort:hover, .badge.in-ontwikkeling:hover{opacity:.9;}
+.badge.binnenkort.active, .badge.in-ontwikkeling.active{background:var(--blue); border-style:solid; opacity:1;}
 
 /* Een knop die iets weggooit hoort er anders uit te zien dan een knop die iets maakt,
    en niet in dezelfde kleur pal naast "opslaan" te staan. */

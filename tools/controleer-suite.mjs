@@ -55,10 +55,11 @@ const zonderCommentaar = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*
   const rij = (t) => {
     const m = /<div class="badges">([\s\S]*?)<\/div>/.exec(t);
     if(!m) return null;
-    /* "binnenkort" hoort bij het tabblad: een tool die op de ene pagina nog komt en
-       op de andere al bestaat, is een rij die uit de pas loopt */
+    /* "binnenkort" en "in-ontwikkeling" horen bij het tabblad: een tool die op de
+       ene pagina nog komt en op de andere al af is, is een rij die uit de pas loopt */
     return [...m[1].matchAll(/class="([^"]*)"\s+href="([^"]+)"[^>]*>([^<]*)</g)].map(x =>
-      x[3].trim() + ' -> ' + x[2] + (/\bbinnenkort\b/.test(x[1]) ? ' (binnenkort)' : ''));
+      x[3].trim() + ' -> ' + x[2] + (/\bbinnenkort\b/.test(x[1]) ? ' (binnenkort)' : '')
+                                   + (/\bin-ontwikkeling\b/.test(x[1]) ? ' (in ontwikkeling)' : ''));
   };
   const eerste = rij(lees(PAGINAS[0]));
   if(!eerste) meld('tabbladenrij: niet gevonden in ' + PAGINAS[0]);
@@ -74,12 +75,16 @@ const zonderCommentaar = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*
     }
   });
   /* En "binnenkort" moet kloppen met de pagina zelf: een tabblad dat zo gemarkeerd
-     is wijst naar een pagina die "Binnenkort beschikbaar" zegt, en omgekeerd. */
+     is wijst naar een pagina die "Binnenkort beschikbaar" zegt, en omgekeerd.
+     "in-ontwikkeling" is een tool die al werkt: die hoort juist een echte pagina
+     te openen, en is niet tegelijk "binnenkort". */
   if(eerste) eerste.forEach(x => {
     const [, doel] = / -> (\S+)/.exec(x);
     if(!existsSync(join(root, doel))) return meld('tabblad wijst naar ' + doel + ', dat niet bestaat');
     const leeg = /Binnenkort beschikbaar/.test(lees(doel));
-    if(leeg !== x.endsWith('(binnenkort)'))
+    if(x.includes('(in ontwikkeling)') && (leeg || x.includes('(binnenkort)')))
+      meld('tabblad ' + x + ' heet "in ontwikkeling" maar opent een lege pagina');
+    if(leeg !== x.includes('(binnenkort)'))
       meld('tabblad ' + x + (leeg ? ' opent een lege pagina maar heet niet "binnenkort"'
                                   : ' heet "binnenkort" maar de pagina bestaat al'));
   });
