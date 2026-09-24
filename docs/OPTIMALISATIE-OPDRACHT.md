@@ -10,7 +10,8 @@ docs/OPTIMALISATIE-OPDRACHT.md uit."*
 > de commit die deze regel toevoegde). Dit bestand blijft staan als de opdracht
 > zoals hij was; de paden erin zijn die van vóór WP7 (de ontwerp-, verificatie- en
 > bronbestanden staan nu in `docs/ontwerp/`, `docs/verificatie/` en `docs/bronnen/`).
-> Nog open: twee beslissingen voor de gebruiker (WP6.4, en of de Word-template weg mag).
+> Nog open: WP6.4 (de productdata los laden in de vergelijker) - de gebruiker denkt
+> erover na. De Word-template is op verzoek van de gebruiker verwijderd (24-9-2026).
 
 ---
 
