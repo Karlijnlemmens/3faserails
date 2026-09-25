@@ -1060,7 +1060,8 @@ function is(wat, gekregen, verwacht){
 
 /* ========================== DLC: de vijf fotovakken ========================== */
 {
-  const m = await laadUit('dlc.html', ['BEELDVAKKEN', 'beeldenNaarVakken', 'beeldOp', 'schrijfBeeld', 'wisselBeelden']);
+  const m = await laadUit('dlc.html', ['BEELDVAKKEN', 'beeldenNaarVakken', 'beeldOp', 'schrijfBeeld', 'wisselBeelden',
+                                      'FOTO', 'fotoKolom', 'toepassingPlek']);
   console.log('DLC: fotovakken');
   const vakken = S => m.BEELDVAKKEN.map(v => S[v.id] || '-').join('');
   is('de legenda van de schets', m.BEELDVAKKEN.map(v => v.nr + ' ' + v.label),
@@ -1084,6 +1085,52 @@ function is(wat, gekregen, verwacht){
   is('rest naar vol vak wisselt terug', [vakken(m.wisselBeelden(S, 'rest0', 'hoofdfoto')), S.beelden], ['EBAFD', ['1']]);
   is('op zichzelf: niets', vakken(m.wisselBeelden(S, 'detail2', 'detail2')), 'EBAFD');
   is('onbekend vak raakt niets', [vakken(m.wisselBeelden(S, 'hoofdfoto', 'onder')), S.beelden], ['EBAFD', ['1']]);
+
+  /* Het raster (FOTO): gemeten op het blad - BESTELGEGEVENS begint op 141 pt, de
+     rechterrand van het DLC-logo ligt op 560,25, de tabel loopt van 35,4 tot 288,4. */
+  const F = m.FOTO, r1 = x => Math.round(x * 10) / 10, A4B = 595.28, onder = 786.9;
+  console.log('DLC: fotoraster');
+  is('kolomgat = linkermarge', r1(F.rechts - (F.links + F.linksB)), r1(F.links));
+  is('rechtermarge = linkermarge (en de logorand)', r1(A4B - (F.rechts + F.rechtsB)), r1(F.links));
+  is('foto 1 begint op BESTELGEGEVENS', F.boven, 141);
+
+  const kolom = m.fotoKolom({hoofdfoto: 4/3, detail1: 1, detail2: 4/3, afmetingen: 2}, onder);
+  const k = kolom.plek, rand = p => [r1(p.x), r1(p.x + p.b)];
+  const volle = [r1(F.rechts), r1(F.rechts + F.rechtsB)];
+  is('1 en 2 vullen de kolom', [rand(k.hoofdfoto), rand(k.afmetingen)], [volle, volle]);
+  is('4 links, 5 rechts in de kolom', [rand(k.detail1)[0], rand(k.detail2)[1]], volle);
+  is('overal dezelfde goot, ook tussen 4 en 5',
+    [k.detail1.y - (k.hoofdfoto.y + k.hoofdfoto.h), k.afmetingen.y - (k.detail1.y + k.detail1.h),
+     k.detail2.x - (k.detail1.x + k.detail1.b)].map(r1), [F.goot, F.goot, F.goot]);
+  is('4 en 5 een tweeling', [k.detail1.b, k.detail1.h, k.detail1.y], [k.detail2.b, k.detail2.h, k.detail2.y]);
+  is('tweeling volgt de gemiddelde vorm', r1(k.detail1.h / k.detail1.b), r1(1 / Math.sqrt(4/3)));
+  is('zonder details sluit 2 aan op 1',
+    r1(m.fotoKolom({hoofdfoto: 1, afmetingen: 2}, onder).plek.afmetingen.y), r1(F.boven + F.rechtsB + F.goot));
+
+  const staand = m.fotoKolom({hoofdfoto: 2/3}, onder).plek.hoofdfoto;
+  is('staande 2:3 wordt smaller, gecentreerd, niet gesneden',
+    [r1(staand.h), staand.snijden, r1(staand.x - F.rechts), r1(F.rechts + F.rechtsB - staand.x - staand.b)],
+    [F.hoofdMaxH, false, r1((F.rechtsB - F.hoofdMaxH * 2/3) / 2), r1((F.rechtsB - F.hoofdMaxH * 2/3) / 2)]);
+  const bijna = m.fotoKolom({hoofdfoto: 3/4}, onder).plek.hoofdfoto;
+  is('staande 3:4 houdt de kolombreedte, wat achtergrond eraf', [rand(bijna), bijna.snijden], [volle, true]);
+  const lang = m.fotoKolom({detail1: 1/3, detail2: 1/3}, onder).plek.detail1;
+  is('tweeling hoogstens 4:5 staand', Math.round(lang.h / lang.b * 100) / 100, F.tweeling[1]);
+  const maat = m.fotoKolom({hoofdfoto: 0.8, detail1: 0.75, detail2: 0.75, afmetingen: 0.5}, onder).plek.afmetingen;
+  is('een maattekening loopt niet over de voet en wordt niet gesneden',
+    [r1(maat.y + maat.h) <= onder, maat.snijden], [true, false]);
+
+  /* toepassing: lijnen van de kolom hierboven, 1 = 141-318, 4|5 = 330-433, 2 = 445-563 */
+  const lijnen = kolom.lijnen;
+  const t1 = m.toepassingPlek(3/2, lijnen[1][0] - 30, lijnen, onder);
+  is('lijn rechts vlak onder de tabel: bovenkant erop', r1(t1.y), r1(lijnen[1][0]));
+  const t2 = m.toepassingPlek(3/2, lijnen[1][0] - 5, lijnen, onder);
+  is('te krap onder de tabel: gewone afstand', r1(t2.y), r1(lijnen[1][0] - 5 + F.naTabel));
+  is('en de onderkant op een onderkant rechts', r1(t2.y + t2.h), r1(lijnen[2][1]));
+  const t3 = m.toepassingPlek(3/2, 150, [], onder);
+  is('niets om op uit te lijnen: eigen vorm, tabelbreed', [r1(t3.y), r1(t3.h), t3.x, t3.b], [r1(150 + F.naTabel), r1(F.linksB / 1.5), F.links, F.linksB]);
+  is('staande toepassing hoogstens vierkant', r1(m.toepassingPlek(2/3, 150, [], onder).h), F.toepMaxH);
+  is('ook niet hoger om uit te lijnen', m.toepassingPlek(2/3, 150, [[200, 600]], onder).h <= F.toepMaxH, true);
+  is('te weinig ruimte: naar de volgende pagina', m.toepassingPlek(3/2, onder - F.naTabel - F.toepMinH + 1, [], onder), null);
 }
 
 /* ---------------------------------------------------------------- verslag ---- */

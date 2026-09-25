@@ -454,7 +454,7 @@ function leegBlad(){
 /* De vijf fotovakken, met de nummers uit de schets van de gebruiker (september 2026):
    1 hoofdfoto rechtsboven, 2 afmetingen rechtsonder, 3 toepassing links onder de
    tabel, 4 en 5 twee details naast elkaar tussen hoofdfoto en afmetingen. Waar ze op
-   het blad staan zit in M.vakken. */
+   het blad staan rekenen fotoKolom() en toepassingPlek() uit (zie FOTO). */
 const BEELDVAKKEN = [
   {id:'hoofdfoto',  nr:1, label:'Hoofdfoto'},
   {id:'afmetingen', nr:2, label:'Afmetingen'},
@@ -817,26 +817,104 @@ const M = {
   naBestel: 27.1,         /* laatste regel bestelgegevens -> PRODUCTGEGEVENS */
   groepGat: 20.5,         /* laatste regel van een groep -> volgende groepskop */
   lijnBoven: 7.1,         /* haarlijn staat zoveel boven de basislijn */
-  /* De vijf fotovakken (zie BEELDVAKKEN), naar de schets van de gebruiker van
-     september 2026. Omgerekend van dat schermbeeld met de voetlijn als ijkmaat
-     (1 pt = 1,065 px). De rechterkolom houdt de rand van de oorspronkelijke
-     hoofdfoto (x 323,5 - 554,1): in de schets liepen de vakken over de rand van het
-     blad. Tussen de rijen rechts steeds zo'n 31 pt. De toepassing staat links onder
-     de tabel; y is waar hij hoogstens begint - een langere tabel duwt hem omlaag,
-     zie de tekening. Elk beeld wordt BINNEN zijn vak geschaald (beeldPassend), dus
-     een vak is een grens, geen kader. */
-  vakken: {
-    hoofdfoto:  {x:323.5, y:117, b:230.6, h:265},
-    detail1:    {x:323.5, y:413, b:107.3, h:130},
-    detail2:    {x:446.8, y:413, b:107.3, h:130},
-    afmetingen: {x:323.5, y:575, b:230.6, h:181},
-    toepassing: {x:35.4,  y:413, b:253,   h:200},
-  },
-  toepassingNaTabel: 26,  /* onderkant tabel -> bovenkant toepassing */
-  toepassingMinH: 100,    /* lager dan dit past hij niet meer: naar de volgende pagina */
+  /* waar de foto's staan: zie FOTO hieronder */
   voetY: 806.9, voetX1:28.3, voetX2:551.5,
   tekst: '#231F20', lijn: '#BCBEC0',
 };
+
+/* De vijf foto's (BEELDVAKKEN), in de schikking van de schets van de gebruiker van
+   september 2026: rechts 1, daaronder 4 en 5 naast elkaar, daaronder 2; links 3 onder
+   de tabel. Geen vaste vakken waar een foto in zweeft, maar één raster waarin elke
+   foto zijn eigen vorm houdt:
+   - De fotokolom loopt van één kolomgat naast de tabel tot de rechterrand van het
+     DLC-logo. Dat kolomgat is gelijk aan de linkermarge (35,4) en de logorand ligt op
+     precies dezelfde marge van de rechterkant: het blad is links en rechts gelijk.
+   - Hij begint op de kapitaalhoogte van BESTELGEGEVENS, zodat foto's en gegevens op
+     één lijn beginnen; de titel staat erboven vrij.
+   - Een foto krijgt de volle kolombreedte en de hoogte die bij zijn vorm hoort, en de
+     volgende komt één goot lager. Tussen alle foto's dezelfde goot, ook tussen 4 en 5.
+   - Wordt een foto te hoog, dan de hoofdfoto en de afmetingen smaller (gecentreerd; van
+     een product of een maattekening gaat niets af) en de details en de toepassing
+     bijgesneden (daar mag een rand af). Een hoofdfoto die maar net te hoog is (een
+     staande 3:4) verliest liever wat achtergrond dan dat zijn randen 7 pt naast die
+     van de foto's eronder staan.
+   - 4 en 5 zijn een tweeling: even breed, even hoog. De hoogte volgt hun gemiddelde
+     vorm, binnen staand 4:5 tot liggend 4:3; wat daarbuiten valt wordt bijgesneden.
+   - De toepassing is zo breed als de tabel. Ligt er vlak onder de tabel een bovenkant
+     van een foto rechts, dan begint hij op die lijn; en valt zijn onderkant met weinig
+     bijsnijden op de onderkant van een foto rechts, dan eindigt hij daar - zo sluiten
+     de twee kolommen samen af. Alle maten gemeten op het blad (pt, y van boven). */
+const FOTO = {
+  links: 35.4,  linksB: 253,       /* de tabel: 35,4 - 288,4 */
+  rechts: 323.8, rechtsB: 236.1,   /* 288,4 + 35,4 tot de logorand 559,9 */
+  boven: 141,                      /* kapitaalhoogte van BESTELGEGEVENS */
+  goot: 12,
+  hoofdMaxH: 295,                  /* hoogstens 5:4 staand */
+  hoofdSnijMax: 0.08,              /* net te hoog: dit deel van de achtergrond mag eraf */
+  afmMaxH: 240,
+  tweeling: [0.75, 1.25],          /* hoogte/breedte van 4 en 5 */
+  toepMaxH: 253,                   /* hoogstens vierkant */
+  toepMinH: 100,                   /* minder ruimte dan dit: naar de volgende pagina */
+  naTabel: 24,                     /* haarlijn onder de tabel -> toepassing */
+  lijnVan: 16, lijnTot: 64,        /* zo ver onder de tabel mag een lijn rechts liggen */
+  snijMax: 0.25,                   /* zoveel mag er van de toepassing af om uit te lijnen */
+};
+/* Rechts: 1, dan 4|5, dan 2. v = de verhouding breedte/hoogte per beeld (0 = geen).
+   Geeft de plek per beeld {x, y, b, h, snijden} en de lijnen [boven, onder] van de
+   rijen, waar de toepassing op kan uitlijnen. */
+function fotoKolom(v, onderGrens){
+  const F = FOTO, plek = {}, lijnen = [];
+  let y = F.boven;
+  const rij = h => { lijnen.push([y, y + h]); y += h + F.goot; };
+  if(v.hoofdfoto){
+    let b = F.rechtsB, h = b / v.hoofdfoto;
+    const snijden = h > F.hoofdMaxH && 1 - F.hoofdMaxH / h <= F.hoofdSnijMax;
+    if(h > F.hoofdMaxH){ h = F.hoofdMaxH; if(!snijden) b = h * v.hoofdfoto; }
+    plek.hoofdfoto = {x: F.rechts + (F.rechtsB - b) / 2, y, b, h, snijden};
+    rij(h);
+  }
+  const tweeling = ['detail1', 'detail2'].filter(id => v[id]);
+  if(tweeling.length){
+    const b = (F.rechtsB - F.goot) / 2;
+    const vorm = Math.exp(tweeling.reduce((s, id) => s + Math.log(v[id]), 0) / tweeling.length);
+    const h = b * Math.min(F.tweeling[1], Math.max(F.tweeling[0], 1 / vorm));
+    ['detail1', 'detail2'].forEach((id, i) => {
+      if(v[id]) plek[id] = {x: F.rechts + i * (b + F.goot), y, b, h, snijden: true};
+    });
+    rij(h);
+  }
+  if(v.afmetingen){
+    let b = F.rechtsB, h = b / v.afmetingen;
+    const max = Math.max(0, Math.min(F.afmMaxH, onderGrens - y));
+    if(h > max){ h = max; b = h * v.afmetingen; }
+    plek.afmetingen = {x: F.rechts + (F.rechtsB - b) / 2, y, b, h, snijden: false};
+    rij(h);
+  }
+  return {plek, lijnen};
+}
+/* Links: de toepassing onder de tabel. tabelOnder is de haarlijn onder de laatste
+   regel; lijnen komen van fotoKolom() (op een volgende pagina: geen). Geeft null als
+   er te weinig ruimte over is - dan hoort hij op een nieuwe pagina. */
+function toepassingPlek(v, tabelOnder, lijnen, onderGrens){
+  const F = FOTO;
+  const lijn = lijnen.map(l => l[0]).find(t => t >= tabelOnder + F.lijnVan && t <= tabelOnder + F.lijnTot);
+  const y = lijn != null ? lijn : tabelOnder + F.naTabel;
+  const ruimte = onderGrens - y;
+  if(ruimte < F.toepMinH) return null;
+  const eigen = F.linksB / v;
+  const max = Math.min(F.toepMaxH, ruimte);
+  let h = Math.min(eigen, max);
+  /* onderkant op een onderkant rechts, als dat weinig kost - en nooit hoger dan
+     vierkant: de toepassing mag de hoofdfoto niet overschreeuwen */
+  let besteSnede = F.snijMax;
+  lijnen.forEach(l => {
+    const H = l[1] - y;
+    if(H < F.toepMinH || H > max) return;
+    const snede = H < eigen ? 1 - H / eigen : 1 - eigen / H;
+    if(snede <= besteSnede){ besteSnede = snede; h = H; }
+  });
+  return {x: F.links, y, b: F.linksB, h, snijden: true};
+}
 
 async function bouwBlad(){
   const doc=await PDFLib.PDFDocument.create();
@@ -851,7 +929,7 @@ async function bouwBlad(){
     logos:[], beelden:['dlcKopbalk'],
     voet:false,
   });
-  const {W,H,BEELD,text,meet,rect,line,wrapBreedte,beginPage,sluitBeeldIn,beeldPassend}=HS;
+  const {W,H,BEELD,text,meet,rect,line,wrapBreedte,beginPage,sluitBeeldIn,beeldPassend,beeldVullend,metUitsnede}=HS;
 
   const beeldUit = async uri=>{
     if(!uri) return null;
@@ -959,28 +1037,25 @@ async function bouwBlad(){
     });
   }
 
-  /* --- beeld: de vijf vakken (M.vakken) ---
-     De toepassing staat links onder de tabel. Een lange tabel duwt hem omlaag; past
-     hij dan niet meer (lager dan toepassingMinH), dan komt hij onder de tabel op de
-     laatste pagina, of op een nieuwe. De rechterkolom staat altijd op pagina 1.
-     Behalve de hoofdfoto (die staat waar hij altijd stond) hangen de beelden tegen de
-     bovenkant van hun vak: zo begint de toepassing echt toepassingNaTabel onder de
-     tabel en delen detail 1 en 2 hun bovenlijn, hoe hoog of breed de foto ook is. */
-  const V = M.vakken, onderGrens = M.voetY - 20;
-  const bovenaan = (img, x, top, b, h) =>
-    beeldPassend(img, x, top, b, img.height*Math.min(b/img.width, h/img.height));
+  /* --- beeld: het raster van FOTO (zie fotoKolom en toepassingPlek) ---
+     De rechterkolom staat altijd op pagina 1. De toepassing komt onder de tabel; is
+     die op een volgende pagina doorgelopen, dan daar, en past hij niet meer, dan op
+     een nieuwe pagina bovenaan. */
+  const onderGrens = M.voetY - 20;
+  const vorm = {};
+  BEELDVAKKEN.forEach(b=>{ vorm[b.id] = beeld[b.id] ? beeld[b.id].width / beeld[b.id].height : 0; });
+  const teken = (img, p) => p.snijden
+    ? metUitsnede([[p.x,p.y],[p.x+p.b,p.y],[p.x+p.b,p.y+p.h],[p.x,p.y+p.h]], ()=>beeldVullend(img, p.x, p.y, p.b, p.h))
+    : beeldPassend(img, p.x, p.y, p.b, p.h);
+  const kolom = fotoKolom(vorm, onderGrens);
   if(beeld.toepassing){
-    const tabelOnder = y - M.lijnBoven;
-    let top = Math.max(paginas.length===1 ? V.toepassing.y : M.kopbalkH+40, tabelOnder + M.toepassingNaTabel);
-    if(onderGrens - top < M.toepassingMinH){ nieuwePagina(false); top = y; }
-    const h = Math.min(V.toepassing.h, onderGrens - top);
-    bovenaan(beeld.toepassing, V.toepassing.x, top, V.toepassing.b, h);
+    let p = toepassingPlek(vorm.toepassing, y - M.lijnBoven, paginas.length===1 ? kolom.lijnen : [], onderGrens);
+    /* op een nieuwe pagina begint hij waar de tabel zou beginnen */
+    if(!p){ nieuwePagina(false); p = toepassingPlek(vorm.toepassing, y - FOTO.naTabel, [], onderGrens); }
+    teken(beeld.toepassing, p);
   }
   pg = paginas[0];
-  if(beeld.hoofdfoto) beeldPassend(beeld.hoofdfoto, V.hoofdfoto.x, V.hoofdfoto.y, V.hoofdfoto.b, V.hoofdfoto.h);
-  ['detail1','detail2','afmetingen'].forEach(id=>{
-    if(beeld[id]) bovenaan(beeld[id], V[id].x, V[id].y, V[id].b, V[id].h);
-  });
+  ['hoofdfoto','detail1','detail2','afmetingen'].forEach(id=>{ if(kolom.plek[id]) teken(beeld[id], kolom.plek[id]); });
   pg = paginas[paginas.length-1];
 
   return {bytes: await doc.save(), paginas: paginas.length};
