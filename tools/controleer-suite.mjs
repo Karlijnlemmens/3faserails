@@ -147,6 +147,9 @@ PAGINAS.forEach(p => {
       if(new RegExp('function\\s+' + f + '\\s*\\(').test(t)) meld(p + ' heeft een eigen ' + f + '(); die hoort alleen in armatuur-rij.js');
     /* alleen de twee tools die een armaturenboek maken; bandrasters.html heeft een
        eigen stempelCode() voor de bestekcode op zijn productblad, en dat is iets anders */
+    /* en met de contactpersonen: het armaturenboek en de railtool zetten ze allebei in hun PDF */
+    for(const f of ['medewerkerVan','contactPersonen','contactRegels','specialist','contactKeuze','tekenContactpersonen'])
+      if(new RegExp('function\\s+' + f + '\\s*\\(').test(t)) meld(p + ' heeft een eigen ' + f + '(); die hoort alleen in contactpersonen.js');
     if(['index.html','armaturenboek.html'].includes(p) && /function\s+(paintBadge|updateSpecialUI|updateStempelUI|stempelCode)\s*\(/.test(t))
       meld(p + ' bouwt zijn eigen armatuurlabel, uploadknop of stempel; die horen uit armRijDelen()/stempelPresenter() in armatuur-rij.js');
   });
@@ -162,6 +165,10 @@ PAGINAS.forEach(p => {
     ['armatuur-rij.js',  /\b(armGroepVanRij|armRijDelen|stempelPresenter|armLijstKolommen|armBoekGroepen|armWisselRijen|armEigenPresenters|specialPresenterId)\(/],
     ['medewerkers.js',   /\b(MEDEWERKERS|MEDEWERKER_ROLLEN)\b/],
     ['medewerker-fotos.js', /\bMEDEWERKER_FOTOS\b/],
+    ['contactpersonen.js', /\b(contactKeuze|tekenContactpersonen|contactPersonen|medewerkerVan)\(/],
+    /* contactpersonen.js leunt op de gegevens en de foto's */
+    ['medewerkers.js',   /\b(contactKeuze|tekenContactpersonen)\(/],
+    ['medewerker-fotos.js', /\btekenContactpersonen\(/],
     /* armatuur-rij.js leunt zelf op de herkenning, de zoekhulp en de meldingen */
     ['armatuur-groepen.js', /\barmRijDelen\(/],
     ['zoeken.js',        /\barmRijDelen\(/],

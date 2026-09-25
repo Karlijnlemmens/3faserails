@@ -88,10 +88,6 @@
   .ab-docveld > label{display:block; font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:3px;}
   .ab-docveld .ongebruikt{font-weight:600; color:var(--slate);}
   .ab-docveld.uit textarea{background:#F7F9FC; color:var(--slate);}
-  .ab-contact{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; margin-top:8px;}
-  @media (max-width:640px){ .ab-contact{grid-template-columns:minmax(0,1fr);} }
-  .ab-contact label{display:block; font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:3px;}
-  .ab-contact select{width:100%;}
   .c2-prodlist{display:flex; flex-direction:column; gap:5px; max-height:640px; overflow-y:auto; padding:6px; border:1.5px solid var(--border); border-radius:8px;}
   .c2-armrow{display:flex; align-items:center; gap:8px; padding:6px 2px; flex-wrap:wrap;}
   .c2-armrow input.c2-textinp{flex:1 1 130px; min-width:100px; padding:5px 8px; font-size:12px;}
@@ -238,7 +234,7 @@
         <p class="hint" style="margin:14px 0 0;">Documenten voor op de briefingpagina — één naam per regel; meer namen worden een opsomming. De projectnaam komt uit Projectgegevens.</p>
         <div id="abDocVelden"></div>
         <p class="hint" style="margin:14px 0 0;">Contactpersonen onder de briefing. Een projectuitwerker met een persoonlijke noot krijgt daaronder ook het blauwe vlak “Onze specialist”, met foto.</p>
-        <div id="abContactVelden" class="ab-contact"></div>
+        <div id="abContactVelden"></div>
       </details>
 
     </div>
@@ -286,6 +282,7 @@
 <script src="pdf-huisstijl.js"></script>
 <script src="medewerkers.js"></script>
 <script src="medewerker-fotos.js"></script>
+<script src="contactpersonen.js"></script>
 <script src="armatuur-groepen.js"></script>
 <script src="zoeken.js"></script>
 <script src="armatuur-rij.js"></script>
@@ -339,60 +336,8 @@ const BRIEF = {
     naDisclaimer:9.7,    /* "DISCLAIMER:" -> de eerste regel eronder */
   },
 };
-/* Contactgegevens en "Onze specialist" onder de briefing. Maten uit de aangeleverde
-   contactkaarten ("Contactgegevens - Update sep 2026.pdf") en uit het voorbeeld van
-   de gewenste pagina; y is ook hier de bovenkant van een regel. De tekst zelf is die
-   van de briefing (B.pt); alleen de koppen, de naam en de functie op het blauwe vlak
-   zijn Poppins, zoals in de bron. */
-const CONTACT = {
-  kopPt:12,
-  kopGat:46,             /* bovenkant laatste briefingregel -> bovenkant "Contactgegevens" */
-  naKop:26.9,            /* bovenkant kop -> bovenkant eerste naam (basislijnen 29,7 uit elkaar) */
-  regel:12.4,
-  kolomX:[38, 215, 400], kolomB:175,
-  labelB:11.5,           /* "T" -> het nummer erachter */
-  specialistGat:55,      /* bovenkant laatste contactregel -> bovenkant "Onze specialist" */
-  naSpecKop:29,          /* bovenkant kop -> bovenkant van het blauwe vlak */
-  /* Krap: bij de langere tekst van een vergelijking kwam het blauwe vlak een paar punten
-     tekort en verhuisde het naar een eigen, verder lege pagina. Dan liever de witruimte
-     erboven wat kleiner; pas als het ook zo niet past gaat het naar de volgende pagina. */
-  specialistGatKrap:34, naSpecKopKrap:23,
-  kaart:{
-    kleur:'#0E7DC2', h:170,
-    foto:{x:14, y:14, maat:102},
-    tekstX:127, rechts:12,
-    naamPt:14, naamTop:16.5,          /* basislijn 27,4 onder de bovenrand */
-    functiePt:10, functieTop:34.3,    /* basislijn 42,1 */
-    citaatPt:8.5, citaatTop:48.9,     /* basislijn 55,5 */
-    citaatRegel:12.95, alinea:15.3,
-    naCitaat:26, contactRegel:10.3, labelB:14.9, onder:13.3,
-  },
-};
-/* Een medewerker uit medewerkers.js, per rol; null als er niets (geldigs) gekozen is -
-   een id dat intussen uit het bestand is verdwenen telt als niet gekozen. */
-function medewerkerVan(rol, id){
-  const M = window.MEDEWERKERS, R = (window.MEDEWERKER_ROLLEN||[]).find(r=>r.id===rol);
-  if(!id || !M || !R) return null;
-  return (M[R.lijst]||[]).find(p=>p.id===id) || null;
-}
-/* De gekozen contactpersonen, in de volgorde van de rollen. */
-function contactPersonen(){
-  return (window.MEDEWERKER_ROLLEN||[]).map(r=>({rol:r, p:medewerkerVan(r.id, st[r.id])})).filter(x=>x.p);
-}
-/* De regels onder naam en functie, zoals in de contactgegevens van de bron. */
-function contactRegels(p){
-  const alg = (window.MEDEWERKERS||{}).algemeen;
-  const uit = [['T', p.tel+' (Direct)']];
-  if(alg) uit.push(['T', alg+' (Algemeen)']);
-  if(p.mobiel) uit.push(['M', p.mobiel]);
-  uit.push(['E', p.email]);
-  return uit;
-}
-/* Het blauwe vlak: alleen voor een projectuitwerker met een persoonlijke noot. */
-function specialist(){
-  const p = medewerkerVan('projectuitwerker', st.projectuitwerker);
-  return p && p.noot ? p : null;
-}
+/* Contactgegevens en "Onze specialist" onder de briefing: de maten, de keuze en de
+   tekening staan in contactpersonen.js, want de railtool zet ze ook in zijn PDF. */
 
 function briefRegels(tekst){
   return String(tekst||'').split(/\r?\n/).map(r=>r.trim()).filter(Boolean);
@@ -700,95 +645,9 @@ async function buildArmaturenboekPdf(){
       }
     });
 
-    /* --- Contactgegevens: de gekozen projectuitwerker, accountmanager en commerciële
-           binnendienst naast elkaar, zoals in de contactkaarten van de bron. Wie niet
-           gekozen is laat geen lege kolom achter; de rest schuift op. --- */
-    const K = CONTACT, KK = K.kaart;
-    const mensen = contactPersonen();
-    if(mensen.length){
-      const hoogste = Math.max(...mensen.map(m=>contactRegels(m.p).length+1));
-      y += K.kopGat;
-      need(K.naKop + hoogste*K.regel + B.pt);
-      text(B.x, y, K.kopPt, 'Contactgegevens', {bold:true, cond:true, color:C.hoofd});
-      const top = y + K.naKop;
-      let onder = top;
-      mensen.forEach(({p}, i)=>{
-        const x = K.kolomX[i];
-        let yy = top;
-        text(x, yy, B.pt, p.naam, {bold:true, color:C.tekst});
-        yy += K.regel; text(x, yy, B.pt, p.functie, {bold:true, color:C.hoofd});
-        contactRegels(p).forEach(([label, waarde])=>{
-          yy += K.regel;
-          text(x, yy, B.pt, label, {bold:true, color:C.tekst});
-          text(x + K.labelB, yy, B.pt, waarde, {color:C.tekst});
-        });
-        onder = Math.max(onder, yy);
-      });
-      y = onder;
-    }
-
-    /* --- Onze specialist: het blauwe vlak met foto en persoonlijke noot van de
-           projectuitwerker, alleen als die er een heeft. Past het niet meer op de
-           pagina, dan komt het op de volgende; het vlak wordt nooit gebroken. --- */
-    const spec = specialist();
-    if(spec){
-      const tx = B.blok.x + KK.tekstX, breedte = B.blok.b - KK.tekstX - KK.rechts;
-      /* opmeten: de noot in alinea's, elke alinea afgebroken op echte tekstbreedte */
-      const alineas = String(spec.noot).split(/\n/).map(a=>a.trim()).filter(Boolean);
-      alineas[0] = '\u201c' + alineas[0];
-      alineas[alineas.length-1] += '\u201d';
-      const regels = [];
-      alineas.forEach((a, i)=> wrapBreedte(a, breedte, KK.citaatPt, {})
-        .forEach((r, j)=> regels.push({t:r, gat: (i>0 && j===0) ? KK.alinea : KK.citaatRegel})));
-      let hoogte = KK.citaatTop;
-      regels.forEach((r, i)=>{ if(i) hoogte += r.gat; });
-      const telTop = hoogte + KK.naCitaat;
-      const kaartH = Math.max(KK.h, telTop + KK.contactRegel + KK.citaatPt*0.78 + KK.onder);
-
-      const ruim = mensen.length ? K.specialistGat : K.kopGat;
-      const krap = y + ruim + K.naSpecKop + kaartH > HS.H - HS.MB
-                && y + K.specialistGatKrap + K.naSpecKopKrap + kaartH <= HS.H - HS.MB;
-      y += krap ? K.specialistGatKrap : ruim;
-      const naKop = krap ? K.naSpecKopKrap : K.naSpecKop;
-      need(naKop + kaartH);
-      text(B.x, y, K.kopPt, 'Onze specialist', {bold:true, cond:true, color:C.hoofd});
-      const kt = y + naKop, kx = B.blok.x;
-      rect(kx, kt, B.blok.b, kaartH, KK.kleur);
-
-      const foto = (window.MEDEWERKER_FOTOS||{})[spec.id];
-      if(foto){
-        try{
-          const img = await HS.sluitBeeldIn(b64Bytes(foto.split(',')[1]));
-          const fx = kx + KK.foto.x, fy = kt + KK.foto.y, m = KK.foto.maat;
-          if(spec.rond){
-            /* De foto is in de bron al rond uitgesneden op een blauw vlak, in een net
-               iets andere tint. Rond knippen, iets binnen de rand, zodat dat blauw niet
-               als vierkant zichtbaar wordt. */
-            const r = m*0.46, cx = fx + m/2, cy = fy + m/2;
-            const punten = Array.from({length:72}, (_, i)=>
-              [cx + r*Math.cos(i*Math.PI/36), cy + r*Math.sin(i*Math.PI/36)]);
-            metUitsnede(punten, ()=> beeldVullend(img, fx, fy, m, m));
-          } else {
-            beeldVullend(img, fx, fy, m, m);
-          }
-        }catch(err){ console.warn('Foto van '+spec.naam+' kon niet worden ingesloten:', err); }
-      }
-
-      text(tx, kt + KK.naamTop, KK.naamPt, spec.naam, {bold:true, cond:true, color:C.wit});
-      text(tx, kt + KK.functieTop, KK.functiePt, spec.kaartFunctie || spec.functie,
-        {bold:true, cond:true, color:C.wit});
-      let ry = kt + KK.citaatTop;
-      regels.forEach((r, i)=>{
-        if(i) ry += r.gat;
-        text(tx, ry, KK.citaatPt, r.t, {schuin:true, color:C.wit});
-      });
-      [['T', spec.tel], ['E', spec.email]].forEach(([label, waarde], i)=>{
-        const ty = kt + telTop + i*KK.contactRegel;
-        text(tx, ty, KK.citaatPt, label, {bold:true, color:C.wit});
-        text(tx + KK.labelB, ty, KK.citaatPt, waarde, {color:C.wit});
-      });
-      y = kt + kaartH;
-    }
+    /* --- Contactgegevens en Onze specialist, zoals in de railtool: tekenContactpersonen()
+           in contactpersonen.js. --- */
+    await tekenContactpersonen(HS, st, {haal:()=>y, zet:v=>{ y=v; }}, CONTACT.kopGat);
     flush();
   }
 
@@ -1272,44 +1131,8 @@ BRIEF_VELDEN.forEach(v=>{
 });
 /* De drie contactpersonen. Zelfde reden om eerst leeg te maken als hierboven. Zonder
    medewerkers.js (bestand weg) blijft dit leeg en werkt de rest gewoon. */
-$('abContactVelden').textContent = '';
-(window.MEDEWERKER_ROLLEN||[]).forEach(r=>{
-  const lijst = ((window.MEDEWERKERS||{})[r.lijst]) || [];
-  const vak = document.createElement('div');
-  const label = document.createElement('label');
-  label.textContent = r.label; label.htmlFor = 'abContact_'+r.id;
-  const sel = document.createElement('select');
-  sel.className = 'c2-select'; sel.id = 'abContact_'+r.id;
-  sel.append(new Option('— niet op de pagina —', ''));
-  /* Alleen de naam, anders past het niet in de lijst; staat een naam er twee keer in
-     (Luuk Eerden als accountmanager en als business developer), dan de functie erbij. */
-  const dubbel = (p)=> lijst.filter(q=>q.naam===p.naam).length > 1;
-  const optie = (p)=>{ const o = new Option(p.naam + (dubbel(p) ? ' ('+p.functie+')' : ''), p.id);
-    o.title = p.functie; return o; };
-  if(r.id==='projectuitwerker'){
-    /* wie een noot heeft krijgt het blauwe vlak - zo zie je bij het kiezen al wat je krijgt */
-    [['Met blauw vlak “Onze specialist”', lijst.filter(p=>p.noot)],
-     ['Alleen contactgegevens', lijst.filter(p=>!p.noot)]].forEach(([kop, groep])=>{
-      if(!groep.length) return;
-      const g = document.createElement('optgroup'); g.label = kop;
-      groep.forEach(p=>g.appendChild(optie(p)));
-      sel.appendChild(g);
-    });
-  } else lijst.forEach(p=>sel.appendChild(optie(p)));
-  const uitleg = document.createElement('p');
-  uitleg.className = 'hint'; uitleg.style.margin = '4px 0 0';
-  const toon = ()=>{
-    const p = medewerkerVan(r.id, sel.value);
-    uitleg.textContent = !p ? '' : p.functie
-      + (r.id==='projectuitwerker' ? (p.noot ? ' · met blauw vlak' : ' · alleen contactgegevens') : '');
-  };
-  /* een gekozen id dat niet meer in medewerkers.js staat: leeg tonen, en zo ook tellen */
-  sel.value = medewerkerVan(r.id, st[r.id]) ? st[r.id] : '';
-  toon();
-  sel.addEventListener('change', ()=>{ st[r.id] = sel.value; toon(); toonBriefingVelden(); updateSummary(); });
-  vak.appendChild(label); vak.appendChild(sel); vak.appendChild(uitleg);
-  $('abContactVelden').appendChild(vak);
-});
+/* De drie contactpersonen: contactKeuze() in contactpersonen.js, dezelfde als in de railtool. */
+contactKeuze($('abContactVelden'), st, ()=>{ toonBriefingVelden(); updateSummary(); }, 'abContact_');
 function toonBriefingVelden(){
   BRIEF_VELDEN.forEach(v=>{
     const inGebruik = v.bij.indexOf(st.soort) >= 0;
@@ -1377,6 +1200,7 @@ function zetProjectInScherm(){
   $('abSoortLicht').checked = st.soort !== 'vergelijking';
   $('abSoortVerg').checked  = st.soort === 'vergelijking';
   $('abToonLijst').checked = st.toonLijst !== false;
+  contactKeuze($('abContactVelden'), st, ()=>{ toonBriefingVelden(); updateSummary(); }, 'abContact_');
   toonBriefingVelden();
   buildArmList();
   updateSummary();

@@ -26,6 +26,10 @@ The armaturenboek and the railtool make the same book — a row per fixture, a p
 
 Like `info-teken.js` it brings its own stylesheet for those parts; the tools keep only the widths of their own fields. `controleer-suite.mjs` fails when either tool grows its own copy again or uses the file without loading it, and `controleer-logica.mjs` holds the rules.
 
+## Contact persons — `contactpersonen.js`
+
+The armaturenboek (under its briefing) and the railtool (on an introduction page after the cover) both show the chosen projectuitwerker, accountmanager and commerciële binnendienst under "Contactgegevens", and the blue "Onze specialist" card for a projectuitwerker with a personal note. Everything that should look and behave the same is in `contactpersonen.js`: the measurements (`CONTACT`, read off "Contactgegevens - Update sep 2026.pdf" and the example page), `medewerkerVan()` / `contactPersonen(keuze)` / `contactRegels()` / `specialist(keuze)`, the three selects (`contactKeuze(vak, keuze, opWijziging, idVoorvoegsel)`, which empties its container first because a saved project already carries the baked selects) and the drawing (`tekenContactpersonen(HS, keuze, plek, eersteGat)`, where `plek` reads and sets the tool's own `y` so `need()` sees the same position). The data is `medewerkers.js` and the photos `medewerker-fotos.js` (see `docs/armaturenboek.md`). Like the other shared files it brings its own stylesheet for the selects, `controleer-suite.mjs` fails when a tool grows its own copy or uses it without loading it, and `controleer-logica.mjs` holds the rules.
+
 ## Drawing layer — `pdf-huisstijl.js`
 
 The drawing layer lives in **`pdf-huisstijl.js`** and is shared by all three PDF-producing tools (`index.html`, `armaturenboek.html`, and the vergelijker template). It used to be copy-pasted into each of them. Anything that has no knowledge of what goes on the page belongs here: the primitives, the house-style colours and fonts, and the fixed page furniture (cover, blue header band, grey diagonal footer, table layout). Composing the pages stays with each tool.

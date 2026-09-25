@@ -838,6 +838,8 @@
           <span>Datum:</span>
           <input type="date" id="c2Datum" class="c2-textinp">
         </div>
+        <p class="hint" style="margin:0 0 2px;">Contactpersonen — komen op een introductiepagina direct achter het voorblad, net als in het armaturenboek. Een projectuitwerker met een persoonlijke noot krijgt ook het blauwe vlak “Onze specialist”, met foto. Niemand gekozen: geen extra pagina.</p>
+        <div id="c2ContactVelden" style="margin-bottom:16px;"></div>
         <p class="hint" style="margin:0 0 6px;">Armaturen — vul de volledige naam en artikelcode in, kies kleur en typ het aantal per type. Bij DALI-dimbaar worden alleen de DALI-geschikte armaturen getoond en geldt een aparte artikelcode.</p>
         <div class="c2-prodlist" id="c2ArmList"></div>
         <label class="c2-check" style="margin-top:6px;"><input type="checkbox" id="c2ToonLijst" checked> Armaturenlijst in de PDF</label>
@@ -922,6 +924,9 @@
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="presenters-data.js"></script>
 <script src="pdf-huisstijl.js"></script>
+<script src="medewerkers.js"></script>
+<script src="medewerker-fotos.js"></script>
+<script src="contactpersonen.js"></script>
 <script src="armatuur-groepen.js"></script>
 <script src="zoeken.js"></script>
 <script src="armatuur-rij.js"></script>
@@ -1554,6 +1559,8 @@ let st = { step:1, dali:false, color:'wit', powercfg:'A', shape:null, gRows:2, g
   use4m:false, pick:false, mount:'geen',
   /* de armaturenlijst in de PDF, net als in het armaturenboek optioneel */
   toonLijst:true,
+  /* wie er op de introductiepagina staan (ids uit medewerkers.js), zoals in het armaturenboek */
+  projectuitwerker:'', accountmanager:'', binnendienst:'',
   /* projectgegevens voor het voorblad */
   proj:'', projNr:'', installateur:'', datum:'',
   sysOphang:false, sysOphangLen:'3', pendelKabelkleur:'zilver', pendelKabelLen:'3',
@@ -2621,6 +2628,22 @@ async function buildPdf(){
   /* --- voorblad --- */
   omslag({naam:st.proj, nr:st.projNr, inst:st.installateur, datum:datumNL(st.datum)});
 
+  /* --- introductiepagina met de contactpersonen, zoals in het armaturenboek: de
+         maten en de tekening zijn tekenContactpersonen() in contactpersonen.js. Alleen
+         als er iemand gekozen is - een project zonder contactpersonen krijgt precies de
+         PDF van voorheen. Daarna terug naar de sectienaam van de pagina's hierna, want
+         een vervolgpagina neemt de laatst gezette naam over in zijn kop. --- */
+  if(contactPersonen(st).length){
+    zetSectie('Introductie');
+    beginPage(true);
+    paginaKop('Introductie',
+      (st.proj||'').trim() + ((st.proj||'').trim()? '  \u2014  ':'') + datumNL(st.datum));
+    y = CONTACT.boven;
+    await tekenContactpersonen(HS, st, {haal:()=>y, zet:v=>{ y=v; }}, 0);
+    flush();
+    zetSectie('Installatieoverzicht');
+  }
+
   /* --- pagina 2: Bestelgegevens. beginPage(true) = geen vervolg-kopregel, want
          deze pagina heeft zijn eigen kopbalk. --- */
   beginPage(true);
@@ -3258,6 +3281,15 @@ function init(){
       $('c2Inst').value=st.installateur; $('c2Datum').value=st.datum;
       $('c2Mount').value=st.mount; $('c2Use4m').checked=st.use4m;
       $('c2ToonLijst').checked = st.toonLijst !== false;
+      /* De lijsten opnieuw opbouwen. Ze houden de regels vast van vóór het herstellen,
+         dus "Verder waar je gebleven was" liet de armaturen leeg zien - en wat je daarna
+         in zo'n regel typte, belandde in een oude kopie en ging verloren (nagemeten).
+         Bij het opstarten gebeurt dit hierna nog een keer; dat kan geen kwaad. */
+      buildArmList();
+      buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
+      contactKeuze($('c2ContactVelden'), st, refresh, 'c2Contact_');
+      $('c2DaliRow').querySelectorAll('.choice-btn').forEach(b=>
+        b.classList.toggle('sel', (b.textContent==='DALI') === !!st.dali));
       snap();
   }
   if(OPGESLAGEN_PROJECT){
@@ -3351,6 +3383,8 @@ function init(){
   })(); }
   buildArmList();
   buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
+  /* de contactpersonen: contactKeuze() in contactpersonen.js, dezelfde als in het armaturenboek */
+  contactKeuze($('c2ContactVelden'), st, refresh, 'c2Contact_');
   /* acties */
   $('c2ResetAll').addEventListener('click', ()=>{
     /* Deze knop staat naast "Project opslaan" en gooit alles weg; zonder deze vraag is
@@ -3370,6 +3404,8 @@ function init(){
     /* projectgegevens van het voorblad; de datum gaat terug naar vandaag */
     st.proj=''; st.projNr=''; st.installateur='';
     $('c2Proj').value=''; $('c2ProjNr').value=''; $('c2Inst').value='';
+    st.projectuitwerker=''; st.accountmanager=''; st.binnendienst='';
+    contactKeuze($('c2ContactVelden'), st, refresh, 'c2Contact_');
     (function(){ const d=new Date();
       st.datum = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
       $('c2Datum').value = st.datum; })();

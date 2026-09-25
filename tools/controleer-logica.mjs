@@ -257,21 +257,24 @@ function is(wat, gekregen, verwacht){
     F[id] !== 'data:image/jpeg;base64,' + readFileSync(join(root, 'docs/bronnen/medewerkers', id + '.jpg')).toString('base64')), []);
   is('geen foto zonder medewerker', Object.keys(F).filter(id => !M.projectuitwerkers.some(p => p.id === id)), []);
 
-  /* de keuze in de tool: de echte functies uit armaturenboek.html */
-  const t = await laadUit('armaturenboek.html', ['medewerkerVan', 'contactPersonen', 'contactRegels', 'specialist'],
-    'const window = ' + JSON.stringify({MEDEWERKERS:M, MEDEWERKER_ROLLEN:venster.MEDEWERKER_ROLLEN})
-    + '; const st = {projectuitwerker:"", accountmanager:"", binnendienst:""};', ['st']);
-  is('niets gekozen: geen contactblok', t.contactPersonen(), []);
-  Object.assign(t.st, {projectuitwerker:'christophe', accountmanager:'tiemen', binnendienst:'hilde'});
-  is('de gekozen drie in de volgorde van de pagina', t.contactPersonen().map(x => x.p.naam),
+  /* de keuze: de echte functies uit contactpersonen.js, die het armaturenboek en de
+     railtool allebei gebruiken */
+  const t = await laadUit('contactpersonen.js', ['CONTACT', 'medewerkerVan', 'contactPersonen', 'contactRegels', 'specialist'],
+    'const window = ' + JSON.stringify({MEDEWERKERS:M, MEDEWERKER_ROLLEN:venster.MEDEWERKER_ROLLEN}) + ';');
+  const keuze = {projectuitwerker:'', accountmanager:'', binnendienst:''};
+  is('niets gekozen: geen contactblok (en in de railtool geen extra pagina)', t.contactPersonen(keuze), []);
+  Object.assign(keuze, {projectuitwerker:'christophe', accountmanager:'tiemen', binnendienst:'hilde'});
+  is('de gekozen drie in de volgorde van de pagina', t.contactPersonen(keuze).map(x => x.p.naam),
     ['Christophe Canoy', 'Tiemen Hasselo', 'Hilde van den Oever']);
   is('de regels van Christophe, met mobiel', t.contactRegels(t.medewerkerVan('projectuitwerker', 'christophe')),
     [['T', '040 209 49 26 (Direct)'], ['T', '040 209 49 00 (Algemeen)'], ['M', '062 714 11 90'], ['E', 'christophe@distrilight.com']]);
-  is('Christophe krijgt het blauwe vlak', !!t.specialist(), true);
-  Object.assign(t.st, {projectuitwerker:'olivia'});
-  is('Olivia nog niet: alleen contactgegevens', t.specialist(), null);
-  Object.assign(t.st, {projectuitwerker:'bestaat-niet', accountmanager:''});
-  is('een id dat er niet meer is telt als niet gekozen', t.contactPersonen().map(x => x.p.naam), ['Hilde van den Oever']);
+  is('Christophe krijgt het blauwe vlak', !!t.specialist(keuze), true);
+  Object.assign(keuze, {projectuitwerker:'olivia'});
+  is('Olivia nog niet: alleen contactgegevens', t.specialist(keuze), null);
+  Object.assign(keuze, {projectuitwerker:'bestaat-niet', accountmanager:''});
+  is('een id dat er niet meer is telt als niet gekozen', t.contactPersonen(keuze).map(x => x.p.naam), ['Hilde van den Oever']);
+  /* de kolommen passen naast elkaar binnen de breedte van het blauwe vlak */
+  is('drie kolommen binnen de pagina', t.CONTACT.kolomX[2] + t.CONTACT.kolomB <= t.CONTACT.kaartX + t.CONTACT.kaartB + 40, true);
   is('Christophe als binnendienst heeft een andere functie', t.medewerkerVan('binnendienst', 'christophe').functie,
     'Hoofd Commerciële Binnendienst');
 }
