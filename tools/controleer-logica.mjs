@@ -1061,7 +1061,7 @@ function is(wat, gekregen, verwacht){
 /* ========================== DLC: de vijf fotovakken ========================== */
 {
   const m = await laadUit('dlc.html', ['BEELDVAKKEN', 'beeldenNaarVakken', 'beeldOp', 'schrijfBeeld', 'wisselBeelden',
-                                      'FOTO', 'fotoKolom', 'toepassingPlek']);
+                                      'FOTO', 'hoofdfotoPlek', 'onderzoneBoven', 'onderzone']);
   console.log('DLC: fotovakken');
   const vakken = S => m.BEELDVAKKEN.map(v => S[v.id] || '-').join('');
   is('de legenda van de schets', m.BEELDVAKKEN.map(v => v.nr + ' ' + v.label),
@@ -1092,45 +1092,71 @@ function is(wat, gekregen, verwacht){
   console.log('DLC: fotoraster');
   is('kolomgat = linkermarge', r1(F.rechts - (F.links + F.linksB)), r1(F.links));
   is('rechtermarge = linkermarge (en de logorand)', r1(A4B - (F.rechts + F.rechtsB)), r1(F.links));
-  is('foto 1 begint op BESTELGEGEVENS', F.boven, 141);
+  const rand = p => [r1(p.x), r1(p.x + p.b)];
+  const volle = [r1(F.rechts), r1(F.rechts + F.rechtsB)], tabel = [r1(F.links), r1(F.links + F.linksB)];
 
-  const kolom = m.fotoKolom({hoofdfoto: 4/3, detail1: 1, detail2: 4/3, afmetingen: 2}, onder);
-  const k = kolom.plek, rand = p => [r1(p.x), r1(p.x + p.b)];
-  const volle = [r1(F.rechts), r1(F.rechts + F.rechtsB)];
-  is('1 en 2 vullen de kolom', [rand(k.hoofdfoto), rand(k.afmetingen)], [volle, volle]);
-  is('4 links, 5 rechts in de kolom', [rand(k.detail1)[0], rand(k.detail2)[1]], volle);
-  is('overal dezelfde goot, ook tussen 4 en 5',
-    [k.detail1.y - (k.hoofdfoto.y + k.hoofdfoto.h), k.afmetingen.y - (k.detail1.y + k.detail1.h),
-     k.detail2.x - (k.detail1.x + k.detail1.b)].map(r1), [F.goot, F.goot, F.goot]);
-  is('4 en 5 een tweeling', [k.detail1.b, k.detail1.h, k.detail1.y], [k.detail2.b, k.detail2.h, k.detail2.y]);
-  is('tweeling volgt de gemiddelde vorm', r1(k.detail1.h / k.detail1.b), r1(1 / Math.sqrt(4/3)));
-  is('zonder details sluit 2 aan op 1',
-    r1(m.fotoKolom({hoofdfoto: 1, afmetingen: 2}, onder).plek.afmetingen.y), r1(F.boven + F.rechtsB + F.goot));
-
-  const staand = m.fotoKolom({hoofdfoto: 2/3}, onder).plek.hoofdfoto;
+  /* bovenzone: foto 1 naast de specificaties */
+  const h43 = m.hoofdfotoPlek(4/3);
+  is('foto 1 begint op BESTELGEGEVENS en vult de kolom', [h43.y, rand(h43)], [141, volle]);
+  const staand = m.hoofdfotoPlek(2/3);
   is('staande 2:3 wordt smaller, gecentreerd, niet gesneden',
-    [r1(staand.h), staand.snijden, r1(staand.x - F.rechts), r1(F.rechts + F.rechtsB - staand.x - staand.b)],
-    [F.hoofdMaxH, false, r1((F.rechtsB - F.hoofdMaxH * 2/3) / 2), r1((F.rechtsB - F.hoofdMaxH * 2/3) / 2)]);
-  const bijna = m.fotoKolom({hoofdfoto: 3/4}, onder).plek.hoofdfoto;
+    [r1(staand.h), staand.snijden, r1(staand.x - F.rechts) === r1(F.rechts + F.rechtsB - staand.x - staand.b)],
+    [F.hoofdMaxH, false, true]);
+  const bijna = m.hoofdfotoPlek(3/4);
   is('staande 3:4 houdt de kolombreedte, wat achtergrond eraf', [rand(bijna), bijna.snijden], [volle, true]);
-  const lang = m.fotoKolom({detail1: 1/3, detail2: 1/3}, onder).plek.detail1;
-  is('tweeling hoogstens 4:5 staand', Math.round(lang.h / lang.b * 100) / 100, F.tweeling[1]);
-  const maat = m.fotoKolom({hoofdfoto: 0.8, detail1: 0.75, detail2: 0.75, afmetingen: 0.5}, onder).plek.afmetingen;
-  is('een maattekening loopt niet over de voet en wordt niet gesneden',
-    [r1(maat.y + maat.h) <= onder, maat.snijden], [true, false]);
 
-  /* toepassing: lijnen van de kolom hierboven, 1 = 141-318, 4|5 = 330-433, 2 = 445-563 */
-  const lijnen = kolom.lijnen;
-  const t1 = m.toepassingPlek(3/2, lijnen[1][0] - 30, lijnen, onder);
-  is('lijn rechts vlak onder de tabel: bovenkant erop', r1(t1.y), r1(lijnen[1][0]));
-  const t2 = m.toepassingPlek(3/2, lijnen[1][0] - 5, lijnen, onder);
-  is('te krap onder de tabel: gewone afstand', r1(t2.y), r1(lijnen[1][0] - 5 + F.naTabel));
-  is('en de onderkant op een onderkant rechts', r1(t2.y + t2.h), r1(lijnen[2][1]));
-  const t3 = m.toepassingPlek(3/2, 150, [], onder);
-  is('niets om op uit te lijnen: eigen vorm, tabelbreed', [r1(t3.y), r1(t3.h), t3.x, t3.b], [r1(150 + F.naTabel), r1(F.linksB / 1.5), F.links, F.linksB]);
-  is('staande toepassing hoogstens vierkant', r1(m.toepassingPlek(2/3, 150, [], onder).h), F.toepMaxH);
-  is('ook niet hoger om uit te lijnen', m.toepassingPlek(2/3, 150, [[200, 600]], onder).h <= F.toepMaxH, true);
-  is('te weinig ruimte: naar de volgende pagina', m.toepassingPlek(3/2, onder - F.naTabel - F.toepMinH + 1, [], onder), null);
+  /* onderzone: altijd onder de specificaties en onder foto 1 */
+  const hOnder = h43.y + h43.h;
+  is('korte tabel: een goot onder foto 1', r1(m.onderzoneBoven(250, h43)), r1(hOnder + F.goot));
+  is('lange tabel: 24 pt onder de tabel', r1(m.onderzoneBoven(500, h43)), 524);
+  is('zonder foto 1 (of op een volgende pagina): onder de tabel', m.onderzoneBoven(200, null), 224);
+
+  const alle = {toepassing: 3/2, detail1: 1, detail2: 4/3, afmetingen: 2};
+  const z = m.onderzone(alle, 330, onder, false).plek;
+  is('3, 4 en 5 beginnen op één lijn', [z.toepassing.y, z.detail1.y, z.detail2.y], [330, 330, 330]);
+  is('3 onder de tabel, 4|5 en 2 onder foto 1',
+    [rand(z.toepassing), [rand(z.detail1)[0], rand(z.detail2)[1]], rand(z.afmetingen)], [tabel, volle, volle]);
+  is('overal dezelfde goot',
+    [z.afmetingen.y - (z.detail1.y + z.detail1.h), z.detail2.x - (z.detail1.x + z.detail1.b)].map(r1), [F.goot, F.goot]);
+  is('4 en 5 een tweeling', [z.detail1.b, z.detail1.h], [z.detail2.b, z.detail2.h]);
+  is('tweeling volgt de gemiddelde vorm', r1(z.detail1.h / z.detail1.b), r1(1 / Math.sqrt(4/3)));
+  is('3 sluit onderaan af met 2', r1(z.toepassing.y + z.toepassing.h), r1(z.afmetingen.y + z.afmetingen.h));
+  const lang = m.onderzone({detail1: 1/3, detail2: 1/3}, 330, onder, false).plek.detail1;
+  is('tweeling hoogstens 4:5 staand', Math.round(lang.h / lang.b * 100) / 100, F.tweeling[1]);
+  is('staande toepassing hoogstens vierkant', r1(m.onderzone({toepassing: 2/3}, 330, onder, false).plek.toepassing.h), F.toepMaxH);
+  is('ook niet hoger om uit te lijnen',
+    m.onderzone({toepassing: 2/3, detail1: 3/4, afmetingen: 1}, 330, onder, false).plek.toepassing.h <= F.toepMaxH, true);
+  is('past niet: de hele zone naar een nieuwe pagina', m.onderzone(alle, 700, onder, false), null);
+  const vers = m.onderzone(alle, 97.35, onder, true);
+  is('op een verse pagina past hij altijd', vers && vers.onder <= onder, true);
+
+  /* De proef over de hele breedte: elke tabellengte, elke vormcombinatie. Wat er ook
+     komt: 3 en 4|5 beginnen samen, niets raakt de tabel, foto 1 of de voet, 3 staat
+     onder de tabel en de rest onder foto 1. */
+  const vormen = [0, 1/2, 2/3, 3/4, 1, 4/3, 3/2, 16/9, 3];
+  let proeven = 0, fout = [];
+  for(const hf of [0, 2/3, 1, 4/3, 16/9]) for(const tabelOnder of [150, 260, 330, 420, 520, 620, 700, 760]){
+    const hoofd = m.hoofdfotoPlek(hf);
+    const boven = m.onderzoneBoven(tabelOnder, hoofd);
+    for(const a3 of vormen) for(const a4 of vormen) for(const a2 of vormen){
+      const v = {toepassing: a3, detail1: a4, detail2: a4 && 1.2, afmetingen: a2};
+      const zone = m.onderzone(v, boven, onder, false) || m.onderzone(v, 97.35, onder, true);
+      const nieuw = !m.onderzone(v, boven, onder, false);
+      const P = zone.plek, top = nieuw ? 97.35 : boven;
+      proeven++;
+      const mis = [];
+      if(P.toepassing && P.detail1 && P.toepassing.y !== P.detail1.y) mis.push('3 en 4 niet op één lijn');
+      Object.entries(P).forEach(([id, p]) => {
+        if(p.y + p.h > onder + 0.01) mis.push(id + ' over de voet');
+        if(p.y < top - 0.01) mis.push(id + ' boven de zonelijn');
+        if(!nieuw && p.y < tabelOnder + F.naTabel - 0.01) mis.push(id + ' raakt de tabel');
+        if(!nieuw && hoofd && p.x + p.b > F.rechts && p.y < hoofd.y + hoofd.h + F.goot - 0.01) mis.push(id + ' raakt foto 1');
+      });
+      if(P.toepassing && (r1(P.toepassing.x) !== tabel[0] || r1(P.toepassing.b) !== F.linksB)) mis.push('3 niet onder de tabel');
+      if(mis.length && fout.length < 5) fout.push(JSON.stringify({hf, tabelOnder, a3, a4, a2}) + ': ' + mis.join(', '));
+    }
+  }
+  is('raster houdt over ' + proeven + ' combinaties', fout, []);
 }
 
 /* ---------------------------------------------------------------- verslag ---- */

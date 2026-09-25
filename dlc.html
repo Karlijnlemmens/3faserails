@@ -454,7 +454,7 @@ function leegBlad(){
 /* De vijf fotovakken, met de nummers uit de schets van de gebruiker (september 2026):
    1 hoofdfoto rechtsboven, 2 afmetingen rechtsonder, 3 toepassing links onder de
    tabel, 4 en 5 twee details naast elkaar tussen hoofdfoto en afmetingen. Waar ze op
-   het blad staan rekenen fotoKolom() en toepassingPlek() uit (zie FOTO). */
+   het blad staan rekenen hoofdfotoPlek() en onderzone() uit (zie FOTO). */
 const BEELDVAKKEN = [
   {id:'hoofdfoto',  nr:1, label:'Hoofdfoto'},
   {id:'afmetingen', nr:2, label:'Afmetingen'},
@@ -822,98 +822,111 @@ const M = {
   tekst: '#231F20', lijn: '#BCBEC0',
 };
 
-/* De vijf foto's (BEELDVAKKEN), in de schikking van de schets van de gebruiker van
-   september 2026: rechts 1, daaronder 4 en 5 naast elkaar, daaronder 2; links 3 onder
-   de tabel. Geen vaste vakken waar een foto in zweeft, maar één raster waarin elke
-   foto zijn eigen vorm houdt:
-   - De fotokolom loopt van één kolomgat naast de tabel tot de rechterrand van het
-     DLC-logo. Dat kolomgat is gelijk aan de linkermarge (35,4) en de logorand ligt op
-     precies dezelfde marge van de rechterkant: het blad is links en rechts gelijk.
-   - Hij begint op de kapitaalhoogte van BESTELGEGEVENS, zodat foto's en gegevens op
-     één lijn beginnen; de titel staat erboven vrij.
-   - Een foto krijgt de volle kolombreedte en de hoogte die bij zijn vorm hoort, en de
-     volgende komt één goot lager. Tussen alle foto's dezelfde goot, ook tussen 4 en 5.
-   - Wordt een foto te hoog, dan de hoofdfoto en de afmetingen smaller (gecentreerd; van
-     een product of een maattekening gaat niets af) en de details en de toepassing
-     bijgesneden (daar mag een rand af). Een hoofdfoto die maar net te hoog is (een
-     staande 3:4) verliest liever wat achtergrond dan dat zijn randen 7 pt naast die
-     van de foto's eronder staan.
-   - 4 en 5 zijn een tweeling: even breed, even hoog. De hoogte volgt hun gemiddelde
-     vorm, binnen staand 4:5 tot liggend 4:3; wat daarbuiten valt wordt bijgesneden.
-   - De toepassing is zo breed als de tabel. Ligt er vlak onder de tabel een bovenkant
-     van een foto rechts, dan begint hij op die lijn; en valt zijn onderkant met weinig
-     bijsnijden op de onderkant van een foto rechts, dan eindigt hij daar - zo sluiten
-     de twee kolommen samen af. Alle maten gemeten op het blad (pt, y van boven). */
+/* De vijf foto's (BEELDVAKKEN), naar de schets van de gebruiker van september 2026, in
+   twee zones op één raster:
+   - Boven: de specificaties links, foto 1 (hoofdfoto) rechts ernaast.
+   - Onder: alles wat verder is, altijd ONDER de specificaties en onder foto 1: links 3
+     (toepassing), rechts 4 en 5 naast elkaar met 2 (afmetingen) daaronder. De zone
+     begint op één lijn over het hele blad: 3 en 4|5 beginnen dus altijd samen.
+   Het raster, gemeten op het blad (pt, y van boven):
+   - Twee kolommen: links de tabel (35,4 - 288,4), rechts van één kolomgat verder tot de
+     rechterrand van het DLC-logo (323,8 - 559,9). Het kolomgat is gelijk aan de marge
+     links, en de logorand ligt op dezelfde marge van rechts: het blad is symmetrisch.
+     Foto 3 staat precies onder de tabel, 1, 4|5 en 2 precies onder elkaar.
+   - Foto 1 begint op de kapitaalhoogte van BESTELGEGEVENS: beeld en gegevens op één lijn.
+   - Tussen foto's één goot (12 pt), ook tussen 4 en 5. De onderzone begint een goot
+     onder foto 1 - rechts loopt dan één gelijkmatige stapel 1, 4|5, 2 - of 24 pt onder
+     de laatste regel van de tabel, wat van de twee lager ligt.
+   - Een foto krijgt de volle kolombreedte en de hoogte die bij zijn vorm hoort. Te
+     hoog: de hoofdfoto en de afmetingen worden smaller en gecentreerd (van een product
+     of een maattekening gaat niets af); een hoofdfoto die maar net te hoog is (een
+     staande 3:4) verliest liever wat achtergrond dan dat zijn randen 7 pt naast die van
+     de foto's eronder staan. Details en toepassing worden bijgesneden.
+   - 4 en 5 zijn een tweeling: even breed, even hoog; de hoogte volgt hun gemiddelde
+     vorm, binnen staand 4:5 tot liggend 4:3.
+   - De onderkant van 3 valt op de onderkant van 2 (of van 4|5), als dat met hoogstens
+     een derde bijsnijden kan en hij daarbij niet hoger wordt dan vierkant: dan sluit de
+     onderzone als één blok af.
+   - Past de onderzone niet meer op de pagina (de afmetingen mogen tot een kwart
+     krimpen), dan gaat hij in zijn geheel naar een nieuwe pagina: liever een rustig
+     tweede blad dan een blok dat over de pagina gebroken is. */
 const FOTO = {
   links: 35.4,  linksB: 253,       /* de tabel: 35,4 - 288,4 */
   rechts: 323.8, rechtsB: 236.1,   /* 288,4 + 35,4 tot de logorand 559,9 */
   boven: 141,                      /* kapitaalhoogte van BESTELGEGEVENS */
   goot: 12,
+  naTabel: 24,                     /* haarlijn onder de tabel -> onderzone */
   hoofdMaxH: 295,                  /* hoogstens 5:4 staand */
   hoofdSnijMax: 0.08,              /* net te hoog: dit deel van de achtergrond mag eraf */
   afmMaxH: 240,
+  afmKrimp: 0.75,                  /* zo ver mogen de afmetingen krimpen voor de onderzone verhuist */
   tweeling: [0.75, 1.25],          /* hoogte/breedte van 4 en 5 */
   toepMaxH: 253,                   /* hoogstens vierkant */
-  toepMinH: 100,                   /* minder ruimte dan dit: naar de volgende pagina */
-  naTabel: 24,                     /* haarlijn onder de tabel -> toepassing */
-  lijnVan: 16, lijnTot: 64,        /* zo ver onder de tabel mag een lijn rechts liggen */
-  snijMax: 0.25,                   /* zoveel mag er van de toepassing af om uit te lijnen */
+  toepMinH: 100,
+  snijMax: 1/3,                    /* zoveel mag er van de toepassing af om uit te lijnen: een
+                                      liggende 3:2 naast 4|5 + 2 vraagt 26-30% */
 };
-/* Rechts: 1, dan 4|5, dan 2. v = de verhouding breedte/hoogte per beeld (0 = geen).
-   Geeft de plek per beeld {x, y, b, h, snijden} en de lijnen [boven, onder] van de
-   rijen, waar de toepassing op kan uitlijnen. */
-function fotoKolom(v, onderGrens){
-  const F = FOTO, plek = {}, lijnen = [];
-  let y = F.boven;
-  const rij = h => { lijnen.push([y, y + h]); y += h + F.goot; };
-  if(v.hoofdfoto){
-    let b = F.rechtsB, h = b / v.hoofdfoto;
-    const snijden = h > F.hoofdMaxH && 1 - F.hoofdMaxH / h <= F.hoofdSnijMax;
-    if(h > F.hoofdMaxH){ h = F.hoofdMaxH; if(!snijden) b = h * v.hoofdfoto; }
-    plek.hoofdfoto = {x: F.rechts + (F.rechtsB - b) / 2, y, b, h, snijden};
-    rij(h);
-  }
+/* Bovenzone: foto 1 naast de specificaties. v = breedte/hoogte van het beeld. */
+function hoofdfotoPlek(v){
+  const F = FOTO;
+  if(!v) return null;
+  let b = F.rechtsB, h = b / v;
+  const snijden = h > F.hoofdMaxH && 1 - F.hoofdMaxH / h <= F.hoofdSnijMax;
+  if(h > F.hoofdMaxH){ h = F.hoofdMaxH; if(!snijden) b = h * v; }
+  return {x: F.rechts + (F.rechtsB - b) / 2, y: F.boven, b, h, snijden};
+}
+/* Waar de onderzone begint: onder de tabel en onder foto 1, wat lager ligt. tabelOnder
+   is de haarlijn onder de laatste regel; hoofd de plek van foto 1 als die op dezelfde
+   pagina staat. */
+function onderzoneBoven(tabelOnder, hoofd){
+  return Math.max(tabelOnder + FOTO.naTabel, hoofd ? hoofd.y + hoofd.h + FOTO.goot : 0);
+}
+/* Onderzone: 3 links, 4|5 en 2 rechts, vanaf lijn boven. v = verhoudingen per beeld
+   (0 = geen). Geeft {plek, onder}, of null als hij niet past; met moet=true (een verse
+   pagina) past hij altijd, desnoods kleiner. */
+function onderzone(v, boven, onderGrens, moet){
+  const F = FOTO, plek = {}, rechtsOnder = [];
+  let y = boven;
   const tweeling = ['detail1', 'detail2'].filter(id => v[id]);
   if(tweeling.length){
     const b = (F.rechtsB - F.goot) / 2;
     const vorm = Math.exp(tweeling.reduce((s, id) => s + Math.log(v[id]), 0) / tweeling.length);
     const h = b * Math.min(F.tweeling[1], Math.max(F.tweeling[0], 1 / vorm));
+    if(y + h > onderGrens && !moet) return null;
     ['detail1', 'detail2'].forEach((id, i) => {
       if(v[id]) plek[id] = {x: F.rechts + i * (b + F.goot), y, b, h, snijden: true};
     });
-    rij(h);
+    rechtsOnder.push(y + h);
+    y += h + F.goot;
   }
   if(v.afmetingen){
-    let b = F.rechtsB, h = b / v.afmetingen;
-    const max = Math.max(0, Math.min(F.afmMaxH, onderGrens - y));
-    if(h > max){ h = max; b = h * v.afmetingen; }
+    let b = F.rechtsB, h = Math.min(b / v.afmetingen, F.afmMaxH);
+    const ruimte = onderGrens - y;
+    if(h > ruimte){
+      if(ruimte < h * F.afmKrimp && !moet) return null;
+      h = Math.max(0, ruimte);
+    }
+    b = Math.min(F.rechtsB, h * v.afmetingen);
+    h = b / v.afmetingen;
     plek.afmetingen = {x: F.rechts + (F.rechtsB - b) / 2, y, b, h, snijden: false};
-    rij(h);
+    rechtsOnder.push(y + h);
   }
-  return {plek, lijnen};
-}
-/* Links: de toepassing onder de tabel. tabelOnder is de haarlijn onder de laatste
-   regel; lijnen komen van fotoKolom() (op een volgende pagina: geen). Geeft null als
-   er te weinig ruimte over is - dan hoort hij op een nieuwe pagina. */
-function toepassingPlek(v, tabelOnder, lijnen, onderGrens){
-  const F = FOTO;
-  const lijn = lijnen.map(l => l[0]).find(t => t >= tabelOnder + F.lijnVan && t <= tabelOnder + F.lijnTot);
-  const y = lijn != null ? lijn : tabelOnder + F.naTabel;
-  const ruimte = onderGrens - y;
-  if(ruimte < F.toepMinH) return null;
-  const eigen = F.linksB / v;
-  const max = Math.min(F.toepMaxH, ruimte);
-  let h = Math.min(eigen, max);
-  /* onderkant op een onderkant rechts, als dat weinig kost - en nooit hoger dan
-     vierkant: de toepassing mag de hoofdfoto niet overschreeuwen */
-  let besteSnede = F.snijMax;
-  lijnen.forEach(l => {
-    const H = l[1] - y;
-    if(H < F.toepMinH || H > max) return;
-    const snede = H < eigen ? 1 - H / eigen : 1 - eigen / H;
-    if(snede <= besteSnede){ besteSnede = snede; h = H; }
-  });
-  return {x: F.links, y, b: F.linksB, h, snijden: true};
+  if(v.toepassing){
+    const eigen = F.linksB / v.toepassing, ruimte = onderGrens - boven;
+    const max = Math.min(F.toepMaxH, ruimte);
+    if(max < Math.min(eigen, F.toepMinH) && !moet) return null;
+    let h = Math.min(eigen, max), besteSnede = F.snijMax;
+    /* onderkant op een onderkant rechts, als dat weinig kost */
+    rechtsOnder.forEach(o => {
+      const H = o - boven;
+      if(H < F.toepMinH || H > max) return;
+      const snede = H < eigen ? 1 - H / eigen : 1 - eigen / H;
+      if(snede <= besteSnede){ besteSnede = snede; h = H; }
+    });
+    plek.toepassing = {x: F.links, y: boven, b: F.linksB, h, snijden: true};
+  }
+  const onder = Math.max(boven, ...Object.values(plek).map(p => p.y + p.h));
+  return {plek, onder};
 }
 
 async function bouwBlad(){
@@ -1037,25 +1050,23 @@ async function bouwBlad(){
     });
   }
 
-  /* --- beeld: het raster van FOTO (zie fotoKolom en toepassingPlek) ---
-     De rechterkolom staat altijd op pagina 1. De toepassing komt onder de tabel; is
-     die op een volgende pagina doorgelopen, dan daar, en past hij niet meer, dan op
-     een nieuwe pagina bovenaan. */
+  /* --- beeld: het raster van FOTO (zie hoofdfotoPlek en onderzone) ---
+     Foto 1 staat op pagina 1 naast de specificaties. De onderzone komt onder de tabel
+     - op de pagina waar die eindigt - en onder foto 1; past hij daar niet meer, dan
+     in zijn geheel bovenaan een nieuwe pagina. */
   const onderGrens = M.voetY - 20;
   const vorm = {};
   BEELDVAKKEN.forEach(b=>{ vorm[b.id] = beeld[b.id] ? beeld[b.id].width / beeld[b.id].height : 0; });
   const teken = (img, p) => p.snijden
     ? metUitsnede([[p.x,p.y],[p.x+p.b,p.y],[p.x+p.b,p.y+p.h],[p.x,p.y+p.h]], ()=>beeldVullend(img, p.x, p.y, p.b, p.h))
     : beeldPassend(img, p.x, p.y, p.b, p.h);
-  const kolom = fotoKolom(vorm, onderGrens);
-  if(beeld.toepassing){
-    let p = toepassingPlek(vorm.toepassing, y - M.lijnBoven, paginas.length===1 ? kolom.lijnen : [], onderGrens);
-    /* op een nieuwe pagina begint hij waar de tabel zou beginnen */
-    if(!p){ nieuwePagina(false); p = toepassingPlek(vorm.toepassing, y - FOTO.naTabel, [], onderGrens); }
-    teken(beeld.toepassing, p);
+  const hoofd = hoofdfotoPlek(vorm.hoofdfoto);
+  if(['toepassing','detail1','detail2','afmetingen'].some(id=>vorm[id])){
+    let zone = onderzone(vorm, onderzoneBoven(y - M.lijnBoven, paginas.length===1 ? hoofd : null), onderGrens, false);
+    if(!zone){ nieuwePagina(false); zone = onderzone(vorm, y, onderGrens, true); }
+    Object.entries(zone.plek).forEach(([id, p])=>teken(beeld[id], p));
   }
-  pg = paginas[0];
-  ['hoofdfoto','detail1','detail2','afmetingen'].forEach(id=>{ if(kolom.plek[id]) teken(beeld[id], kolom.plek[id]); });
+  if(hoofd){ pg = paginas[0]; teken(beeld.hoofdfoto, hoofd); }
   pg = paginas[paginas.length-1];
 
   return {bytes: await doc.save(), paginas: paginas.length};
