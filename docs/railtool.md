@@ -37,13 +37,14 @@ The **Onderdelen** and **Artikelzoeker** searches go word by word in any order t
 The installer PDF has two halves: the installation overview (drawing + order data, generated here) and the **armaturenboek** (externally-supplied "presenter" PDFs for the chosen fixtures, spliced in). Final page order:
 
 ```
-Bestelgegevens → rail presenter → Montage + tekenvlakken
-→ Armaturenboek index → per type: tabbladpagina + that type's presenter
+voorblad → Bestelgegevens → Installatieoverzicht (drawing + parts per tekenvlak)
+→ hoofdstukblad Armaturen → Armaturenlijst (optional)
+→ rail presenter → one presenter per fixture type → achterpaginas
 ```
 
-`buildPdf()` returns `{bytes, bgPageCount, bookStart, bookIndexEnd, bookGroups, ownPageCount}`. Those are page-index checkpoints for `assembleFinalPdf()`, which does the splicing: `bgPageCount` = end of Bestelgegevens (rail presenter goes here), `bookStart` = first armaturenboek page, `bookIndexEnd` = end of the index, and `bookGroups` lists the group ids in book order — divider page `bookIndexEnd + i` is followed by presenter `bookGroups[i]`. If you add or reorder pages in `buildPdf`, keep these checkpoints in sync or the presenters land in the wrong place.
+`buildPdf()` draws every own page and returns `{bytes, bookGroups, ownPageCount}`; `assembleFinalPdf()` copies all own pages first and then appends the presenters, so no page index has to be corrected for pages spliced in between. `bookGroups` lists the presenters in book order, each with the codes to stamp on it; a mismatch between the expected and the actual page count logs a console warning.
 
-`assembleFinalPdf()` loads every needed presenter **first**, because the footer's page number has to account for pages that get spliced in later: it passes `presenterPages` (`{id: pageCount}`) into `buildPdf`, which keeps a running `extra` offset, bumped at each splice point. It then runs `buildPdf` **twice** — once to count, once to render with `"pagina X van Y"` — which is safe because `buildPdf` only reads state. A mismatch between predicted and actual page count logs a console warning. The loaded presenter documents are reused for the merge, not parsed twice.
+**The armaturenboek part works exactly like `armaturenboek.html`**, because both use `armatuur-rij.js` (see `docs/gedeeld.md`): which presenter a row gets (an uploaded PDF on any row wins, then a manual choice such as the Mondial choice in the label, then the name), the upload button for a type the tool does not know, the stamp in two styles at the measured spot, the ↑/↓ arrows, and the armaturenlijst with the armaturenboek's columns (Code, Artikelcode, Omschrijving, Aantal; Code drops when no row has one) in the order of the rows. The list is optional (`st.toonLijst`, the "Armaturenlijst in de PDF" tick under the fixtures); only that page drops. Rows without a presenter stay in the list and are warned about before the PDF is made, not in the document itself. Two things are the railtool's own: a row only counts with a quantity above zero (the same rows feed Bestelgegevens), and the DALI code beside the standard one — which is why `verplaatsArmRij()` will not move a row with a DALI code past the five DALI slots (arm01–arm05), where that code would disappear from view in DALI mode.
 
 ### Preview
 

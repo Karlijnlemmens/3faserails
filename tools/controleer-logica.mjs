@@ -173,6 +173,58 @@ function is(wat, gekregen, verwacht){
             + zonder + ' zonder presenter.');
 }
 
+/* ============================ armatuurregel ============================ */
+{
+  /* Het armaturenboek en de railtool maken hetzelfde boek, via armatuur-rij.js. Hier
+     de regels die daar vastliggen: welke presenter een regel krijgt, wanneer de
+     uploadknop verschijnt, wat er op een presenter gestempeld wordt, de kolommen van
+     de armaturenlijst en het verplaatsen van een regel. */
+  const r = await laadUit('armatuur-rij.js',
+    ['specialPresenterId', 'armGroepVanRij', 'armTypeOnbekend', 'armEigenPresenters', 'armWisselRijen',
+     'STEMPELSTIJLEN', 'stempelZwart', 'armBoekGroepen', 'armLijstKolommen'],
+    readFileSync(join(root, 'zoeken.js'), 'utf8') + '\n' + readFileSync(join(root, 'armatuur-groepen.js'), 'utf8')
+    + '\nconst window = globalThis; globalThis.PRESENTER_DATA = {};'
+    + '\nconst PdfHuisstijl = {presenterAanwezig: id => !!globalThis.PRESENTER_DATA[id]};');
+  const D = globalThis.PRESENTER_DATA;
+  const rij = (x) => Object.assign({aanduiding:'', name:'', code:'', groep:'', qty:0}, x);
+  const id = (g) => g ? g.id : null;
+
+  console.log('\narmatuurregel');
+  is('een herkende naam', id(r.armGroepVanRij(rij({name:'Punto 15W zwart'}), 'arm01', false)), 'ag01');
+  is('een keuze in het label wint van de naam', id(r.armGroepVanRij(rij({name:'Mondial 9W', groep:'ag25'}), 'arm01', false)), 'ag25');
+  is('bewust geen presenter', r.armGroepVanRij(rij({name:'Punto', groep:'-'}), 'arm01', false), null);
+  D.sparm03 = 'eigen-pdf';
+  const eigen = r.armGroepVanRij(rij({name:'Punto 15W'}), 'arm03', false);
+  is('een eigen PDF wint op elke regel, ook als de naam herkend wordt', [eigen.id, eigen.special], ['sparm03', true]);
+  is('special zonder PDF valt terug op de naam', id(r.armGroepVanRij(rij({name:'Punto'}), 'arm04', true)), 'ag01');
+  is('special zonder PDF en zonder herkenbare naam: niets', r.armGroepVanRij(rij({name:'Iets eenmaligs'}), 'arm04', true), null);
+
+  is('uploadknop bij een onherkend type', r.armTypeOnbekend(rij({}), 'Onbekend armatuur 12W', false), true);
+  is('geen uploadknop bij een herkend type', r.armTypeOnbekend(rij({}), 'Punto 15W', false), false);
+  is('uploadknop bij special', r.armTypeOnbekend(rij({}), 'Punto 15W', true), true);
+  is('geen uploadknop bij bewust geen presenter', r.armTypeOnbekend(rij({groep:'-'}), 'Onbekend', false), false);
+
+  const g = {id:'ag01', stempelKleur:undefined};
+  const boek = [{g, rijen:[{s:rij({aanduiding:'A'})}, {s:rij({aanduiding:' A '})}, {s:rij({aanduiding:'B', stempel:'zwart'})}]}];
+  is('stempel: unieke codes onder elkaar, zwart als een regel erom vraagt', r.armBoekGroepen(boek),
+    [{id:'ag01', code:['A', 'B'], kleur:'#FFFFFF', zwart:true}]);
+  is('wit is de standaard', r.stempelZwart(rij({})), false);
+
+  const zonder = r.armLijstKolommen([{s:rij({name:'x'})}], () => '123', () => 'x');
+  is('lijst zonder codes en aantallen: alleen Artikelcode en Omschrijving',
+    zonder.cols.map(c => c.h + ':' + c.w), ['Artikelcode:90', 'Omschrijving:425']);
+  const met = r.armLijstKolommen([{s:rij({aanduiding:'A', qty:3})}], () => '123', () => 'Punto');
+  is('lijst met code en aantal, in de volgorde van het armaturenboek', met.cols.map(c => c.h), ['Code', 'Artikelcode', 'Omschrijving', 'Aantal']);
+  is('de waarden in die volgorde', met.waarden({s:rij({aanduiding:' A ', qty:3})}), ['A', '123', 'Punto', '3']);
+
+  const st = {arm01:rij({name:'een'}), arm02:rij({name:'twee'})};
+  D.sparm01 = 'pdf-een';
+  r.armWisselRijen(st, 'arm01', 'arm02');
+  is('verplaatsen wisselt de inhoud', [st.arm01.name, st.arm02.name], ['twee', 'een']);
+  is('en neemt de eigen PDF mee', [D.sparm01, D.sparm02], [undefined, 'pdf-een']);
+  is('alle eigen PDF\'s gaan mee met opslaan', Object.keys(r.armEigenPresenters(['arm01', 'arm02', 'arm03'])), ['sparm02', 'sparm03']);
+}
+
 /* ========================== bandrasterberekening =========================== */
 {
   /* P.instellingen staat in de tool op het projectobject; hier zetten we alleen dat

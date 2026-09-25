@@ -140,6 +140,15 @@ PAGINAS.forEach(p => {
     const t = zonderCommentaar(lees(p));
     for(const f of ['zoekNormaal','zoekWoorden','bevatWoord','tekstPast','codeSleutel','lijktCode','maatLezingen','bewerkAfstand','besteSuggestie'])
       if(new RegExp('function\\s+' + f + '\\s*\\(').test(t)) meld(p + ' heeft een eigen ' + f + '(); die hoort alleen in zoeken.js');
+    /* Net zo met de armatuurregel: het armaturenboek en de railtool maken hetzelfde
+       boek, en liepen uit elkaar zolang ze elk hun eigen regel hadden. */
+    for(const f of ['specialPresenterId','armGroepVanRij','armTypeOnbekend','armEigenPresenters','armWisselRijen',
+                    'stempelZwart','armBoekGroepen','stempelPresenter','armLijstKolommen','armRijDelen','armVolgBijwerken'])
+      if(new RegExp('function\\s+' + f + '\\s*\\(').test(t)) meld(p + ' heeft een eigen ' + f + '(); die hoort alleen in armatuur-rij.js');
+    /* alleen de twee tools die een armaturenboek maken; bandrasters.html heeft een
+       eigen stempelCode() voor de bestekcode op zijn productblad, en dat is iets anders */
+    if(['index.html','armaturenboek.html'].includes(p) && /function\s+(paintBadge|updateSpecialUI|updateStempelUI|stempelCode)\s*\(/.test(t))
+      meld(p + ' bouwt zijn eigen armatuurlabel, uploadknop of stempel; die horen uit armRijDelen()/stempelPresenter() in armatuur-rij.js');
   });
   const gedeeld = [
     ['info-teken.js',    /InfoTeken\./],
@@ -150,6 +159,11 @@ PAGINAS.forEach(p => {
     ['zoeken.js',        /\b(zoekNormaal|zoekWoorden|tekstPast|bevatWoord|codeSleutel|lijktCode|besteSuggestie)\(/],
     /* armSuggestie() staat in armatuur-groepen.js maar rekent met bewerkAfstand() uit zoeken.js */
     ['zoeken.js',        /\barmSuggestie\(/],
+    ['armatuur-rij.js',  /\b(armGroepVanRij|armRijDelen|stempelPresenter|armLijstKolommen|armBoekGroepen|armWisselRijen|armEigenPresenters|specialPresenterId)\(/],
+    /* armatuur-rij.js leunt zelf op de herkenning, de zoekhulp en de meldingen */
+    ['armatuur-groepen.js', /\barmRijDelen\(/],
+    ['zoeken.js',        /\barmRijDelen\(/],
+    ['melding.js',       /\barmRijDelen\(/],
   ];
   PAGINAS.forEach(p => {
     const t = lees(p);
