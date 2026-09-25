@@ -108,6 +108,9 @@
   .c2-armrecog.warn{background:#FFF4E0; color:#95651A;}
   .c2-armrecog.sug{cursor:pointer; text-decoration:underline dotted; text-underline-offset:2px;}
   .c2-armrecog.sug:hover{background:#F9D9D6;}
+  /* Het label als keuzelijst, voor een serie met meer presenters (Mondial). */
+  .c2-armrecog select.c2-serie{font:inherit; color:inherit; background:transparent; border:none;
+    padding:0 2px; margin:0; cursor:pointer; max-width:190px;}
 
   .c2-stempelbtn{
     font:inherit; font-size:11px; font-weight:700; white-space:nowrap;
@@ -1166,6 +1169,29 @@ function maakArmRij(a){
        melding in dit badge zou daar niets aan toevoegen. */
     if(g && g.special){
       badge.textContent=''; badge.className='c2-armrecog'; badge.title='';
+    } else if(g && armSerieKeuze(g.id)){
+      /* Een serie met meer presenters: welke bedoeld is zegt de naam niet altijd
+         ("Mondial" kan ook de opbouw-/pendeluitvoering zijn). Het label wordt een
+         keuzelijst; de herkende staat voorgekozen. Een andere keuze gaat in s.groep,
+         dezelfde plek die armGroepVan() al als handmatige keuze leest, en wordt dus
+         ook opgeslagen en verhuist mee met de pijltjes. */
+      const serie = armSerieKeuze(g.id), aanwezig = presenterAanwezig(g.id);
+      badge.textContent = aanwezig ? '✓ ' : '⚠ ';
+      badge.className = 'c2-armrecog '+(aanwezig?'ok':'warn');
+      const sel = document.createElement('select'); sel.className='c2-serie';
+      serie.keuzes.forEach(k=>sel.append(new Option(k.label, k.id)));
+      sel.value = g.id;
+      sel.setAttribute('aria-label', 'Welke '+serie.serie+'-presenter');
+      sel.addEventListener('change', ()=>{
+        const auto = matchArmGroep(s.name);
+        s.groep = (auto && auto.id===sel.value) ? '' : sel.value;
+        paintBadge(); updateSpecialUI(); updateStempelUI(); updateSummary();
+      });
+      badge.append(sel);
+      badge.title = (aanwezig
+        ? 'Presenter '+g.naam+' komt in het armaturenboek.'
+        : 'De presenter-PDF van '+g.naam+' ontbreekt nog in presenters-data.js.')
+        + ' Kies hier een andere '+serie.serie+'-presenter als de opbouw-, pendel- of een andere uitvoering bedoeld is.';
     } else if(g){
       badge.textContent = (presenterAanwezig(g.id)?'✓ ':'⚠ ')+g.naam;
       badge.className = 'c2-armrecog '+(presenterAanwezig(g.id)?'ok':'warn');
@@ -1196,9 +1222,15 @@ function maakArmRij(a){
     nameInp.dispatchEvent(new Event('change'));
   }
   badge.addEventListener('click', neemSuggestieOver);
-  badge.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); neemSuggestieOver(); } });
+  /* alleen het label zelf: een toets in de keuzelijst erin hoort bij de keuzelijst */
+  badge.addEventListener('keydown', e=>{ if(e.target===badge && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); neemSuggestieOver(); } });
   nameInp.addEventListener('input', ()=>{ paintBadge(); updateSpecialUI(); updateStempelUI(); });
-  nameInp.addEventListener('change', ()=>{ s.name=nameInp.value; paintBadge(); updateSpecialUI(); updateStempelUI(); updateSummary(); });
+  nameInp.addEventListener('change', ()=>{
+    /* een Mondial-keuze vervalt als de nieuwe naam zelf een ander type aanwijst */
+    if(s.groep && !armKeuzeBlijft(s.groep, s.name, nameInp.value)) s.groep='';
+    s.name=nameInp.value;
+    paintBadge(); updateSpecialUI(); updateStempelUI(); updateSummary();
+  });
   const codeInp=document.createElement('input'); codeInp.type='text'; codeInp.className='c2-textinp c2-armcode';
   codeInp.placeholder='Artikelcode — of "special"';
   codeInp.value = s.code||'';

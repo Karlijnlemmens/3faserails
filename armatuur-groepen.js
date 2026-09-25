@@ -340,3 +340,34 @@ function armSuggestie(txt){
   }
   return null;
 }
+/* Series met meer dan één presenter, waar de naam niet altijd zegt welke bedoeld
+   is. "Mondial 6-19,5W facet wit" kan de gewone inbouw zijn, maar ook de
+   opbouw- of pendeluitvoering - die hebben samen één eigen presenter (ag25) - of
+   de PIR-, nood- of trackversie. De herkenning kiest de gewone, en in het
+   armaturenboek wordt het label dan een keuzelijst met de rest. De eerste is de
+   gewone; de volgorde is die van hoe vaak ze bedoeld worden. */
+const ARM_SERIES = [
+  {serie:'Mondial', keuzes:[
+    ['ag21', 'Mondial'],
+    ['ag25', 'Mondial Opbouw / Pendel'],
+    ['ag15', 'Mondial PIR'],
+    ['ag24', 'Mondial Nood'],
+    ['ag26', 'Mondial Track'],
+  ]},
+];
+/* De keuzes voor de serie waar deze groep bij hoort, of null als hij alleen staat. */
+function armSerieKeuze(id){
+  const s = ARM_SERIES.find(x=>x.keuzes.some(k=>k[0]===id));
+  return s ? {serie:s.serie, keuzes:s.keuzes.map(([id, label])=>({id, label}))} : null;
+}
+/* Blijft een gekozen presenter staan als de naam verandert? Alleen een keuze
+   binnen een serie kan vervallen, en alleen als de nieuwe naam zelf een ander
+   type aanwijst dan de oude: wie "Mondial" vervangt door "Punto" of door
+   "Mondial PIR" zegt daarmee wat hij bedoelt, maar wie alleen het wattage of de
+   kleur aanpast wil zijn opbouwkeuze houden. Een keuze buiten een serie blijft
+   altijd staan - daar heeft iemand bewust iets gekozen. */
+function armKeuzeBlijft(gekozenId, oudeNaam, nieuweNaam){
+  if(!armSerieKeuze(gekozenId)) return true;
+  const voor = matchArmGroep(oudeNaam), na = matchArmGroep(nieuweNaam);
+  return (voor ? voor.id : null) === (na ? na.id : null);
+}

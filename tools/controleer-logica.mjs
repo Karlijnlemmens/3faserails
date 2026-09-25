@@ -57,7 +57,8 @@ function is(wat, gekregen, verwacht){
     ['ARM_GROEPEN', 'ARM_STOPWOORDEN', 'ARM_GETAL', 'ARM_CODE', 'armTokens', 'ARM_GROEP_TOKENS',
      'ARM_VOCAB', 'armSchoon', 'armZinvolleTokens', 'ARM_TYPEWOORDEN', 'ARM_TUSSENWOORDEN',
      'ARM_NAAMWOORDEN', 'armNaamZone', 'ARM_SOORT', 'armSoorten', 'ARM_GROEP_SOORT', 'armBeginSoorten',
-     'armBesteGroep', 'matchArmGroep', 'ARM_SCHRIJFWIJZE', 'armSuggestie'],
+     'armBesteGroep', 'matchArmGroep', 'ARM_SCHRIJFWIJZE', 'armSuggestie',
+     'ARM_SERIES', 'armSerieKeuze', 'armKeuzeBlijft'],
     /* armSuggestie() rekent met bewerkAfstand() uit zoeken.js, dat de tools ook laden */
     readFileSync(join(root, 'zoeken.js'), 'utf8'), ['bewerkAfstand']);
   const groep = (t) => { const g = m.matchArmGroep(t); return g ? g.id : null; };
@@ -124,6 +125,28 @@ function is(wat, gekregen, verwacht){
   is('Horizon wordt niet Orion', sug('Pragmalux LED Highbay Horizon 100W 4000K 14000lm'), null);
   is('Area wordt niet Arda', sug('Pragmalux LED Straatverlichting Area 100W 4000K 14000lm'), null);
   is('herkend geeft geen suggestie', sug('Punto 15W zwart'), null);
+
+  /* Een serie met meer presenters: de Mondial kan ook de opbouw-/pendeluitvoering
+     zijn, of PIR, nood of track. De herkenning kiest de gewone; het armaturenboek
+     maakt van het label een keuzelijst. */
+  const mondial = groep('Pragmalux LED Downlight Mondial IP54 facet wit 6-19,5W 3-CCT');
+  is('een Mondial wordt de gewone Mondial', mondial, 'ag21');
+  is('met de opbouw/pendel als tweede keuze', m.armSerieKeuze(mondial).keuzes.map(k => k.id).slice(0, 2), ['ag21', 'ag25']);
+  is('elke keuze in een serie is een echte groep', m.ARM_SERIES.flatMap(x => x.keuzes)
+    .filter(([id]) => !m.ARM_GROEPEN.some(g => g.id === id)).map(([id]) => id), []);
+  {
+    /* een keuze zonder presenterbestand zou een lege plek in het boek geven */
+    const venster = {};
+    new Function('window', readFileSync(join(root, 'presenters-data.js'), 'utf8'))(venster);
+    is('elke keuze in een serie heeft een presenter', m.ARM_SERIES.flatMap(x => x.keuzes)
+      .filter(([id]) => !venster.PRESENTER_FILES.includes(id)).map(([id]) => id), []);
+  }
+  is('Punto staat alleen', m.armSerieKeuze(groep('Punto 15W zwart')), null);
+  is('keuze blijft als alleen de kleur verandert',
+    m.armKeuzeBlijft('ag25', 'Mondial facet wit 9W', 'Mondial facet zwart 9W'), true);
+  is('keuze vervalt als de naam iets anders wordt', m.armKeuzeBlijft('ag25', 'Mondial 9W', 'Punto 15W'), false);
+  is('keuze vervalt als de naam zelf PIR aanwijst', m.armKeuzeBlijft('ag25', 'Mondial 9W', 'Mondial PIR 9W'), false);
+  is('een keuze buiten een serie blijft altijd', m.armKeuzeBlijft('ag01', 'Punto', 'Mondial'), true);
 
   /* De meting over de hele catalogus: alle artikelen van één Pragmalux-familie horen
      bij dezelfde presenter uit te komen. Een familie die over twee groepen valt is
