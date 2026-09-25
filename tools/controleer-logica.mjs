@@ -1058,6 +1058,34 @@ function is(wat, gekregen, verwacht){
   is('geen presenter is een keuze', m.presenterVan({presenter: '-'}, pir, pir.varianten[0]), {id: null, bron: 'geen'});
 }
 
+/* ========================== DLC: de vijf fotovakken ========================== */
+{
+  const m = await laadUit('dlc.html', ['BEELDVAKKEN', 'beeldenNaarVakken', 'beeldOp', 'schrijfBeeld', 'wisselBeelden']);
+  console.log('DLC: fotovakken');
+  const vakken = S => m.BEELDVAKKEN.map(v => S[v.id] || '-').join('');
+  is('de legenda van de schets', m.BEELDVAKKEN.map(v => v.nr + ' ' + v.label),
+    ['1 Hoofdfoto', '2 Afmetingen', '3 Toepassing', '4 Detail 1', '5 Detail 2']);
+
+  /* Een special van voor de vijf vakken: hoofdfoto plus een rij beelden onderaan. De
+     rij gaat in de volgorde van de legenda in de lege vakken; de hoofdfoto blijft. */
+  const oud = m.beeldenNaarVakken({hoofdfoto: '1', beelden: ['A', 'B', 'C', 'D', 'E', 'F']});
+  is('oude rij in vak 2 t/m 5', vakken(oud), '1ABCD');
+  is('wat niet past blijft over, niets kwijt', oud.beelden, ['E', 'F']);
+  is('zonder hoofdfoto blijft vak 1 leeg', vakken(m.beeldenNaarVakken({beelden: ['A']})), '-A---');
+  is('een gevuld vak wordt overgeslagen',
+    vakken(m.beeldenNaarVakken({afmetingen: 'x', beelden: ['A', 'B']})), '-xAB-');
+  is('een nieuwe special blijft zoals hij is',
+    vakken(m.beeldenNaarVakken({hoofdfoto: '1', detail2: '5', beelden: []})), '1---5');
+
+  /* slepen: twee vakken wisselen, een niet-geplaatst beeld valt uit de rij */
+  const S = {hoofdfoto: '1', afmetingen: 'A', toepassing: 'B', detail1: '', detail2: 'D', beelden: ['E', 'F']};
+  is('vak naar vak wisselt', vakken(m.wisselBeelden(S, 'afmetingen', 'toepassing')), '1BA-D');
+  is('rest naar leeg vak', [vakken(m.wisselBeelden(S, 'rest1', 'detail1')), S.beelden], ['1BAFD', ['E']]);
+  is('rest naar vol vak wisselt terug', [vakken(m.wisselBeelden(S, 'rest0', 'hoofdfoto')), S.beelden], ['EBAFD', ['1']]);
+  is('op zichzelf: niets', vakken(m.wisselBeelden(S, 'detail2', 'detail2')), 'EBAFD');
+  is('onbekend vak raakt niets', [vakken(m.wisselBeelden(S, 'hoofdfoto', 'onder')), S.beelden], ['EBAFD', ['1']]);
+}
+
 /* ---------------------------------------------------------------- verslag ---- */
 console.log('\n' + gedaan + ' controles, ' + (mis ? mis + ' MIS' : 'alles goed') + '.');
 process.exit(mis ? 1 : 0);

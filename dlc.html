@@ -109,8 +109,23 @@
     background:var(--white); aspect-ratio:1; display:grid; place-items:center; cursor:pointer; padding:0;
   }
   .beeldvak.gekozen{border-color:var(--blue);}
+  .beeldvak.erboven{border-color:var(--blue); border-style:dashed; background:#EEF5FC;}
   .beeldvak img{width:100%; height:100%; object-fit:contain; display:block;}
   .beeldvak .leeg{font-size:11px; color:var(--slate); text-align:center; padding:6px; line-height:1.3;}
+  /* De vijf vakken in de schikking van het blad: links de gegevens met daaronder de
+     toepassing, rechts de hoofdfoto, twee details en de afmetingen. */
+  .beeldblad{display:grid; gap:8px; grid-template-columns:1fr 1fr 1fr 1fr;
+    grid-template-areas:"tabel tabel hoofd hoofd" "tabel tabel hoofd hoofd"
+                        "toep toep det1 det2" "toep toep afm afm";}
+  .beeldblad-tabel{grid-area:tabel; border:1.5px dashed var(--border); border-radius:10px; min-height:84px;
+    display:grid; place-items:center; font-size:11px; color:var(--slate);}
+  .beeldblad-vak{display:flex; flex-direction:column; gap:3px; min-width:0;}
+  .beeldblad-label{font-size:10.5px; font-weight:700; color:var(--slate);}
+  .beeldblad .beeldvak{flex:1 1 auto; aspect-ratio:auto; min-height:70px;}
+  .vak-hoofdfoto{grid-area:hoofd;} .vak-hoofdfoto .beeldvak{min-height:150px;}
+  .vak-toepassing{grid-area:toep;} .vak-toepassing .beeldvak{min-height:150px;}
+  .vak-detail1{grid-area:det1;} .vak-detail2{grid-area:det2;}
+  .vak-afmetingen{grid-area:afm;}
   .beeldvak .weg{
     position:absolute; top:3px; right:3px; border:none; background:rgba(28,37,52,.72); color:#fff;
     border-radius:50%; width:19px; height:19px; font-size:12px; line-height:1; cursor:pointer; padding:0;
@@ -429,12 +444,61 @@ function leegBlad(){
     omschrijving:'',
     velden,                 /* id -> {l:label, w:waarde} */
     extra:[],               /* [{kop, l, w}] handmatig bijgezette regels */
-    hoofdfoto:'',
-    beelden:[],
+    /* de vijf fotovakken van het blad, zie BEELDVAKKEN */
+    hoofdfoto:'', afmetingen:'', toepassing:'', detail1:'', detail2:'',
+    beelden:[],             /* alleen nog beelden uit een oude special die niet in een vak pasten */
     plaktekst:'',
     uitslag:null,
   };
 }
+/* De vijf fotovakken, met de nummers uit de schets van de gebruiker (september 2026):
+   1 hoofdfoto rechtsboven, 2 afmetingen rechtsonder, 3 toepassing links onder de
+   tabel, 4 en 5 twee details naast elkaar tussen hoofdfoto en afmetingen. Waar ze op
+   het blad staan zit in M.vakken. */
+const BEELDVAKKEN = [
+  {id:'hoofdfoto',  nr:1, label:'Hoofdfoto'},
+  {id:'afmetingen', nr:2, label:'Afmetingen'},
+  {id:'toepassing', nr:3, label:'Toepassing'},
+  {id:'detail1',    nr:4, label:'Detail 1'},
+  {id:'detail2',    nr:5, label:'Detail 2'},
+];
+/* Een special van vóór de vijf vakken had een hoofdfoto en een rij beelden onderaan.
+   Die beelden gaan in de volgorde van de legenda in de lege vakken (2, 3, 4, 5), zodat
+   er niets verloren gaat; wat daarna nog over is blijft in S.beelden staan en het
+   paneel laat het zien, om weg te halen of naar een vak te slepen. */
+function beeldenNaarVakken(S){
+  const rest = [];
+  (S.beelden||[]).forEach(uri=>{
+    const vak = BEELDVAKKEN.find(v=>v.id!=='hoofdfoto' && !S[v.id]);
+    if(vak) S[vak.id] = uri; else rest.push(uri);
+  });
+  S.beelden = rest;
+  return S;
+}
+function aantalBeelden(){ return BEELDVAKKEN.filter(v=>S[v.id]).length; }
+/* Een beeld in het paneel heet naar zijn plek: het id van een vak, of 'rest0',
+   'rest1', ... voor een beeld dat nog niet geplaatst is. */
+function beeldOp(S, sleutel){
+  if(BEELDVAKKEN.some(v=>v.id===sleutel)) return S[sleutel] || '';
+  const m = /^rest(\d+)$/.exec(sleutel);
+  return m ? (S.beelden[+m[1]] || '') : '';
+}
+function schrijfBeeld(S, sleutel, uri){
+  if(BEELDVAKKEN.some(v=>v.id===sleutel)) S[sleutel] = uri;
+  else { const m = /^rest(\d+)$/.exec(sleutel); if(m) S.beelden[+m[1]] = uri; }
+}
+/* Een beeld naar een ander vak slepen verwisselt de twee: zo zet je een beeld dat de
+   omzetting hierboven in het verkeerde vak zette recht, zonder het opnieuw te zoeken.
+   Sleep je een niet-geplaatst beeld naar een leeg vak, dan valt het uit die rij. */
+function wisselBeelden(S, van, naar){
+  const plek = k => BEELDVAKKEN.some(v=>v.id===k) || /^rest\d+$/.test(k);
+  if(van===naar || !plek(van) || !plek(naar)) return S;
+  const a = beeldOp(S, van), b = beeldOp(S, naar);
+  schrijfBeeld(S, van, b); schrijfBeeld(S, naar, a);
+  S.beelden = S.beelden.filter(Boolean);
+  return S;
+}
+
 /* Wordt bij "Special opslaan" (zie slaSpecialOp()) volgeschreven met de huidige
    special - blijft null in de originele tool, net als bij armaturenboek.html. */
 const OPGESLAGEN_SPECIAL = /*__PROJECT_DATA_START__*/null/*__PROJECT_DATA_END__*/;
@@ -446,7 +510,7 @@ const SPECIAL_VERSIE = 1;
 /* Een hele special in de tool zetten: uit het ingebakken bestand hieronder, of uit de
    balk van project-opslag.js die vraagt of je verder wilt waar je gebleven was. */
 function herstelSpecial(bron){
-    S = Object.assign(leegBlad(), bron.S);
+    S = beeldenNaarVakken(Object.assign(leegBlad(), bron.S));
     SCHEMA.forEach(gr=>gr.velden.forEach(v=>{ if(!S.velden[v.id]) S.velden[v.id]={l:v.l, w:''}; }));
 }
 if(OPGESLAGEN_SPECIAL){
@@ -602,22 +666,29 @@ function tekenPaneel(){
   });
   p.append(kProd);
 
-  /* --- beeld --- */
-  const kBeeld=kaart('Beeld');
+  /* --- beeld: de vijf vakken, gerangschikt zoals ze op het blad staan --- */
+  const kBeeld=kaart('Beeld', aantalBeelden()+'/5');
   kBeeld.append(el('p','hint',
-    'De hoofdfoto komt rechtsboven. De overige beelden komen onderaan op een rij. '+
-    'Klik een vak om een bestand te kiezen, of klik en plak met Ctrl+V.'));
-  kBeeld.append(el('p','hint','Hoofdfoto'));
-  const r1=el('div','beeldrooster');
-  r1.append(beeldVak(S.hoofdfoto, 'hoofdfoto', ()=>{ S.hoofdfoto=''; tekenPaneel(); plan(); }));
-  kBeeld.append(r1);
-  kBeeld.append(el('p','hint','Beelden onderaan'));
-  const r2=el('div','beeldrooster');
-  S.beelden.forEach((uri,i)=>{
-    r2.append(beeldVak(uri, 'beeld'+i, ()=>{ S.beelden.splice(i,1); tekenPaneel(); plan(); }));
+    'Vijf vakken, op de plek waar ze op het blad komen. Klik een vak om een bestand te '+
+    'kiezen, klik en plak met Ctrl+V, of sleep een bestand erop. Sleep een beeld naar een '+
+    'ander vak om de twee te wisselen. Een leeg vak blijft op het blad gewoon wit.'));
+  const blad=el('div','beeldblad');
+  blad.append(el('div','beeldblad-tabel','gegevens'));
+  BEELDVAKKEN.forEach(v=>{
+    const vak=el('div','beeldblad-vak vak-'+v.id);
+    vak.append(el('span','beeldblad-label', v.nr+' · '+v.label));
+    vak.append(beeldVak(S[v.id], v.id, ()=>{ S[v.id]=''; tekenPaneel(); plan(); }, v.label.toLowerCase()));
+    blad.append(vak);
   });
-  r2.append(beeldVak('', 'beeld-nieuw', null));
-  kBeeld.append(r2);
+  kBeeld.append(blad);
+  /* beelden uit een oude special die niet meer in een vak pasten */
+  if(S.beelden.length){
+    kBeeld.append(el('p','hint','Nog niet geplaatst (uit een eerder opgeslagen special) - '+
+      'sleep naar een vak hierboven, of haal weg:'));
+    const r=el('div','beeldrooster');
+    S.beelden.forEach((uri,i)=> r.append(beeldVak(uri, 'rest'+i, ()=>{ S.beelden.splice(i,1); tekenPaneel(); plan(); })));
+    kBeeld.append(r);
+  }
   p.append(kBeeld);
 }
 
@@ -637,26 +708,47 @@ function veldRij(veld, verwijder){
   return r;
 }
 
-function beeldVak(uri, sleutel, verwijder){
+const SLEEP_TYPE='application/x-dlc-beeld';
+function beeldVak(uri, sleutel, verwijder, leegTekst){
   const b=el('button','beeldvak'+(plakDoel===sleutel?' gekozen':''));
   b.type='button';
   if(uri){
-    const i=document.createElement('img'); i.src=uri; i.alt=''; b.append(i);
+    const i=document.createElement('img'); i.src=uri; i.alt=''; i.draggable=false; b.append(i);
     if(verwijder){
       const x=el('button','weg','×');
       x.onclick=e=>{ e.stopPropagation(); verwijder(); };
       b.append(x);
     }
-  } else b.append(el('span','leeg', sleutel==='hoofdfoto' ? 'hoofdfoto' : 'toevoegen'));
+    b.draggable=true;
+    b.title='Klik voor een ander beeld, of sleep naar een ander vak om te wisselen';
+    b.ondragstart=e=>{ e.dataTransfer.setData(SLEEP_TYPE, sleutel); e.dataTransfer.effectAllowed='move'; };
+  } else b.append(el('span','leeg', leegTekst || 'toevoegen'));
   b.onclick=()=>{ plakDoel=sleutel; beeldDoel=sleutel; $('beeldKiezer').click(); tekenPaneel(); };
+  /* neerzetten: een beeld uit een ander vak (wisselen) of een bestand van de computer */
+  const magErop=e=>[...e.dataTransfer.types].some(t=>t===SLEEP_TYPE || t==='Files');
+  b.ondragover=e=>{ if(!magErop(e)) return; e.preventDefault(); b.classList.add('erboven'); };
+  b.ondragleave=()=>b.classList.remove('erboven');
+  b.ondrop=e=>{
+    if(!magErop(e)) return;
+    e.preventDefault(); b.classList.remove('erboven');
+    const van=e.dataTransfer.getData(SLEEP_TYPE);
+    if(van){ wisselBeelden(S, van, sleutel); tekenPaneel(); plan(); return; }
+    const bestand=[...e.dataTransfer.files].find(f=>/^image\//.test(f.type));
+    if(bestand) leesAfbeelding(bestand, u=>zetBeeld(sleutel, u));
+    else Melding.letop('Dat is geen afbeelding.');
+  };
   return b;
 }
 function zetBeeld(sleutel, uri){
-  if(sleutel==='hoofdfoto') S.hoofdfoto=uri;
-  else if(sleutel==='beeld-nieuw') S.beelden.push(uri);
-  else if(/^beeld(\d+)$/.test(sleutel)) S.beelden[+RegExp.$1]=uri;
+  schrijfBeeld(S, sleutel, uri);
   tekenPaneel(); plan();
 }
+/* Een bestand dat naast een vak valt, zou de browser openen - en daarmee de special
+   wegzetten. Een vak dat het aanneemt heeft de gebeurtenis dan al voor zich gehouden. */
+['dragover','drop'].forEach(soort=>document.addEventListener(soort, e=>{
+  if(e.defaultPrevented || ![...e.dataTransfer.types].includes('Files')) return;
+  e.preventDefault(); e.dataTransfer.dropEffect='none';
+}));
 $('beeldKiezer').onchange=e=>{
   const b=e.target.files[0]; $('beeldKiezer').value='';
   leesAfbeelding(b, uri=>zetBeeld(beeldDoel, uri));
@@ -725,8 +817,23 @@ const M = {
   naBestel: 27.1,         /* laatste regel bestelgegevens -> PRODUCTGEGEVENS */
   groepGat: 20.5,         /* laatste regel van een groep -> volgende groepskop */
   lijnBoven: 7.1,         /* haarlijn staat zoveel boven de basislijn */
-  hoofdfoto: {x:323.5, y:171.9, b:230.6, h:163.3},
-  onder: {x:37.6, y:581.9, b:218.97, h:154.7},
+  /* De vijf fotovakken (zie BEELDVAKKEN), naar de schets van de gebruiker van
+     september 2026. Omgerekend van dat schermbeeld met de voetlijn als ijkmaat
+     (1 pt = 1,065 px). De rechterkolom houdt de rand van de oorspronkelijke
+     hoofdfoto (x 323,5 - 554,1): in de schets liepen de vakken over de rand van het
+     blad. Tussen de rijen rechts steeds zo'n 31 pt. De toepassing staat links onder
+     de tabel; y is waar hij hoogstens begint - een langere tabel duwt hem omlaag,
+     zie de tekening. Elk beeld wordt BINNEN zijn vak geschaald (beeldPassend), dus
+     een vak is een grens, geen kader. */
+  vakken: {
+    hoofdfoto:  {x:323.5, y:117, b:230.6, h:265},
+    detail1:    {x:323.5, y:413, b:107.3, h:130},
+    detail2:    {x:446.8, y:413, b:107.3, h:130},
+    afmetingen: {x:323.5, y:575, b:230.6, h:181},
+    toepassing: {x:35.4,  y:413, b:253,   h:200},
+  },
+  toepassingNaTabel: 26,  /* onderkant tabel -> bovenkant toepassing */
+  toepassingMinH: 100,    /* lager dan dit past hij niet meer: naar de volgende pagina */
   voetY: 806.9, voetX1:28.3, voetX2:551.5,
   tekst: '#231F20', lijn: '#BCBEC0',
 };
@@ -753,9 +860,8 @@ async function bouwBlad(){
     try{ return await sluitBeeldIn(PdfHuisstijl.b64Bytes(String(uri).slice(komma+1))); }
     catch(err){ return null; }
   };
-  const hoofd = await beeldUit(S.hoofdfoto);
-  const onder = [];
-  for(const uri of S.beelden){ const i=await beeldUit(uri); if(i) onder.push(i); }
+  const beeld = {};
+  for(const v of BEELDVAKKEN) beeld[v.id] = await beeldUit(S[v.id]);
 
   /* Het ontwerp geeft basislijnen; text() wil de bovenkant van de regel. Door hier
      om te rekenen kunnen alle maten hierboven de gemeten basislijnen blijven, en
@@ -853,21 +959,28 @@ async function bouwBlad(){
     });
   }
 
-  /* --- beeld: hoofdfoto rechtsboven, de rest onderaan op een rij --- */
-  pg = paginas[0];
-  if(hoofd) beeldPassend(hoofd, M.hoofdfoto.x, M.hoofdfoto.y, M.hoofdfoto.b, M.hoofdfoto.h);
-  if(onder.length){
-    const perRij=Math.min(4, onder.length);
-    const tussen=12;
-    const b=Math.min(M.onder.b, (W-2*M.onder.x - (perRij-1)*tussen)/perRij);
-    const h=M.onder.h*(b/M.onder.b);
-    let bx=M.onder.x, by=M.onder.y;
-    onder.forEach((img,i)=>{
-      if(i && i%perRij===0){ bx=M.onder.x; by+=h+tussen; }
-      beeldPassend(img, bx, by, b, h);
-      bx+=b+tussen;
-    });
+  /* --- beeld: de vijf vakken (M.vakken) ---
+     De toepassing staat links onder de tabel. Een lange tabel duwt hem omlaag; past
+     hij dan niet meer (lager dan toepassingMinH), dan komt hij onder de tabel op de
+     laatste pagina, of op een nieuwe. De rechterkolom staat altijd op pagina 1.
+     Behalve de hoofdfoto (die staat waar hij altijd stond) hangen de beelden tegen de
+     bovenkant van hun vak: zo begint de toepassing echt toepassingNaTabel onder de
+     tabel en delen detail 1 en 2 hun bovenlijn, hoe hoog of breed de foto ook is. */
+  const V = M.vakken, onderGrens = M.voetY - 20;
+  const bovenaan = (img, x, top, b, h) =>
+    beeldPassend(img, x, top, b, img.height*Math.min(b/img.width, h/img.height));
+  if(beeld.toepassing){
+    const tabelOnder = y - M.lijnBoven;
+    let top = Math.max(paginas.length===1 ? V.toepassing.y : M.kopbalkH+40, tabelOnder + M.toepassingNaTabel);
+    if(onderGrens - top < M.toepassingMinH){ nieuwePagina(false); top = y; }
+    const h = Math.min(V.toepassing.h, onderGrens - top);
+    bovenaan(beeld.toepassing, V.toepassing.x, top, V.toepassing.b, h);
   }
+  pg = paginas[0];
+  if(beeld.hoofdfoto) beeldPassend(beeld.hoofdfoto, V.hoofdfoto.x, V.hoofdfoto.y, V.hoofdfoto.b, V.hoofdfoto.h);
+  ['detail1','detail2','afmetingen'].forEach(id=>{
+    if(beeld[id]) bovenaan(beeld[id], V[id].x, V[id].y, V[id].b, V[id].h);
+  });
   pg = paginas[paginas.length-1];
 
   return {bytes: await doc.save(), paginas: paginas.length};
@@ -896,7 +1009,7 @@ async function ververs(){
     const gevuld=Object.values(S.velden).filter(v=>v.w.trim()).length+S.extra.filter(e=>e.w.trim()).length;
     $('stand').innerHTML='<b>'+((S.titelDun?S.titelDun+' ':'')+(S.titelVet||''))+'</b> — '+
       paginas+' pagina'+(paginas>1?'\'s':'')+' · '+gevuld+' gegevens · '+
-      (S.beelden.length+(S.hoofdfoto?1:0))+' beelden';
+      aantalBeelden()+' beelden';
   }catch(err){
     console.error(err);
     $('stand').textContent='Het blad kon niet worden getekend: '+(err&&err.message);
@@ -975,7 +1088,7 @@ function specialLeeg(){
   const kaal = leegBlad();
   if((S.titelVet||'') !== kaal.titelVet || (S.titelDun||'') !== kaal.titelDun) return false;
   if((S.artikelcode||'') !== kaal.artikelcode || (S.omschrijving||'').trim()) return false;
-  if((S.hoofdfoto||'') || (S.beelden||[]).length || (S.extra||[]).length) return false;
+  if(aantalBeelden() || (S.beelden||[]).length || (S.extra||[]).length) return false;
   return !Object.keys(S.velden||{}).some(k=> ((S.velden[k]||{}).w||'').toString().trim());
 }
 ProjectOpslag.koppel({
@@ -991,7 +1104,7 @@ ProjectOpslag.koppel({
      niet meer in de opslag van de browser. In het opgeslagen bestand gaan ze wel mee. */
   licht: (payload)=>{
     const kaal = JSON.parse(JSON.stringify(payload));
-    if(kaal.S){ kaal.S.beelden = []; kaal.S.hoofdfoto = ''; }
+    if(kaal.S){ kaal.S.beelden = []; BEELDVAKKEN.forEach(v=>{ kaal.S[v.id] = ''; }); }
     return kaal;
   },
 });
