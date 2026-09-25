@@ -300,7 +300,10 @@ async function tekenaar(doc, opt){
     return opt.bold ? FONT.bold : FONT.reg;
   }
   /* Zet tekst neer en geeft de gebruikte breedte terug. pushOperators omdat pdf-lib
-     de horizontale samenknijping (cond) en de letterspatiering niet aanbiedt. */
+     de horizontale samenknijping (cond) en de letterspatiering niet aanbiedt.
+     schuin:true helt de letter 12 graden, voor een citaat: er is geen cursieve Open
+     Sans ingesloten, en een hellende tekstmatrix verandert de breedte niet, dus meet()
+     en de regelafbreking blijven kloppen. */
   function text(x,yt,size,str,opt){ opt=opt||{};
     const pg=haalPg();
     const s=pdfTxt(str);
@@ -317,7 +320,7 @@ async function tekenaar(doc, opt){
       PDFLib.setFontAndSize(key,size),
       PDFLib.setCharacterSqueeze(hz), PDFLib.setCharacterSpacing(tc),
       PDFLib.setFillingRgbColor(c.red,c.green,c.blue),
-      PDFLib.setTextMatrix(1,0,0,1,xx,H-yt-size*0.78),
+      PDFLib.setTextMatrix(1,0,opt.schuin?0.2126:0,1,xx,H-yt-size*0.78),
       PDFLib.showText(f.encodeText(s)),
       PDFLib.endText(), PDFLib.popGraphicsState());
     return w;

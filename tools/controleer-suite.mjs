@@ -160,6 +160,8 @@ PAGINAS.forEach(p => {
     /* armSuggestie() staat in armatuur-groepen.js maar rekent met bewerkAfstand() uit zoeken.js */
     ['zoeken.js',        /\barmSuggestie\(/],
     ['armatuur-rij.js',  /\b(armGroepVanRij|armRijDelen|stempelPresenter|armLijstKolommen|armBoekGroepen|armWisselRijen|armEigenPresenters|specialPresenterId)\(/],
+    ['medewerkers.js',   /\b(MEDEWERKERS|MEDEWERKER_ROLLEN)\b/],
+    ['medewerker-fotos.js', /\bMEDEWERKER_FOTOS\b/],
     /* armatuur-rij.js leunt zelf op de herkenning, de zoekhulp en de meldingen */
     ['armatuur-groepen.js', /\barmRijDelen\(/],
     ['zoeken.js',        /\barmRijDelen\(/],

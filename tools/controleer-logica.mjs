@@ -14,7 +14,7 @@
  *
  * Eindigt met afsluitcode 1 zodra een test faalt. Alleen Node nodig.
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -223,6 +223,57 @@ function is(wat, gekregen, verwacht){
   is('verplaatsen wisselt de inhoud', [st.arm01.name, st.arm02.name], ['twee', 'een']);
   is('en neemt de eigen PDF mee', [D.sparm01, D.sparm02], [undefined, 'pdf-een']);
   is('alle eigen PDF\'s gaan mee met opslaan', Object.keys(r.armEigenPresenters(['arm01', 'arm02', 'arm03'])), ['sparm02', 'sparm03']);
+}
+
+/* ============================ contactpersonen ============================ */
+{
+  /* De briefingpagina van het armaturenboek zet de gekozen projectuitwerker,
+     accountmanager en commerciële binnendienst onder "Contactgegevens", en onder
+     "Onze specialist" het blauwe vlak van een projectuitwerker met een persoonlijke
+     noot. De gegevens staan in medewerkers.js, de foto's in medewerker-fotos.js. */
+  const venster = {};
+  new Function('window', readFileSync(join(root, 'medewerkers.js'), 'utf8'))(venster);
+  new Function('window', readFileSync(join(root, 'medewerker-fotos.js'), 'utf8'))(venster);
+  const M = venster.MEDEWERKERS, F = venster.MEDEWERKER_FOTOS;
+  console.log('\ncontactpersonen');
+
+  const alle = venster.MEDEWERKER_ROLLEN.flatMap(r => M[r.lijst].map(p => ({rol:r.id, p})));
+  is('elke medewerker heeft naam, functie, telefoon en e-mail',
+    alle.filter(({p}) => !(p.naam && p.functie && p.tel && /^[^@\s]+@distrilight\.com$/.test(p.email)))
+      .map(({p}) => p.id), []);
+  is('ids zijn uniek binnen hun lijst', venster.MEDEWERKER_ROLLEN.flatMap(r => {
+    const ids = M[r.lijst].map(p => p.id); return ids.filter((x, i) => ids.indexOf(x) !== i); }), []);
+  is('telefoonnummers in de schrijfwijze van de bron', alle.filter(({p}) =>
+    ![p.tel, p.mobiel].filter(Boolean).every(n => /^0\d{2} \d{3} \d{2} \d{2}$/.test(n))).map(({p}) => p.id), []);
+  /* de tool zet de aanhalingstekens er zelf omheen */
+  is('een noot zonder eigen aanhalingstekens aan begin of eind', M.projectuitwerkers
+    .filter(p => p.noot && /^["\u201c\u201d]|["\u201c\u201d]$/.test(p.noot.trim())).map(p => p.id), []);
+  is('elke projectuitwerker met een noot heeft een foto',
+    M.projectuitwerkers.filter(p => p.noot && !F[p.id]).map(p => p.id), []);
+  const bronFotos = readdirSync(join(root, 'docs/bronnen/medewerkers')).filter(f => /\.jpe?g$/i.test(f))
+    .map(f => f.replace(/\.jpe?g$/i, '')).sort();
+  is('medewerker-fotos.js is gebouwd uit docs/bronnen/medewerkers', Object.keys(F).sort(), bronFotos);
+  is('en de foto\'s zijn dezelfde bytes', bronFotos.filter(id =>
+    F[id] !== 'data:image/jpeg;base64,' + readFileSync(join(root, 'docs/bronnen/medewerkers', id + '.jpg')).toString('base64')), []);
+  is('geen foto zonder medewerker', Object.keys(F).filter(id => !M.projectuitwerkers.some(p => p.id === id)), []);
+
+  /* de keuze in de tool: de echte functies uit armaturenboek.html */
+  const t = await laadUit('armaturenboek.html', ['medewerkerVan', 'contactPersonen', 'contactRegels', 'specialist'],
+    'const window = ' + JSON.stringify({MEDEWERKERS:M, MEDEWERKER_ROLLEN:venster.MEDEWERKER_ROLLEN})
+    + '; const st = {projectuitwerker:"", accountmanager:"", binnendienst:""};', ['st']);
+  is('niets gekozen: geen contactblok', t.contactPersonen(), []);
+  Object.assign(t.st, {projectuitwerker:'christophe', accountmanager:'tiemen', binnendienst:'hilde'});
+  is('de gekozen drie in de volgorde van de pagina', t.contactPersonen().map(x => x.p.naam),
+    ['Christophe Canoy', 'Tiemen Hasselo', 'Hilde van den Oever']);
+  is('de regels van Christophe, met mobiel', t.contactRegels(t.medewerkerVan('projectuitwerker', 'christophe')),
+    [['T', '040 209 49 26 (Direct)'], ['T', '040 209 49 00 (Algemeen)'], ['M', '062 714 11 90'], ['E', 'christophe@distrilight.com']]);
+  is('Christophe krijgt het blauwe vlak', !!t.specialist(), true);
+  Object.assign(t.st, {projectuitwerker:'olivia'});
+  is('Olivia nog niet: alleen contactgegevens', t.specialist(), null);
+  Object.assign(t.st, {projectuitwerker:'bestaat-niet', accountmanager:''});
+  is('een id dat er niet meer is telt als niet gekozen', t.contactPersonen().map(x => x.p.naam), ['Hilde van den Oever']);
+  is('Christophe als binnendienst heeft een andere functie', t.medewerkerVan('binnendienst', 'christophe').functie,
+    'Hoofd Commerciële Binnendienst');
 }
 
 /* ========================== bandrasterberekening =========================== */
