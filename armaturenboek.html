@@ -745,8 +745,8 @@ async function assembleArmaturenboekPdf(){
   }
   /* De stempel zelf - twee stijlen, gemeten plek, krimpen bij een lange code -
      staat in armatuur-rij.js, zodat de railtool op precies dezelfde plek stempelt. */
-  const stempelCode = (pagina, codes, kleur, zwart)=> stempelPresenter(pagina, codes, kleur, zwart, stempelFont);
-  const appendPresenter = async(id, codes, kleur, zwart)=>{
+  const stempelCode = (pagina, codes, kleur, zwart, special)=> stempelPresenter(pagina, codes, kleur, zwart, stempelFont, special);
+  const appendPresenter = async(id, codes, kleur, zwart, special)=>{
     const b64 = await presenterData(id);
     if(!b64){ console.warn('Presenter "'+id+'" is nog niet toegevoegd (presenters/'+id+'.js) — overgeslagen.'); return 0; }
     try{
@@ -754,14 +754,14 @@ async function assembleArmaturenboekPdf(){
       const idx = d.getPageIndices();
       const pgs = await finalDoc.copyPages(d, idx);
       pgs.forEach(p=>finalDoc.addPage(p));
-      stempelCode(pgs[0], codes, kleur||'#FFFFFF', zwart);
+      stempelCode(pgs[0], codes, kleur||'#FFFFFF', zwart, special);
       return pgs.length;
     }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); return 0; }
   };
 
   await copyRange(ownDoc, 0, ownDoc.getPageCount());
   let presenterTotaal = 0;
-  for(const g of bookGroups) presenterTotaal += await appendPresenter(g.id, g.code, g.kleur, g.zwart);
+  for(const g of bookGroups) presenterTotaal += await appendPresenter(g.id, g.code, g.kleur, g.zwart, g.special);
   presenterTotaal += await appendPresenter('achterpaginas'); /* AB Achterpaginas, helemaal achteraan */
 
   const eind = await finalDoc.save();

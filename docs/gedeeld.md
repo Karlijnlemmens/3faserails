@@ -20,7 +20,7 @@ The armaturenboek and the railtool make the same book — a row per fixture, a p
 - `armTypeOnbekend()` — whether the upload button shows; it ignores the uploaded PDF on purpose, or the button would vanish once used.
 - `armRijDelen(o)` — the label (recognised type, the series choice, the typo suggestion), the upload button with its ×, the stamp toggle and the ↑/↓ arrows as DOM parts; the tool builds its own row around them and passes `opWijziging` (`refresh` or `updateSummary`). It owns the name field's listeners, including `armKeuzeBlijft()`.
 - `armWisselRijen()` — swaps the contents of two slots, and an uploaded PDF with them; `armVolgBijwerken()` disables the first ↑ and the last ↓.
-- `armBoekGroepen(boek)` and `stempelPresenter()` — per presenter the unique codes (stacked, one per line), colour and style, and the stamp itself at the measured spot, shrinking rather than shifting when a code is too wide.
+- `armBoekGroepen(boek)` and `stempelPresenter()` — per presenter the unique codes (stacked, one per line), colour, style and whether it is a special, and the stamp itself at the measured spot, shrinking rather than shifting when a code is too wide. A special (an uploaded PDF, usually a DLC sheet) has its own spot, `STEMPEL_SPECIAL`, clear of the DLC header band and logo block, and defaults to black — see `docs/armaturenboek.md`.
 - `armLijstKolommen(rijen, artikel, oms)` — the armaturenlijst's columns and values; Code and Aantal drop when no row has one.
 - `armEigenPresenters()` — every uploaded PDF, for "Project opslaan".
 

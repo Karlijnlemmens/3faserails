@@ -92,13 +92,19 @@ function armWisselRijen(armaturen, idA, idB){
               kleur van de groep (wit, tenzij de groep een eigen stempelKleur heeft).
      'zwart'  zwart en hoger, voor een pagina waar de kop licht is of de indeling
               onbekend, zodat hij niet over het merk of het logo valt.
-   Wit is overal de standaard, ook voor een geüploade presenter: die komen meestal
-   uit de DLC-tool en hebben dan een zwarte kopbalk. */
+   Wit is de standaard, behalve op een special (een geüploade PDF): die komt meestal
+   uit de DLC-tool, en daar valt de stempel onder de dunne zwarte balk op wit papier
+   - een witte stempel was daar onzichtbaar. Een special is dus standaard zwart; wie
+   zelf op wit zet (een eigen PDF met een hoge donkere kop) houdt wit. `special` is
+   of de regel een eigen PDF heeft (armGroepVanRij() geeft dan special:true). */
 const STEMPELSTIJLEN = [
   {id:'wit',   label:'Stempel wit'},
   {id:'zwart', label:'Stempel zwart'},
 ];
-function stempelZwart(s){ return !!s && s.stempel==='zwart'; }
+function stempelZwart(s, special){
+  if(s && s.stempel) return s.stempel==='zwart';
+  return !!special;
+}
 
 /* Per presenter in het boek: de codes die erop gestempeld worden, de kleur en de
    stijl. Meerdere regels mogen dezelfde code hebben en twee codes kunnen bij
@@ -111,9 +117,25 @@ function armBoekGroepen(boek){
     id: b.g.id,
     code: [...new Set(b.rijen.map(r=>(r.s.aanduiding||'').trim()).filter(Boolean))],
     kleur: b.g.stempelKleur || '#FFFFFF',
-    zwart: b.rijen.some(r=>stempelZwart(r.s)),
+    zwart: b.rijen.some(r=>stempelZwart(r.s, b.g.special)),
+    special: !!b.g.special,
   }));
 }
+
+/* De stempel op een special - een geüploade PDF, meestal een DLC-blad uit dlc.html.
+   Gemeten op dat blad (pt, y van boven): de zwarte balk loopt over de hele breedte tot
+   23,7; rechts hangt het schuine logovlak eraan, met zijn linkerrand van x 444,8 op
+   y 24 tot 468,3 op y 57,4. Op de Pragmalux-plek (rechterrand 449,9, hoofdletters
+   vanaf 27,7) liep de zwarte stempel met zijn laatste letter in dat vlak en stond hij
+   4 pt onder de balk; een witte viel op wit papier.
+   Hier: rechts uitgelijnd op x 435,85 - de lijn van het DLC-raster waar de goot
+   tussen detail 4 en 5 begint (323,8 + (236,1 - 12) / 2) - dus 9 pt vóór de hoek van
+   het logovlak en 17 pt ervan op de hoogte van de letters. De hoofdletters beginnen
+   één goot (12 pt) onder de balk: 35,7. Gemeten in Poppins Bold 11 pt beginnen die
+   0,47 pt onder `basislijn` (zoals stempelPresenter die gebruikt), vandaar 35,2.
+   Een lange code loopt naar links, over het wit boven de titel; een derde regel
+   eindigt rond y 72, de titel begint op 78. */
+const STEMPEL_SPECIAL = {marge: 595.28 - 435.85, basislijn: 35.2};
 
 /* Zet de codes rechtsboven op de eerste presenterpagina, zodat te zien is bij
    welke regel uit de armaturenlijst dit blad hoort.
@@ -130,11 +152,15 @@ function armBoekGroepen(boek){
    vrije ruimte). pdf-lib kan geen pixels van een bestaande pagina uitlezen, dus
    dit is een vuistregel: bij overschrijding krimpt het lettertype van die regel
    in plaats van dat de positie verschuift. `font` is een lettertype dat in het
-   document van de pagina is ingesloten. */
-function stempelPresenter(pagina, codes, kleur, zwart, font){
+   document van de pagina is ingesloten.
+
+   Een special (special=true) krijgt een eigen plek, zie STEMPEL_SPECIAL: de plek
+   hierboven is op de Pragmalux-bladen gemeten en valt op een DLC-blad in de kop. */
+function stempelPresenter(pagina, codes, kleur, zwart, font, special){
   if(!pagina || !codes || !codes.length) return;
-  const korps=11, marge=32+113.4 /* +4cm naar links t.o.v. de rechtermarge */,
-        regelhoogte=13, basislijn = zwart ? 27.2 : 35.5;
+  const korps=11, regelhoogte=13;
+  const marge = special ? STEMPEL_SPECIAL.marge : 32+113.4 /* +4cm naar links t.o.v. de rechtermarge */;
+  const basislijn = special ? STEMPEL_SPECIAL.basislijn : zwart ? 27.2 : 35.5;
   const veiligeBreedte = 250, minKorps = 7;
   const {width, height} = pagina.getSize();
   const c = zwart
@@ -264,7 +290,8 @@ function armRijDelen(o){
   const stempel=document.createElement('button');
   stempel.type='button'; stempel.className='c2-stempelbtn';
   stempel.addEventListener('click', ()=>{
-    s.stempel = stempelZwart(s) ? 'wit' : 'zwart';
+    const g = groep();
+    s.stempel = stempelZwart(s, g && g.special) ? 'wit' : 'zwart';
     verf(); o.opWijziging();
   });
 
@@ -285,12 +312,17 @@ function armRijDelen(o){
     const toon = !!groep() && !!(codeNaamInp.value||'').trim();
     stempel.style.display = toon ? '' : 'none';
     if(!toon) return;
-    const zwart = stempelZwart(s);
+    const sp = !!(groep() || {}).special;
+    const zwart = stempelZwart(s, sp);
     stempel.textContent = zwart ? '● Stempel zwart' : '○ Stempel wit';
     stempel.className = 'c2-stempelbtn'+(zwart?' zwart':'');
-    stempel.title = zwart
-      ? 'De code komt zwart en iets hoger op de presenter — voor een pagina met een lichte kop. Klik voor wit.'
-      : 'De code komt wit in de kopbalk van de presenter. Klik voor zwart, als die kop licht is.';
+    stempel.title = sp
+      ? (zwart
+        ? 'De code komt zwart onder de kop van de eigen PDF, links van het DLC-logo. Klik voor wit - alleen voor een PDF met een hoge donkere kop.'
+        : 'De code komt wit onder de kop van de eigen PDF; op een DLC-blad is die dan onzichtbaar. Klik voor zwart.')
+      : zwart
+        ? 'De code komt zwart en iets hoger op de presenter — voor een pagina met een lichte kop. Klik voor wit.'
+        : 'De code komt wit in de kopbalk van de presenter. Klik voor zwart, als die kop licht is.';
   }
   function verfBadge(){
     badge.removeAttribute('tabindex'); badge.removeAttribute('role'); badge.dataset.tekst='';

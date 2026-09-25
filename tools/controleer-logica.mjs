@@ -181,7 +181,7 @@ function is(wat, gekregen, verwacht){
      de armaturenlijst en het verplaatsen van een regel. */
   const r = await laadUit('armatuur-rij.js',
     ['specialPresenterId', 'armGroepVanRij', 'armTypeOnbekend', 'armEigenPresenters', 'armWisselRijen',
-     'STEMPELSTIJLEN', 'stempelZwart', 'armBoekGroepen', 'armLijstKolommen'],
+     'STEMPELSTIJLEN', 'stempelZwart', 'armBoekGroepen', 'armLijstKolommen', 'STEMPEL_SPECIAL'],
     readFileSync(join(root, 'zoeken.js'), 'utf8') + '\n' + readFileSync(join(root, 'armatuur-groepen.js'), 'utf8')
     + '\nconst window = globalThis; globalThis.PRESENTER_DATA = {};'
     + '\nconst PdfHuisstijl = {presenterAanwezig: id => !!globalThis.PRESENTER_DATA[id]};');
@@ -207,8 +207,32 @@ function is(wat, gekregen, verwacht){
   const g = {id:'ag01', stempelKleur:undefined};
   const boek = [{g, rijen:[{s:rij({aanduiding:'A'})}, {s:rij({aanduiding:' A '})}, {s:rij({aanduiding:'B', stempel:'zwart'})}]}];
   is('stempel: unieke codes onder elkaar, zwart als een regel erom vraagt', r.armBoekGroepen(boek),
-    [{id:'ag01', code:['A', 'B'], kleur:'#FFFFFF', zwart:true}]);
+    [{id:'ag01', code:['A', 'B'], kleur:'#FFFFFF', zwart:true, special:false}]);
   is('wit is de standaard', r.stempelZwart(rij({})), false);
+  /* Een special is meestal een DLC-blad: daar valt de stempel op wit papier. */
+  is('special: standaard zwart', r.stempelZwart(rij({}), true), true);
+  is('special: zelf op wit gezet blijft wit', r.stempelZwart(rij({stempel:'wit'}), true), false);
+  is('special gaat mee naar het boek',
+    r.armBoekGroepen([{g:{id:'sparm03', special:true}, rijen:[{s:rij({aanduiding:'S1'})}]}]),
+    [{id:'sparm03', code:['S1'], kleur:'#FFFFFF', zwart:true, special:true}]);
+
+  /* De plek op een special tegen de kop van het DLC-blad, gemeten op een blad uit
+     dlc.html: balk over de hele breedte tot y 23,7, het schuine logovlak met zijn
+     linkerrand van x 444,8 (y 24) tot 468,3 (y 57,4). Hoofdletters Poppins Bold 11 pt:
+     0,47 onder basislijn, 7,7 hoog; regels 13 pt, onderstok 2,5. Tot drie codes onder
+     elkaar mag geen letter de balk of het vlak raken, met minstens een goot (12 pt)
+     ertussen. De Pragmalux-plek (449,9 / 27,2) haalt dat niet - zo is het misgegaan. */
+  const vrijVanKop = (rechts, basislijn, regels) => {
+    const boven = basislijn + 0.47, onder = basislijn + 0.47 + 7.7 + 2.5 + (regels - 1) * 13;
+    const vlakRand = y => 444.8 + (468.3 - 444.8) * (Math.min(Math.max(y, 24), 57.4) - 24) / (57.4 - 24);
+    const naastVlak = Math.min(vlakRand(boven), vlakRand(onder)) - rechts;
+    return Math.round(Math.min(boven - 23.7, onder < 24 ? Infinity : naastVlak) * 10) / 10;
+  };
+  const SP = r.STEMPEL_SPECIAL, rechtsSP = 595.28 - SP.marge;
+  is('special: een goot onder de balk en naast het logovlak, ook met drie codes',
+    [1, 2, 3].map(n => vrijVanKop(rechtsSP, SP.basislijn, n) >= 11.9), [true, true, true]);
+  is('special: rechts op de DLC-lijn van de goot tussen detail 4 en 5', Math.round(rechtsSP * 100) / 100, 435.85);
+  is('de oude plek raakte het logovlak', vrijVanKop(595.28 - 145.4, 27.2, 1) < 0, true);
 
   const zonder = r.armLijstKolommen([{s:rij({name:'x'})}], () => '123', () => 'x');
   is('lijst zonder codes en aantallen: alleen Artikelcode en Omschrijving',
