@@ -60,7 +60,7 @@ window.PRESENTER_FILES = [
   'ag31',   /* Paneel Modul */
   'ag32',   /* Paneel Optic */
   'ag33',   /* Paneel Rondix */
-  'ag34',   /* Paneel Sigma G2 */
+  'ag34',   /* Paneel Sigma G2 IP44 */
   'ag35',   /* Paneel Wingar */
   'ag36',   /* BRIQ */
   'ag37',   /* Inbouwspot Alpha */

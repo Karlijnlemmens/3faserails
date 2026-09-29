@@ -52,7 +52,7 @@ const ARM_GROEPEN = [
   {id:'ag31', naam:'Paneel Modul', zoektermen:['Modul']},
   {id:'ag32', naam:'Paneel Optic', zoektermen:['Optic']},
   {id:'ag33', naam:'Paneel Rondix', zoektermen:['Rondix']},
-  {id:'ag34', naam:'Paneel Sigma G2', zoektermen:['Sigma G2','Sigma']},
+  {id:'ag34', naam:'Paneel Sigma G2 IP44', zoektermen:['Sigma G2','Sigma']},
   {id:'ag35', naam:'Paneel Wingar', zoektermen:['Wingar']},
   {id:'ag36', naam:'Briq', zoektermen:[]},
   {id:'ag37', naam:'Inbouwspot Alpha', zoektermen:['Alpha']},
@@ -168,8 +168,12 @@ function armSchoon(txt){
   /* "UGR<19" e.d. is een glare-index spec-waarde die op vrijwel elk paneel/downlight-
      spec-blad staat, geen verwijzing naar het type "Essence Ugr" (ag18) - anders wint
      dat type onterecht mee zodra iemand een volledige spec-tekst plakt die toevallig
-     ook een UGR-waarde bevat. Kaal "Ugr" (zonder </≤ + getal erachter) blijft intact. */
-  return String(txt||'').replace(/ugr\s*[<≤]\s*\d+/gi, ' ');
+     ook een UGR-waarde bevat. Kaal "Ugr" (zonder </≤ + getal erachter) blijft intact.
+     De IP-klasse gaat aaneen, zoals op de bladen en in de typenamen: wie "Sigma IP 65"
+     of "Sigma IP-65" typt, bedoelt de Sigma G2 IP65 - los bleef "ip" "65" over, en
+     dat woord kent geen enkel type, dus werd het de gewone Sigma G2 (IP44). */
+  return String(txt||'').replace(/ugr\s*[<≤]\s*\d+/gi, ' ')
+    .replace(/\bip[\s.-]*(\d{2}k?)\b/gi, 'IP$1');
 }
 function armZinvolleTokens(txt){
   return armTokens(armSchoon(txt)).filter(t=>

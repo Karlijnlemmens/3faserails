@@ -75,6 +75,18 @@ function is(wat, gekregen, verwacht){
   is('Pendelarmatuur Orion is niet Orion', groep('Pragmalux LED Pendelarmatuur Orion wit 30W'), 'ag109');
   is('Gevelarmatuur Squalo is niet Squalo Mini', groep('Pragmalux LED Gevelarmatuur Squalo IP65 zwart 20W'), 'ag67');
   is('Squalo Mini blijft Squalo Mini', groep('Pragmalux LED Squalo Mini IP65 zwart 10W'), 'ag63');
+  /* Sigma G2: IP44 (ag34) of IP65 (ag82), op de IP-klasse - de volledige naam zoals de
+     gebruiker hem aanleverde, of alleen het type met de klasse, ook met een spatie of
+     streepje ertussen ("IP 65", "IP-65"). */
+  is('Sigma G2 IP65, volledige naam',
+    groep('Pragmalux LED Paneel 30x120cm Sigma G2 IP65 CRI>90 37W 3000K-4000K 2-CCT 5000-5050lm UGR<19 '
+        + '+IP65 Driver (2x28W/2x36W)'), 'ag82');
+  is('Sigma G2 IP44, volledige naam',
+    groep('Pragmalux LED Paneel 30x60cm Sigma G2 IP44 9-20W 3000K-4000K 2-CCT 1050-2500lm UGR<19 +Driver (2x14W)'), 'ag34');
+  is('Sigma op de IP-klasse, ingetypt',
+    ['Sigma IP65', 'sigma ip65', 'SIGMA IP 65', 'Sigma IP-65', 'IP65 Sigma', 'Sigma IP44', 'sigma ip 44', 'Sigma G2'].map(groep),
+    ['ag82', 'ag82', 'ag82', 'ag82', 'ag82', 'ag34', 'ag34', 'ag34']);
+  is('IP-klasse los getypt, ook bij andere types', ['Fora IP 65', 'Dot IP-65', 'Clean IP 69K'].map(groep), ['ag19', 'ag75', 'ag68']);
   /* De naam staat vóór het soortwoord: dan niet afknippen. */
   is('Mondial Opbouw Pendel zonder merknaam', groep('Mondial Opbouw Pendel wit 25,5W'), 'ag25');
   /* Ruis mag niet meetellen. */
@@ -1072,9 +1084,15 @@ function is(wat, gekregen, verwacht){
   is('Essence PIR krijgt de PIR-presenter', m.presenterVan(leeg, pir, pir.varianten[0]).id, 'ag17');
   const sigma = fam('LED Paneel Sigma');
   const ip65 = sigma.varianten.find(v => /IP65/.test(v.omschrijving));
-  const gewoon = sigma.varianten.find(v => !/IP65/.test(v.omschrijving));
-  is('een Sigma-artikel krijgt de Sigma G2', m.presenterNaam(m.presenterVan(leeg, sigma, gewoon).id), 'Paneel Sigma G2');
+  const gewoon = sigma.varianten.find(v => /Sigma G2 IP44/.test(v.omschrijving));
+  is('een Sigma-artikel krijgt de Sigma G2 IP44', m.presenterNaam(m.presenterVan(leeg, sigma, gewoon).id), 'Paneel Sigma G2 IP44');
   is('een Sigma IP65 krijgt die van de IP65', m.presenterNaam(m.presenterVan(leeg, sigma, ip65).id), 'Paneel Sigma G2 IP65');
+  /* Over de hele familie: elk G2-artikel krijgt het blad van zijn eigen IP-klasse.
+     Gemeten: 48 keer IP65, 53 keer IP44 (de 16 Sigma G3 IP54 hebben geen eigen blad). */
+  const sigmaG2 = sigma.varianten.filter(v => /Sigma G2\s+(Zwart\s+)?IP(44|65)/.test(v.omschrijving));
+  const sigmaMis = sigmaG2.filter(v => m.presenterVan(leeg, sigma, v).id !== (/IP65/.test(v.omschrijving) ? 'ag82' : 'ag34'));
+  is('elke Sigma G2 krijgt het blad van zijn IP-klasse', sigmaMis.map(v => v.artikelcode), []);
+  is('Sigma G2-artikelen gemeten: ondergrens 101', sigmaG2.length >= 101, true);
   is('zonder artikel en oneens: geen', m.presenterVan(leeg, sigma, null).id, null);
   is('herkend staat erbij', m.presenterVan(leeg, sigma, gewoon).bron, 'herkend');
   is('families.json wint', m.presenterVan(leeg, pir, pir.varianten[0]).bron, 'familie');

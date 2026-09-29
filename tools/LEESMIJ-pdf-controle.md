@@ -20,7 +20,7 @@ daarvan met een map die je eerder met `pdfbaseline.mjs` maakte.
 |---|---|
 | `node tools/controleer-logica.mjs` | de rekenkern: armatuurherkenning, de bandrasterberekening tegen het voorbeeld uit de werkmap, het uitlezen van geplakte specificaties, de zoekers en de presenterkeuze van de vergelijker |
 | `node tools/controleer-suite.mjs` | wat over meerdere bestanden gelijk moet blijven: armatuurtabel, tabbladenrij, palet, geen netwerkverzoeken, gedeelde scripts, en dat de ingebakken productdata bij `armaturen.json` hoort |
-| `node tools/controleer-presenters.mjs` | de ingebakken presenters: lege pagina's, uitschieters in grootte, lijst en map uit de pas |
+| `node tools/controleer-presenters.mjs` | de ingebakken presenters: lege pagina's, uitschieters in grootte, lijst en map uit de pas, twee presenters met dezelfde inhoud |
 | `python3 vergelijker/controleer-families.py` | dat de productdata in de juiste families valt: nagekeken gevallen, en hoeveel families er uit één artikel bestaan |
 | `python3 vergelijker/controleer-data.py` | of `armaturen.json` compleet genoeg is om op te kiezen. Er zijn 14 bekende punten - families waarvan de prijslijst nergens een lichtstroom noemt - dus `controleer-alles` draait hem met `--hoogstens 14`: een vijftiende maakt het rood |
 | `node tools/pdfbaseline.mjs` + `vergelijk.mjs` | dat een wijziging niets aan de PDF's verandert (hieronder) |

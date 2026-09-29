@@ -14,7 +14,11 @@
  *   - pagina's zonder één tekenopdracht (de lege-export-fout);
  *   - bestanden die niet te openen zijn;
  *   - presenters in presenters/ die niet in PRESENTER_FILES staan en andersom;
- *   - uitschieters in bestandsgrootte (die maken de export onmailbaar).
+ *   - uitschieters in bestandsgrootte (die maken de export onmailbaar);
+ *   - twee presenters met precies dezelfde inhoud: dan heeft er één het blad van een
+ *     ander type. Zo kreeg een Sigma G2 IP44 het blad van de IP65 - "Paneel SIGMA
+ *     G2.pdf" was een kopie van "Paneel SIGMA G2 IP65.pdf" - en dat viel pas op toen
+ *     iemand het verkeerde blad in een armaturenboek zag.
  *
  * Eindigt met afsluitcode 1 als er iets te melden valt, zodat het ook in een
  * controlestap gebruikt kan worden.
@@ -23,6 +27,7 @@
  * net als tools/maak-rail-figuren.mjs.
  */
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
@@ -88,6 +93,13 @@ await pagina.addScriptTag({url: basis + '/pdf.mjs', type: 'module'});
 await pagina.waitForFunction(() => !!window.pdfjsLib);
 await pagina.evaluate((w)=>{ window.pdfjsLib.GlobalWorkerOptions.workerSrc = w; }, basis + '/pdf.worker.mjs');
 
+/* Twee presenters met dezelfde inhoud die al bekend zijn en op het juiste blad wachten.
+   Mag alleen korter worden: zodra het juiste blad er is, gaat het tweetal hier weg. */
+const BEKEND_DUBBEL = [
+  ['ag06', 'ag07'],   /* Orion (ag07) is een kopie van het Arda-blad (ag06), september 2026 */
+];
+const inhoud = new Map();   /* sha1 van de presenterdata -> ids */
+
 const regels = [];
 for(const id of opSchijf.sort()){
   const pad = join(map, id + '.js');
@@ -97,6 +109,8 @@ for(const id of opSchijf.sort()){
   const tekst = readFileSync(pad, 'utf8');
   const a = tekst.indexOf("] = '"), b = tekst.lastIndexOf("';");
   if(a < 0 || b < a){ meldingen.push(id + ': geen presenterdata in het bestand'); continue; }
+  const vingerafdruk = createHash('sha1').update(tekst.slice(a + 5, b)).digest('hex');
+  inhoud.set(vingerafdruk, (inhoud.get(vingerafdruk) || []).concat(id));
   const uitslag = await pagina.evaluate(async (data) => {
     try{
       const doc = await window.pdfjsLib.getDocument({data: Uint8Array.from(atob(data), c => c.charCodeAt(0))}).promise;
@@ -117,6 +131,14 @@ for(const id of opSchijf.sort()){
 }
 await browser.close();
 server.close();
+
+for(const ids of inhoud.values()){
+  if(ids.length < 2) continue;
+  const bekend = BEKEND_DUBBEL.some(p => p.length === ids.length && p.every(x => ids.includes(x)));
+  if(!bekend) meldingen.push(ids.join(' en ') + ': precies dezelfde inhoud - een van beide heeft het blad van een ander type');
+}
+BEKEND_DUBBEL.filter(p => ![...inhoud.values()].some(ids => p.every(x => ids.includes(x))))
+  .forEach(p => meldingen.push(p.join(' en ') + ': staan in BEKEND_DUBBEL maar zijn niet meer gelijk - haal ze daar weg'));
 
 /* ---------- verslag ---------- */
 const totaal = regels.reduce((s, r) => s + r.mb, 0);
