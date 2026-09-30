@@ -565,6 +565,7 @@ async function tekenaar(doc, opt){
     rect(Mg,y,T.totW,15,T.kopVulling);
     T.cols.forEach(c=>{ text(x+5,y+2.6,8.5,c.h,{bold:true,color:T.kopTekst}); x+=c.w; });
     zetY(y+15);
+    T.naKop=true;
   }
   function tableStart(cols, opt){ opt=opt||{};
     const totW=cols.reduce((s,c)=>s+c.w,0);
@@ -573,12 +574,39 @@ async function tekenaar(doc, opt){
     tabelKop(T);
     return T;
   }
+  /* Een woord dat zelf breder is dan zijn kolom - een code als "Trappenhuizen/gangen(opbouw)"
+     of een lang artikelnummer - liep de volgende kolom in, want er werd alleen op
+     spaties afgebroken. Zo'n woord breekt nu af, liefst na / - _ of vóór een (, en
+     pas als die er niet zijn midden in het woord - "gangen(opbouw" + ")" leest slecht.
+     Een stuk van minder dan drie tekens aan het begin telt niet als breekplek. */
+  function breekWoord(wd, past){
+    const stukken=[];
+    while(wd.length>1 && !past(wd)){
+      let n=wd.length-1;
+      while(n>1 && !past(wd.slice(0,n))) n--;
+      let knip=n;
+      for(let k=n; k>=3; k--){
+        if('/-_'.includes(wd[k-1]) || wd[k]==='('){ knip=k; break; }
+      }
+      stukken.push(wd.slice(0,knip)); wd=wd.slice(knip);
+    }
+    stukken.push(wd);
+    return stukken;
+  }
   function wrapCell(str,w){
+    const past=t=>FONT.reg.widthOfTextAtSize(t,8.5)<=w;
     const words=String(str==null?'':str).split(' ');
     const lines=[]; let cur='';
     words.forEach(wd=>{
+      if(!past(wd)){
+        const stukken=breekWoord(wd, past);
+        if(cur) lines.push(cur);
+        lines.push(...stukken.slice(0,-1));
+        cur=stukken[stukken.length-1];
+        return;
+      }
       const test=cur?cur+' '+wd:wd;
-      if(FONT.reg.widthOfTextAtSize(test,8.5)>w && cur){ lines.push(cur); cur=wd; }
+      if(!past(test) && cur){ lines.push(cur); cur=wd; }
       else cur=test;
     });
     lines.push(cur);
@@ -591,11 +619,16 @@ async function tekenaar(doc, opt){
     const rowH=13.5+(nLines-1)*lineH;
     let y=haalY();
     if(y+rowH>H-MB){ flush(); beginPage(false); tabelKop(T); y=haalY(); }
-    if(T.i%2===0) rect(Mg,y,T.totW,rowH,C.shade);
+    if(T.i%2===0){
+      rect(Mg,y,T.totW,rowH,C.shade);
+      /* De vulling valt over de onderste helft van de lijn onder de vorige rij; op
+         schermgrootte leek daar dan geen lijn te staan. Dus die lijn opnieuw, bovenop. */
+      if(!T.naKop) line(Mg,y,Mg+T.totW,y,0.5,C.line);
+    }
     let x=Mg;
     T.cols.forEach((c,j)=>{ cellLines[j].forEach((ln,li)=>text(x+5,y+2.4+li*lineH,8.5,ln,{color:C.tekst})); x+=c.w; });
     line(Mg,y+rowH,Mg+T.totW,y+rowH,0.5,C.line);
-    T.i++; zetY(y+rowH);
+    T.i++; T.naKop=false; zetY(y+rowH);
   }
 
   return {

@@ -27,7 +27,10 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
    van Node weet dat allemaal wel. */
 function snijUit(tekst, naam){
   const regels = tekst.split('\n');
-  const start = regels.findIndex(r => new RegExp('^(?:const|let|function)\\s+' + naam + '\\b').test(r));
+  let start = regels.findIndex(r => new RegExp('^(?:const|let|function)\\s+' + naam + '\\b').test(r));
+  /* Anders een ingesprongen declaratie, zoals een hulpfunctie binnen de tekenlaag van
+     pdf-huisstijl.js - alleen bruikbaar als die niets uit zijn omgeving nodig heeft. */
+  if(start < 0) start = regels.findIndex(r => new RegExp('^\\s+(?:const|let|function)\\s+' + naam + '\\b').test(r));
   if(start < 0) throw new Error('niet gevonden in de broncode: ' + naam);
   for(let eind = start; eind < Math.min(regels.length, start + 400); eind++){
     const stuk = regels.slice(start, eind + 1).join('\n');
@@ -1098,6 +1101,31 @@ function is(wat, gekregen, verwacht){
   is('families.json wint', m.presenterVan(leeg, pir, pir.varianten[0]).bron, 'familie');
   is('zelf gekozen wint van alles', m.presenterVan({presenter: 'ag01'}, pir, pir.varianten[0]), {id: 'ag01', bron: 'handmatig'});
   is('geen presenter is een keuze', m.presenterVan({presenter: '-'}, pir, pir.varianten[0]), {id: null, bron: 'geen'});
+}
+
+/* ===================== tabelcellen: een te lang woord ===================== */
+{
+  /* Een woord breder dan zijn kolom liep de volgende kolom in (de armaturenlijst:
+     "Trappenhuizen/gangen(opbouw)" dwars door het artikelnummer). breekWoord() in
+     pdf-huisstijl.js breekt het af; hier met een tekenaantal als breedtemaat, zodat
+     de uitkomst niet van het lettertype afhangt. */
+  const m = await laadUit('pdf-huisstijl.js', ['breekWoord']);
+  console.log('tabelcellen');
+  const tot = n => t => t.length <= n;
+  is('past het, dan heel', m.breekWoord('Horeca', tot(14)), ['Horeca']);
+  is('na een schuine streep', m.breekWoord('Trappenhuizen/gangen(opbouw)', tot(14)), ['Trappenhuizen/', 'gangen(opbouw)']);
+  is('vóór een haakje, niet midden in het woord', m.breekWoord('gangen(opbouw)', tot(13)), ['gangen', '(opbouw)']);
+  is('na een streepje', m.breekWoord('ZSF1092386-tc-da', tot(12)), ['ZSF1092386-', 'tc-da']);
+  is('geen breekplek: midden in het woord', m.breekWoord('ABCDEFGHIJKLMNOPQRST', tot(8)), ['ABCDEFGH', 'IJKLMNOP', 'QRST']);
+  is('geen snipper vooraan', m.breekWoord('A/BCDEFGHIJKLMNOP', tot(8))[0].length > 2, true);
+  const proef = ['Trappenhuizen/gangen(opbouw)', 'ZSF1092386-tc-da-extra-lang', 'kantoor_verdieping_2(noord)', 'x'.repeat(40), 'a-b-c-d-e-f-g-h-i-j'];
+  const fout = [];
+  for(const w of proef) for(const n of [4, 7, 10, 15]){
+    const stukken = m.breekWoord(w, tot(n));
+    if(stukken.join('') !== w) fout.push(w + '/' + n + ': tekens kwijt');
+    if(stukken.some(st => st.length > n)) fout.push(w + '/' + n + ': stuk te breed');
+  }
+  is('niets kwijt en elk stuk past', fout, []);
 }
 
 /* ========================== DLC: de vijf fotovakken ========================== */
