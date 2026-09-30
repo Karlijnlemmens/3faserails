@@ -612,14 +612,19 @@ async function tekenaar(doc, opt){
     lines.push(cur);
     return lines;
   }
-  function tableRow(T,vals){
+  /* opt.vervolg: deze regel hoort bij de vorige (een accessoire onder zijn armatuur)
+     en krijgt dezelfde kleur, zodat de twee in de tabel samen één regel van de
+     afwisseling zijn. */
+  function tableRow(T,vals,opt){
+    const vervolg = !!(opt && opt.vervolg) && T.i > 0;
+    const gekleurd = vervolg ? !!T.vorigeGekleurd : T.i%2===0;
     const lineH=11;
     const cellLines=T.cols.map((c,j)=>wrapCell(vals[j],c.w-10));
     const nLines=Math.max.apply(null,cellLines.map(l=>l.length));
     const rowH=13.5+(nLines-1)*lineH;
     let y=haalY();
     if(y+rowH>H-MB){ flush(); beginPage(false); tabelKop(T); y=haalY(); }
-    if(T.i%2===0){
+    if(gekleurd){
       rect(Mg,y,T.totW,rowH,C.shade);
       /* De vulling valt over de onderste helft van de lijn onder de vorige rij; op
          schermgrootte leek daar dan geen lijn te staan. Dus die lijn opnieuw, bovenop. */
@@ -628,7 +633,9 @@ async function tekenaar(doc, opt){
     let x=Mg;
     T.cols.forEach((c,j)=>{ cellLines[j].forEach((ln,li)=>text(x+5,y+2.4+li*lineH,8.5,ln,{color:C.tekst})); x+=c.w; });
     line(Mg,y+rowH,Mg+T.totW,y+rowH,0.5,C.line);
-    T.i++; T.naKop=false; zetY(y+rowH);
+    T.vorigeGekleurd = gekleurd;
+    if(!vervolg) T.i++;
+    T.naKop=false; zetY(y+rowH);
   }
 
   return {

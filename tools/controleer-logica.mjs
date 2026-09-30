@@ -196,7 +196,8 @@ function is(wat, gekregen, verwacht){
      de armaturenlijst en het verplaatsen van een regel. */
   const r = await laadUit('armatuur-rij.js',
     ['specialPresenterId', 'armGroepVanRij', 'armTypeOnbekend', 'armEigenPresenters', 'armWisselRijen',
-     'STEMPELSTIJLEN', 'stempelZwart', 'armBoekGroepen', 'armLijstKolommen', 'STEMPEL_SPECIAL', 'armSlotLeeg'],
+     'STEMPELSTIJLEN', 'stempelZwart', 'armBoekGroepen', 'armLijstKolommen', 'STEMPEL_SPECIAL', 'armSlotLeeg',
+     'armAccessoires'],
     readFileSync(join(root, 'zoeken.js'), 'utf8') + '\n' + readFileSync(join(root, 'armatuur-groepen.js'), 'utf8')
     + '\nconst window = globalThis; globalThis.PRESENTER_DATA = {};'
     + '\nconst PdfHuisstijl = {presenterAanwezig: id => !!globalThis.PRESENTER_DATA[id]};');
@@ -219,6 +220,30 @@ function is(wat, gekregen, verwacht){
     [rij({}), rij({aanduiding:'A1'}), rij({name:'Punto 15W'}), rij({code:'2001111'}), rij({codeDali:'2001111-DA'}),
      rij({qty:4}), rij({name:'   ', code:' '}), rij({qty:0, groep:'ag01'}), null].map(r.armSlotLeeg),
     [true, false, false, false, false, false, true, true, true]);
+
+  /* Accessoires (een opbouwset bij een Mondial): eigen artikelcode en naam, geen eigen
+     CODE, geen presenter; in de armaturenlijst direct onder hun armatuur. */
+  const mondial = rij({aanduiding:'H1', name:'Mondial opbouw 19W', code:'2013254', qty:24,
+    accessoires:[{code:'2013261', name:'Mondial opbouwset zwart', qty:24}, {code:'', name:'  ', qty:0},
+                 {code:'2013278', name:'Mondial pendelset', qty:0}]});
+  is('accessoires: alleen de ingevulde', r.armAccessoires(mondial).map(a => a.code), ['2013261', '2013278']);
+  is('een regel met alleen een accessoire telt mee', r.armSlotLeeg(rij({accessoires:[{code:'2013261', name:'', qty:0}]})), false);
+  is('een leeg accessoire telt niet', r.armSlotLeeg(rij({accessoires:[{code:' ', name:'', qty:0}]})), true);
+  const lijst = r.armLijstKolommen([{s:mondial}, {s:rij({aanduiding:'H2', name:'Punto 15W', code:'2001111', qty:8})}],
+    x => x.s.code, x => x.s.name);
+  is('accessoires direct onder hun armatuur, zonder eigen CODE, aantal alleen als ingevuld',
+    lijst.regels.map(g => (g.vervolg ? '  ' : '') + g.waarden.join(' | ')),
+    ['H1 | 2013254 | Mondial opbouw 19W | 24',
+     '   | 2013261 | Mondial opbouwset zwart | 24',
+     '   | 2013278 | Mondial pendelset | ',
+     'H2 | 2001111 | Punto 15W | 8']);
+  const alleenAcc = r.armLijstKolommen([{s:rij({name:'Mondial opbouw', accessoires:[{code:'', name:'Opbouwset', qty:5}]})}],
+    x => 'volgt', x => x.s.name);
+  const verplaatst = {arm01: mondial, arm02: rij({aanduiding:'H2'})};
+  r.armWisselRijen(verplaatst, 'arm01', 'arm02');
+  is('↑/↓ neemt de accessoires mee', [verplaatst.arm01.accessoires, verplaatst.arm02.accessoires.length], [undefined, 3]);
+  is('een accessoire met aantal toont de kolom Aantal, zonder code "volgt"',
+    [alleenAcc.cols.map(c => c.h), (alleenAcc.regels[1] || {}).waarden], [['Artikelcode', 'Omschrijving', 'Aantal'], ['volgt', 'Opbouwset', '5']]);
 
   is('uploadknop bij een onherkend type', r.armTypeOnbekend(rij({}), 'Onbekend armatuur 12W', false), true);
   is('geen uploadknop bij een herkend type', r.armTypeOnbekend(rij({}), 'Punto 15W', false), false);

@@ -32,7 +32,17 @@ function specialPresenterId(armId){ return 'sp'+armId; }
 function armSlotLeeg(s){
   if(!s) return true;
   const vol = v => String(v||'').trim() !== '';
-  return !vol(s.aanduiding) && !vol(s.name) && !vol(s.code) && !vol(s.codeDali) && !((s.qty||0) > 0);
+  return !vol(s.aanduiding) && !vol(s.name) && !vol(s.code) && !vol(s.codeDali) && !((s.qty||0) > 0)
+      && !armAccessoires(s).length;
+}
+
+/* De accessoires van een armatuurregel - een opbouwset bij een Mondial Opbouw, een
+   pendelset: een eigen artikelcode en naam, maar geen eigen CODE en geen presenter.
+   Ze horen bij de CODE van hun armatuur en staan in de armaturenlijst direct eronder.
+   s.accessoires = [{code, name, qty}]; alleen wat ingevuld is telt mee. */
+function armAccessoires(s){
+  const vol = v => String(v||'').trim() !== '';
+  return ((s && s.accessoires) || []).filter(a => a && (vol(a.code) || vol(a.name)));
 }
 
 /* Welke presenter bij een regel hoort. Een zelf geüploade PDF wint altijd, op
@@ -204,7 +214,7 @@ function stempelPresenter(pagina, codes, kleur, zwart, font, special){
    `oms` geeft de tool, want welke code geldt verschilt (standaard of DALI). */
 function armLijstKolommen(rijen, artikel, oms){
   const toonCode = rijen.some(r=> (r.s.aanduiding||'').trim());
-  const toonAantal = rijen.some(r=> (r.s.qty||0)>0);
+  const toonAantal = rijen.some(r=> (r.s.qty||0)>0 || armAccessoires(r.s).some(a=> (a.qty||0)>0));
   let omschrijvingBreedte = 290;
   if(!toonCode) omschrijvingBreedte += 75;
   if(!toonAantal) omschrijvingBreedte += 60;
@@ -220,10 +230,74 @@ function armLijstKolommen(rijen, artikel, oms){
     if(toonAantal) basis.push(String(r.s.qty||0));
     return basis;
   };
-  return {cols, waarden};
+  /* Een accessoire: geen eigen CODE (die van zijn armatuur staat erboven), zijn
+     artikelcode - 'volgt' als die nog ontbreekt, net als bij een armatuur - en zijn
+     naam. Het aantal alleen als het is ingevuld: leeg is niet 0. */
+  const accWaarden = (a)=>{
+    const basis=[];
+    if(toonCode) basis.push('');
+    basis.push((a.code||'').trim() || 'volgt', (a.name||'').trim());
+    if(toonAantal) basis.push((a.qty||0)>0 ? String(a.qty) : '');
+    return basis;
+  };
+  /* De regels van de tabel: elke armatuur met zijn accessoires direct eronder. Een
+     accessoire is een vervolg: tableRow() geeft hem dezelfde kleur als zijn armatuur,
+     zodat ze in de tabel zichtbaar bij elkaar horen. */
+  const regels = rijen.flatMap(r=> [{waarden:waarden(r), vervolg:false}]
+    .concat(armAccessoires(r.s).map(a=> ({waarden:accWaarden(a), vervolg:true}))));
+  return {cols, waarden, regels};
 }
 
 /* ======================= de regel in beeld ======================= */
+
+/* De accessoires onder een armatuurregel: de knop "+ Accessoire" voor op de regel en
+   de lijst subregels (artikelcode, naam, aantal, ×) die de tool onder de regel zet.
+   o.s is de staat van de regel, o.opWijziging() laat de tool verversen. Een lege
+   subregel telt niet mee (armAccessoires()); weghalen gaat met het kruisje. De
+   accessoires horen bij de regel, dus ↑/↓ neemt ze mee (armWisselRijen() verwisselt
+   de hele regel). */
+function armAccessoireDelen(o){
+  const s = o.s;
+  const knop = document.createElement('button'); knop.type='button'; knop.className='c2-accknop';
+  knop.textContent = '+ Accessoire';
+  knop.title = 'Een accessoire bij dit armatuur, zoals een opbouwset: eigen artikelcode en naam, '
+    + 'geen eigen CODE en geen presenter. In de armaturenlijst komt het direct onder dit armatuur.';
+  const lijst = document.createElement('div'); lijst.className='c2-acclijst';
+  const veld = (klasse, hint, waarde, zet)=>{
+    const inp = document.createElement('input'); inp.type='text'; inp.className=klasse;
+    inp.placeholder = hint; inp.value = waarde || '';
+    inp.addEventListener('change', ()=>{ zet(inp.value); o.opWijziging(); });
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter') inp.blur(); });
+    return inp;
+  };
+  function teken(){
+    lijst.innerHTML = '';
+    (s.accessoires || []).forEach((acc, i)=>{
+      const r = document.createElement('div'); r.className = 'c2-accrow';
+      const label = document.createElement('span'); label.className = 'c2-acclabel'; label.textContent = '↳ accessoire';
+      const code = veld('c2-textinp c2-acccode', 'Artikelcode', acc.code, v=>{ acc.code = v; });
+      const naam = veld('c2-textinp c2-accnaam', 'Naam (bijv. Mondial opbouwset)', acc.name, v=>{ acc.name = v; });
+      const qty = veld('c2-qtyinp', '–', acc.qty > 0 ? String(acc.qty) : '', v=>{
+        acc.qty = Math.max(0, parseInt(v) || 0); qty.value = acc.qty > 0 ? String(acc.qty) : '';
+      });
+      qty.inputMode = 'numeric'; qty.title = 'Aantal — mag leeg blijven';
+      const weg = document.createElement('button'); weg.type='button'; weg.className='c2-accweg';
+      weg.textContent = '×'; weg.title = 'Accessoire weghalen'; weg.setAttribute('aria-label', 'Accessoire weghalen');
+      weg.addEventListener('click', ()=>{ s.accessoires.splice(i, 1); teken(); o.opWijziging(); });
+      r.append(label, code, naam, qty, weg);
+      lijst.appendChild(r);
+    });
+  }
+  knop.addEventListener('click', ()=>{
+    s.accessoires = s.accessoires || [];
+    s.accessoires.push({code:'', name:'', qty:0});
+    teken(); o.opWijziging();
+    const codes = lijst.querySelectorAll('.c2-acccode');
+    if(codes.length) codes[codes.length-1].focus();
+  });
+  teken();
+  return {knop, lijst};
+}
 
 /* De onderdelen van een armatuurregel die in beide tools hetzelfde doen: het label
    met het herkende type, de uploadknop, de stempelknop en de pijltjes. De tool
@@ -460,6 +534,26 @@ function armVolgBijwerken(lijst){
   .c2-armspecial .c2-specialbtn.ok{background:var(--green-light); color:var(--green);}
   .c2-armspecial .c2-specialx{font:inherit; font-size:14px; color:var(--slate); cursor:pointer;
     padding:0 3px; line-height:1; background:none; border:0;}
+  /* De accessoires lopen in kolommen met hun armatuur mee: het label op de plek van de
+     CODE (ingesprongen voorbij de pijltjes), de artikelcode en de naam eronder, het
+     aantal onder het aantal en het kruisje onder de knop. De knop en het kruisje delen
+     daarom één vaste breedte. Een tool met andere veldbreedtes zet de variabelen. */
+  .c2-accknop{
+    flex:0 0 var(--acc-knop, 92px);
+    font:inherit; font-size:11px; font-weight:700; white-space:nowrap; padding:3px 0; border-radius:20px;
+    cursor:pointer; border:1px dashed var(--border); background:var(--white); color:var(--slate);
+  }
+  .c2-accknop:hover{border-color:var(--blue); border-style:solid; color:var(--blue-dark);}
+  .c2-acclijst{display:flex; flex-direction:column;}
+  .c2-accrow{display:flex; align-items:center; gap:8px; padding:0 2px 5px var(--acc-inspring, 52px);}
+  .c2-acclabel{flex:0 0 var(--acc-label, 96px); font-size:11px; font-weight:700; color:var(--slate); white-space:nowrap;}
+  .c2-accrow input.c2-textinp{padding:5px 8px; font-size:12px; min-width:0;}
+  .c2-accrow input.c2-acccode{flex:0 0 var(--acc-code, 100px);}
+  .c2-accrow input.c2-accnaam{flex:1 1 auto;}
+  .c2-accrow .c2-qtyinp{flex:0 0 auto;}
+  .c2-accweg{flex:0 0 var(--acc-knop, 92px); font:inherit; font-size:15px; color:var(--slate); cursor:pointer;
+    padding:0; line-height:1; background:none; border:0;}
+  .c2-accweg:hover{color:#B0362B;}
   `;
   document.head.appendChild(st);
 })();

@@ -93,7 +93,12 @@
   .c2-armrow input.c2-textinp{flex:1 1 130px; min-width:100px; padding:5px 8px; font-size:12px;}
   .c2-armrow input.c2-aanduiding{flex:0 0 96px; min-width:96px;}
   .c2-armrow input.c2-armcode{flex:0 0 100px; min-width:90px;}
-  .c2-armrow input.c2-armnaam{flex:1 1 260px;}
+  /* groeit mee, maar begint smal: dan past de knop "+ Accessoire" vaker nog op de regel */
+  .c2-armrow input.c2-armnaam{flex:1 1 170px;}
+  /* het aantal en de knop "+ Accessoire" als één staart: past de regel niet (een smal
+     scherm, een breed typelabel), dan gaan ze samen naar rechts op de volgende regel -
+     boven het aantal en het kruisje van de accessoires - en niet los links eronder */
+  .c2-armstaart{display:flex; align-items:center; gap:8px; margin-left:auto;}
   /* het label, de upload- en stempelknop en de pijltjes: opmaak in armatuur-rij.js */
   .c2-qtyinp{width:48px; border:1.5px solid var(--border); border-radius:8px; padding:6px 4px; font-family:'JetBrains Mono',monospace; font-size:13px; text-align:center; color:var(--ink); background:#fff;}
 
@@ -720,9 +725,11 @@ async function buildArmaturenboekPdf(){
       const rijenVoorTabel = ARMATUREN
         .map(a=>({a, s:st.armaturen[a.id]}))
         .filter(r=> r.s && !armSlotLeeg(r.s));
-      const {cols, waarden:rijWaarden} = armLijstKolommen(rijenVoorTabel, armCode, armOms);
+      /* regels: elke armatuur met zijn accessoires eronder - zonder eigen CODE en in de
+         kleur van hun armatuur (armLijstKolommen() in armatuur-rij.js) */
+      const {cols, regels} = armLijstKolommen(rijenVoorTabel, armCode, armOms);
       let TB=tableStart(cols);
-      rijenVoorTabel.forEach(r=> tableRow(TB, rijWaarden(r)));
+      regels.forEach(g=> tableRow(TB, g.waarden, {vervolg:g.vervolg}));
       y+=10;
       const ontbreekt = boek.filter(b=>!presenterAanwezig(b.g.id));
       if(ontbreekt.length){
@@ -1003,10 +1010,17 @@ function maakArmRij(a){
   function commitQty(){ const v=Math.max(0, parseInt(qty.value)||0); s.qty=v; qty.value=String(v); updateSummary(); }
   qty.addEventListener('change', commitQty);
   qty.addEventListener('keydown', e=>{ if(e.key==='Enter') qty.blur(); });
+  /* accessoires (een opbouwset, een pendelset): armAccessoireDelen() in armatuur-rij.js.
+     De regel en zijn accessoires zitten in één blok, zodat ze samen onder elkaar staan. */
+  const acc = armAccessoireDelen({s, opWijziging:updateSummary});
   row.appendChild(delen.volg);
   row.appendChild(codeNaamInp); row.appendChild(codeInp); row.appendChild(nameInp); row.appendChild(delen.badge);
-  row.appendChild(delen.upload); row.appendChild(delen.stempel); row.appendChild(qty);
-  return row;
+  row.appendChild(delen.upload); row.appendChild(delen.stempel);
+  const staart=document.createElement('span'); staart.className='c2-armstaart';
+  staart.appendChild(qty); staart.appendChild(acc.knop); row.appendChild(staart);
+  const blok=document.createElement('div'); blok.className='c2-armblok';
+  blok.appendChild(row); blok.appendChild(acc.lijst);
+  return blok;
 }
 /* Verwisselt de INHOUD van twee regels, niet de slots zelf: arm01..armNN blijven op
    volgorde staan. Dat scheelt: de labels ("Armatuur 3"), het opslaan en het herstellen
