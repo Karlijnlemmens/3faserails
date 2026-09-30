@@ -688,7 +688,8 @@ async function buildArmaturenboekPdf(){
   });
   const bookGroups = [];
   const armOms=(r)=> (r.s.name&&r.s.name.trim()) ? r.s.name.trim() : armLabel(r.a);
-  const armCode=(r)=>{ const c = r.s.code; return (c&&c.trim()) ? c.trim() : 'volgt'; };
+  /* geen artikelcode ingevuld: de cel blijft leeg (er stond 'volgt') */
+  const armCode=(r)=> (r.s.code||'').trim();
   if(boek.length || onbekend.length){
     zetSectie('Armaturen');
     beginPage(true);

@@ -231,12 +231,12 @@ function armLijstKolommen(rijen, artikel, oms){
     return basis;
   };
   /* Een accessoire: geen eigen CODE (die van zijn armatuur staat erboven), zijn
-     artikelcode - 'volgt' als die nog ontbreekt, net als bij een armatuur - en zijn
+     artikelcode - leeg als die niet is ingevuld, net als bij een armatuur - en zijn
      naam. Het aantal alleen als het is ingevuld: leeg is niet 0. */
   const accWaarden = (a)=>{
     const basis=[];
     if(toonCode) basis.push('');
-    basis.push((a.code||'').trim() || 'volgt', (a.name||'').trim());
+    basis.push((a.code||'').trim(), (a.name||'').trim());
     if(toonAantal) basis.push((a.qty||0)>0 ? String(a.qty) : '');
     return basis;
   };

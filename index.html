@@ -2556,7 +2556,9 @@ function refresh(){
   const codes=Object.keys(B.items);
   $('c2ArtList').innerHTML = codes.length ? codes.map(c=>{
     const it=B.items[c];
-    const codeTxt = c.indexOf('m-')===0 ? 'artikelnr volgt' : c;
+    /* een armatuur of accessoire zonder ingevulde artikelcode: leeg. 'artikelnr volgt'
+       alleen bij een onderdeel van de rail waarvan de tool het nummer nog niet kent. */
+    const codeTxt = /^m-(arm|acc)-/.test(c) ? '' : c.indexOf('m-')===0 ? 'artikelnr volgt' : c;
     return '<div class="cfg-art-row hoverable" data-prov="'+it.prov.join('|')+'"><span class="name">'+it.name+'</span><span><span class="code">'+codeTxt+'</span> <span class="qty">\u00D7'+it.qty+'</span></span></div>';
   }).join('') : '<div class="cfg-art-row"><span class="name">Kies een vorm om de lijst te vullen\u2026</span></div>';
   $('c2ArtList').querySelectorAll('[data-prov]').forEach(row=>{
@@ -2834,7 +2836,8 @@ async function buildPdf(){
   const overigeArm = armaturenOverig();
   const bookGroups = [];
   const armOms=(r)=> (r.s.name&&r.s.name.trim()) ? r.s.name.trim() : armLabel(r.a);
-  const armCode=(r)=>{ const c = st.dali ? r.s.codeDali : r.s.code; return (c&&c.trim()) ? c.trim() : 'volgt'; };
+  /* geen artikelcode ingevuld: de cel blijft leeg (er stond 'volgt') */
+  const armCode=(r)=> ((st.dali ? r.s.codeDali : r.s.code)||'').trim();
   if(boek.length || overigeArm.length){
     /* --- hoofdstukblad ---------------------------------------------------------
        Maten zijn opgemeten uit het aangeleverde ontwerp (AB_Armaturen.pdf):

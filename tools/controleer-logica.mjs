@@ -238,12 +238,13 @@ function is(wat, gekregen, verwacht){
      '   | 2013278 | Mondial pendelset | ',
      'H2 | 2001111 | Punto 15W | 8']);
   const alleenAcc = r.armLijstKolommen([{s:rij({name:'Mondial opbouw', accessoires:[{code:'', name:'Opbouwset', qty:5}]})}],
-    x => 'volgt', x => x.s.name);
+    x => (x.s.code || '').trim(), x => x.s.name);
   const verplaatst = {arm01: mondial, arm02: rij({aanduiding:'H2'})};
   r.armWisselRijen(verplaatst, 'arm01', 'arm02');
   is('↑/↓ neemt de accessoires mee', [verplaatst.arm01.accessoires, verplaatst.arm02.accessoires.length], [undefined, 3]);
-  is('een accessoire met aantal toont de kolom Aantal, zonder code "volgt"',
-    [alleenAcc.cols.map(c => c.h), (alleenAcc.regels[1] || {}).waarden], [['Artikelcode', 'Omschrijving', 'Aantal'], ['volgt', 'Opbouwset', '5']]);
+  is('een accessoire met aantal toont de kolom Aantal; zonder code blijft de cel leeg (geen "volgt")',
+    [alleenAcc.cols.map(c => c.h), alleenAcc.regels.map(g => g.waarden.slice(0, 2)), (alleenAcc.regels[1] || {waarden:[]}).waarden[2]],
+    [['Artikelcode', 'Omschrijving', 'Aantal'], [['', 'Mondial opbouw'], ['', 'Opbouwset']], '5']);
 
   is('uploadknop bij een onherkend type', r.armTypeOnbekend(rij({}), 'Onbekend armatuur 12W', false), true);
   is('geen uploadknop bij een herkend type', r.armTypeOnbekend(rij({}), 'Punto 15W', false), false);
