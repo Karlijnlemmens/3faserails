@@ -840,6 +840,13 @@
         </div>
         <p class="hint" style="margin:0 0 2px;">Contactpersonen — komen op een introductiepagina direct achter het voorblad, net als in het armaturenboek. Een projectuitwerker met een persoonlijke noot krijgt ook het blauwe vlak “Onze specialist”, met foto. Niemand gekozen: geen extra pagina.</p>
         <div id="c2ContactVelden" style="margin-bottom:16px;"></div>
+        <p class="hint" style="margin:0 0 6px;">Totaal projectboek — voeg het lichtplan toe als PDF, bijvoorbeeld de uitvoer uit DIALux of AutoCAD die je al hebt opgeslagen. Het komt in de PDF direct na de introductie (of na het voorblad), achter het hoofdstukblad “Lichtberekening”, net als in het armaturenboek. Zonder lichtplan verandert er niets.</p>
+        <input type="file" id="c2LichtplanBestand" accept="application/pdf,.pdf" hidden>
+        <div class="lichtplan-keuze" style="margin-bottom:16px;">
+          <button type="button" id="c2LichtplanKnop">Lichtplan (PDF) kiezen</button>
+          <span class="lichtplan-naam" id="c2LichtplanNaam"></span>
+          <button type="button" id="c2LichtplanWeg" class="weg" title="Lichtplan weghalen" aria-label="Lichtplan weghalen" hidden>×</button>
+        </div>
         <p class="hint" style="margin:0 0 6px;">Armaturen — vul de volledige naam en artikelcode in, kies kleur en typ het aantal per type. Bij DALI-dimbaar worden alleen de DALI-geschikte armaturen getoond en geldt een aparte artikelcode.</p>
         <div class="c2-prodlist" id="c2ArmList"></div>
         <label class="c2-check" style="margin-top:6px;"><input type="checkbox" id="c2ToonLijst" checked> Armaturenlijst in de PDF</label>
@@ -863,6 +870,7 @@
         <div class="cfg-metric-row"><span class="k">Totale lengte</span><span class="v" id="c2TotLen">0 cm</span></div>
         <div class="cfg-metric-row"><span class="k">Segmenten</span><span class="v" id="c2TotSeg">0</span></div>
         <div class="cfg-metric-row"><span class="k">Armaturen</span><span class="v" id="c2TotArm">0</span></div>
+        <div class="cfg-metric-row"><span class="k">Lichtplan</span><span class="v" id="c2TotLicht">—</span></div>
       </div>
       <div>
         <span class="eyebrow">Materiaallijst</span>
@@ -932,6 +940,7 @@
 <script src="armatuur-rij.js"></script>
 <script src="info-teken.js"></script>
 <script src="melding.js"></script>
+<script src="lichtplan.js"></script>
 <script src="project-opslag.js"></script>
 <script src="rail-figuren.js"></script>
 <script>
@@ -1561,6 +1570,9 @@ let st = { step:1, dali:false, color:'wit', powercfg:'A', shape:null, gRows:2, g
   toonLijst:true,
   /* wie er op de introductiepagina staan (ids uit medewerkers.js), zoals in het armaturenboek */
   projectuitwerker:'', accountmanager:'', binnendienst:'',
+  /* totaal projectboek: het ingeladen lichtplan, {naam, paginas} of null; de PDF zelf
+     houdt lichtplan.js bij (Lichtplan.pdf), net als in het armaturenboek */
+  lichtplan:null,
   /* projectgegevens voor het voorblad */
   proj:'', projNr:'', installateur:'', datum:'',
   sysOphang:false, sysOphangLen:'3', pendelKabelkleur:'zilver', pendelKabelLen:'3',
@@ -2414,6 +2426,8 @@ document.addEventListener('click', ()=>{ $('c2Pop').style.display='none'; });
 /* ---------- samenvatting, waarschuwingen, stuklijstdetail ---------- */
 function warnings(B){
   const w=[];
+  /* vóór de vorm: een hervat project zonder tekening moet dit ook zien */
+  if(Lichtplan.ontbreekt()) w.push({t:'warn', m: Lichtplan.waarschuwing()});
   if(!st.shape){ w.push({t:'tip', m:'Kies eerst een vorm (stap 4).'}); return w; }
   const cm1=compMap(); const fed1=new Set(st.feeds.map(f=>feedComp(f,cm1.m)));
   const miss1=cm1.count-fed1.size;
@@ -2643,6 +2657,9 @@ async function buildPdf(){
     flush();
     zetSectie('Installatieoverzicht');
   }
+  /* Tot hier voorblad en introductie; het totale projectboek zet hierna het lichtplan
+     (zie railBoekDelen()). Zonder introductie is dat direct na het voorblad. */
+  const naIntroductie = pages.length;
 
   /* --- pagina 2: Bestelgegevens. beginPage(true) = geen vervolg-kopregel, want
          deze pagina heeft zijn eigen kopbalk. --- */
@@ -2868,7 +2885,7 @@ async function buildPdf(){
   }
 
   const bytes = await doc.save();
-  return {bytes, bookGroups, ownPageCount:pages.length};
+  return {bytes, bookGroups, ownPageCount:pages.length, naIntroductie};
 }
 if(typeof window!=='undefined') window.__c2BuildPdf=buildPdf;
 
@@ -2882,8 +2899,16 @@ if(typeof window!=='undefined') window.__c2BuildPdf=buildPdf;
 
    Alle eigen pagina's staan dus vooraan en de presenters komen er in hun geheel
    achter; daardoor hoeft de paginanummering niet gecorrigeerd te worden. */
+/* De delen van de eind-PDF, in hun volgorde: de eigen pagina's met het lichtplan erna
+   de introductie tussen geschoven (lichtplanDelen() in lichtplan.js, dezelfde regel als
+   in het armaturenboek), dan de rail-presenter, een presenter per armatuurtype en de
+   achterpagina's. Een losse functie, zodat de volgorde getest kan worden. */
+function railBoekDelen(naIntroductie, eigenTotaal, metLichtplan){
+  return lichtplanDelen(naIntroductie, eigenTotaal, metLichtplan)
+    .concat([{bron:'rail'}, {bron:'presenters'}, {bron:'achterpaginas'}]);
+}
 async function assembleFinalPdf(){
-  const {bytes, bookGroups, ownPageCount} = await buildPdf();
+  const {bytes, bookGroups, ownPageCount, naIntroductie} = await buildPdf();
   const ownDoc = await PDFLib.PDFDocument.load(bytes);
   const finalDoc = await PDFLib.PDFDocument.create();
 
@@ -2922,10 +2947,17 @@ async function assembleFinalPdf(){
     }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); return 0; }
   };
 
-  await copyRange(ownDoc, 0, ownDoc.getPageCount());   /* alle eigen pagina's */
-  let presenterTotaal = await appendPresenter('rail'); /* de rail heeft geen code */
-  for(const g of bookGroups) presenterTotaal += await appendPresenter(g.id, g.code, g.kleur, g.zwart, g.special);
-  presenterTotaal += await appendPresenter('achterpaginas'); /* vaste achterpagina's, helemaal achteraan */
+  let presenterTotaal = 0;
+  for(const deel of railBoekDelen(naIntroductie, ownDoc.getPageCount(), Lichtplan.ingeladen())){
+    if(deel.bron==='eigen') await copyRange(ownDoc, deel.van, deel.tot);
+    else if(deel.bron==='lichtberekening') presenterTotaal += await appendPresenter('lichtberekening'); /* geen stempel */
+    else if(deel.bron==='lichtplan') presenterTotaal += await Lichtplan.voegToe(finalDoc);
+    else if(deel.bron==='rail') presenterTotaal += await appendPresenter('rail'); /* de rail heeft geen code */
+    else if(deel.bron==='presenters'){
+      for(const g of bookGroups) presenterTotaal += await appendPresenter(g.id, g.code, g.kleur, g.zwart, g.special);
+    }
+    else if(deel.bron==='achterpaginas') presenterTotaal += await appendPresenter('achterpaginas'); /* vaste achterpagina's, helemaal achteraan */
+  }
 
   const eind = await finalDoc.save();
   const verwacht = ownPageCount + presenterTotaal;
@@ -2960,7 +2992,9 @@ const PROJECT_VERSIE = 1;
 /* Eén beschrijving van wat een project is: het bestand dat "Project opslaan" bakt en
    het hoekje dat project-opslag.js in de browser bijhoudt schrijven allebei dit weg. */
 function projectPayload(){
-  return { versie:PROJECT_VERSIE, st:JSON.parse(JSON.stringify(st)), presenters:verzamelSpecialPresenters() };
+  const payload = { versie:PROJECT_VERSIE, st:JSON.parse(JSON.stringify(st)), presenters:verzamelSpecialPresenters() };
+  if(Lichtplan.pdf) payload.lichtplan = Lichtplan.pdf;   /* het lichtplan zelf, zie lichtplan.js */
+  return payload;
 }
 function slaProjectOp(){
   const payload = projectPayload();
@@ -3045,6 +3079,7 @@ async function maakPdfBytes(){
       + '\nHet tabblad komt wel in het boek, de productpagina’s ontbreken.\n'
       + 'Toevoegen: zet de PDF in presenters-bron/ en draai "node tools/maak-presenters.mjs".');
   }
+  if(Lichtplan.ontbreekt()) meldingen.push(Lichtplan.exportMelding());
   if(meldingen.length) alert(meldingen.join('\n\n')+'\n\nDe PDF wordt verder gewoon gegenereerd.');
   try{
     const bytes = await assembleFinalPdf();
@@ -3263,6 +3298,10 @@ function init(){
   /* Een heel project in de tool zetten: uit het ingebakken bestand hieronder, of uit
      de balk van project-opslag.js die vraagt of je verder wilt waar je gebleven was. */
   function herstelProject(bron){
+      /* Het lichtplan zelf: uit een opgeslagen projectbestand altijd, uit het hoekje van de
+         browser alleen als het project daar in zijn geheel in paste. Anders komt alleen
+         st.lichtplan terug, en meldt Lichtplan.verf() dat het opnieuw gekozen moet worden. */
+      Lichtplan.zetPdf(bron.lichtplan);
       if(bron.presenters){
         window.PRESENTER_DATA = window.PRESENTER_DATA || {};
         Object.assign(window.PRESENTER_DATA, bron.presenters);
@@ -3289,6 +3328,7 @@ function init(){
       buildArmList();
       buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
       contactKeuze($('c2ContactVelden'), st, refresh, 'c2Contact_');
+      Lichtplan.verf();
       $('c2DaliRow').querySelectorAll('.choice-btn').forEach(b=>
         b.classList.toggle('sel', (b.textContent==='DALI') === !!st.dali));
       snap();
@@ -3386,6 +3426,13 @@ function init(){
   buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
   /* de contactpersonen: contactKeuze() in contactpersonen.js, dezelfde als in het armaturenboek */
   contactKeuze($('c2ContactVelden'), st, refresh, 'c2Contact_');
+  /* totaal projectboek: het lichtplan, zie lichtplan.js - hetzelfde blok als in het armaturenboek */
+  Lichtplan.koppel({
+    st: ()=>st,
+    knop: $('c2LichtplanKnop'), bestand: $('c2LichtplanBestand'), naam: $('c2LichtplanNaam'),
+    weg: $('c2LichtplanWeg'), overzicht: $('c2TotLicht'),
+    opWijziging: refresh,
+  });
   /* acties */
   $('c2ResetAll').addEventListener('click', ()=>{
     /* Deze knop staat naast "Project opslaan" en gooit alles weg; zonder deze vraag is
@@ -3395,6 +3442,7 @@ function init(){
     st.shape=null; st.nodes=[]; st.edges=[]; st.feeds=[]; st.angles={}; st.mount='geen'; st.pick=false; st.step=1;
     st.sysOphang=false; st.sysOphangLen='3'; st.pendelKabelkleur='zilver'; st.pendelKabelLen='3';
     st.toonLijst=true; $('c2ToonLijst').checked=true;
+    Lichtplan.wis();   /* het lichtplan hoort bij dit project */
     /* geüploade Special-PDF's horen niet bij een specifieke tekening, dus die vervallen mee. */
     if(window.PRESENTER_DATA) ARMATUREN.forEach(a=>delete window.PRESENTER_DATA[specialPresenterId(a.id)]);
     st.armaturen=ARMATUREN.reduce((o,a)=>{o[a.id]={aanduiding:'',qty:0,name:'',code:'',codeDali:'',groep:''};return o;},{});
@@ -3503,7 +3551,7 @@ function init(){
     /* Leeg = er is nog niets getekend en niets ingevuld. Kleur, voeding en de andere
        keuzes van stap 1-2 tellen niet mee: daar kies je zo weer iets anders. */
     isLeeg: ()=> !st.nodes.length && !(st.proj||'').trim() && !(st.projNr||'').trim()
-              && ARMATUREN.every(a=> armSlotLeeg(st.armaturen[a.id])),
+              && ARMATUREN.every(a=> armSlotLeeg(st.armaturen[a.id])) && !st.lichtplan,
     omschrijf: ()=> (st.proj||'').trim(),
     bewaar: slaProjectOp,
     /* Zonder de geüploade presenter-PDF's: die zijn zo een paar MB en dan past het niet

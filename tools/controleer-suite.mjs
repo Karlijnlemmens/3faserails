@@ -151,6 +151,8 @@ PAGINAS.forEach(p => {
     /* en met de contactpersonen: het armaturenboek en de railtool zetten ze allebei in hun PDF */
     for(const f of ['medewerkerVan','contactPersonen','contactRegels','specialist','contactKeuze','tekenContactpersonen'])
       if(new RegExp('function\\s+' + f + '\\s*\\(').test(t)) meld(p + ' heeft een eigen ' + f + '(); die hoort alleen in contactpersonen.js');
+    /* en met het lichtplan van het totale projectboek */
+    if(/function\s+lichtplanDelen\s*\(/.test(t)) meld(p + ' heeft een eigen lichtplanDelen(); die hoort alleen in lichtplan.js');
     if(['index.html','armaturenboek.html'].includes(p) && /function\s+(paintBadge|updateSpecialUI|updateStempelUI|stempelCode)\s*\(/.test(t))
       meld(p + ' bouwt zijn eigen armatuurlabel, uploadknop of stempel; die horen uit armRijDelen()/stempelPresenter() in armatuur-rij.js');
   });
@@ -167,6 +169,7 @@ PAGINAS.forEach(p => {
     ['medewerkers.js',   /\b(MEDEWERKERS|MEDEWERKER_ROLLEN)\b/],
     ['medewerker-fotos.js', /\bMEDEWERKER_FOTOS\b/],
     ['contactpersonen.js', /\b(contactKeuze|tekenContactpersonen|contactPersonen|medewerkerVan)\(/],
+    ['lichtplan.js',     /\b(Lichtplan\.|lichtplanDelen\()/],
     /* contactpersonen.js leunt op de gegevens en de foto's */
     ['medewerkers.js',   /\b(contactKeuze|tekenContactpersonen)\(/],
     ['medewerker-fotos.js', /\btekenContactpersonen\(/],

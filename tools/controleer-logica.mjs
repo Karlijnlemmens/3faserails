@@ -1114,7 +1114,10 @@ function is(wat, gekregen, verwacht){
   /* Het lichtplan komt direct na de introductie, achter het hoofdstukblad
      "Lichtberekening"; daarna pas het hoofdstuk Armaturen, de presenters en de
      achterpagina's. boekDelen() in armaturenboek.html bepaalt die volgorde. */
-  const m = await laadUit('armaturenboek.html', ['boekDelen']);
+  /* lichtplanDelen() staat in lichtplan.js, gedeeld met de railtool */
+  const lpDelen = snijUit(readFileSync(join(root, 'lichtplan.js'), 'utf8'), 'lichtplanDelen');
+  const m = await laadUit('armaturenboek.html', ['boekDelen'], lpDelen);
+  const r = await laadUit('index.html', ['railBoekDelen'], lpDelen);
   console.log('totaal projectboek');
   const kort = d => d.bron === 'eigen' ? 'eigen ' + d.van + '-' + d.tot : d.bron;
   /* voorblad (0) + introductie (1) = 2; dan hoofdstukblad Armaturen en armaturenlijst = 4 */
@@ -1125,6 +1128,14 @@ function is(wat, gekregen, verwacht){
   is('introductie over twee pagina\'s', m.boekDelen(3, 5, true).map(kort)[0], 'eigen 0-3');
   is('niets na de introductie: geen leeg stuk', m.boekDelen(2, 2, true).map(kort),
     ['eigen 0-2', 'lichtberekening', 'lichtplan', 'presenters', 'achterpaginas']);
+  /* De railtool: dezelfde regel. Met contactpersonen voorblad + introductie (2), anders
+     alleen het voorblad (1); daarna Bestelgegevens, Installatieoverzicht enz. */
+  is('railtool met introductie', r.railBoekDelen(2, 6, true).map(kort),
+    ['eigen 0-2', 'lichtberekening', 'lichtplan', 'eigen 2-6', 'rail', 'presenters', 'achterpaginas']);
+  is('railtool zonder introductie: na het voorblad', r.railBoekDelen(1, 5, true).map(kort).slice(0, 4),
+    ['eigen 0-1', 'lichtberekening', 'lichtplan', 'eigen 1-5']);
+  is('railtool zonder lichtplan: zoals voorheen', r.railBoekDelen(1, 5, false).map(kort),
+    ['eigen 0-5', 'rail', 'presenters', 'achterpaginas']);
 }
 
 /* ===================== tabelcellen: een te lang woord ===================== */
