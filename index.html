@@ -474,7 +474,14 @@
 
   .c2-armrow input.c2-aanduiding{flex:0 0 96px; min-width:96px;}
   .c2-armrow input.c2-armcode{flex:0 0 72px; min-width:65px;}
-  .c2-armrow input.c2-armnaam{flex:0 0 300px;}
+  /* groeit mee, maar begint smaller dan de vaste 300 px van vroeger: met de knop
+     "+ Accessoire" erbij brak anders op een laptop (1280 px) elke regel af */
+  .c2-armrow input.c2-armnaam{flex:1 1 200px;}
+  /* het aantal en de knop "+ Accessoire" als één staart, rechts: dan staan het aantal en
+     het kruisje van de accessoires eronder, ook als de regel afbreekt. De artikelcode is
+     hier smaller dan in het armaturenboek, dus die van de accessoires ook. */
+  .c2-armstaart{display:flex; align-items:center; gap:8px; margin-left:auto;}
+  #c2ArmList{--acc-code:72px;}
   /* het label, de upload- en stempelknop en de pijltjes: opmaak in armatuur-rij.js */
 
   #c2Svg .c2-movable{cursor:move;}
@@ -2029,6 +2036,14 @@ function computeBOM(){
     /* markering zodat de materialenpagina van de PDF armaturen kan overslaan: die
        staan daar niet, maar enkel in de armaturenlijst in het armaturenboek. */
     items[code].isArm=true; });
+  /* De accessoires met een aantal (een opbouwset bij een Mondial) horen net zo goed in de
+     bestelling; ook zij staan in de PDF alleen in de armaturenlijst, onder hun armatuur. */
+  visibleArmaturen().forEach(a=>{ const s=st.armaturen[a.id];
+    armAccessoires(s).forEach((acc,i)=>{ if(!((acc.qty||0)>0)) return;
+      const code = (acc.code||'').trim() || ('m-acc-'+a.id+'-'+i);
+      const armNaam = (s.name||'').trim() || armLabel(a);
+      add(code, code, (acc.name||'').trim() || ('Accessoire bij '+armNaam), acc.qty, null);
+      items[code].isArm=true; }); });
   ADAPTERS_OVERIG.forEach(a=>{ const s=st.overig[a.id]; if(!s||s.qty<=0) return;
     const c=a.codes[s.color];
     add(c.p, c.l, a.name+' '+CLRN(s.color), s.qty, null); });
@@ -2868,9 +2883,11 @@ async function buildPdf(){
       const rijenVoorTabel = visibleArmaturen()
         .map(a=>({a, s:st.armaturen[a.id]}))
         .filter(r=> r.s && !armSlotLeeg(r.s));
-      const {cols, waarden} = armLijstKolommen(rijenVoorTabel, armCode, armOms);
+      /* regels: elke armatuur met zijn accessoires eronder, zonder eigen CODE en in de
+         kleur van hun armatuur */
+      const {cols, regels} = armLijstKolommen(rijenVoorTabel, armCode, armOms);
       let TB=tableStart(cols);
-      rijenVoorTabel.forEach(r=> tableRow(TB, waarden(r)));
+      regels.forEach(g=> tableRow(TB, g.waarden, {vervolg:g.vervolg}));
       y+=10;
       const ontbreekt = boek.filter(b=>!presenterAanwezig(b.g.id));
       if(ontbreekt.length){
@@ -3230,10 +3247,17 @@ function buildArmList(){
     function commitQty(){ const v=Math.max(0, parseInt(qty.value)||0); s.qty=v; qty.value=String(v); refresh(); }
     qty.addEventListener('change', commitQty);
     qty.addEventListener('keydown', e=>{ if(e.key==='Enter') qty.blur(); });
+    /* accessoires (een opbouwset, een pendelset): armAccessoireDelen() in armatuur-rij.js,
+       net als in het armaturenboek. De regel en zijn accessoires zitten in één blok. */
+    const acc = armAccessoireDelen({s, opWijziging:refresh});
     row.appendChild(delen.volg);
     row.appendChild(codeNaamInp); row.appendChild(codeInp); row.appendChild(nameInp); row.appendChild(delen.badge);
-    row.appendChild(delen.upload); row.appendChild(delen.stempel); row.appendChild(qty);
-    container.appendChild(row);
+    row.appendChild(delen.upload); row.appendChild(delen.stempel);
+    const staart=document.createElement('span'); staart.className='c2-armstaart';
+    staart.appendChild(qty); staart.appendChild(acc.knop); row.appendChild(staart);
+    const blok=document.createElement('div'); blok.className='c2-armblok';
+    blok.appendChild(row); blok.appendChild(acc.lijst);
+    container.appendChild(blok);
   });
   armVolgBijwerken(container);
 }
@@ -3501,7 +3525,7 @@ function init(){
     };
     if(window.PRESENTER_DATA) Object.keys(st.armaturen).forEach(k=>delete window.PRESENTER_DATA[specialPresenterId(k)]);
     Object.keys(st.armaturen).forEach(k=>{ const a=st.armaturen[k];
-      a.aanduiding=''; a.name=''; a.code=''; a.codeDali=''; a.qty=0; a.groep=''; });
+      a.aanduiding=''; a.name=''; a.code=''; a.codeDali=''; a.qty=0; a.groep=''; a.accessoires=[]; });
     /* CODE A staat twee keer: meerdere armaturen mogen dezelfde code dragen. */
     zetArm('arm01','CODE A','Punto 15W 3000K wit','2001111',8);
     zetArm('arm02','CODE A','Punto 15W 3000K zwart','2001112',4);
