@@ -130,6 +130,7 @@ window.PRESENTER_FILES = [
   'ag97',   /* Sparta Eco */
   'ag98',   /* Spot Adjusto G2 */
   'ag99',   /* Spot Casso */
+  'lichtberekening',   /* AB Lichtberekening */
   'lichtlijn-prxline',   /* Lichtlijn PRX-Line */
   'lichtlijn-retroline',   /* Lichtlijn Retroline PRX */
   'lichtlijn-uniline',   /* Lichtlijn PRX-Uniline */

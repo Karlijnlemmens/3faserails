@@ -65,6 +65,17 @@ function opmaakEenmalig(){
   st.textContent = STIJL;
   document.head.appendChild(st);
 }
+/* Een projectbestand ("Project opslaan") is een kopie van de pagina zoals hij op dat
+   moment is. Stond er toen een melding in beeld, dan zat die in het bestand - zonder de
+   klok die hem weghaalt en zonder werkend kruisje, dus voorgoed. Bij het openen gaan
+   zulke resten weg; een melding die de pagina zelf al toont (lijst) blijft staan. */
+function ruimOp(){
+  document.querySelectorAll('.meldingen').forEach(n=>{ if(n !== lijst) n.remove(); });
+  document.querySelectorAll('.melding-aandacht').forEach(n=>n.classList.remove('melding-aandacht'));
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ruimOp);
+else ruimOp();
+
 function vak(){
   if(lijst && lijst.isConnected) return lijst;
   opmaakEenmalig();

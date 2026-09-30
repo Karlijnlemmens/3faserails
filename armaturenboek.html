@@ -84,6 +84,15 @@
   .ab-keuze input{accent-color:var(--blue); margin:0;}
   .ab-keuze input:checked + span{color:var(--blue-dark);}
   .ab-keuze label:has(input:checked){border-color:var(--blue); background:var(--blue-light);}
+  .ab-lichtplan{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .ab-lichtplan button{
+    border:1.5px solid var(--blue); border-radius:8px; padding:7px 12px; background:#fff; color:var(--blue-dark);
+    font-family:'Nunito Sans',sans-serif; font-size:12.5px; font-weight:700; cursor:pointer;
+  }
+  .ab-lichtplan button:hover{background:var(--blue-light);}
+  .ab-lichtplan button.weg{border-color:var(--border); color:var(--slate); padding:4px 10px; font-size:15px; line-height:1;}
+  .ab-lichtplan-naam{font-size:12.5px; font-weight:700; color:var(--green, #1C7C54);}
+  .ab-lichtplan-naam.mis{color:#B0362B;}
   .ab-docveld{margin-top:12px;}
   .ab-docveld > label{display:block; font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:3px;}
   .ab-docveld .ongebruikt{font-weight:600; color:var(--slate);}
@@ -237,6 +246,17 @@
         <div id="abContactVelden"></div>
       </details>
 
+      <div class="cfg-block">
+        <h4>Totaal projectboek</h4>
+        <p class="hint">Voeg het lichtplan toe als PDF, bijvoorbeeld de uitvoer uit DIALux of AutoCAD die je al hebt opgeslagen. Het komt in het boek direct na de introductie, achter het hoofdstukblad “Lichtberekening”. Zonder lichtplan blijft het een gewoon armaturenboek.</p>
+        <input type="file" id="abLichtplanBestand" accept="application/pdf,.pdf" hidden>
+        <div class="ab-lichtplan">
+          <button type="button" id="abLichtplanKnop">Lichtplan (PDF) kiezen</button>
+          <span class="ab-lichtplan-naam" id="abLichtplanNaam"></span>
+          <button type="button" id="abLichtplanWeg" class="weg" title="Lichtplan weghalen" aria-label="Lichtplan weghalen" hidden>×</button>
+        </div>
+      </div>
+
     </div>
 
     <div class="cfg-summary">
@@ -245,6 +265,7 @@
       <div>
         <div class="cfg-metric-row"><span class="k">Armaturen</span><span class="v" id="abTotArm">0</span></div>
         <div class="cfg-metric-row"><span class="k">Typen herkend</span><span class="v" id="abTotType">0</span></div>
+        <div class="cfg-metric-row"><span class="k">Lichtplan</span><span class="v" id="abTotLicht">—</span></div>
       </div>
       <div>
         <span class="eyebrow">Types in het boek</span>
@@ -304,7 +325,13 @@ const OPGESLAGEN_PROJECT = /*__PROJECT_DATA_START__*/null/*__PROJECT_DATA_END__*
 const st = { proj:'', projNr:'', installateur:'', datum:'', soort:'lichtberekening',
              bestek:'', tekeningen:'', armaturenboek:'', toonLijst:true, armaturen:{},
              /* wie er onder "Contactgegevens" op de briefingpagina staan (ids uit medewerkers.js) */
-             projectuitwerker:'', accountmanager:'', binnendienst:'' };
+             projectuitwerker:'', accountmanager:'', binnendienst:'',
+             /* totaal projectboek: het ingeladen lichtplan, {naam, paginas} of null */
+             lichtplan:null };
+/* De PDF van het lichtplan zelf (base64). Niet in st: st gaat ook naar het hoekje van
+   de browser (project-opslag.js), en een lichtplan is al gauw tientallen MB. In het
+   bestand van "Project opslaan" gaat hij wel mee, net als geüploade presenters. */
+let LICHTPLAN_PDF = null;
 
 /* ---------- briefingpagina "Introductie" ----------
    Maten uit het aangeleverde ontwerp (docs/ontwerp/AB Briefing vergelijking.pdf), gemeten in plaats
@@ -651,6 +678,10 @@ async function buildArmaturenboekPdf(){
     flush();
   }
 
+  /* Tot hier voorblad en introductie; het totale projectboek zet hierna het
+     lichtplan (zie boekDelen()). */
+  const naIntroductie = pages.length;
+
   /* --- hoofdstukblad Armaturen + armaturenlijst; de presenters worden er in
          assembleArmaturenboekPdf achter geplakt, in de volgorde van bookGroups --- */
   const boek = armaturenboek();
@@ -717,12 +748,30 @@ async function buildArmaturenboekPdf(){
   }
 
   const bytes = await doc.save();
-  return {bytes, bookGroups, ownPageCount:pages.length};
+  return {bytes, bookGroups, ownPageCount:pages.length, naIntroductie};
+}
+
+/* ---------- de delen van het boek, in hun volgorde ----------
+   De eigen pagina's (voorblad, introductie, hoofdstuk Armaturen, armaturenlijst) komen
+   uit buildArmaturenboekPdf(); het totale projectboek schuift er direct na de
+   introductie het hoofdstukblad "Lichtberekening" en het lichtplan tussen. Daarna de
+   presenters en als laatste de achterpagina's. naIntroductie is het aantal eigen
+   pagina's tot en met de introductie. Een losse functie, zodat de volgorde getest kan
+   worden (tools/controleer-logica.mjs). */
+function boekDelen(naIntroductie, eigenTotaal, metLichtplan){
+  const delen = [];
+  if(metLichtplan){
+    delen.push({bron:'eigen', van:0, tot:naIntroductie},
+               {bron:'lichtberekening'}, {bron:'lichtplan'},
+               {bron:'eigen', van:naIntroductie, tot:eigenTotaal});
+  } else delen.push({bron:'eigen', van:0, tot:eigenTotaal});
+  delen.push({bron:'presenters'}, {bron:'achterpaginas'});
+  return delen.filter(d => d.bron !== 'eigen' || d.tot > d.van);
 }
 
 /* ---------- presenters achter de eigen pagina's plakken, sluit af met AB Achterpaginas ---------- */
 async function assembleArmaturenboekPdf(){
-  const {bytes, bookGroups, ownPageCount} = await buildArmaturenboekPdf();
+  const {bytes, bookGroups, ownPageCount, naIntroductie} = await buildArmaturenboekPdf();
   const ownDoc = await PDFLib.PDFDocument.load(bytes);
   const finalDoc = await PDFLib.PDFDocument.create();
 
@@ -759,13 +808,34 @@ async function assembleArmaturenboekPdf(){
     }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); return 0; }
   };
 
-  await copyRange(ownDoc, 0, ownDoc.getPageCount());
-  let presenterTotaal = 0;
-  for(const g of bookGroups) presenterTotaal += await appendPresenter(g.id, g.code, g.kleur, g.zwart, g.special);
-  presenterTotaal += await appendPresenter('achterpaginas'); /* AB Achterpaginas, helemaal achteraan */
+  /* het lichtplan van het totale projectboek: alle pagina's zoals ze zijn */
+  const voegLichtplanToe = async()=>{
+    try{
+      const d = await PDFLib.PDFDocument.load(b64Bytes(LICHTPLAN_PDF));
+      const pgs = await finalDoc.copyPages(d, d.getPageIndices());
+      pgs.forEach(p=>finalDoc.addPage(p));
+      return pgs.length;
+    }catch(err){
+      console.warn('Lichtplan kon niet worden ingevoegd:', err);
+      Melding.fout('Het lichtplan kon niet in het boek worden gezet: '+(err&&err.message||err)+'.');
+      return 0;
+    }
+  };
+
+  const metLichtplan = !!(st.lichtplan && LICHTPLAN_PDF);
+  let erbij = 0;
+  for(const deel of boekDelen(naIntroductie, ownDoc.getPageCount(), metLichtplan)){
+    if(deel.bron==='eigen') await copyRange(ownDoc, deel.van, deel.tot);
+    else if(deel.bron==='lichtberekening') erbij += await appendPresenter('lichtberekening'); /* AB Lichtberekening, geen stempel */
+    else if(deel.bron==='lichtplan') erbij += await voegLichtplanToe();
+    else if(deel.bron==='presenters'){
+      for(const g of bookGroups) erbij += await appendPresenter(g.id, g.code, g.kleur, g.zwart, g.special);
+    }
+    else if(deel.bron==='achterpaginas') erbij += await appendPresenter('achterpaginas'); /* AB Achterpaginas, helemaal achteraan */
+  }
 
   const eind = await finalDoc.save();
-  const verwacht = ownPageCount + presenterTotaal;
+  const verwacht = ownPageCount + erbij;
   if(finalDoc.getPageCount()!==verwacht){
     console.warn('Paginatelling klopt niet: verwacht '+verwacht+', werkelijk '+finalDoc.getPageCount()+'.');
   }
@@ -836,6 +906,11 @@ async function maakPdfBytes(){
       + '\nHet tabblad komt wel in het boek, de productpagina’s ontbreken.\n'
       + 'Toevoegen: zet de PDF in presenters-bron/ en draai "node tools/maak-presenters.mjs".');
   }
+  if(st.lichtplan && !LICHTPLAN_PDF){
+    meldingen.push('Het lichtplan "' + st.lichtplan.naam + '" is niet meer ingeladen (een project dat je '
+      + 'uit de browser hervat, neemt ingeladen PDF\'s niet mee). Kies het opnieuw bij "Totaal projectboek"; '
+      + 'nu komt het boek zonder lichtplan.');
+  }
   const briefingOpen = briefingOpenVelden();
   if(briefingOpen.length){
     meldingen.push('Op de briefingpagina is nog niet ingevuld: '+briefingOpen.join(', ')+'.\n'
@@ -874,7 +949,9 @@ const PROJECT_VERSIE = 1;
 /* Eén beschrijving van wat een project is: het bestand dat "Project opslaan" bakt en
    het hoekje dat project-opslag.js in de browser bijhoudt schrijven allebei dit weg. */
 function projectPayload(){
-  return { versie:PROJECT_VERSIE, st:JSON.parse(JSON.stringify(st)), presenters:verzamelSpecialPresenters() };
+  const payload = { versie:PROJECT_VERSIE, st:JSON.parse(JSON.stringify(st)), presenters:verzamelSpecialPresenters() };
+  if(LICHTPLAN_PDF) payload.lichtplan = LICHTPLAN_PDF;
+  return payload;
 }
 function slaProjectOp(){
   const payload = projectPayload();
@@ -1044,6 +1121,11 @@ function updateSummary(){
     w.textContent = specialZonderPdf.length+' special-armatu(u)r(en) missen nog een geüploade PDF.';
     warns.appendChild(w);
   }
+  if(st.lichtplan && !LICHTPLAN_PDF){
+    const w=document.createElement('div'); w.className='cfg-warn';
+    w.textContent = 'Lichtplan "' + st.lichtplan.naam + '" is niet meer ingeladen — kies het opnieuw bij Totaal projectboek.';
+    warns.appendChild(w);
+  }
   const briefingOpen = briefingOpenVelden();
   if(briefingOpen.length){
     const w=document.createElement('div'); w.className='cfg-warn';
@@ -1062,6 +1144,10 @@ st.armaturen = ARMATUREN.reduce((o,a)=>{o[a.id]={aanduiding:'',name:'',code:'',g
    over de zojuist gezette defaults heen - vóór buildArmList()/updateSummary() zodat
    die de herstelde staat meteen goed tonen, zonder aparte resync-code. */
 function herstelProject(bron){
+  /* Het lichtplan zelf staat alleen in een opgeslagen projectbestand; uit het hoekje
+     van de browser komt alleen st.lichtplan terug, en dan meldt verfLichtplan() dat
+     het bestand opnieuw gekozen moet worden. */
+  LICHTPLAN_PDF = bron.lichtplan || null;
   if(bron.presenters){
     window.PRESENTER_DATA = window.PRESENTER_DATA || {};
     Object.assign(window.PRESENTER_DATA, bron.presenters);
@@ -1159,6 +1245,45 @@ toonBriefingVelden();
    nog niet, en daar hoorde de armaturenlijst er gewoon bij. */
 $('abToonLijst').checked = st.toonLijst !== false;
 $('abToonLijst').addEventListener('change', e=>{ st.toonLijst = e.target.checked; });
+
+/* ---------- totaal projectboek: het lichtplan ---------- */
+function verfLichtplan(){
+  const lp = st.lichtplan, aanwezig = !!(lp && LICHTPLAN_PDF);
+  $('abLichtplanKnop').textContent = lp ? 'Ander lichtplan kiezen' : 'Lichtplan (PDF) kiezen';
+  const naam = $('abLichtplanNaam');
+  naam.textContent = !lp ? ''
+    : aanwezig ? '✓ ' + lp.naam + ' — ' + lp.paginas + (lp.paginas === 1 ? ' pagina' : ' pagina’s')
+    : '⚠ ' + lp.naam + ' is niet meer ingeladen — kies het bestand opnieuw';
+  naam.classList.toggle('mis', !!lp && !aanwezig);
+  $('abLichtplanWeg').hidden = !lp;
+  $('abTotLicht').textContent = aanwezig ? lp.paginas + ' p.' : '—';
+}
+$('abLichtplanKnop').addEventListener('click', ()=> $('abLichtplanBestand').click());
+$('abLichtplanBestand').addEventListener('change', async e=>{
+  const bestand = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(!bestand) return;
+  try{
+    const bytes = new Uint8Array(await bestand.arrayBuffer());
+    if(String.fromCharCode.apply(null, bytes.subarray(0, 5)) !== '%PDF-') throw new Error('dit is geen PDF-bestand');
+    const d = await PDFLib.PDFDocument.load(bytes, {ignoreEncryption:true});
+    /* pdf-lib kan een beveiligd PDF niet ontsleutelen: de pagina's komen er dan leeg
+       of verminkt uit. Liever nu zeggen dan in het boek bij de klant. */
+    if(d.isEncrypted) throw new Error('het is beveiligd. Sla het lichtplan op zonder beveiliging (of druk het af naar PDF) en kies het opnieuw');
+    LICHTPLAN_PDF = bytesToB64(bytes);
+    st.lichtplan = {naam: bestand.name, paginas: d.getPageCount()};
+    verfLichtplan(); updateSummary();
+    Melding.goed('Lichtplan ingeladen: ' + st.lichtplan.paginas + (st.lichtplan.paginas === 1 ? ' pagina' : ' pagina’s')
+      + '. Het komt in het boek na de introductie.');
+  }catch(err){
+    Melding.fout('Dit lichtplan kan niet in het boek: ' + (err && err.message || err) + '.', {bij: $('abLichtplanKnop')});
+  }
+});
+$('abLichtplanWeg').addEventListener('click', ()=>{
+  st.lichtplan = null; LICHTPLAN_PDF = null;
+  verfLichtplan(); updateSummary();
+});
+verfLichtplan();
 $('abProj').addEventListener('input', e=>{ st.proj=e.target.value; updateSummary(); });
 $('abProjNr').addEventListener('input', e=>{ st.projNr=e.target.value; });
 $('abInst').addEventListener('input', e=>{ st.installateur=e.target.value; });
@@ -1199,6 +1324,7 @@ function zetProjectInScherm(){
   $('abSoortLicht').checked = st.soort !== 'vergelijking';
   $('abSoortVerg').checked  = st.soort === 'vergelijking';
   $('abToonLijst').checked = st.toonLijst !== false;
+  verfLichtplan();
   contactKeuze($('abContactVelden'), st, ()=>{ toonBriefingVelden(); updateSummary(); }, 'abContact_');
   toonBriefingVelden();
   buildArmList();
@@ -1209,6 +1335,7 @@ function zetProjectInScherm(){
 function projectLeeg(){
   if((st.proj||'').trim() || (st.projNr||'').trim() || (st.installateur||'').trim()) return false;
   if(BRIEF_VELDEN.some(v=> (st[v.id]||'').trim())) return false;
+  if(st.lichtplan) return false;
   return !ARMATUREN.some(a=> !armSlotLeeg(st.armaturen[a.id]));
 }
 ProjectOpslag.koppel({
@@ -1220,8 +1347,8 @@ ProjectOpslag.koppel({
   isLeeg: projectLeeg,
   omschrijf: ()=> (st.proj||'').trim(),
   bewaar: slaProjectOp,
-  /* Zonder de geüploade presenter-PDF's: die zijn zo een paar MB en dan past het niet
-     meer in de opslag van de browser. In het opgeslagen bestand gaan ze wel mee. */
+  /* Zonder de geüploade presenter-PDF's en het lichtplan: die zijn zo een paar MB en dan
+     past het niet meer in de opslag van de browser. In het opgeslagen bestand gaan ze wel mee. */
   licht: (payload)=> ({versie:payload.versie, st:payload.st}),
 });
 startKlaar = true;

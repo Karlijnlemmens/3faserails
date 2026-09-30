@@ -1109,6 +1109,24 @@ function is(wat, gekregen, verwacht){
   is('geen presenter is een keuze', m.presenterVan({presenter: '-'}, pir, pir.varianten[0]), {id: null, bron: 'geen'});
 }
 
+/* ======================= armaturenboek: totaal projectboek ======================= */
+{
+  /* Het lichtplan komt direct na de introductie, achter het hoofdstukblad
+     "Lichtberekening"; daarna pas het hoofdstuk Armaturen, de presenters en de
+     achterpagina's. boekDelen() in armaturenboek.html bepaalt die volgorde. */
+  const m = await laadUit('armaturenboek.html', ['boekDelen']);
+  console.log('totaal projectboek');
+  const kort = d => d.bron === 'eigen' ? 'eigen ' + d.van + '-' + d.tot : d.bron;
+  /* voorblad (0) + introductie (1) = 2; dan hoofdstukblad Armaturen en armaturenlijst = 4 */
+  is('met lichtplan: na de introductie', m.boekDelen(2, 4, true).map(kort),
+    ['eigen 0-2', 'lichtberekening', 'lichtplan', 'eigen 2-4', 'presenters', 'achterpaginas']);
+  is('zonder lichtplan: het gewone boek', m.boekDelen(2, 4, false).map(kort),
+    ['eigen 0-4', 'presenters', 'achterpaginas']);
+  is('introductie over twee pagina\'s', m.boekDelen(3, 5, true).map(kort)[0], 'eigen 0-3');
+  is('niets na de introductie: geen leeg stuk', m.boekDelen(2, 2, true).map(kort),
+    ['eigen 0-2', 'lichtberekening', 'lichtplan', 'presenters', 'achterpaginas']);
+}
+
 /* ===================== tabelcellen: een te lang woord ===================== */
 {
   /* Een woord breder dan zijn kolom liep de volgende kolom in (de armaturenlijst:

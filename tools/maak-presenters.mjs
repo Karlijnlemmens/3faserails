@@ -76,6 +76,10 @@ const GROEPEN = [
   ['ag107', 'Waterdicht Essence Slim'], ['ag108', 'Waterdicht Typhoon'], ['ag109', 'Pendelarmatuur Orion'],
   ['ag110', 'Spot Vapor IP65'],
   ['achterpaginas', 'AB Achterpaginas'],
+  /* Het hoofdstukblad "Lichtberekening" van het totale projectboek: het armaturenboek zet
+     het vóór een ingeladen lichtplan, direct na de introductie. Net als 'achterpaginas'
+     een vast ontworpen blad zonder codestempel, geen armatuurtype. */
+  ['lichtberekening', 'AB Lichtberekening'],
 ];
 const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
 const opNaam = new Map();
