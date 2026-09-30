@@ -196,7 +196,7 @@ function is(wat, gekregen, verwacht){
      de armaturenlijst en het verplaatsen van een regel. */
   const r = await laadUit('armatuur-rij.js',
     ['specialPresenterId', 'armGroepVanRij', 'armTypeOnbekend', 'armEigenPresenters', 'armWisselRijen',
-     'STEMPELSTIJLEN', 'stempelZwart', 'armBoekGroepen', 'armLijstKolommen', 'STEMPEL_SPECIAL'],
+     'STEMPELSTIJLEN', 'stempelZwart', 'armBoekGroepen', 'armLijstKolommen', 'STEMPEL_SPECIAL', 'armSlotLeeg'],
     readFileSync(join(root, 'zoeken.js'), 'utf8') + '\n' + readFileSync(join(root, 'armatuur-groepen.js'), 'utf8')
     + '\nconst window = globalThis; globalThis.PRESENTER_DATA = {};'
     + '\nconst PdfHuisstijl = {presenterAanwezig: id => !!globalThis.PRESENTER_DATA[id]};');
@@ -213,6 +213,12 @@ function is(wat, gekregen, verwacht){
   is('een eigen PDF wint op elke regel, ook als de naam herkend wordt', [eigen.id, eigen.special], ['sparm03', true]);
   is('special zonder PDF valt terug op de naam', id(r.armGroepVanRij(rij({name:'Punto'}), 'arm04', true)), 'ag01');
   is('special zonder PDF en zonder herkenbare naam: niets', r.armGroepVanRij(rij({name:'Iets eenmaligs'}), 'arm04', true), null);
+  /* Welke regels meetellen - voor beide tools hetzelfde. De railtool eiste een aantal:
+     zonder aantal geen armaturenlijst en geen presenters, ook met het vinkje aan. */
+  is('meetellen: iets ingevuld, ook zonder aantal',
+    [rij({}), rij({aanduiding:'A1'}), rij({name:'Punto 15W'}), rij({code:'2001111'}), rij({codeDali:'2001111-DA'}),
+     rij({qty:4}), rij({name:'   ', code:' '}), rij({qty:0, groep:'ag01'}), null].map(r.armSlotLeeg),
+    [true, false, false, false, false, false, true, true, true]);
 
   is('uploadknop bij een onherkend type', r.armTypeOnbekend(rij({}), 'Onbekend armatuur 12W', false), true);
   is('geen uploadknop bij een herkend type', r.armTypeOnbekend(rij({}), 'Punto 15W', false), false);

@@ -1446,7 +1446,7 @@ function armaturenboek(){
   const boek=[], perGroep={};
   visibleArmaturen().forEach(a=>{
     const s=st.armaturen[a.id];
-    if(!s || (s.qty||0)<=0) return;
+    if(!s || armSlotLeeg(s)) return;
     const g=armGroepVan(s, a.id);
     if(!g) return;
     let b=perGroep[g.id];
@@ -1455,20 +1455,20 @@ function armaturenboek(){
   });
   return boek;
 }
-/* Armaturen met een aantal waarvan het type niet bekend is (en niet bewust op
+/* Ingevulde armaturen (armSlotLeeg) waarvan het type niet bekend is (en niet bewust op
    'Geen presenter' staat) — die krijgen geen presenter in het boek. Special-rijen
    hebben hun eigen melding (armaturenSpecialZonderPdf), dus die vallen hier buiten. */
 function armaturenZonderGroep(){
   return visibleArmaturen().filter(a=>{
     const s=st.armaturen[a.id];
-    return (s.qty||0)>0 && s.groep!=='-' && !isSpecial(s) && !armGroepVan(s, a.id);
+    return !armSlotLeeg(s) && s.groep!=='-' && !isSpecial(s) && !armGroepVan(s, a.id);
   });
 }
-/* Special-rijen met een aantal waarvoor nog geen PDF is geüpload. */
+/* Ingevulde Special-rijen waarvoor nog geen PDF is geüpload. */
 function armaturenSpecialZonderPdf(){
   return visibleArmaturen().filter(a=>{
     const s=st.armaturen[a.id];
-    return (s.qty||0)>0 && isSpecial(s) && !armGroepVan(s, a.id);
+    return !armSlotLeeg(s) && isSpecial(s) && !armGroepVan(s, a.id);
   });
 }
 /* Armaturen met een aantal die niet in een boek-hoofdstuk vallen: type niet herkend,
@@ -1478,7 +1478,7 @@ function armaturenSpecialZonderPdf(){
 function armaturenOverig(){
   return visibleArmaturen().filter(a=>{
     const s=st.armaturen[a.id];
-    return (s.qty||0)>0 && !armGroepVan(s, a.id);
+    return !armSlotLeeg(s) && !armGroepVan(s, a.id);
   });
 }
 /* Adapters & overig: 12 artikelen, wit/zwart/grijs, zelfde intern/extern-codescheiding.
@@ -2835,7 +2835,8 @@ async function buildPdf(){
            in het armaturenboek (armLijstKolommen() in armatuur-rij.js) ----------
        Optioneel (st.toonLijst): alleen deze pagina vervalt, het hoofdstukblad en de
        presenters blijven, en bookGroups wordt hieronder los van de tabel gevuld.
-       Elke regel met een aantal komt erin, in de volgorde waarin hij in de tool staat -
+       Elke ingevulde regel komt erin (armSlotLeeg(), ook zonder aantal - net als in het
+       armaturenboek), in de volgorde waarin hij in de tool staat -
        niet gegroepeerd per type, en een onherkend type niet onderaan: wie de regels op
        volgorde van het bestek invult wil ze zo terugzien. De presenters erachter volgen
        dezelfde volgorde, want armaturenboek() zet elk type neer waar het voor het eerst
@@ -2849,7 +2850,7 @@ async function buildPdf(){
         (st.proj||'').trim() + ((st.proj||'').trim()? '  \u2014  ':'') + datumNL(st.datum));
       const rijenVoorTabel = visibleArmaturen()
         .map(a=>({a, s:st.armaturen[a.id]}))
-        .filter(r=> r.s && (r.s.qty||0)>0);
+        .filter(r=> r.s && !armSlotLeeg(r.s));
       const {cols, waarden} = armLijstKolommen(rijenVoorTabel, armCode, armOms);
       let TB=tableStart(cols);
       rijenVoorTabel.forEach(r=> tableRow(TB, waarden(r)));
@@ -3502,7 +3503,7 @@ function init(){
     /* Leeg = er is nog niets getekend en niets ingevuld. Kleur, voeding en de andere
        keuzes van stap 1-2 tellen niet mee: daar kies je zo weer iets anders. */
     isLeeg: ()=> !st.nodes.length && !(st.proj||'').trim() && !(st.projNr||'').trim()
-              && !ARMATUREN.some(a=> (st.armaturen[a.id].qty||0) > 0 || (st.armaturen[a.id].name||'').trim()),
+              && ARMATUREN.every(a=> armSlotLeeg(st.armaturen[a.id])),
     omschrijf: ()=> (st.proj||'').trim(),
     bewaar: slaProjectOp,
     /* Zonder de geüploade presenter-PDF's: die zijn zo een paar MB en dan past het niet

@@ -23,6 +23,18 @@
    is een eenmalig armatuur, dus krijgt hij een eigen id per slot. */
 function specialPresenterId(armId){ return 'sp'+armId; }
 
+/* Telt een regel mee in het boek? Zodra er iets in staat - een code, een naam, een
+   artikelcode (gewoon of DALI) of een aantal. Een regel zonder aantal hoort dus ook in
+   de armaturenlijst en krijgt zijn presenter: vaak is het aantal nog niet bekend als
+   het boek al de deur uit moet. De railtool eiste een aantal en liet zonder aantal de
+   hele lijst weg, ook met het vinkje aan; het armaturenboek deed het zo. Spaties
+   alleen tellen niet. */
+function armSlotLeeg(s){
+  if(!s) return true;
+  const vol = v => String(v||'').trim() !== '';
+  return !vol(s.aanduiding) && !vol(s.name) && !vol(s.code) && !vol(s.codeDali) && !((s.qty||0) > 0);
+}
+
 /* Welke presenter bij een regel hoort. Een zelf geüploade PDF wint altijd, op
    elke regel - niet alleen op een regel met "special" in het artikelcodeveld.
    Uploaden is een bewuste handeling; wie dat doet wil die PDF in het boek, ook

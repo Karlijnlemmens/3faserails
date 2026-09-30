@@ -21,6 +21,7 @@ The armaturenboek and the railtool make the same book — a row per fixture, a p
 - `armRijDelen(o)` — the label (recognised type, the series choice, the typo suggestion), the upload button with its ×, the stamp toggle and the ↑/↓ arrows as DOM parts; the tool builds its own row around them and passes `opWijziging` (`refresh` or `updateSummary`). It owns the name field's listeners, including `armKeuzeBlijft()`.
 - `armWisselRijen()` — swaps the contents of two slots, and an uploaded PDF with them; `armVolgBijwerken()` disables the first ↑ and the last ↓.
 - `armBoekGroepen(boek)` and `stempelPresenter()` — per presenter the unique codes (stacked, one per line), colour, style and whether it is a special, and the stamp itself at the measured spot, shrinking rather than shifting when a code is too wide. A special (an uploaded PDF, usually a DLC sheet) has its own spot, `STEMPEL_SPECIAL`, clear of the DLC header band and logo block, and defaults to black — see `docs/armaturenboek.md`.
+- `armSlotLeeg(s)` — whether a row counts: anything filled in (code, name, article code or DALI code, a quantity), whitespace not counting. Both tools use it for the book, the list and the warnings, so a row without a quantity is in both or in neither.
 - `armLijstKolommen(rijen, artikel, oms)` — the armaturenlijst's columns and values; Code and Aantal drop when no row has one.
 - `armEigenPresenters()` — every uploaded PDF, for "Project opslaan".
 

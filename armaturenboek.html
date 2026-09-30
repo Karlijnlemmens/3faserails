@@ -989,9 +989,8 @@ function updateVolgKnoppen(){ armVolgBijwerken($('abArmList')); }
    leeg is, komt er automatisch een nieuw leeg slot bij (zie updateSummary()). Na het
    toevoegen is de nieuwe laatste rij weer leeg, dus er ontstaat nooit meer dan één
    nieuwe rij per keer. */
-function armSlotLeeg(s){
-  return !s.aanduiding && !s.name && !s.code && !(s.qty>0);
-}
+/* Of een regel leeg is: armSlotLeeg() in armatuur-rij.js, zodat de railtool dezelfde
+   regels meetelt. */
 function voegArmatuurSlotToe(){
   const nieuw = {id:'arm'+String(ARMATUREN.length+1).padStart(2,'0')};
   ARMATUREN.push(nieuw);
