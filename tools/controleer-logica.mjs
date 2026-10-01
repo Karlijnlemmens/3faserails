@@ -136,12 +136,16 @@ function is(wat, gekregen, verwacht){
   is('alleen "Ario" blijft de GU10, met de LED als tweede keuze',
     [groep('Ario zwart'), m.armSerieKeuze('ag09').keuzes.map(k => k.id)], ['ag09', ['ag09', 'ag113']]);
   is('"half afgeschermd" maakt van een Aludisc geen Ario',
-    groep('Pragmalux LED Plafonnière / Wandarmatuur Aludisc-M Zwart half afgeschermd Ø340 IP66 IK10 C4 10-23W 750-1800lm 3000K-3500K-4000K 3-CCT'), null);
+    groep('Pragmalux LED Plafonnière / Wandarmatuur Aludisc-M Zwart half afgeschermd Ø340 IP66 IK10 C4 10-23W 750-1800lm 3000K-3500K-4000K 3-CCT'), 'ag116');
   /* Een IP-klasse is geen naam: op "wandarmatuur" en "IP65" werden de Titandisc, de
      Soladisc, de Facio en de Parono de Qube IP65, en de Cyclone HT werd op
      "waterdicht" en "IP66" de Essence G3 IP66. */
-  is('een Titandisc IP65 is geen Qube IP65',
-    groep('Pragmalux LED Plafonnière / Wandarmatuur Titandisc-M Grijs Ø360 IP65 IK10 7-14W 690-1500lm 3000K-3500K-4000K 3-CCT'), null);
+  is('een Titandisc IP65 is de Titandisc, geen Qube IP65',
+    groep('Pragmalux LED Plafonnière / Wandarmatuur Titandisc-M Grijs Ø360 IP65 IK10 7-14W 690-1500lm 3000K-3500K-4000K 3-CCT'), 'ag115');
+  is('een Eclipse is de Eclipse',
+    groep('Pragmalux LED Plafonnière / Pendelarmatuur Eclipse-L Wit Ø430 IP40 IK08 13-32W 1400-4000lm 3000K-3500K-4000K 3-CCT'), 'ag114');
+  is('een Soladisc IP65 blijft zonder presenter (geen Qube, geen Titandisc)',
+    groep('Pragmalux LED Plafonnière / Wandarmatuur Soladisc IP65 IK10 Ø370 7-14W 700-1600lm 3000-3500-4000K'), null);
   is('een Facio IP65 is de Facio', groep('Pragmalux LED Wandarmatuur Facio IP65 Up/Down 6W 500lm 2700K'), 'ag50');
   is('een Cyclone HT IP66 is geen Essence G3 IP66',
     groep('Pragmalux LED TL Waterdicht Armatuur Cyclone HT IP66 150cm 42W 4000K 7000lm Alu+PC 3x2,5mm Doorvoerbedrading'), null);
@@ -153,7 +157,8 @@ function is(wat, gekregen, verwacht){
   is('Polo is niet Qube omdat beide wandarmatuur zijn',
     groep('Pragmalux LED Plafonnière / Wandarmatuur Polo IP64 8W 3000K 650lm Ø180 (1x18W)'),
     m.ARM_GROEPEN.find(g => g.naam === 'Polo G3').id);
-  is('Aludisc is geen Qube', groep('Pragmalux LED Plafonnière / Wandarmatuur Aludisc-M Zwart Ø340 IP66 IK10'), null);
+  /* sinds september 2026 met een eigen blad; daarvoor null, en dat was goed */
+  is('Aludisc is de Aludisc, geen Qube', groep('Pragmalux LED Plafonnière / Wandarmatuur Aludisc-M Zwart Ø340 IP66 IK10'), 'ag116');
   is('een bandraster zonder naam is geen Miro',
     groep('Pragmalux LED Bandraster Opaal 295x1560mm 43W 6000lm 4000K wit RAL9003'), null);
 
@@ -210,11 +215,11 @@ function is(wat, gekregen, verwacht){
      (september 2026). */
   is('families die over groepen vallen', gesplitst.sort(),
     ['LED Highbay Clean HACCP', 'LED Paneel Sigma', 'LED Portiek Port PKVW', 'LED TL Waterdicht Armatuur Essence Classic']);
-  /* Was 151. Naar 148 in september 2026, en dat is winst: de Soladisc en de Titandisc
-     hadden de presenter van de Qube IP65 en de Cyclone HT die van de Essence G3 IP66,
-     op niets dan het soortwoord en de IP-klasse - geen presenter is beter dan de
-     verkeerde. De Highbay Essence kwam erbij, de Clean HACCP valt nu terecht in tweeën. */
-  is('families met één presenter: ondergrens 148', eens >= 148, true);
+  /* September 2026: de Soladisc, de Titandisc en de Cyclone HT verloren hun presenter
+     (de Qube IP65 en de Essence G3 IP66, op niets dan het soortwoord en de IP-klasse -
+     geen presenter is beter dan de verkeerde), de Clean HACCP valt terecht in tweeën,
+     en de Highbay Essence, Titandisc, Aludisc en Eclipse kregen hun eigen blad. */
+  is('families met één presenter: ondergrens 151', eens >= 151, true);
   is('geen suggestie op een echt artikel', onterecht, 0);
   console.log('  catalogus: ' + eens + ' families eenduidig, ' + gesplitst.length + ' gesplitst, '
             + zonder + ' zonder presenter.');

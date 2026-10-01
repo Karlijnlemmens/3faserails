@@ -16,7 +16,7 @@
    veranderen. Laden met een gewoon <script src="armatuur-groepen.js">, vóór de code
    van de tool; geen module, want die weigert te laden vanaf schijf (file://).
 
-   node tools/controleer-logica.mjs test de herkenning (116 groepen plus de gevallen
+   node tools/controleer-logica.mjs test de herkenning (119 groepen plus de gevallen
    die er ooit naast zaten). */
 const ARM_GROEPEN = [
   {id:'ag01', naam:'Punto', zoektermen:[]},
@@ -142,6 +142,10 @@ const ARM_GROEPEN = [
      variant moet met zijn eerste woord raken, en "half" alleen raakte ook "half
      afgeschermd" van de Aludisc. Zie ARM_SERIES voor de keuze. */
   {id:'ag113', naam:'LED Half-inbouwspot Ario', zoektermen:['Ario Half-inbouwspot']},
+  /* plafonnière / wand- of pendelarmatuur, in S, M en L */
+  {id:'ag114', naam:'Eclipse', zoektermen:[]},
+  {id:'ag115', naam:'Titandisc', zoektermen:[]},
+  {id:'ag116', naam:'Aludisc', zoektermen:[]},
   {id:'lichtlijn-prxline', naam:'Lichtlijn PRX-Line', zoektermen:['Line']},
   {id:'lichtlijn-uniline', naam:'Lichtlijn PRX-Uniline', zoektermen:['Uniline']},
   {id:'lichtlijn-retroline', naam:'Lichtlijn Retroline PRX', zoektermen:['Retroline']},

@@ -41,6 +41,9 @@ window.PRESENTER_FILES = [
   'ag111',   /* Highbay Essence IP65 */
   'ag112',   /* Highbay Clean HACCP G3 */
   'ag113',   /* LED Half-inbouwspot Ario */
+  'ag114',   /* Eclipse */
+  'ag115',   /* Titandisc */
+  'ag116',   /* Aludisc */
   'ag12',   /* Altoflood */
   'ag13',   /* Paneel Essence G3 */
   'ag14',   /* Downlight Essence G2 */
