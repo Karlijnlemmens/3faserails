@@ -16,7 +16,7 @@
    veranderen. Laden met een gewoon <script src="armatuur-groepen.js">, vóór de code
    van de tool; geen module, want die weigert te laden vanaf schijf (file://).
 
-   node tools/controleer-logica.mjs test de herkenning (120 groepen plus de gevallen
+   node tools/controleer-logica.mjs test de herkenning (122 groepen plus de gevallen
    die er ooit naast zaten). */
 const ARM_GROEPEN = [
   {id:'ag01', naam:'Punto', zoektermen:[]},
@@ -150,6 +150,11 @@ const ARM_GROEPEN = [
      (IP44) zonder eigen blad. vereist: deze woorden moeten in de omschrijving staan, anders
      wees "Soladisc" alleen al deze groep aan - ook bij de Soladisc-M IP44. */
   {id:'ag117', naam:'Soladisc IP65', zoektermen:[], vereist:['ip65']},
+  /* De gewone Soladisc: S, M en L, IP44. Een kale "Soladisc" is deze; met IP65 erbij
+     wint ag117 (twee woorden raak tegen één). */
+  {id:'ag118', naam:'Soladisc IP44', zoektermen:['Soladisc']},
+  /* Cyclone HT IP66: het blad heet "LED waterdicht Cyclone" */
+  {id:'ag119', naam:'Waterdicht Cyclone', zoektermen:['Cyclone']},
   {id:'lichtlijn-prxline', naam:'Lichtlijn PRX-Line', zoektermen:['Line']},
   {id:'lichtlijn-uniline', naam:'Lichtlijn PRX-Uniline', zoektermen:['Uniline']},
   {id:'lichtlijn-retroline', naam:'Lichtlijn Retroline PRX', zoektermen:['Retroline']},

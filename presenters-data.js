@@ -45,6 +45,8 @@ window.PRESENTER_FILES = [
   'ag115',   /* Titandisc */
   'ag116',   /* Aludisc */
   'ag117',   /* Soladisc IP65 */
+  'ag118',   /* Soladisc IP44 */
+  'ag119',   /* Waterdicht Cyclone */
   'ag12',   /* Altoflood */
   'ag13',   /* Paneel Essence G3 */
   'ag14',   /* Downlight Essence G2 */

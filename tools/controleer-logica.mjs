@@ -146,14 +146,14 @@ function is(wat, gekregen, verwacht){
     groep('Pragmalux LED Plafonnière / Pendelarmatuur Eclipse-L Wit Ø430 IP40 IK08 13-32W 1400-4000lm 3000K-3500K-4000K 3-CCT'), 'ag114');
   is('een Soladisc IP65 is de Soladisc IP65 (geen Qube, geen Titandisc)',
     groep('Pragmalux LED Plafonnière / Wandarmatuur Soladisc IP65 IK10 Ø370 7-14W 700-1600lm 3000-3500-4000K'), 'ag117');
-  /* De Soladisc-S/M/L is een ander armatuur (IP44) zonder eigen blad: de groep eist "IP65"
-     (vereist), anders wees "Soladisc" alleen al het IP65-blad aan. */
-  is('een Soladisc-M IP44 krijgt het IP65-blad niet',
-    groep('Pragmalux LED Plafonnière / Wandarmatuur Soladisc-M Wit Ø340 IP44 IK10 7-14W 700-1600lm 3000K-3500K-4000K 3-CCT'), null);
-  is('getypt: Soladisc IP 65 wel, Soladisc alleen niet', [groep('Soladisc IP 65'), groep('Soladisc wit')], ['ag117', null]);
+  /* De Soladisc-S/M/L is een ander armatuur (IP44) met een eigen blad (ag118): de IP65-groep
+     eist "IP65" (vereist), anders wees "Soladisc" alleen al het IP65-blad aan. */
+  is('een Soladisc-M IP44 krijgt het IP44-blad, niet het IP65-blad',
+    groep('Pragmalux LED Plafonnière / Wandarmatuur Soladisc-M Wit Ø340 IP44 IK10 7-14W 700-1600lm 3000K-3500K-4000K 3-CCT'), 'ag118');
+  is('getypt: Soladisc IP 65 is de IP65, een kale Soladisc de IP44', [groep('Soladisc IP 65'), groep('Soladisc wit')], ['ag117', 'ag118']);
   is('een Facio IP65 is de Facio', groep('Pragmalux LED Wandarmatuur Facio IP65 Up/Down 6W 500lm 2700K'), 'ag50');
-  is('een Cyclone HT IP66 is geen Essence G3 IP66',
-    groep('Pragmalux LED TL Waterdicht Armatuur Cyclone HT IP66 150cm 42W 4000K 7000lm Alu+PC 3x2,5mm Doorvoerbedrading'), null);
+  is('een Cyclone HT IP66 is de Cyclone, geen Essence G3 IP66',
+    groep('Pragmalux LED TL Waterdicht Armatuur Cyclone HT IP66 150cm 42W 4000K 7000lm Alu+PC 3x2,5mm Doorvoerbedrading'), 'ag119');
   is('de Qube zelf blijft de Qube', [groep('Wandarmatuur Qube IP65'), groep('Qube')], ['ag88', 'ag88']);
   /* Paneel en bandraster zijn één soort: de Flexcore-presenter heet zelf zo. */
   is('bandraster Flexcore houdt de Flexcore-presenter',
@@ -217,9 +217,10 @@ function is(wat, gekregen, verwacht){
     if(!ids.size) zonder++; else if(ids.size === 1) eens++; else gesplitst.push(f.naam);
   }
   /* De Clean HACCP is in de prijslijst één serie, maar de G3 heeft een eigen blad
-     (september 2026). */
+     (september 2026); net zo de Soladisc: S/M/L (IP44) en IP65 elk een eigen blad. */
   is('families die over groepen vallen', gesplitst.sort(),
-    ['LED Highbay Clean HACCP', 'LED Paneel Sigma', 'LED Portiek Port PKVW', 'LED TL Waterdicht Armatuur Essence Classic']);
+    ['LED Highbay Clean HACCP', 'LED Paneel Sigma', 'LED Plafonnière / Wandarmatuur Soladisc', 'LED Portiek Port PKVW',
+     'LED TL Waterdicht Armatuur Essence Classic']);
   /* September 2026: de Soladisc, de Titandisc en de Cyclone HT verloren hun presenter
      (de Qube IP65 en de Essence G3 IP66, op niets dan het soortwoord en de IP-klasse -
      geen presenter is beter dan de verkeerde), de Clean HACCP valt terecht in tweeën,
