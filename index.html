@@ -753,10 +753,15 @@
   <div class="c2-steps" id="c2Steps">
     <button data-step="1"><span class="c2-stepnum">1</span>DALI</button>
     <button data-step="2"><span class="c2-stepnum">2</span>Kleur</button>
-    <button data-step="3"><span class="c2-stepnum">3</span>Voeding</button>
-    <button data-step="4"><span class="c2-stepnum">4</span>Vorm</button>
-    <button data-step="5"><span class="c2-stepnum">5</span>Tekening &amp; maten</button>
-    <button data-step="6"><span class="c2-stepnum">6</span>Stuklijst</button>
+    <!-- Voeding (A/B/C) staat er voorlopig niet tussen: de keuze verandert niets aan de
+         producten - het verschil zit in de verdeelkast, en dat regelt de installateur. De
+         uitleg staat in de tab "Aansluiting & polariteit". De stap blijft in de code
+         (data-step 3) zodat hij terug kan; goStep() slaat hem over. De nummers hieronder
+         zijn wat de gebruiker ziet, data-step blijft de interne stap. -->
+    <button data-step="3" style="display:none"><span class="c2-stepnum">3</span>Voeding</button>
+    <button data-step="4"><span class="c2-stepnum">3</span>Vorm</button>
+    <button data-step="5"><span class="c2-stepnum">4</span>Tekening &amp; maten</button>
+    <button data-step="6"><span class="c2-stepnum">5</span>Stuklijst</button>
   </div>
   <div class="c2-stepmsg" id="c2StepMsg"></div>
 
@@ -2281,7 +2286,7 @@ function zoomBy(factor, vx, vy){
 }
 function renderCanvas(B){
   const svg=$('c2Svg');
-  if(!st.shape || !st.nodes.length){ svg.innerHTML='<text class="c2-empty" x="450" y="220" text-anchor="middle">Kies eerst een vorm in stap 4.</text>'; return; }
+  if(!st.shape || !st.nodes.length){ svg.innerHTML='<text class="c2-empty" x="450" y="220" text-anchor="middle">Kies eerst een vorm in stap 3.</text>'; return; }
   const f=frozenFit||fit(); const P=B.P, V=B.V;
   const px=n=>({x:n.x*f.sc+f.ox, y:n.y*f.sc+f.oy});
   const out=[];
@@ -2295,7 +2300,7 @@ function renderCanvas(B){
   const outDirX=n=>{ const c=cent[cmR.m[n.id]]; if(!c) return 1; return n.x>=c.x? 1 : -1; };
 
   if(!shN.length){
-    svg.innerHTML='<text class="c2-empty" x="450" y="220" text-anchor="middle">Leeg tekenvlak \u2014 kies een vorm (stap 4) of \uFF0B Nieuw figuur.</text>';
+    svg.innerHTML='<text class="c2-empty" x="450" y="220" text-anchor="middle">Leeg tekenvlak \u2014 kies een vorm (stap 3) of \uFF0B Nieuw figuur.</text>';
     return;
   }
 
@@ -2624,7 +2629,7 @@ function warnings(B){
   const w=[];
   /* vóór de vorm: een hervat project zonder tekening moet dit ook zien */
   if(Lichtplan.ontbreekt()) w.push({t:'warn', m: Lichtplan.waarschuwing()});
-  if(!st.shape){ w.push({t:'tip', m:'Kies eerst een vorm (stap 4).'}); return w; }
+  if(!st.shape){ w.push({t:'tip', m:'Kies eerst een vorm (stap 3).'}); return w; }
   const cm1=compMap(); const fed1=new Set(st.feeds.map(f=>feedComp(f,cm1.m)));
   const miss1=cm1.count-fed1.size;
   if(miss1>0) w.push({t:'warn', m: cm1.count===1
@@ -2651,7 +2656,7 @@ function warnings(B){
   /* per tekenvlak met rails: is er een montagewijze gekozen? */
   st.sheets.forEach(sh=>{ const n=computeMounts(sh.id).count;
     if(montageVan(sh.id).wijze!=='geen' || !n) return;
-    w.push({t:'tip', m:'Kies in stap 5 een montagewijze'+(st.sheets.length>1?' voor \u201c'+sh.name.replace(/</g,'&lt;')+'\u201d':'')
+    w.push({t:'tip', m:'Kies in stap 4 een montagewijze'+(st.sheets.length>1?' voor \u201c'+sh.name.replace(/</g,'&lt;')+'\u201d':'')
       +' \u2014 '+(st.sheets.length>1?'dit tekenvlak':'deze tekening')+' heeft '+n+' montagepunten (om de meter, incl. uiteinden; hoeken en kruisingen gedeeld).'}); });
   return w;
 }
@@ -2702,6 +2707,7 @@ function renderSheetsBar(){
 let startKlaar = false;
 function refresh(){
   if(startKlaar) ProjectOpslag.gewijzigd();
+  if(st.step===3) st.step=4;   /* Voeding is verborgen; een project dat daar stond gaat naar Vorm */
   const B=computeBOM(); lastBOM=B;
   renderSheetsBar();
   /* stepper */
@@ -3277,8 +3283,8 @@ function meldPdfGrootte(bytes, vak){
 async function maakPdfBytes(){
   const cmP=compMap(); const fedP=new Set(st.feeds.map(f=>feedComp(f,cmP.m)));
   if(cmP.count===0 || fedP.size<cmP.count){
-    const msg = cmP.count===0 ? 'Teken eerst een figuur (stap 4) voordat de PDF gemaakt kan worden.'
-      : 'Kies eerst per traject een stroomaansluitpunt (\u26a1 in stap 5) \u2014 daarna kan de PDF gemaakt worden.';
+    const msg = cmP.count===0 ? 'Teken eerst een figuur (stap 3) voordat de PDF gemaakt kan worden.'
+      : 'Kies eerst per traject een stroomaansluitpunt (\u26a1 in stap 4) \u2014 daarna kan de PDF gemaakt worden.';
     $('c2StepMsg').textContent=msg; Melding.letop(msg); return null;
   }
   /* Waarschuwen over gaten in het armaturenboek, maar de PDF altijd gewoon maken. */
@@ -3363,9 +3369,11 @@ async function previewPdf(){
 /* ---------- wizard ---------- */
 function goStep(k){
   $('c2StepMsg').textContent='';
-  if(k>=5 && !st.shape){ $('c2StepMsg').textContent='Kies eerst een vorm (stap 4).'; st.step=4; refresh(); return; }
+  /* stap 3 (Voeding) is verborgen: vooruit naar Vorm, terug naar Kleur */
+  if(k===3) k = st.step>3 ? 2 : 4;
+  if(k>=5 && !st.shape){ $('c2StepMsg').textContent='Kies eerst een vorm (stap 3).'; st.step=4; refresh(); return; }
   if(k===6){ const cm2=compMap(); const fed2=new Set(st.feeds.map(f=>feedComp(f,cm2.m)));
-    if(cm2.count===0 || fed2.size<cm2.count){ $('c2StepMsg').textContent='Kies eerst per traject een stroomaansluitpunt in de tekening (stap 5).'; st.step=5; refresh(); return; } }
+    if(cm2.count===0 || fed2.size<cm2.count){ $('c2StepMsg').textContent='Kies eerst per traject een stroomaansluitpunt in de tekening (stap 4).'; st.step=5; refresh(); return; } }
   st.step=k; st.pick=false; refresh();
 }
 
