@@ -486,6 +486,8 @@
 
   #c2Svg .c2-movable{cursor:move;}
   .c2-sheetsrow{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px;}
+  .c2-montagerij{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:13px; color:var(--ink); font-weight:600; margin-bottom:10px;}
+  .c2-montagesub{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
   .c2-sheets{display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
   .c2-sheettab{
     display:inline-flex; align-items:center; gap:7px;
@@ -802,6 +804,19 @@
         <div class="c2-sheetsrow">
           <div class="c2-sheets" id="c2Sheets"></div>
         </div>
+        <!-- De montagewijze hoort bij het tekenvlak dat open staat: elk raildesign kan
+             anders hangen. Stond in stap 6 en gold voor alles. -->
+        <div class="c2-montagerij">
+          <span>Montagewijze<span id="c2MountVlak"></span>:</span>
+          <select id="c2Mount" class="c2-select">
+            <option value="geen">&mdash; nog geen keuze &mdash;</option>
+            <option value="beugel">Plafond Montagebeugel</option>
+            <option value="sys">Systeemplafondbeugel</option>
+            <option value="pendel">Pendelset (plafondbus + staalkabel)</option>
+          </select>
+          <span class="c2-montagesub" id="c2MountSubRow" style="display:none;"></span>
+          <span class="hint" style="margin:0;">Montagepunten: <b id="c2MountCount">0</b></span>
+        </div>
         <div class="c2-toolbar">
           <button id="c2Undo" title="Ongedaan maken">↶ Ongedaan</button>
           <button id="c2Redo" title="Herstellen">↷ Herstel</button>
@@ -821,17 +836,6 @@
         <h4>Stuklijst &amp; opties</h4>
         <p class="hint"></p>
         <label class="c2-check"><input type="checkbox" id="c2Use4m"> Gebruik ook 4 meter rail (alleen bij grote bestellingen - logistiek)</label>
-        <div class="c2-adapterrow">
-          <span>Montagewijze:</span>
-          <select id="c2Mount" class="c2-select">
-            <option value="geen">&mdash; nog geen keuze &mdash;</option>
-            <option value="beugel">Plafond Montagebeugel</option>
-            <option value="sys">Systeemplafondbeugel</option>
-            <option value="pendel">Pendelset (plafondbus + staalkabel)</option>
-          </select>
-          <span class="hint" style="margin:0;">Montagepunten: <b id="c2MountCount">0</b> </span>
-        </div>
-        <div class="c2-adapterrow" id="c2MountSubRow" style="display:none;"></div>
         <p class="hint" style="margin:10px 0 6px;">Projectgegevens — deze komen op het voorblad van de PDF.</p>
         <div class="c2-adapterrow">
           <span>Projectnaam:</span>
@@ -1586,7 +1590,7 @@ let st = { step:1, dali:false, color:'wit', powercfg:'A', shape:null, gRows:2, g
   nodes:[], edges:[], nid:0, eid:0, feeds:[], angles:{},
   armaturen: ARMATUREN.reduce((o,a)=>{o[a.id]={aanduiding:'',qty:0,name:'',code:'',codeDali:'',groep:''};return o;},{}),
   overig: ADAPTERS_OVERIG.reduce((o,a)=>{o[a.id]={color:'wit',qty:0};return o;},{}),
-  use4m:false, pick:false, mount:'geen',
+  use4m:false, pick:false,
   /* de armaturenlijst in de PDF, net als in het armaturenboek optioneel */
   toonLijst:true,
   /* wie er op de introductiepagina staan (ids uit medewerkers.js), zoals in het armaturenboek */
@@ -1596,7 +1600,8 @@ let st = { step:1, dali:false, color:'wit', powercfg:'A', shape:null, gRows:2, g
   lichtplan:null,
   /* projectgegevens voor het voorblad */
   proj:'', projNr:'', installateur:'', datum:'',
-  sysOphang:false, sysOphangLen:'3', pendelKabelkleur:'zilver', pendelKabelLen:'3',
+  /* de montagewijze per tekenvlak (sheet-id -> nieuweMontage()); zie montageVan() */
+  montage:{s1:{wijze:'geen', sysOphang:false, sysOphangLen:'3', pendelKabelkleur:'zilver', pendelKabelLen:'3'}},
   sheets:[{id:'s1',name:'Tekenvlak 1'}], sheet:'s1', sid:1 };
 let hist=[], hIdx=-1;
 let lastBOM=null;
@@ -2000,16 +2005,36 @@ const MOUNTS = {
   sys:     {label:'Systeemplafondbeugel'},
   pendel:  {label:'Pendelset (plafondbus + staalkabel)'},
 };
+/* De montagewijze geldt per tekenvlak: elk raildesign kan anders hangen (het ene
+   tegen het plafond, het andere aan pendels). st.montage houdt per tekenvlak-id de
+   keuze en de subkeuzes bij. Bewust niet in st.sheets: die gaan mee in de
+   geschiedenis van "Ongedaan", en dan zou het terugdraaien van een versleept punt ook
+   de montagekeuze terugdraaien. Een weggehaald tekenvlak houdt zijn regel, zodat
+   "Ongedaan" hem terugbrengt; een nieuw tekenvlak begint op "nog geen keuze". */
+function nieuweMontage(){ return {wijze:'geen', sysOphang:false, sysOphangLen:'3', pendelKabelkleur:'zilver', pendelKabelLen:'3'}; }
+function montageVan(shId){
+  if(!st.montage) st.montage={};
+  if(!st.montage[shId]) st.montage[shId]=nieuweMontage();
+  return st.montage[shId];
+}
 /* Kabelkleur Zwart bestaat alleen i.c.m. een zwarte plafondbus (= railkleur); voor
    wit/grijs is zilver de enige leverbare kabelkleur. */
-function pendelKabelkleur(){ return st.color==='zwart' ? st.pendelKabelkleur : 'zilver'; }
+function pendelKabelkleur(mt){ return st.color==='zwart' ? mt.pendelKabelkleur : 'zilver'; }
 /* Zorgt dat de montage-subkeuzes altijd een geldige combinatie voor de huidige
    railkleur vormen \u2014 nodig omdat kleur/kabelkeuze onafhankelijk van elkaar wijzigen. */
 function normalizeMountState(){
-  if(st.color!=='zwart') st.pendelKabelkleur='zilver';
-  const validLen = st.pendelKabelkleur==='zwart' ? ['3','5'] : ['3','6'];
-  if(!validLen.includes(st.pendelKabelLen)) st.pendelKabelLen='3';
-  if(!['3','6'].includes(st.sysOphangLen)) st.sysOphangLen='3';
+  Object.keys(st.montage||{}).forEach(id=>{ const mt=st.montage[id];
+    if(st.color!=='zwart') mt.pendelKabelkleur='zilver';
+    const validLen = mt.pendelKabelkleur==='zwart' ? ['3','5'] : ['3','6'];
+    if(!validLen.includes(mt.pendelKabelLen)) mt.pendelKabelLen='3';
+    if(!['3','6'].includes(mt.sysOphangLen)) mt.sysOphangLen='3';
+  });
+}
+/* De montage van een tekenvlak in woorden, voor de PDF: leeg zolang er niets gekozen is. */
+function montageTekst(mt){
+  if(mt.wijze==='pendel') return 'Pendelset, plafondbus '+st.color+' en staalkabel '+pendelKabelkleur(mt)+' '+mt.pendelKabelLen+' m';
+  if(mt.wijze==='sys') return MOUNTS.sys.label+(mt.sysOphang ? ', met ophangset verstelbaar '+mt.sysOphangLen+' m' : '');
+  return MOUNTS[mt.wijze] && mt.wijze!=='geen' ? MOUNTS[mt.wijze].label : '';
 }
 function computeMounts(sheetId){
   const pts=[]; const seen={}; const key=p=>p.x+'_'+p.y+'_'+(sheetId||nodeSheet(p.id)||'');
@@ -2069,22 +2094,36 @@ function computeBOM(){
   if(railDetail.length) add(activeP().buigtool, activeL().buigtool, 'PRX 3-Fase Rail buiggereedschap',1,null);
   normalizeMountState();
   const mounts=computeMounts();
-  if(st.mount==='beugel' && mounts.count>0){
-    add(activeP().montagebeugel[st.color], activeL().montagebeugel[st.color], 'Plafond Montagebeugel '+CLRN(st.color), mounts.count, null);
-  }
-  if(st.mount==='sys' && mounts.count>0){
-    add(activeP().systeembeugel[st.color], activeL().systeembeugel[st.color], 'Systeemplafond beugel '+CLRN(st.color), mounts.count, null);
-    if(st.sysOphang){
-      const len=st.sysOphangLen;
-      add(activeP().ophangsetsysteempl[st.color][len], activeL().ophangsetsysteempl[st.color][len], 'ophangsetsysteempl verstelbaar '+len+'m '+CLRN(st.color), mounts.count, null);
+  /* Per tekenvlak zijn eigen montagewijze, met zijn eigen montagepunten. Dezelfde
+     onderdelen uit meer tekenvlakken tellen samen op. Pendelsets gaan per 10, dus die
+     worden eerst per uitvoering over alle tekenvlakken samengeteld en dan pas
+     afgerond: twee vlakken met 6 punten zijn 2 pakken, geen 2 x 1. */
+  const pendelPunten={};
+  st.sheets.forEach(sh=>{ const mt=montageVan(sh.id); if(mt.wijze!=='pendel') return;
+    const n=computeMounts(sh.id).count; if(!n) return;
+    const kk=pendelKabelkleur(mt), len=mt.pendelKabelLen, code=activeP().pendel[st.color][kk][len];
+    pendelPunten[code]=pendelPunten[code]||{codeL:activeL().pendel[st.color][kk][len], kk, len, punten:0};
+    pendelPunten[code].punten+=n; });
+  st.sheets.forEach(sh=>{
+    const mt=montageVan(sh.id), n=computeMounts(sh.id).count;
+    if(!n) return;
+    if(mt.wijze==='beugel'){
+      add(activeP().montagebeugel[st.color], activeL().montagebeugel[st.color], 'Plafond Montagebeugel '+CLRN(st.color), n, null);
     }
-  }
-  if(st.mount==='pendel' && mounts.count>0){
-    const kk=pendelKabelkleur(), len=st.pendelKabelLen, setQty=Math.ceil(mounts.count/10);
-    add(activeP().pendel[st.color][kk][len], activeL().pendel[st.color][kk][len],
-      'Pendelset 10-pack (bus '+CLRN(st.color)+' / kabel '+CLRN(kk)+' '+len+'m)'+' (voor '+mounts.count+' punten)', setQty, null);
-    add(activeP().beugelsnel[st.color], activeL().beugelsnel[st.color], 'PRX 3-Fase Rail beugel en snelspanner '+CLRN(st.color)+' (excl. staalkabel)', mounts.count, null);
-  }
+    if(mt.wijze==='sys'){
+      add(activeP().systeembeugel[st.color], activeL().systeembeugel[st.color], 'Systeemplafond beugel '+CLRN(st.color), n, null);
+      if(mt.sysOphang){
+        const len=mt.sysOphangLen;
+        add(activeP().ophangsetsysteempl[st.color][len], activeL().ophangsetsysteempl[st.color][len], 'ophangsetsysteempl verstelbaar '+len+'m '+CLRN(st.color), n, null);
+      }
+    }
+    if(mt.wijze==='pendel'){
+      const code=activeP().pendel[st.color][pendelKabelkleur(mt)][mt.pendelKabelLen], pp=pendelPunten[code];
+      if(!items[code]) add(code, pp.codeL,
+        'Pendelset 10-pack (bus '+CLRN(st.color)+' / kabel '+CLRN(pp.kk)+' '+pp.len+'m)'+' (voor '+pp.punten+' punten)', Math.ceil(pp.punten/10), null);
+      add(activeP().beugelsnel[st.color], activeL().beugelsnel[st.color], 'PRX 3-Fase Rail beugel en snelspanner '+CLRN(st.color)+' (excl. staalkabel)', n, null);
+    }
+  });
   return {P,V,items,railDetail,errs,mounts};
 }
 
@@ -2486,8 +2525,11 @@ function warnings(B){
   if(st.dali && angleCount>0) w.push({t:'warn', m:'Een verstelbare hoek bestaat niet in DALI-uitvoering \u2014 alleen voor de gewone 3-fase rail. '
     + 'In de stuklijst en bij de tekening '+(angleCount===1?'staat hij':'staan ze')+' daarom zonder artikelnummer en verpakkingscode. '
     + 'Kies een vaste bocht (90\u00b0) of overleg met de leverancier.'});
-  const mB=(B&&B.mounts)||computeMounts();
-  if(st.mount==='geen' && mB.count>0) w.push({t:'tip', m:'Kies in stap 6 een montagewijze \u2014 deze tekening heeft '+mB.count+' montagepunten (om de meter, incl. uiteinden; hoeken en kruisingen gedeeld).'});
+  /* per tekenvlak met rails: is er een montagewijze gekozen? */
+  st.sheets.forEach(sh=>{ const n=computeMounts(sh.id).count;
+    if(montageVan(sh.id).wijze!=='geen' || !n) return;
+    w.push({t:'tip', m:'Kies in stap 5 een montagewijze'+(st.sheets.length>1?' voor \u201c'+sh.name.replace(/</g,'&lt;')+'\u201d':'')
+      +' \u2014 '+(st.sheets.length>1?'dit tekenvlak':'deze tekening')+' heeft '+n+' montagepunten (om de meter, incl. uiteinden; hoeken en kruisingen gedeeld).'}); });
   return w;
 }
 
@@ -2527,6 +2569,7 @@ function renderSheetsBar(){
   if(add) add.addEventListener('click', ()=>{
     const id='s'+(++st.sid);
     st.sheets.push({id, name:'Tekenvlak '+(st.sheets.length+1)});
+    st.montage[id]=nieuweMontage();   /* eigen keuze; ook als dit id eerder gebruikt was */
     st.sheet=id; view={zoom:1,px:0,py:0}; snap(); goStep(4);
   });
 }
@@ -2561,9 +2604,11 @@ function refresh(){
   $('c2Undo').disabled = hIdx<=0;
   $('c2Redo').disabled = hIdx>=hist.length-1;
   $('c2PickBtn').classList.toggle('active', st.pick);
-  const mts=(lastBOM&&lastBOM.mounts)||computeMounts();
-  if($('c2MountCount')) $('c2MountCount').textContent = mts.count;
-  if($('c2Mount') && $('c2Mount').value!==st.mount) $('c2Mount').value=st.mount;
+  /* de montagewijze van het tekenvlak dat nu open staat */
+  const mtNu=montageVan(st.sheet), vlakNu=st.sheets.find(s=>s.id===st.sheet);
+  $('c2MountCount').textContent = computeMounts(st.sheet).count;
+  if($('c2Mount').value!==mtNu.wijze) $('c2Mount').value=mtNu.wijze;
+  $('c2MountVlak').textContent = st.sheets.length>1 && vlakNu ? ' \u2014 '+vlakNu.name : '';
   renderMountOptions();
   document.querySelectorAll('#c2GridRow .stepper-val')[0] && renderGridRow();
   /* canvas */
@@ -2841,6 +2886,9 @@ async function buildPdf(){
     rect(Mg,y,boxW,boxH,C.wit,C.line,1);
     drawPlan(Mg,y,boxW,boxH,sh.id);
     y+=boxH+8;
+    /* de montagewijze van dit tekenvlak: kan per tekenvlak verschillen */
+    const mtTxt=montageTekst(montageVan(sh.id)), mtN=computeMounts(sh.id).count;
+    if(mtTxt && mtN) para('Montage: '+mtTxt+' \u2014 '+mtN+' montagepunten.',8.5,C.tekst);
     if(si===0) para('Maten zijn raillengtes; koppelstukken komen daar in werkelijkheid bovenop.',8,C.grey);
     h2('Onderdelen in de tekening'+(D.sheets.length>1?' \u2014 '+sh.name:''));
     /* Per onderdeel twee codes: ons artikelnummer - hetzelfde als in Bestelgegevens,
@@ -3311,31 +3359,31 @@ function verplaatsArmRij(a, richting){
    opnieuw op bij elke refresh() — alleen selects/een checkbox, dus geen focusrisico. */
 function renderMountOptions(){
   normalizeMountState();
-  const row=$('c2MountSubRow');
-  if(st.mount==='pendel'){
+  const row=$('c2MountSubRow'), mt=montageVan(st.sheet);
+  if(mt.wijze==='pendel'){
     row.style.display='flex';
     row.innerHTML='<span>Kabelkleur:</span><select id="c2PendelKk" class="c2-select"></select>'
       +'<span>Kabellengte:</span><select id="c2PendelLen" class="c2-select"></select>';
-    const kk=pendelKabelkleur();
+    const kk=pendelKabelkleur(mt);
     const kkSel=$('c2PendelKk');
     const kkOpts = st.color==='zwart' ? [{k:'zilver',l:'Zilver'},{k:'zwart',l:'Zwart'}] : [{k:'zilver',l:'Zilver'}];
     kkOpts.forEach(o=>{ const el=document.createElement('option'); el.value=o.k; el.textContent=o.l; kkSel.appendChild(el); });
     kkSel.value=kk;
-    kkSel.addEventListener('change', ()=>{ st.pendelKabelkleur=kkSel.value; refresh(); });
+    kkSel.addEventListener('change', ()=>{ mt.pendelKabelkleur=kkSel.value; refresh(); });
     const lenSel=$('c2PendelLen');
     (kk==='zwart' ? ['3','5'] : ['3','6']).forEach(v=>{ const el=document.createElement('option'); el.value=v; el.textContent=v+' m'; lenSel.appendChild(el); });
-    lenSel.value=st.pendelKabelLen;
-    lenSel.addEventListener('change', ()=>{ st.pendelKabelLen=lenSel.value; refresh(); });
-  } else if(st.mount==='sys'){
+    lenSel.value=mt.pendelKabelLen;
+    lenSel.addEventListener('change', ()=>{ mt.pendelKabelLen=lenSel.value; refresh(); });
+  } else if(mt.wijze==='sys'){
     row.style.display='flex';
     row.innerHTML='<label class="c2-check" style="margin:0;"><input type="checkbox" id="c2SysOphangChk"> ophangsetsysteempl verstelbaar toevoegen</label>'
-      +'<select id="c2SysOphangLenSel" class="c2-select"'+(st.sysOphang?'':' style="display:none;"')+'></select>';
-    const chk=$('c2SysOphangChk'); chk.checked=st.sysOphang;
-    chk.addEventListener('change', ()=>{ st.sysOphang=chk.checked; refresh(); });
+      +'<select id="c2SysOphangLenSel" class="c2-select"'+(mt.sysOphang?'':' style="display:none;"')+'></select>';
+    const chk=$('c2SysOphangChk'); chk.checked=mt.sysOphang;
+    chk.addEventListener('change', ()=>{ mt.sysOphang=chk.checked; refresh(); });
     const lenSel=$('c2SysOphangLenSel');
     ['3','6'].forEach(v=>{ const el=document.createElement('option'); el.value=v; el.textContent=v+' m'; lenSel.appendChild(el); });
-    lenSel.value=st.sysOphangLen;
-    lenSel.addEventListener('change', ()=>{ st.sysOphangLen=lenSel.value; refresh(); });
+    lenSel.value=mt.sysOphangLen;
+    lenSel.addEventListener('change', ()=>{ mt.sysOphangLen=lenSel.value; refresh(); });
   } else {
     row.style.display='none'; row.innerHTML='';
   }
@@ -3368,10 +3416,17 @@ function init(){
         if(k==='armaturen' || k==='overig'){ st[k] = Object.assign({}, st[k], s[k]); }
         else { st[k]=s[k]; }
       });
+      /* Een project van vóór de montagewijze per tekenvlak had één keuze voor alles
+         (st.mount en de subkeuzes ernaast): die geldt dan voor elk tekenvlak. */
+      if(!s.montage && s.mount){
+        st.montage={};
+        st.sheets.forEach(sh=>{ st.montage[sh.id]={wijze:s.mount, sysOphang:!!s.sysOphang, sysOphangLen:s.sysOphangLen||'3',
+          pendelKabelkleur:s.pendelKabelkleur||'zilver', pendelKabelLen:s.pendelKabelLen||'3'}; });
+      }
       hist=[]; hIdx=-1; view={zoom:1,px:0,py:0};
       $('c2Proj').value=st.proj; $('c2ProjNr').value=st.projNr;
       $('c2Inst').value=st.installateur; $('c2Datum').value=st.datum;
-      $('c2Mount').value=st.mount; $('c2Use4m').checked=st.use4m;
+      $('c2Use4m').checked=st.use4m;
       $('c2ToonLijst').checked = st.toonLijst !== false;
       /* De lijsten opnieuw opbouwen. Ze houden de regels vast van vóór het herstellen,
          dus "Verder waar je gebleven was" liet de armaturen leeg zien - en wat je daarna
@@ -3463,7 +3518,7 @@ function init(){
   /* stap 6 opties */
   $('c2Use4m').addEventListener('change', e=>{ st.use4m=e.target.checked; refresh(); });
   $('c2ToonLijst').addEventListener('change', e=>{ st.toonLijst=e.target.checked; refresh(); });
-  $('c2Mount').addEventListener('change', e=>{ st.mount=e.target.value; refresh(); });
+  $('c2Mount').addEventListener('change', e=>{ montageVan(st.sheet).wijze=e.target.value; refresh(); });
   $('c2Proj').addEventListener('input', e=>{ st.proj=e.target.value; });
   $('c2ProjNr').addEventListener('input', e=>{ st.projNr=e.target.value; });
   $('c2Inst').addEventListener('input', e=>{ st.installateur=e.target.value; });
@@ -3491,8 +3546,8 @@ function init(){
        één misklik genoeg om een tekening en een hele armaturenlijst kwijt te zijn. */
     if(!confirm('Alles weggooien en opnieuw beginnen?\n\nDe tekening, de armaturen en de '
               + 'projectgegevens verdwijnen. Dit kan niet ongedaan gemaakt worden.')) return;
-    st.shape=null; st.nodes=[]; st.edges=[]; st.feeds=[]; st.angles={}; st.mount='geen'; st.pick=false; st.step=1;
-    st.sysOphang=false; st.sysOphangLen='3'; st.pendelKabelkleur='zilver'; st.pendelKabelLen='3';
+    st.shape=null; st.nodes=[]; st.edges=[]; st.feeds=[]; st.angles={}; st.pick=false; st.step=1;
+    st.montage={s1:nieuweMontage()};
     st.toonLijst=true; $('c2ToonLijst').checked=true;
     Lichtplan.wis();   /* het lichtplan hoort bij dit project */
     /* geüploade Special-PDF's horen niet bij een specifieke tekening, dus die vervallen mee. */
@@ -3541,7 +3596,7 @@ function init(){
     const uiteinde = sheetNodes('s1').find(n=>nodeType(n.id)==='end');
     if(uiteinde) st.feeds=[{kind:'node', node:uiteinde.id, side:'R'}];
 
-    st.mount='beugel';
+    st.montage={s1:Object.assign(nieuweMontage(), {wijze:'beugel'})};
     st.proj='Renovatie kantoorpand Weena 120 te Rotterdam';
     st.projNr='P.24187';
     st.installateur='Van der Velden Elektrotechniek B.V.';
@@ -3566,7 +3621,6 @@ function init(){
     /* invoervelden gelijktrekken met de state */
     $('c2Proj').value=st.proj; $('c2ProjNr').value=st.projNr;
     $('c2Inst').value=st.installateur; $('c2Datum').value=st.datum;
-    $('c2Mount').value=st.mount;
     $('c2ShapeGrid').querySelectorAll('.shape-card').forEach(x=>x.classList.toggle('sel', x.dataset.shape==='t-vorm'));
     buildArmList();
     buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
