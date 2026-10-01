@@ -488,6 +488,17 @@
   .c2-sheetsrow{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px;}
   .c2-montagerij{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:13px; color:var(--ink); font-weight:600; margin-bottom:10px;}
   .c2-montagesub{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .c2-ruimterij{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; color:var(--ink); font-weight:600; margin-bottom:10px;}
+  .c2-ruimterij input.c2-textinp{flex:0 1 300px; min-width:200px; padding:5px 8px; font-size:12px;}
+  .c2-ruimtes{display:flex; gap:6px; flex-wrap:wrap;}
+  .c2-ruimte{display:inline-flex; align-items:center; gap:4px; padding:3px 4px 3px 10px; border-radius:20px;
+    background:var(--blue-light); color:var(--blue-dark); font-size:12px; font-weight:700;}
+  .c2-ruimte button{border:0; background:none; color:inherit; font:inherit; font-size:14px; line-height:1; cursor:pointer; padding:0 4px;}
+  .c2-ruimte button:hover{color:#B0362B;}
+  .c2-ruimteknop{border:1.5px solid var(--blue); border-radius:8px; padding:5px 10px; background:#fff; color:var(--blue-dark);
+    font-family:'Nunito Sans',sans-serif; font-size:12px; font-weight:700; cursor:pointer;}
+  .c2-ruimteknop:hover{background:var(--blue-light);}
+  .c2-ruimtekeer{font-size:12.5px; font-weight:800; color:var(--blue-dark);}
   .c2-sheets{display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
   .c2-sheettab{
     display:inline-flex; align-items:center; gap:7px;
@@ -816,6 +827,16 @@
           </select>
           <span class="c2-montagesub" id="c2MountSubRow" style="display:none;"></span>
           <span class="hint" style="margin:0;">Montagepunten: <b id="c2MountCount">0</b></span>
+        </div>
+        <!-- Ruimtes: hetzelfde ontwerp in meer ruimtes (kantoor 1, 2, 3 ...) is één
+             tekenvlak; de stuklijst telt het zo vaak, de PDF toont het één keer. -->
+        <div class="c2-ruimterij">
+          <span>Ruimtes<span id="c2RuimteVlak"></span>:</span>
+          <span class="c2-ruimtes" id="c2Ruimtes"></span>
+          <input type="text" id="c2RuimteInp" class="c2-textinp" autocomplete="off"
+                 placeholder="ruimte toevoegen, bijv. Kantoor 1 of Kantoor 1-12">
+          <button type="button" id="c2RuimteAdd" class="c2-ruimteknop">Toevoegen</button>
+          <span class="c2-ruimtekeer" id="c2RuimteKeer"></span>
         </div>
         <div class="c2-toolbar">
           <button id="c2Undo" title="Ongedaan maken">↶ Ongedaan</button>
@@ -1602,6 +1623,8 @@ let st = { step:1, dali:false, color:'wit', powercfg:'A', shape:null, gRows:2, g
   proj:'', projNr:'', installateur:'', datum:'',
   /* de montagewijze per tekenvlak (sheet-id -> nieuweMontage()); zie montageVan() */
   montage:{s1:{wijze:'geen', sysOphang:false, sysOphangLen:'3', pendelKabelkleur:'zilver', pendelKabelLen:'3'}},
+  /* de ruimtes per tekenvlak (sheet-id -> namen); zie ruimtesVan() */
+  ruimtes:{},
   sheets:[{id:'s1',name:'Tekenvlak 1'}], sheet:'s1', sid:1 };
 let hist=[], hIdx=-1;
 let lastBOM=null;
@@ -2030,6 +2053,33 @@ function normalizeMountState(){
     if(!['3','6'].includes(mt.sysOphangLen)) mt.sysOphangLen='3';
   });
 }
+/* Eén ontwerp, meer ruimtes: een kantoorvloer met twintig gelijke kantoren is één
+   tekenvlak met twintig ruimtes, niet twintig tekenvlakken (en twintig pagina's). De
+   PDF toont het ontwerp één keer met de ruimtes erbij; de stuklijst telt het zo vaak
+   als er ruimtes zijn. Geen ruimte is één keer. Net als st.montage buiten de
+   geschiedenis van "Ongedaan", en een weggehaald tekenvlak houdt zijn ruimtes. */
+function ruimtesVan(shId){ return (st.ruimtes && st.ruimtes[shId]) || []; }
+function ruimteFactor(shId){ return Math.max(1, ruimtesVan(shId).length); }
+/* Wat er in het invoerveld getypt is, als namen: "Kantoor 1" is één ruimte, "Kantoor
+   1-12" of "Kantoor 1 t/m 12" twaalf (Kantoor 1 ... Kantoor 12, met voorloopnullen als
+   je "01-12" typt), en komma's of puntkomma's scheiden meer namen. Een reeks van meer
+   dan 500 is vast een tikfout en blijft één naam. */
+function ruimteNamen(invoer){
+  const uit=[];
+  String(invoer||'').split(/[,;]/).map(s=>s.trim()).filter(Boolean).forEach(deel=>{
+    const m = deel.match(/^(.*?)(\d+)\s*(?:-|t\/m|tot en met)\s*(\d+)$/i);
+    if(m){
+      const van=parseInt(m[2],10), tot=parseInt(m[3],10), breed = m[2].length>1 && m[2][0]==='0' ? m[2].length : 0;
+      if(tot>van && tot-van<500){
+        for(let i=van; i<=tot; i++) uit.push(m[1] + (breed ? String(i).padStart(breed,'0') : String(i)));
+        return;
+      }
+    }
+    uit.push(deel);
+  });
+  return uit;
+}
+
 /* De montage van een tekenvlak in woorden, voor de PDF: leeg zolang er niets gekozen is. */
 function montageTekst(mt){
   if(mt.wijze==='pendel') return 'Pendelset, plafondbus '+st.color+' en staalkabel '+pendelKabelkleur(mt)+' '+mt.pendelKabelLen+' m';
@@ -2062,14 +2112,17 @@ function computeBOM(){
     if(!items[codeP])items[codeP]={name,qty:0,prov:[],codeL};
     items[codeP].qty+=qty; if(prov)items[codeP].prov.push(prov); }
   const railDetail=[]; const errs=[];
+  /* Alles wat in een tekenvlak getekend is, telt zo vaak als dat tekenvlak ruimtes
+     heeft (ruimteFactor()); het buiggereedschap, de armaturen en de adapters niet. */
   st.nodes.forEach(n=>{ const v=V[n.id];
-    if(v&&v.art) add(v.art, v.artL, v.label+' '+CLRN(st.color), 1, 'n:'+n.id); });
-  st.feeds.filter(f=>f.kind==='edge').forEach(f=> add(activeP().midden[st.color], activeL().midden[st.color], 'Middenvoeding '+CLRN(st.color),1,'e:'+f.edge));
+    if(v&&v.art) add(v.art, v.artL, v.label+' '+CLRN(st.color), ruimteFactor(n.s), 'n:'+n.id); });
+  st.feeds.filter(f=>f.kind==='edge').forEach(f=> add(activeP().midden[st.color], activeL().midden[st.color], 'Middenvoeding '+CLRN(st.color),
+    ruimteFactor(nodeSheet(edge(f.edge).a)),'e:'+f.edge));
   st.edges.forEach(e=>{
-    const r=railFor(e);
-    r.pieces.forEach(p=> add(activeP().rail[st.color][p], activeL().rail[st.color][p], 'Rail '+p+'m '+CLRN(st.color), 1, 'e:'+e.id));
-    if(r.seams>0) add(activeP().elkoppel[st.color], activeL().elkoppel[st.color], 'Elektrisch Koppelstuk '+CLRN(st.color),r.seams,'e:'+e.id);
-    railDetail.push({e, r});
+    const r=railFor(e), keer=ruimteFactor(nodeSheet(e.a));
+    r.pieces.forEach(p=> add(activeP().rail[st.color][p], activeL().rail[st.color][p], 'Rail '+p+'m '+CLRN(st.color), keer, 'e:'+e.id));
+    if(r.seams>0) add(activeP().elkoppel[st.color], activeL().elkoppel[st.color], 'Elektrisch Koppelstuk '+CLRN(st.color),r.seams*keer,'e:'+e.id);
+    railDetail.push({e, r, keer});
   });
   visibleArmaturen().forEach(a=>{ const s=st.armaturen[a.id]; if(!s||s.qty<=0) return;
     const rawCode = st.dali ? s.codeDali : s.code;
@@ -2100,12 +2153,12 @@ function computeBOM(){
      afgerond: twee vlakken met 6 punten zijn 2 pakken, geen 2 x 1. */
   const pendelPunten={};
   st.sheets.forEach(sh=>{ const mt=montageVan(sh.id); if(mt.wijze!=='pendel') return;
-    const n=computeMounts(sh.id).count; if(!n) return;
+    const n=computeMounts(sh.id).count*ruimteFactor(sh.id); if(!n) return;
     const kk=pendelKabelkleur(mt), len=mt.pendelKabelLen, code=activeP().pendel[st.color][kk][len];
     pendelPunten[code]=pendelPunten[code]||{codeL:activeL().pendel[st.color][kk][len], kk, len, punten:0};
     pendelPunten[code].punten+=n; });
   st.sheets.forEach(sh=>{
-    const mt=montageVan(sh.id), n=computeMounts(sh.id).count;
+    const mt=montageVan(sh.id), n=computeMounts(sh.id).count*ruimteFactor(sh.id);
     if(!n) return;
     if(mt.wijze==='beugel'){
       add(activeP().montagebeugel[st.color], activeL().montagebeugel[st.color], 'Plafond Montagebeugel '+CLRN(st.color), n, null);
@@ -2570,6 +2623,7 @@ function renderSheetsBar(){
     const id='s'+(++st.sid);
     st.sheets.push({id, name:'Tekenvlak '+(st.sheets.length+1)});
     st.montage[id]=nieuweMontage();   /* eigen keuze; ook als dit id eerder gebruikt was */
+    st.ruimtes[id]=[];
     st.sheet=id; view={zoom:1,px:0,py:0}; snap(); goStep(4);
   });
 }
@@ -2610,17 +2664,19 @@ function refresh(){
   if($('c2Mount').value!==mtNu.wijze) $('c2Mount').value=mtNu.wijze;
   $('c2MountVlak').textContent = st.sheets.length>1 && vlakNu ? ' \u2014 '+vlakNu.name : '';
   renderMountOptions();
+  renderRuimtes(vlakNu);
   document.querySelectorAll('#c2GridRow .stepper-val')[0] && renderGridRow();
   /* canvas */
   if(st.step===5) renderCanvas(B);
   /* summary */
-  const tot=st.edges.reduce((s,e)=>s+eLen(e),0);
+  /* totalen over alle ruimtes: een ontwerp in twaalf kantoren telt twaalf keer */
+  const tot=st.edges.reduce((s,e)=>s+eLen(e)*ruimteFactor(nodeSheet(e.a)),0);
   const cmT=compMap();
   const shTxt = st.sheets.length>1 ? ' \u00b7 '+st.sheets.length+' tekenvlakken' : '';
   $('c2Title').textContent = cmT.count>1 ? 'Plattegrond \u00b7 '+cmT.count+' trajecten'+shTxt+' \u00b7 '+st.color
     : (st.shape ? SHAPES[st.shape].label+' in '+st.color+shTxt : 'Nog geen vorm gekozen');
   $('c2TotLen').textContent = mTxt(tot/100)+' m';
-  $('c2TotSeg').textContent = st.edges.length;
+  $('c2TotSeg').textContent = st.edges.reduce((s,e)=>s+ruimteFactor(nodeSheet(e.a)),0);
   $('c2TotArm').textContent = visibleArmaturen().reduce((s,a)=>s+(st.armaturen[a.id].qty||0),0);
   const codes=Object.keys(B.items);
   $('c2ArtList').innerHTML = codes.length ? codes.map(c=>{
@@ -2639,7 +2695,8 @@ function refresh(){
   /* rail detail (stap 6) */
   $('c2RailDetail').innerHTML = B.railDetail.length ? B.railDetail.map(d=>{
     return '<div class="c2-railrow">Segment <b>'+mTxt(d.r.drawnM)+' m</b> \u2192 bestel <b>'+piecesTxt(d.r.pieces)+'</b>'
-      +(d.r.seams>0 ? ' \u00B7 '+d.r.seams+'\u00D7 elektrisch koppelstuk' : '')+'</div>';
+      +(d.r.seams>0 ? ' \u00B7 '+d.r.seams+'\u00D7 elektrisch koppelstuk' : '')
+      +(d.keer>1 ? ' \u00B7 <b>'+d.keer+'\u00D7</b> (ruimtes)' : '')+'</div>';
   }).join('') : '<div class="c2-railrow">Nog geen segmenten.</div>';
 }
 
@@ -2773,7 +2830,8 @@ async function buildPdf(){
   para('*'
   
     +(D.trCount>1?'   ·   '+D.trCount+' trajecten':'')
-    +(D.sheets.length>1?'   ·   '+D.sheets.length+' tekenvlakken':''), 8, C.grey);
+    +(D.sheets.length>1?'   ·   '+D.sheets.length+' tekenvlakken':'')
+    +(D.sheets.some(sh=>ruimtesVan(sh.id).length>1)?'   ·   aantallen voor alle ruimtes samen':''), 8, C.grey);
   flush();
 
   /* --- Installatieoverzicht: eigen kopbalk, zelfde sjabloon als Bestelgegevens
@@ -2881,6 +2939,15 @@ async function buildPdf(){
   D.sheets.forEach((sh,si)=>{
     if(si>0){ flush(); beginPage(false); }
     if(D.sheets.length>1){ need(20); text(Mg,y,12.5,sh.name.toUpperCase(),{bold:true,cond:true,color:C.hoofd}); y+=18; }
+    /* Eén ontwerp voor meer ruimtes: het staat hier één keer, met de ruimtes erbij; de
+       aantallen in Bestelgegevens zijn al voor alle ruimtes samen. */
+    const ruimtes=ruimtesVan(sh.id);
+    if(ruimtes.length>1){
+      need(14); text(Mg,y,10,'Dit ontwerp geldt voor '+ruimtes.length+' ruimtes',{bold:true,color:C.hoofd}); y+=14;
+      para(ruimtes.join(', ')+'.',8.5,C.tekst);
+    } else if(ruimtes.length===1){
+      need(14); text(Mg,y,10,'Ruimte: '+ruimtes[0],{bold:true,color:C.hoofd}); y+=17;
+    }
     const boxH=320;
     need(boxH+16);
     rect(Mg,y,boxW,boxH,C.wit,C.line,1);
@@ -2888,9 +2955,9 @@ async function buildPdf(){
     y+=boxH+8;
     /* de montagewijze van dit tekenvlak: kan per tekenvlak verschillen */
     const mtTxt=montageTekst(montageVan(sh.id)), mtN=computeMounts(sh.id).count;
-    if(mtTxt && mtN) para('Montage: '+mtTxt+' \u2014 '+mtN+' montagepunten.',8.5,C.tekst);
+    if(mtTxt && mtN) para('Montage: '+mtTxt+' \u2014 '+mtN+' montagepunten'+(ruimtes.length>1?' per ruimte':'')+'.',8.5,C.tekst);
     if(si===0) para('Maten zijn raillengtes; koppelstukken komen daar in werkelijkheid bovenop.',8,C.grey);
-    h2('Onderdelen in de tekening'+(D.sheets.length>1?' \u2014 '+sh.name:''));
+    h2('Onderdelen in de tekening'+(D.sheets.length>1?' \u2014 '+sh.name:'')+(ruimtes.length>1?' (per ruimte)':''));
     /* Per onderdeel twee codes: ons artikelnummer - hetzelfde als in Bestelgegevens,
        waarop besteld wordt - en de verpakkingscode (de KKT-reeks, in de bron
        "LeverancierCode"): de code die de installateur op de doos van het onderdeel
@@ -3355,6 +3422,46 @@ function verplaatsArmRij(a, richting){
   buildArmList(); refresh();
 }
 
+/* De ruimtes van het tekenvlak dat open staat, als labels met een kruisje. Het
+   invoerveld zelf wordt niet opnieuw gebouwd, dus typen gaat gewoon door. Vanaf 13
+   ruimtes staan alleen de eerste tien er, met "+ N meer": veertig labels duwen de
+   tekening anders een halve pagina naar beneden. */
+let ruimtesUitgeklapt = false;
+function renderRuimtes(vlak){
+  const namen = ruimtesVan(st.sheet), doos = $('c2Ruimtes');
+  $('c2RuimteVlak').textContent = st.sheets.length>1 && vlak ? ' \u2014 '+vlak.name : '';
+  doos.textContent = '';
+  const inklappen = namen.length>12;
+  namen.forEach((naam, i)=>{
+    if(inklappen && !ruimtesUitgeklapt && i>=10) return;
+    const chip = document.createElement('span'); chip.className = 'c2-ruimte'; chip.textContent = naam;
+    const weg = document.createElement('button'); weg.type = 'button'; weg.textContent = '\u00d7';
+    weg.title = naam+' weghalen'; weg.setAttribute('aria-label', naam+' weghalen');
+    weg.addEventListener('click', ()=>{ st.ruimtes[st.sheet] = ruimtesVan(st.sheet).filter((_, j)=>j!==i); refresh(); });
+    chip.appendChild(weg); doos.appendChild(chip);
+  });
+  if(inklappen){
+    const meer = document.createElement('button'); meer.type = 'button'; meer.className = 'c2-ruimteknop';
+    meer.textContent = ruimtesUitgeklapt ? 'Minder tonen' : '+ '+(namen.length-10)+' meer';
+    meer.addEventListener('click', ()=>{ ruimtesUitgeklapt = !ruimtesUitgeklapt; renderRuimtes(vlak); });
+    doos.appendChild(meer);
+  }
+  if(namen.length>1){
+    const alle = document.createElement('button'); alle.type = 'button'; alle.className = 'c2-ruimteknop';
+    alle.textContent = 'Alle weghalen';
+    alle.addEventListener('click', ()=>{ st.ruimtes[st.sheet] = []; refresh(); });
+    doos.appendChild(alle);
+  }
+  $('c2RuimteKeer').textContent = namen.length>1 ? 'dit ontwerp '+namen.length+'\u00d7' : '';
+}
+function voegRuimtesToe(){
+  const inp = $('c2RuimteInp'), nieuw = ruimteNamen(inp.value);
+  if(!nieuw.length) return;
+  st.ruimtes = st.ruimtes || {};
+  st.ruimtes[st.sheet] = ruimtesVan(st.sheet).concat(nieuw);
+  inp.value = ''; refresh(); inp.focus();
+}
+
 /* bouwt de montage-subkeuzes (kabelkleur/-lengte bij pendel, ophangsetsysteempl bij systeemplafond)
    opnieuw op bij elke refresh() — alleen selects/een checkbox, dus geen focusrisico. */
 function renderMountOptions(){
@@ -3519,6 +3626,8 @@ function init(){
   $('c2Use4m').addEventListener('change', e=>{ st.use4m=e.target.checked; refresh(); });
   $('c2ToonLijst').addEventListener('change', e=>{ st.toonLijst=e.target.checked; refresh(); });
   $('c2Mount').addEventListener('change', e=>{ montageVan(st.sheet).wijze=e.target.value; refresh(); });
+  $('c2RuimteAdd').addEventListener('click', voegRuimtesToe);
+  $('c2RuimteInp').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); voegRuimtesToe(); } });
   $('c2Proj').addEventListener('input', e=>{ st.proj=e.target.value; });
   $('c2ProjNr').addEventListener('input', e=>{ st.projNr=e.target.value; });
   $('c2Inst').addEventListener('input', e=>{ st.installateur=e.target.value; });
@@ -3547,7 +3656,7 @@ function init(){
     if(!confirm('Alles weggooien en opnieuw beginnen?\n\nDe tekening, de armaturen en de '
               + 'projectgegevens verdwijnen. Dit kan niet ongedaan gemaakt worden.')) return;
     st.shape=null; st.nodes=[]; st.edges=[]; st.feeds=[]; st.angles={}; st.pick=false; st.step=1;
-    st.montage={s1:nieuweMontage()};
+    st.montage={s1:nieuweMontage()}; st.ruimtes={};
     st.toonLijst=true; $('c2ToonLijst').checked=true;
     Lichtplan.wis();   /* het lichtplan hoort bij dit project */
     /* geüploade Special-PDF's horen niet bij een specifieke tekening, dus die vervallen mee. */
@@ -3596,7 +3705,7 @@ function init(){
     const uiteinde = sheetNodes('s1').find(n=>nodeType(n.id)==='end');
     if(uiteinde) st.feeds=[{kind:'node', node:uiteinde.id, side:'R'}];
 
-    st.montage={s1:Object.assign(nieuweMontage(), {wijze:'beugel'})};
+    st.montage={s1:Object.assign(nieuweMontage(), {wijze:'beugel'})}; st.ruimtes={};
     st.proj='Renovatie kantoorpand Weena 120 te Rotterdam';
     st.projNr='P.24187';
     st.installateur='Van der Velden Elektrotechniek B.V.';

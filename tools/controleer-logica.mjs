@@ -1425,6 +1425,22 @@ function is(wat, gekregen, verwacht){
   is('alleen een lege projectnaam is nog een open veld', b.briefingOpenVelden(), ['projectnaam']);
 }
 
+/* ======================= railtool: ruimtes per tekenvlak ======================= */
+{
+  /* Eén ontwerp in meer ruimtes (twintig gelijke kantoren) is één tekenvlak met twintig
+     ruimtes. Het invoerveld neemt een naam, een reeks of een lijst. */
+  console.log('ruimtes');
+  const r = await laadUit('index.html', ['ruimteNamen']);
+  is('één naam is één ruimte', r.ruimteNamen('Kantoor 1'), ['Kantoor 1']);
+  is('een reeks wordt uitgeschreven', r.ruimteNamen('Kantoor 1-4'), ['Kantoor 1', 'Kantoor 2', 'Kantoor 3', 'Kantoor 4']);
+  is('ook met t/m, en voorloopnullen blijven', r.ruimteNamen('Spreekkamer 08 t/m 11'),
+    ['Spreekkamer 08', 'Spreekkamer 09', 'Spreekkamer 10', 'Spreekkamer 11']);
+  is('komma\'s scheiden namen', r.ruimteNamen('Kantine, Hal; Kantoor 2-3'), ['Kantine', 'Hal', 'Kantoor 2', 'Kantoor 3']);
+  is('een aflopende of te lange reeks blijft één naam', [r.ruimteNamen('Kamer 5-2'), r.ruimteNamen('Gebouw 1-9999').length],
+    [['Kamer 5-2'], 1]);
+  is('leeg is niets', r.ruimteNamen('  , '), []);
+}
+
 /* ---------------------------------------------------------------- verslag ---- */
 console.log('\n' + gedaan + ' controles, ' + (mis ? mis + ' MIS' : 'alles goed') + '.');
 process.exit(mis ? 1 : 0);
