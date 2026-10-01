@@ -1305,16 +1305,20 @@ function is(wat, gekregen, verwacht){
     const code = (r[0] || '').replace(/\*/g, '').trim();
     if(code) bron.set(code, (r[2] || '').trim());
   });
-  /* Wat nu niet klopt: adapter70 heeft in de tool geen verpakkingscode en "trek" heeft
-     in de bron '????' (geen van beide in de tekening); de verstelbare hoek heeft bij DALI
-     geen artikelnummer ('NB', de bron zegt '???'), en LCODES_DALI geeft daar de KKT-code
-     van de gewone hoek. Komt er een afwijking bij, dan valt die op. */
-  const BEKEND = ['PCODES.adapter70.wit', 'PCODES.adapter70.zwart', 'PCODES.adapter70.grijs', 'PCODES.trek',
-    'PCODES_DALI.verstelbaar.wit', 'PCODES_DALI.verstelbaar.zwart', 'PCODES_DALI.verstelbaar.grijs', 'PCODES_DALI.trek'];
+  /* Wat nu niet klopt, en geen van beide in de tekening: adapter70 heeft in de tool geen
+     verpakkingscode en "trek" heeft in de bron '????'. Komt er een afwijking bij, dan
+     valt die op. Een onderdeel dat in een uitvoering niet bestaat (de verstelbare hoek
+     bij DALI) heeft in beide tabellen null: geen nummer, en dan ook geen verpakkingscode
+     - daar stond de KKT-code van de gewone hoek naast 'NB'. */
+  const BEKEND = ['PCODES.adapter70.wit', 'PCODES.adapter70.zwart', 'PCODES.adapter70.grijs', 'PCODES.trek', 'PCODES_DALI.trek'];
   const afwijkend = [];
   let paren = 0;
   for(const [pn, ln] of [['PCODES', 'LCODES'], ['PCODES_DALI', 'LCODES_DALI']]){
     const loop = (p, l, pad) => {
+      if(p === null){
+        if(l !== null) afwijkend.push(pad + ': geen nummer, maar wel verpakkingscode ' + l);
+        return;
+      }
       if(typeof p === 'string'){
         paren++;
         if(bron.get(p) !== l && !BEKEND.includes(pad))
@@ -1325,7 +1329,7 @@ function is(wat, gekregen, verwacht){
     };
     loop(t[pn], t[ln], pn);
   }
-  is('het bronwerkboek en de codetabellen zijn gelezen', [bron.size >= 150, paren >= 162], [true, true]);
+  is('het bronwerkboek en de codetabellen zijn gelezen', [bron.size >= 150, paren >= 159], [true, true]);
   is('artikelnummer en verpakkingscode horen bij elkaar zoals in PCODES LCODES.xlsx (' + paren + ' paren)', afwijkend, []);
 }
 

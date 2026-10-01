@@ -1362,7 +1362,11 @@ const PCODES_DALI = {
   buigtool:  '2001374',
   beugelsnel:{wit:'2013049', zwart:'2013032', grijs:'2013056'},
   adapter103: {wit:'2001923', zwart:'2001916', grijs:'2001909'},
-  verstelbaar:{wit:'NB', zwart:'NB', grijs:'NB'},
+  /* De verstelbare hoek bestaat niet als DALI-versie: het assortiment kent hem alleen
+     voor de gewone 3-fase rail (2001107/2001114/2001121) en de 1-fase rail - lijst van
+     de binnendienst, 1-10-2026; het bronwerkboek zegt bij "Verstelbare hoek DALI" ???.
+     Dus geen nummer (stond 'NB'); zie nodeVariants() en de waarschuwing in warnings(). */
+  verstelbaar:{wit:null, zwart:null, grijs:null},
   montagebeugel:{wit:'2001329', zwart:'2001312', grijs:'2001305'},
   systeembeugel:{wit:'2001299', zwart:'2001282', grijs:'2001275'},
   ophangsetsysteempl:{wit:{3:'2001237',6:'2001268'}, zwart:{3:'2001220',6:'2001251'}, grijs:{3:'2001213', 5:'1098906', 6:'2001244'}},
@@ -1386,7 +1390,8 @@ const LCODES_DALI = {
   buigtool:  'KKT30155',
  beugelsnel:{wit:'01-C15-N1-9817', zwart:'01-C15-N1-9818', grijs:'01-C15-N1-9802'},
   adapter103: {wit:'KKT30693', zwart:'KKT30692', grijs:'KKT30691'},
-  verstelbaar:{wit:'KKT301276', zwart:'KKT301272', grijs:'KKT301271'},
+  /* geen DALI-versie (zie PCODES_DALI); hier stonden de KKT-codes van de gewone hoek */
+  verstelbaar:{wit:null, zwart:null, grijs:null},
   montagebeugel:{wit:'KKT301414', zwart:'KKT301411', grijs:'KKT30143'},
   systeembeugel:{wit:'KKT3014159', zwart:'KKT3014158', grijs:'KKT3014157'},
   ophangsetsysteempl:{wit:{3:'KKT315501',6:'KKT315515'}, zwart:{3:'KKT315500',6:'KKT315514'}, grijs:{3:'KKT315499', 5:'KKT315511', 6:'KKT315526'}},
@@ -1402,6 +1407,15 @@ const LCODES_DALI = {
    lezen nooit rechtstreeks uit PCODES/LCODES, altijd via deze twee. */
 function activeP(){ return st.dali ? PCODES_DALI : PCODES; }
 function activeL(){ return st.dali ? LCODES_DALI : LCODES; }
+/* Wat er van een code in beeld en op papier komt. Een code die met 'm-' begint is een
+   plaatshouder van de tool zelf: 'm-arm-'/'m-acc-' is een armatuur of accessoire zonder
+   ingevulde code, 'm-geen-' een onderdeel dat in deze uitvoering niet bestaat (de
+   verstelbare hoek bij DALI) - die blijven leeg; elke andere 'm-' is een onderdeel
+   waarvan het nummer nog volgt. */
+function codeTekst(c, volgt){
+  if(!c || /^m-(arm|acc|geen)-/.test(c)) return '';
+  return c.indexOf('m-')===0 ? volgt : c;
+}
 
 /* Inbouwmaat per aansluiting in mm: alleen het zichtbare deel telt,
    het koppeldeel schuift in de rail. VOLLEDIG BEVESTIGD door productcheck:
@@ -1912,7 +1926,12 @@ function nodeVariants(P){
     if(t==='corner'){
       const ang=st.angles[n.id];
       if(ang!=null && ang!==90){
-        out[n.id]={cls:'hoek', label:'Verstelbare Hoek '+mTxt(ang)+'°', art:activeP().verstelbaar[st.color], artL:activeL().verstelbaar[st.color]};
+        /* Bij DALI bestaat hij niet en heeft hij dus geen nummer. Hij blijft wel een
+           onderdeel van de tekening en de stuklijst, onder een plaatshouder die
+           codeTekst() leeg laat (en de tool waarschuwt). */
+        const art = activeP().verstelbaar[st.color];
+        out[n.id]={cls:'hoek', label:'Verstelbare Hoek '+mTxt(ang)+'°', art: art || ('m-geen-verstelbaar-'+st.color),
+          artL: activeL().verstelbaar[st.color] || ''};
         return;
       }
       const n1=P.nor[es[0].id];
@@ -2168,7 +2187,7 @@ function renderCanvas(B){
   const NX=18, NY=24; /* > halve raildikte (7.5) + max. rode-lijn-uitwijking (13) \u2014 mist zo altijd elke as-uitgelijnde rail */
   shN.forEach(nd=>{
     const p=px(nd); const t=nodeType(nd.id); const v=V[nd.id]||{};
-    const titl='<title>'+(v.label||'')+(v.art?' \u00b7 '+v.art:'')+'</title>';
+    const titl='<title>'+(v.label||'')+(codeTekst(v.art,'')?' \u00b7 '+codeTekst(v.art,''):'')+'</title>';
     const g=[];
     const fN = feedForNode(nd.id); const isFeedN = !!fN;
     let lx, ly, anchor;
@@ -2462,6 +2481,11 @@ function warnings(B){
   if(angleCount>0) w.push({t:'tip', m:angleCount===1
     ? 'E\u00e9n hoek is ingesteld als Verstelbare Hoek \u2014 dit is een ander koppelstuk dan een vaste Bocht. Controleer de exacte hoekinstelling op locatie.'
     : angleCount+' hoeken zijn ingesteld als Verstelbare Hoek \u2014 dit zijn andere koppelstukken dan een vaste Bocht. Controleer de exacte hoekinstelling op locatie.'});
+  /* De verstelbare hoek bestaat niet als DALI-versie (zie PCODES_DALI): zeggen, in plaats
+     van een nummer te tonen dat bij de gewone rail hoort. */
+  if(st.dali && angleCount>0) w.push({t:'warn', m:'Een verstelbare hoek bestaat niet in DALI-uitvoering \u2014 alleen voor de gewone 3-fase rail. '
+    + 'In de stuklijst en bij de tekening '+(angleCount===1?'staat hij':'staan ze')+' daarom zonder artikelnummer en verpakkingscode. '
+    + 'Kies een vaste bocht (90\u00b0) of overleg met de leverancier.'});
   const mB=(B&&B.mounts)||computeMounts();
   if(st.mount==='geen' && mB.count>0) w.push({t:'tip', m:'Kies in stap 6 een montagewijze \u2014 deze tekening heeft '+mB.count+' montagepunten (om de meter, incl. uiteinden; hoeken en kruisingen gedeeld).'});
   return w;
@@ -2558,7 +2582,7 @@ function refresh(){
     const it=B.items[c];
     /* een armatuur of accessoire zonder ingevulde artikelcode: leeg. 'artikelnr volgt'
        alleen bij een onderdeel van de rail waarvan de tool het nummer nog niet kent. */
-    const codeTxt = /^m-(arm|acc)-/.test(c) ? '' : c.indexOf('m-')===0 ? 'artikelnr volgt' : c;
+    const codeTxt = codeTekst(c, 'artikelnr volgt');
     return '<div class="cfg-art-row hoverable" data-prov="'+it.prov.join('|')+'"><span class="name">'+it.name+'</span><span><span class="code">'+codeTxt+'</span> <span class="qty">\u00D7'+it.qty+'</span></span></div>';
   }).join('') : '<div class="cfg-art-row"><span class="name">Kies een vorm om de lijst te vullen\u2026</span></div>';
   $('c2ArtList').querySelectorAll('[data-prov]').forEach(row=>{
@@ -2696,7 +2720,7 @@ async function buildPdf(){
   Object.keys(D.B.items).forEach(c=>{
     const it=D.B.items[c];
     if(it.isArm) return;
-    tableRow(T,[c.indexOf('m-')===0?'volgt':c, it.name, String(it.qty)]);
+    tableRow(T,[codeTekst(c, 'volgt'), it.name, String(it.qty)]);
   });
   /* Technische gegevens onder de tabel: in het ontwerp is de kopbalk voor de titel en
      het project, dus deze regel staat hier in plaats van bovenaan. */
@@ -2824,7 +2848,7 @@ async function buildPdf(){
        "LeverancierCode"): de code die de installateur op de doos van het onderdeel
        terugvindt. Even breed als de tabel van Bestelgegevens. */
     let TL=tableStart([{w:34,h:'Nr'},{w:52,h:'Traject'},{w:249,h:'Onderdeel'},{w:85,h:'Artikelnummer'},{w:95,h:'Verpakkingscode'}]);
-    sh.legend.forEach(l=> tableRow(TL,[String(l.nr), String(l.tr), l.name, l.art, l.verpakking]));
+    sh.legend.forEach(l=> tableRow(TL,[String(l.nr), String(l.tr), l.name, codeTekst(l.art, 'volgt'), l.verpakking]));
   });
   flush();
   /* Vanaf hier volgen alleen nog externe presenters, dus alle eigen pagina's staan
