@@ -1369,6 +1369,62 @@ function is(wat, gekregen, verwacht){
   is('artikelnummer en verpakkingscode horen bij elkaar zoals in PCODES LCODES.xlsx (' + paren + ' paren)', afwijkend, []);
 }
 
+/* ======================= armaturenboek: de briefingtekst ======================= */
+{
+  /* De bronnen van de briefing (bestek, technische tekeningen, armaturenboek, e-mail)
+     zijn optioneel: alleen wat is ingevuld komt in de tekst, en de zinnen voegen zich
+     daarnaar. Een leeg veld gaf vroeger "[Bestek]" in de PDF, ook bij een vergelijking
+     waar geen bestek bij hoorde. */
+  console.log('briefingtekst');
+  const b = await laadUit('armaturenboek.html',
+    ['briefRegels', 'briefOpsomming', 'BRIEF_VELDEN', 'briefingOpenVelden', 'briefNamen', 'briefGroepen',
+     'briefBronnen', 'briefVraagSlot', 'briefInhoud'],
+    'const st = {}; function zet(o){ Object.keys(st).forEach(k => delete st[k]); Object.assign(st, o); }', ['zet']);
+  const tekst = segs => segs.map(s => s.v ? '**' + s.t + '**' : s.t).join('');
+  const blad = (soort, velden) => {
+    b.zet(Object.assign({proj:'Kantoor Weena'}, velden));
+    const i = b.briefInhoud(soort, 'Kantoor Weena');
+    return {vraag: tekst(i.vraag), slot: tekst(i.vraagSlot),
+            rest: i.blokken.map(x => x.t || (x.s ? tekst(x.s) : x.items.join(' / ')))};
+  };
+
+  const alleenMail = blad('vergelijking', {email:'Aanvraag verlichting kantoor'});
+  is('vergelijking met alleen een e-mail: geen bestek, geen plaatshouder',
+    [alleenMail.vraag + alleenMail.slot + alleenMail.rest.join(' ')].map(s => /\[|bestek|document/i.test(s)), [false]);
+  is('de e-mail staat in "De vraag", onderwerp tussen aanhalingstekens',
+    [alleenMail.vraag.endsWith('vastgelegd in de e-mail met als onderwerp:'), alleenMail.slot],
+    [true, '**“Aanvraag verlichting kantoor”**']);
+  is('zonder armaturenboek wijkt het af van de gevraagde armaturen',
+    alleenMail.rest.some(r => r.includes('afwijken van de gevraagde armaturen of van de laatst geldende')), true);
+
+  /* bestek en tekeningen: dezelfde zinnen als het ontwerp */
+  const ontwerp = blad('lichtberekening', {bestek:'Bestek E-01', tekeningen:'Tekening E-01\nTekening E-02'});
+  is('lichtberekening met bestek en tekeningen: de tekst van het ontwerp',
+    [ontwerp.vraag.endsWith('vastgelegd in het document:'), ontwerp.slot, ontwerp.rest.slice(1, 4)],
+    [true, '**Bestek E-01**', ['Op basis van de tekeningen:', '**Tekening E-01 en Tekening E-02**',
+      'ontwikkelen wij een lichtconcept dat aansluit op het gevraagde lichtplan. Dit concept is uitgewerkt '
+      + 'volgens de uitgangspunten zoals omschreven in het document **Bestek E-01**, en voldoet aan de actuele '
+      + 'norm NEN-EN 12464-1:2021.']]);
+
+  const twee = blad('vergelijking', {bestek:'Bestek X', armaturenboek:'Armaturenboek Y'});
+  is('bestek en armaturenboek worden samen "de documenten"', twee.rest[1],
+    'Op basis van de documenten **Bestek X en Armaturenboek Y** maken wij een armaturenpropositie die aansluit op de gevraagde offerte.');
+  is('het armaturenboek in de disclaimer', twee.rest.some(r => r.includes('afwijken van de armaturen in het document **Armaturenboek Y** of')), true);
+
+  const gemengd = blad('vergelijking', {bestek:'Bestek X', email:'Offerte hal 2'});
+  is('twee soorten bronnen: de opsomming op de regel onder de vraag',
+    [gemengd.vraag.endsWith('vastgelegd in:'), gemengd.slot],
+    [true, 'het document **Bestek X** en de e-mail met als onderwerp **“Offerte hal 2”**']);
+
+  const niets = blad('lichtberekening', {});
+  is('zonder bronnen: geen slotzin en geen plaatshouder',
+    [niets.vraag, niets.slot, niets.rest[1]],
+    ['Het opstellen van een lichtplan voor **Kantoor Weena.**', '',
+     'Wij ontwikkelen een lichtconcept dat aansluit op het gevraagde lichtplan. Dit concept voldoet aan de actuele norm NEN-EN 12464-1:2021.']);
+  b.zet({});
+  is('alleen een lege projectnaam is nog een open veld', b.briefingOpenVelden(), ['projectnaam']);
+}
+
 /* ---------------------------------------------------------------- verslag ---- */
 console.log('\n' + gedaan + ' controles, ' + (mis ? mis + ' MIS' : 'alles goed') + '.');
 process.exit(mis ? 1 : 0);
