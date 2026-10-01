@@ -2607,10 +2607,10 @@ function reportData(){
       trGlobal++;
       comps[c].slice().sort((p,q)=>(p.y-q.y)||(p.x-q.x)).forEach(n=>{
         const v=B.V[n.id];
-        if(v&&v.art){ nr++; numOf['n:'+n.id]=nr; legend.push({nr, tr:trGlobal, name:v.label+' '+CLRN(st.color), art:v.artL}); }
+        if(v&&v.art){ nr++; numOf['n:'+n.id]=nr; legend.push({nr, tr:trGlobal, name:v.label+' '+CLRN(st.color), art:v.art, verpakking:v.artL}); }
       });
       st.feeds.filter(f=>f.kind==='edge' && m[edge(f.edge).a]===+c).forEach(f=>{
-        nr++; numOf['f:'+f.edge]=nr; legend.push({nr, tr:trGlobal, name:'Middenvoeding '+CLRN(st.color), art:activeL().midden[st.color]});
+        nr++; numOf['f:'+f.edge]=nr; legend.push({nr, tr:trGlobal, name:'Middenvoeding '+CLRN(st.color), art:activeP().midden[st.color], verpakking:activeL().midden[st.color]});
       });
     });
     sheets.push({id:sh.id, name:sh.name, legend});
@@ -2819,11 +2819,12 @@ async function buildPdf(){
     y+=boxH+8;
     if(si===0) para('Maten zijn raillengtes; koppelstukken komen daar in werkelijkheid bovenop.',8,C.grey);
     h2('Onderdelen in de tekening'+(D.sheets.length>1?' \u2014 '+sh.name:''));
-    /* Hier staat bewust de leveranciercode (KKT-reeks) en niet het bestelnummer:
-       dit is de code die de installateur op het onderdeel zelf terugvindt. Bestellen
-       gaat op de Pragmalux-nummers in Bestelgegevens. */
-    let TL=tableStart([{w:34,h:'Nr'},{w:52,h:'Traject'},{w:300,h:'Onderdeel'},{w:90,h:'Leveranciercode'}]);
-    sh.legend.forEach(l=> tableRow(TL,[String(l.nr), String(l.tr), l.name, l.art]));
+    /* Per onderdeel twee codes: ons artikelnummer - hetzelfde als in Bestelgegevens,
+       waarop besteld wordt - en de verpakkingscode (de KKT-reeks, in de bron
+       "LeverancierCode"): de code die de installateur op de doos van het onderdeel
+       terugvindt. Even breed als de tabel van Bestelgegevens. */
+    let TL=tableStart([{w:34,h:'Nr'},{w:52,h:'Traject'},{w:249,h:'Onderdeel'},{w:85,h:'Artikelnummer'},{w:95,h:'Verpakkingscode'}]);
+    sh.legend.forEach(l=> tableRow(TL,[String(l.nr), String(l.tr), l.name, l.art, l.verpakking]));
   });
   flush();
   /* Vanaf hier volgen alleen nog externe presenters, dus alle eigen pagina's staan

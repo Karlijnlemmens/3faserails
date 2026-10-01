@@ -17,6 +17,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { bladRijen } from './werkboek.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -1288,6 +1289,44 @@ function is(wat, gekregen, verwacht){
     }
   }
   is('raster houdt over ' + proeven + ' combinaties', fout, []);
+}
+
+/* ======================= railtool: de codeparen ======================= */
+{
+  /* In het installatieoverzicht, onder "Onderdelen in de tekening", staan per onderdeel
+     ons artikelnummer (PCODES) en de verpakkingscode (LCODES, de KKT-reeks) naast
+     elkaar. De tool houdt die twee in aparte tabellen bij; ze moeten bij elkaar horen
+     zoals in het bronwerkboek docs/bronnen/PCODES LCODES.xlsx (ProductCode en
+     LeverancierCode op één rij). Een paar dat uit de pas loopt, staat anders zo bij de
+     installateur. */
+  const t = await laadUit('index.html', ['PCODES', 'LCODES', 'PCODES_DALI', 'LCODES_DALI']);
+  const bron = new Map();
+  bladRijen(join(root, 'docs/bronnen/PCODES LCODES.xlsx')).slice(1).forEach(r => {
+    const code = (r[0] || '').replace(/\*/g, '').trim();
+    if(code) bron.set(code, (r[2] || '').trim());
+  });
+  /* Wat nu niet klopt: adapter70 heeft in de tool geen verpakkingscode en "trek" heeft
+     in de bron '????' (geen van beide in de tekening); de verstelbare hoek heeft bij DALI
+     geen artikelnummer ('NB', de bron zegt '???'), en LCODES_DALI geeft daar de KKT-code
+     van de gewone hoek. Komt er een afwijking bij, dan valt die op. */
+  const BEKEND = ['PCODES.adapter70.wit', 'PCODES.adapter70.zwart', 'PCODES.adapter70.grijs', 'PCODES.trek',
+    'PCODES_DALI.verstelbaar.wit', 'PCODES_DALI.verstelbaar.zwart', 'PCODES_DALI.verstelbaar.grijs', 'PCODES_DALI.trek'];
+  const afwijkend = [];
+  let paren = 0;
+  for(const [pn, ln] of [['PCODES', 'LCODES'], ['PCODES_DALI', 'LCODES_DALI']]){
+    const loop = (p, l, pad) => {
+      if(typeof p === 'string'){
+        paren++;
+        if(bron.get(p) !== l && !BEKEND.includes(pad))
+          afwijkend.push(pad + ': ' + p + ' / ' + l + ' (bron: ' + (bron.has(p) ? bron.get(p) : 'niet gevonden') + ')');
+        return;
+      }
+      for(const k of Object.keys(p)) loop(p[k], l && typeof l === 'object' ? l[k] : undefined, pad + '.' + k);
+    };
+    loop(t[pn], t[ln], pn);
+  }
+  is('het bronwerkboek en de codetabellen zijn gelezen', [bron.size >= 150, paren >= 162], [true, true]);
+  is('artikelnummer en verpakkingscode horen bij elkaar zoals in PCODES LCODES.xlsx (' + paren + ' paren)', afwijkend, []);
 }
 
 /* ---------------------------------------------------------------- verslag ---- */

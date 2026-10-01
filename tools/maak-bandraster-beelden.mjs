@@ -32,7 +32,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { inflateRawSync } from 'node:zlib';
+import { zipLees } from './werkboek.mjs';
 import { chromium } from '/opt/node22/lib/node_modules/playwright/index.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -47,29 +47,7 @@ if(!existsSync(werkboek)){
 }
 
 /* ======================= het werkboek openpakken =======================
-   Een xlsx is een zip. Node heeft geen zipreader, maar meer dan de centrale
-   inhoudsopgave aflopen en per onderdeel inflateRaw draaien is het niet. */
-function zipLees(buf){
-  const eocd = (() => {
-    for(let i = buf.length - 22; i >= 0; i--) if(buf.readUInt32LE(i) === 0x06054b50) return i;
-    throw new Error('Geen zip: het einde van de inhoudsopgave ontbreekt.');
-  })();
-  let p = buf.readUInt32LE(eocd + 16);
-  const aantal = buf.readUInt16LE(eocd + 10), uit = new Map();
-  for(let i = 0; i < aantal; i++){
-    if(buf.readUInt32LE(p) !== 0x02014b50) throw new Error('Beschadigde inhoudsopgave in de zip.');
-    const nLen = buf.readUInt16LE(p + 28), eLen = buf.readUInt16LE(p + 30), cLen = buf.readUInt16LE(p + 32);
-    const naam = buf.toString('utf8', p + 46, p + 46 + nLen);
-    const lokaal = buf.readUInt32LE(p + 42);
-    const methode = buf.readUInt16LE(p + 10), gepakt = buf.readUInt32LE(p + 20);
-    const lnLen = buf.readUInt16LE(lokaal + 26), leLen = buf.readUInt16LE(lokaal + 28);
-    const start = lokaal + 30 + lnLen + leLen;
-    const rauw = buf.subarray(start, start + gepakt);
-    uit.set(naam, methode === 0 ? Buffer.from(rauw) : inflateRawSync(rauw));
-    p += 46 + nLen + eLen + cLen;
-  }
-  return uit;
-}
+   Een xlsx is een zip; zipLees() staat in werkboek.mjs, gedeeld met de controles. */
 const zip = zipLees(readFileSync(werkboek));
 const tekst = naam => {
   const b = zip.get(naam);
