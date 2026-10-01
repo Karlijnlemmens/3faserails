@@ -16,7 +16,7 @@
    veranderen. Laden met een gewoon <script src="armatuur-groepen.js">, vóór de code
    van de tool; geen module, want die weigert te laden vanaf schijf (file://).
 
-   node tools/controleer-logica.mjs test de herkenning (122 groepen plus de gevallen
+   node tools/controleer-logica.mjs test de herkenning (123 groepen plus de gevallen
    die er ooit naast zaten). */
 const ARM_GROEPEN = [
   {id:'ag01', naam:'Punto', zoektermen:[]},
@@ -155,6 +155,9 @@ const ARM_GROEPEN = [
   {id:'ag118', naam:'Soladisc IP44', zoektermen:['Soladisc']},
   /* Cyclone HT IP66: het blad heet "LED waterdicht Cyclone" */
   {id:'ag119', naam:'Waterdicht Cyclone', zoektermen:['Cyclone']},
+  /* Port-Nova IP65 (2032149 en uitvoeringen): een ander armatuur dan de Port-M en Port-S
+     PKVW, met een eigen blad ("LED Portiekarmatuur Port-Nova") */
+  {id:'ag120', naam:'Portiekarmatuur Port-Nova', zoektermen:['Port-Nova']},
   {id:'lichtlijn-prxline', naam:'Lichtlijn PRX-Line', zoektermen:['Line']},
   {id:'lichtlijn-uniline', naam:'Lichtlijn PRX-Uniline', zoektermen:['Uniline']},
   {id:'lichtlijn-retroline', naam:'Lichtlijn Retroline PRX', zoektermen:['Retroline']},

@@ -155,6 +155,12 @@ function is(wat, gekregen, verwacht){
   is('een Cyclone HT IP66 is de Cyclone, geen Essence G3 IP66',
     groep('Pragmalux LED TL Waterdicht Armatuur Cyclone HT IP66 150cm 42W 4000K 7000lm Alu+PC 3x2,5mm Doorvoerbedrading'), 'ag119');
   is('de Qube zelf blijft de Qube', [groep('Wandarmatuur Qube IP65'), groep('Qube')], ['ag88', 'ag88']);
+  /* De Port-Nova (oktober 2026) heeft een eigen blad; de Port-M en Port-S PKVW houden het hunne. */
+  is('een Port-Nova is de Port-Nova, en Port-M en Port-S blijven wat ze waren',
+    [groep('Pragmalux LED Portiek Port-Nova Wit IP65 IK10 3-6W 360-780lm 3000K-3500K-4000K 3-CCT + draadloos sensor'),
+     groep('Port Nova 6W'), groep('Pragmalux LED Portiek Port-M PKVW IP66 IK10 2,75-5W 295-570lm 2700K-4000K 3-CCT'),
+     groep('Pragmalux LED Portiek Port-S PKVW IP66 IK10 2,75-5W 275-600lm 2700K-4000K 3-CCT'), groep('Nova')],
+    ['ag120', 'ag120', 'ag85', 'ag95', null]);
   /* Paneel en bandraster zijn één soort: de Flexcore-presenter heet zelf zo. */
   is('bandraster Flexcore houdt de Flexcore-presenter',
     groep('Pragmalux LED Bandrasterarmatuur Flexcore Microprisma 185x1542mm 26-36W 3600-4800lm'), 'ag30');
@@ -225,8 +231,8 @@ function is(wat, gekregen, verwacht){
      (de Qube IP65 en de Essence G3 IP66, op niets dan het soortwoord en de IP-klasse -
      geen presenter is beter dan de verkeerde), de Clean HACCP valt terecht in tweeën,
      en de Highbay Essence, Titandisc, Aludisc, Eclipse en Soladisc IP65 kregen hun eigen
-     blad. */
-  is('families met één presenter: ondergrens 152', eens >= 152, true);
+     blad. Oktober 2026: de Port-Nova kreeg zijn eigen blad. */
+  is('families met één presenter: ondergrens 153', eens >= 153, true);
   is('geen suggestie op een echt artikel', onterecht, 0);
   console.log('  catalogus: ' + eens + ' families eenduidig, ' + gesplitst.length + ' gesplitst, '
             + zonder + ' zonder presenter.');
