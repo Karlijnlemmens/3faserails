@@ -18,7 +18,7 @@ modules en spots). Dat valt niet op te lossen zonder gegevens te verzinnen,
 maar een vijftiende punt hoort wel op te vallen.
 """
 
-import importlib.util, json, sys
+import importlib.util, json, re, sys
 from pathlib import Path
 
 HIER = Path(__file__).parent
@@ -107,6 +107,17 @@ def controleer_familie(fam):
         aandacht.append("alle varianten hebben alleen een bovengrens voor lichtstroom — "
                         "er valt niets af omdat het te ruim bemeten is, de kleinste wint")
 
+    # De brandduur van de noodverlichting moet in de omschrijving staan. Het suffix -N
+    # zette er 3u neer, ook bij "noodmodule 1uur manueel": 267 artikelen stonden zo
+    # verkeerd in de data, en de vergelijker en de presenters toonden het.
+    nood_mis = [v for v in varianten
+                if re.fullmatch(r"\d+u", str(v.get("noodverlichting") or ""))
+                and not re.search(r"nood.*?\b" + v["noodverlichting"][:-1] + r"\s*(?:uur|u|h)\b",
+                                  v.get("omschrijving") or "", re.I)]
+    if nood_mis:
+        kritiek.append(f"{len(nood_mis)}x een brandduur voor de noodverlichting die niet in de "
+                       f"omschrijving staat: {codes(nood_mis)}")
+
     return kritiek, aandacht
 
 
@@ -178,6 +189,17 @@ LEESPROEVEN = [
      "Pragmalux",
      {"type": "Essence Classic G3", "lengte_cm": 60, "ip": 66,
       "afmetingen_tekst": None, "cct_tekst": None}),
+
+    # De noodverlichting: de duur zoals de omschrijving hem noemt, "ja" als die er niet
+    # bij staat - nooit een aangenomen 3u (die stond er bij 267 artikelen met 1 uur).
+    ("Pragmalux LED Plafonnière / Wandarmatuur Rondisc Wit Ø348 IP44 IK10 6-12W 650-1500lm "
+     "3000K-4000K 2-CCT + noodmodule 1uur manueel", "Pragmalux", {"noodverlichting": "1u"}),
+    ("Pragmalux LED Downlight Mado 240 Darklight 12W 3000K 1777lm Ø240 Buitenmaat - Gatmaat Ø200 "
+     "+ Nood 1h &Autotest", "Pragmalux", {"noodverlichting": "1u"}),
+    ("Pragmalux LED Opbouw Downlight Mado 205 Mat IP40 25W 3000K 2950lm Ø205 Buitenmaat - Hoogte "
+     "Ø190 UGR<18 + noodmodule", "Pragmalux", {"noodverlichting": "ja"}),
+    ("Pragmalux LED Plafonnière / Wandarmatuur Rondisc Wit Ø348 IP44 IK10 6-12W 650-1500lm "
+     "3000K-4000K 2-CCT", "Pragmalux", {"noodverlichting": None}),
 ]
 
 

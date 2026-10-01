@@ -49,8 +49,12 @@ DRIVERS = {
 SNOER = ("-GST3", "-GST3S", "-EUR", "-ST3", "-ST3S", "-ST5", "-ST5S")
 
 # Suffixen die een uitvoeringskenmerk aanduiden (waterdichte armaturen).
-EXTRA = {"-S": {"sensor": True}, "-N": {"noodverlichting": "3u"},
-         "-SN": {"sensor": True, "noodverlichting": "3u"}}
+# -N zegt dat er een noodmodule in zit, niet hoe lang die brandt: dat staat in de
+# omschrijving ("noodmodule 1uur manueel"), en die gaat voor (zie nood_duur()). Hier
+# stond "3u", en omdat het suffix ná de omschrijving werd toegepast, overschreef het
+# die: 267 artikelen met "1 uur" in de omschrijving stonden als 3u in de data.
+EXTRA = {"-S": {"sensor": True}, "-N": {"noodverlichting": "ja"},
+         "-SN": {"sensor": True, "noodverlichting": "ja"}}
 
 
 def getal(s):
@@ -344,9 +348,18 @@ def lees_omschrijving(o, merk=None):
         v["ip"] = int(m.group(1))
     if re.search(r"\bPIR\b|bewegingssensor", o, re.I):
         v["sensor"] = True
-    if re.search(r"noodmodule|noodverlichting", o, re.I):
-        v.setdefault("noodverlichting", "3u")
+    if re.search(r"noodmodule|noodverlichting|\bnood\b", o, re.I):
+        v["noodverlichting"] = nood_duur(o)
     return v, mist
+
+
+def nood_duur(o):
+    """De brandduur van de noodverlichting zoals de omschrijving hem noemt ("1uur",
+    "1 uur", "1H", "3uur"), als "1u"/"3u"; "ja" als er wel nood in zit maar geen duur
+    bij staat. Nooit een aangenomen duur: die stond hier als 3u, ook bij 1 uur."""
+    m = re.search(r"nood", o, re.I)
+    duur = re.search(r"(\d+)\s*(?:uur|u|h)\b", o[m.start():] if m else o, re.I)
+    return f"{duur.group(1)}u" if duur else "ja"
 
 
 # --- Catalogus ---------------------------------------------------------------
@@ -671,7 +684,9 @@ def catalogusfamilies(bestand):
         basis, drv, extra = split_suffix(code)
         v.update({"artikelcode": code, "basiscode": basis, "omschrijving": oms})
         v.update({k: w for k, w in DRIVERS.get(drv, {}).items() if w is not None})
-        v.update(EXTRA.get(extra, {}))
+        # het suffix vult aan, de omschrijving gaat voor (zie EXTRA)
+        for k, w in EXTRA.get(extra, {}).items():
+            v.setdefault(k, w)
         # Groeperen gaat op de genormaliseerde sleutel, niet op de naam zoals hij
         # er staat; welke schrijfwijze de familie krijgt beslist toonnaam().
         # Het merk hoort bij de sleutel: dezelfde spot onder twee labels
@@ -928,7 +943,9 @@ def main():
             if merk and merk != fam.get("merk"):
                 v["merk"] = merk
             v.update({k: w for k, w in DRIVERS.get(drv, {}).items() if w is not None})
-            v.update(EXTRA.get(extra, {}))
+            # het suffix vult aan, de omschrijving gaat voor (zie EXTRA)
+            for k, w in EXTRA.get(extra, {}).items():
+                v.setdefault(k, w)
             if i_stat is not None:
                 v["status"] = r[i_stat]
             if i_bar is not None:
