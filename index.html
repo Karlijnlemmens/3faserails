@@ -111,6 +111,10 @@
   }
   .wtab h4{margin:0 0 3px; font-size:14px;}
   .wtab p{margin:0; font-size:12px; color:var(--slate);}
+  .voeding-uitleg h4{margin:0 0 8px;}
+  .voeding-uitleg p{font-size:13.5px; color:var(--ink); line-height:1.6; margin:0 0 10px;}
+  .voeding-uitleg ul{margin:0; padding-left:18px; font-size:13.5px; color:var(--slate); line-height:1.6;}
+  .voeding-uitleg li{margin:0 0 4px;}
   .wiring-detail{display:none;}
   .wiring-detail.active{display:grid; grid-template-columns:1.1fr .9fr; gap:24px;}
   @media(max-width:900px){.wiring-detail.active{grid-template-columns:1fr;}}
@@ -622,34 +626,22 @@
   <p class="lede">De rail kan op drie manieren worden aangesloten, afhankelijk van de beschikbare netvoeding bij de klant. Dit is het eerste dat je met een installateur moet doorlopen — de rest van de installatie hangt hiervan af.</p>
 
   <div class="wiring-tabs">
-    <div class="wtab active" data-w="A"><span class="letter">A</span><h4>1-fase, 3-circuit</h4><p>230V AC · 16A · 3,7 kVA</p></div>
-    <div class="wtab" data-w="B"><span class="letter">B</span><h4>3-fase, 3-circuit</h4><p>230/400V AC · 16A · 3×3,7 kVA</p></div>
-    <div class="wtab" data-w="C"><span class="letter">C</span><h4>3-fase, 3-phase</h4><p>230/400V AC · 16A · 1,1 kVA</p></div>
+    <div class="wtab active" data-w="A"><span class="letter">A</span><h4>1-fase, 3-circuit</h4><p data-voeding-spec="A"></p></div>
+    <div class="wtab" data-w="B"><span class="letter">B</span><h4>3-fase, 3-circuit</h4><p data-voeding-spec="B"></p></div>
+    <div class="wtab" data-w="C"><span class="letter">C</span><h4>3-fase, 3-phase</h4><p data-voeding-spec="C"></p></div>
   </div>
 
   <div class="wiring-detail active" data-wd="A">
     <div id="wiringA"></div>
-    <div class="card">
-      <h4 style="margin-top:0;">Wanneer gebruik je dit?</h4>
-      <p style="font-size:13.5px;color:var(--slate);line-height:1.7;">Bij een standaard 1-fase groep (L + N). De rail wordt gebruikt als <b>3 losse circuits</b> op dezelfde fase, bijvoorbeeld om drie groepen spots apart te schakelen of te dimmen — maar ze delen wél dezelfde fase.</p>
-      <div class="ts-warn">De optelsom van de drie circuits samen (N-geleider) mag <b>max. 16A</b> zijn. Bij veel spots op alle drie de circuits: bereken de totale stroom vóór installatie.</div>
-    </div>
+    <div class="card voeding-uitleg" data-voeding="A"></div>
   </div>
   <div class="wiring-detail" data-wd="B">
     <div id="wiringB"></div>
-    <div class="card">
-      <h4 style="margin-top:0;">Wanneer gebruik je dit?</h4>
-      <p style="font-size:13.5px;color:var(--slate);line-height:1.7;">Bij een 3-fase aansluiting (L1, L2, L3 + N) waarbij je de rail als <b>3 onafhankelijke circuits</b> wilt gebruiken — elk circuit op zijn eigen fase. Meest flexibele optie voor grotere installaties met meerdere schakelgroepen.</p>
-      <div class="ts-warn">Elke fase mag <b>max. 16A</b> voeren. De gezamenlijke N-stroom (L1+L2+L3) is eveneens gemaximeerd op 16A — bewaak de balans tussen de drie circuits.</div>
-    </div>
+    <div class="card voeding-uitleg" data-voeding="B"></div>
   </div>
   <div class="wiring-detail" data-wd="C">
     <div id="wiringC"></div>
-    <div class="card">
-      <h4 style="margin-top:0;">Wanneer gebruik je dit?</h4>
-      <p style="font-size:13.5px;color:var(--slate);line-height:1.7;">Bij een 3-fase aansluiting waarbij spots over de <b>drie fasen verdeeld</b> worden binnen wat op het rail als één doorlopend systeem oogt (3-phase adapters kiezen zelf hun fase). Handig om de belasting over L1/L2/L3 te spreiden i.p.v. te schakelen per circuit.</p>
-      <div class="ts-fix">Lager opgegeven vermogen (1,1 kVA) omdat elke fase hier afzonderlijk maar één adapterstroom draagt — niet drie circuits parallel.</div>
-    </div>
+    <div class="card voeding-uitleg" data-voeding="C"></div>
   </div>
 
   <div style="height:38px;"></div>
@@ -1121,7 +1113,8 @@ document.getElementById('crossSectionMini').innerHTML = `
 </svg>`;
 
 /* wiring diagrams A/B/C */
-/* De uitleg bij de drie voedingsconfiguraties, voor het informatieteken in stap 3:
+/* De uitleg bij de drie voedingsconfiguraties, voor het informatieteken in stap 3 en de
+   tab "Aansluiting & polariteit" (spec is de regel onder de tabkop):
    eerst wanneer je het kiest, dan drie punten, dan het schema. Kort en zonder
    vakjargon - binnendienst moet het in een telefoongesprek kunnen uitleggen. Feiten
    uit het aansluitschema in de presenter van de rail: A één zekering en drie
@@ -1132,17 +1125,20 @@ const VOEDING_UITLEG = {
      punten:['Aansluiting: één fase (L + N), 230 V.',
              'De rail heeft drie circuits, elk met een eigen schakelaar of dimmer.',
              'De drie circuits delen die ene groep: samen max. 16 A (3,7 kVA).'],
-     schema:'Eén zekering, drie schakelaars'},
+     schema:'Eén zekering, drie schakelaars',
+     spec:'230 V · max. 16 A · 3,7 kVA'},
   B:{kies:'Kies dit als je meer vermogen nodig hebt dan één groep geeft, en de spots in drie groepen apart aan en uit moeten.',
      punten:['Aansluiting: drie fasen (L1, L2, L3 + N), 230/400 V.',
              'Elk circuit zit op een eigen fase, met een eigen zekering en schakelaar.',
              'Per circuit max. 16 A (samen 3 × 3,7 kVA). Ook de nul mag max. 16 A voeren: verdeel de spots gelijkmatig.'],
-     schema:'Per fase een zekering en een schakelaar'},
+     schema:'Per fase een zekering en een schakelaar',
+     spec:'230/400 V · max. 16 A per circuit · 3 × 3,7 kVA'},
   C:{kies:'Kies dit als de hele rail in één keer aan en uit gaat en je de belasting over drie fasen wilt verdelen.',
      punten:['Aansluiting: drie fasen (L1, L2, L3 + N), 230/400 V, via één driepolige zekering en schakelaar.',
              'Per spot stel je op de adapter in op welke fase hij zit.',
              'Per fase max. 16 A, en de nul ook max. 16 A: verdeel de spots over de drie fasen.'],
-     schema:'Eén driepolige zekering en schakelaar'},
+     schema:'Eén driepolige zekering en schakelaar',
+     spec:'230/400 V · max. 16 A per fase'},
 };
 
 /* Het aansluitschema van een voedingsconfiguratie (A, B of C), naar de schema's in de
@@ -1204,6 +1200,18 @@ function wiringSvg(letter){
 document.getElementById('wiringA').innerHTML = `<div class="card">${wiringSvg('A')}</div>`;
 document.getElementById('wiringB').innerHTML = `<div class="card">${wiringSvg('B')}</div>`;
 document.getElementById('wiringC').innerHTML = `<div class="card">${wiringSvg('C')}</div>`;
+/* De tekst bij de drie aansluitwijzen komt uit VOEDING_UITLEG, dezelfde als in het
+   informatieteken van stap 3: één tekst, die niet uit de pas kan lopen. */
+document.querySelectorAll('[data-voeding-spec]').forEach(el=>{ el.textContent = VOEDING_UITLEG[el.dataset.voedingSpec].spec; });
+document.querySelectorAll('[data-voeding]').forEach(kaart=>{
+  const u = VOEDING_UITLEG[kaart.dataset.voeding];
+  kaart.textContent = '';
+  const kop = document.createElement('h4'); kop.textContent = 'Wanneer kies je dit?';
+  const kies = document.createElement('p'); kies.textContent = u.kies;
+  const lijst = document.createElement('ul');
+  u.punten.forEach(pt=>{ const li = document.createElement('li'); li.textContent = pt; lijst.appendChild(li); });
+  kaart.append(kop, kies, lijst);
+});
 
 /* wiring tab switch */
 document.querySelectorAll('.wtab').forEach(t=>{
