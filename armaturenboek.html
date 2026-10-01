@@ -504,7 +504,7 @@ function briefInhoud(soort, proj){
   };
 }
 
-/* ---------- armaturen: 12 vaste slots, zelfde opzet als de Railconfigurator ---------- */
+/* ---------- armaturen: 12 om mee te beginnen, er komt steeds een lege bij (zorgVoorLegeSlot) ---------- */
 const ARMATUREN = [
   {id:'arm01'}, {id:'arm02'}, {id:'arm03'}, {id:'arm04'}, {id:'arm05'},
   {id:'arm06'}, {id:'arm07'}, {id:'arm08'}, {id:'arm09'}, {id:'arm10'}, {id:'arm11'}, {id:'arm12'},
@@ -1163,7 +1163,11 @@ function herstelProject(bron){
   const s = bron.st || {};
   /* armaturen is een sloten-map (arm01, arm02, ...): mergen i.p.v. vervangen, anders
      vallen sloten die na het opslaan zijn toegevoegd terug op undefined i.p.v. hun
-     lege default, en crasht buildArmList(). */
+     lege default, en crasht buildArmList(). Mergen op lege regels, niet op wat er nu
+     staat: een regel die je vóór het terughalen had getypt (arm13) en die het project
+     niet heeft, bleef anders in het teruggehaalde project staan (nagemeten). */
+  ARMATUREN.length = 12;
+  st.armaturen = ARMATUREN.reduce((o,a)=>{o[a.id]={aanduiding:'',name:'',code:'',groep:'',qty:0};return o;},{});
   Object.keys(st).forEach(k=>{
     if(!Object.prototype.hasOwnProperty.call(s,k)) return;
     if(k==='armaturen'){ st[k] = Object.assign({}, st[k], s[k]); }

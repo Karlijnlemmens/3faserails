@@ -877,7 +877,7 @@
           <span class="lichtplan-naam" id="c2LichtplanNaam"></span>
           <button type="button" id="c2LichtplanWeg" class="weg" title="Lichtplan weghalen" aria-label="Lichtplan weghalen" hidden>×</button>
         </div>
-        <p class="hint" style="margin:0 0 6px;">Armaturen — vul de volledige naam en artikelcode in, kies kleur en typ het aantal per type. Bij DALI-dimbaar worden alleen de DALI-geschikte armaturen getoond en geldt een aparte artikelcode.</p>
+        <p class="hint" style="margin:0 0 6px;">Armaturen — vul de volledige naam en artikelcode in en typ het aantal per type. Er komt steeds een lege regel bij. Bij DALI-dimbaar geldt per armatuur een aparte artikelcode.</p>
         <div class="c2-prodlist" id="c2ArmList"></div>
         <label class="c2-check" style="margin-top:6px;"><input type="checkbox" id="c2ToonLijst" checked> Armaturenlijst in de PDF</label>
         <p class="hint" style="margin:10px 0 6px;">Adapters &amp; overig — kies kleur en typ het aantal per product.</p>
@@ -1523,26 +1523,28 @@ function codeTekst(c, volgt){
    kruis 50/arm, middenvoeding 100, elektrisch koppelstuk 0, eindkap 3. */
 const MM = { aansluit:66, eindkap:3, bochtArm:66, tBarArm:50, tStemArm:66, kruisArm:50, midden:100, elkoppel:0 };
 
-/* Armaturen: 32 vaste slots voor de normale 3-fase rail; 5 daarvan (arm01-arm05)
-   bestaan ook als DALI-dimbare versie — zichtbaar/gefilterd via visibleArmaturen().
-   Naam en artikelcode worden niet meer hardcoded bijgehouden: de gebruiker vult ze
-   zelf in via de UI (buildArmList) en ze worden opgeslagen in st.armaturen[id].
-   DALI-geschikte armaturen houden 2 losse codes aan (code = standaard, codeDali =
+/* Armaturen: geen vaste bovengrens, net als in het armaturenboek. Er staan er 12 klaar,
+   en zodra de laatste regel niet meer leeg is komt er een lege bij (zorgVoorLegeSlot()).
+   Naam en artikelcode vult de gebruiker zelf in (buildArmList) en ze staan in
+   st.armaturen[id]. Elke regel heeft twee codes (code = standaard, codeDali =
    DALI-dimbaar) onder dezelfde naam, zodat wisselen tussen Standaard/DALI niets
-   overschrijft. */
-const ARMATUREN = [
-  {id:'arm01', dali:true}, {id:'arm02', dali:true}, {id:'arm03', dali:true},
-  {id:'arm04', dali:true}, {id:'arm05', dali:true},
-  {id:'arm06', dali:false}, {id:'arm07', dali:false}, {id:'arm08', dali:false},
-  {id:'arm09', dali:false}, {id:'arm10', dali:false}, {id:'arm11', dali:false}, {id:'arm12', dali:false},
-  {id:'arm13', dali:false}, {id:'arm14', dali:false}, {id:'arm15', dali:false}, {id:'arm16', dali:false},
-  {id:'arm17', dali:false}, {id:'arm18', dali:false}, {id:'arm19', dali:false}, {id:'arm20', dali:false},
-  {id:'arm21', dali:false}, {id:'arm22', dali:false}, {id:'arm23', dali:false}, {id:'arm24', dali:false},
-  {id:'arm25', dali:false}, {id:'arm26', dali:false}, {id:'arm27', dali:false}, {id:'arm28', dali:false},
-  {id:'arm29', dali:false}, {id:'arm30', dali:false}, {id:'arm31', dali:false}, {id:'arm32', dali:false},
-];
+   overschrijft. Vroeger waren het 32 vaste sloten, waarvan alleen de eerste vijf een
+   DALI-versie hadden - een overblijfsel uit de tijd dat de producten vast in de tool
+   stonden; bij DALI-dimbaar waren er dus maar vijf regels. */
+const ARMATUREN = [];
+for(let i=1; i<=12; i++) ARMATUREN.push({id:'arm'+String(i).padStart(2,'0')});
 function armLabel(a){ return 'Armatuur '+a.id.replace('arm',''); }
-function visibleArmaturen(){ return st.dali ? ARMATUREN.filter(a=>a.dali) : ARMATUREN; }
+/* alle regels, in beide standen; de naam bleef staan voor de dertien aanroepen */
+function visibleArmaturen(){ return ARMATUREN; }
+function legeArmatuur(){ return {aanduiding:'',qty:0,name:'',code:'',codeDali:'',groep:''}; }
+/* Een nieuwe regel achteraan, met een id dat nog niet bestaat. */
+function voegArmatuurSlotToe(){
+  const hoogste = ARMATUREN.reduce((m,a)=>Math.max(m, parseInt(a.id.slice(3),10)||0), 0);
+  const nieuw = {id:'arm'+String(hoogste+1).padStart(2,'0')};
+  ARMATUREN.push(nieuw);
+  st.armaturen[nieuw.id] = st.armaturen[nieuw.id] || legeArmatuur();
+  return nieuw;
+}
 
 /* De armatuurtypen en hun herkenning staan in armatuur-groepen.js: dezelfde tabel
    en dezelfde matchArmGroep() als het armaturenboek gebruikt. */
@@ -2708,6 +2710,7 @@ let startKlaar = false;
 function refresh(){
   if(startKlaar) ProjectOpslag.gewijzigd();
   if(st.step===3) st.step=4;   /* Voeding is verborgen; een project dat daar stond gaat naar Vorm */
+  zorgVoorLegeSlot();
   const B=computeBOM(); lastBOM=B;
   renderSheetsBar();
   /* stepper */
@@ -3425,8 +3428,8 @@ function buildProdList(container, list, stateMap, colorOptions){
   });
 }
 
-/* bouwt de armaturen-lijst (c2ArmList) opnieuw op: filtert op visibleArmaturen()
-   (alle 32 bij Standaard, alleen de 5 DALI-geschikte bij DALI-dimbaar) en toont per
+/* bouwt de armaturen-lijst (c2ArmList) opnieuw op: alle regels, in beide standen
+   (zorgVoorLegeSlot() zet er steeds een lege bij), en toont per
    rij een eigen code, de artikelcode (standaard of DALI) en de volledige naam. Zelfde
    bouwstijl als buildProdList (rebuild-on-call, commit op change/Enter) om
    focusverlies tijdens typen te voorkomen. Wordt net als buildProdList niet vanuit
@@ -3436,9 +3439,7 @@ function buildProdList(container, list, stateMap, colorOptions){
    voorstel bij een tikfout), de uploadknop voor een type dat de tool niet kent, de
    stempelknop en de pijltjes zijn dezelfde als in het armaturenboek: armRijDelen()
    in armatuur-rij.js. Wat hier eigen is, is de DALI-code naast de gewone. */
-function buildArmList(){
-  const container=$('c2ArmList'); container.innerHTML='';
-  visibleArmaturen().forEach(a=>{
+function maakArmRij(a){
     const s=st.armaturen[a.id];
     const row=document.createElement('div'); row.className='c2-armrow';
     /* De vaste aanduiding "Armatuur NN" is vervangen door een eigen code: de
@@ -3478,24 +3479,30 @@ function buildArmList(){
     staart.appendChild(qty); staart.appendChild(acc.knop); row.appendChild(staart);
     const blok=document.createElement('div'); blok.className='c2-armblok';
     blok.appendChild(row); blok.appendChild(acc.lijst);
-    container.appendChild(blok);
-  });
+    return blok;
+}
+function buildArmList(){
+  const container=$('c2ArmList'); container.innerHTML='';
+  visibleArmaturen().forEach(a=>container.appendChild(maakArmRij(a)));
   armVolgBijwerken(container);
 }
-/* Een regel een plaats omhoog of omlaag, binnen de regels die nu te zien zijn. Alleen
-   de eerste vijf slots bestaan ook als DALI-versie: een regel met een DALI-code naar
-   een slot zonder DALI schuiven zou die code verbergen zodra je DALI kiest, dus dat
-   gebeurt niet - de tool zegt waarom. */
+/* Is de laatste regel niet meer leeg, dan komt er een lege bij - zonder de lijst opnieuw
+   te bouwen, dus wie aan het typen is houdt zijn plek. Nooit meer dan één tegelijk. */
+function zorgVoorLegeSlot(){
+  const laatste = ARMATUREN[ARMATUREN.length-1];
+  if(laatste && !armSlotLeeg(st.armaturen[laatste.id])){
+    const nieuw = voegArmatuurSlotToe();
+    const lijst = $('c2ArmList');
+    if(lijst){ lijst.appendChild(maakArmRij(nieuw)); armVolgBijwerken(lijst); }
+  }
+}
+/* Een regel een plaats omhoog of omlaag. Elke regel heeft zijn standaard- en zijn
+   DALI-code, dus er is geen grens meer (vroeger mocht een regel met een DALI-code niet
+   voorbij de eerste vijf). */
 function verplaatsArmRij(a, richting){
   const zicht = visibleArmaturen();
   const b = zicht[zicht.indexOf(a)+richting];
   if(!b) return;
-  const daliCode = (id)=> ((st.armaturen[id].codeDali)||'').trim();
-  if(a.dali!==b.dali && (daliCode(a.id) || daliCode(b.id))){
-    Melding.letop('Deze regel heeft een DALI-code en blijft daarom bij de eerste vijf regels: '
-      + 'alleen die bestaan ook als DALI-versie.');
-    return;
-  }
   armWisselRijen(st.armaturen, a.id, b.id);
   buildArmList(); refresh();
 }
@@ -3595,12 +3602,29 @@ function init(){
       /* armaturen/overig zijn sloten-maps (arm01, ao01, ...): mergen i.p.v.
          vervangen, anders vallen sloten die na het opslaan zijn toegevoegd
          (bijv. door uitbreiding van ARMATUREN) terug op undefined i.p.v. hun
-         lege default, en crasht buildArmList(). */
+         lege default, en crasht buildArmList(). De armaturen mergen op lege regels,
+         niet op wat er nu staat: een regel die je vóór het terughalen had getypt (arm13)
+         en die het project niet heeft, bleef anders in het teruggehaalde project staan. */
+      ARMATUREN.length = 12;
+      st.armaturen = ARMATUREN.reduce((o,a)=>{o[a.id]=legeArmatuur();return o;},{});
       Object.keys(st).forEach(k=>{
         if(!Object.prototype.hasOwnProperty.call(s,k)) return;
         if(k==='armaturen' || k==='overig'){ st[k] = Object.assign({}, st[k], s[k]); }
         else { st[k]=s[k]; }
       });
+      /* Geen vaste bovengrens meer aan het aantal regels (zie zorgVoorLegeSlot()): een
+         opgeslagen project kan meer sloten hebben dan de 12 waarmee de tool begint - die
+         moeten ook in ARMATUREN staan, anders tekent buildArmList() ze nooit. Een project
+         van vóór die tijd heeft er 32, meestal grotendeels leeg: de lege staart gaat terug
+         tot 12, op één lege regel na. */
+      Object.keys(st.armaturen).forEach(id=>{
+        if(/^arm\d+$/.test(id) && !ARMATUREN.some(a=>a.id===id)) ARMATUREN.push({id});
+      });
+      ARMATUREN.sort((a,b)=> parseInt(a.id.slice(3),10) - parseInt(b.id.slice(3),10));
+      while(ARMATUREN.length>12 && armSlotLeeg(st.armaturen[ARMATUREN[ARMATUREN.length-1].id])
+            && armSlotLeeg(st.armaturen[ARMATUREN[ARMATUREN.length-2].id])){
+        delete st.armaturen[ARMATUREN.pop().id];
+      }
       /* Een project van vóór de montagewijze per tekenvlak had één keuze voor alles
          (st.mount en de subkeuzes ernaast): die geldt dan voor elk tekenvlak. */
       if(!s.montage && s.mount){
@@ -3753,7 +3777,8 @@ function init(){
     Lichtplan.wis();   /* het lichtplan hoort bij dit project */
     /* geüploade Special-PDF's horen niet bij een specifieke tekening, dus die vervallen mee. */
     if(window.PRESENTER_DATA) ARMATUREN.forEach(a=>delete window.PRESENTER_DATA[specialPresenterId(a.id)]);
-    st.armaturen=ARMATUREN.reduce((o,a)=>{o[a.id]={aanduiding:'',qty:0,name:'',code:'',codeDali:'',groep:''};return o;},{});
+    ARMATUREN.length = 12;   /* weer de 12 waarmee de tool begint */
+    st.armaturen=ARMATUREN.reduce((o,a)=>{o[a.id]=legeArmatuur();return o;},{});
     st.overig=ADAPTERS_OVERIG.reduce((o,a)=>{o[a.id]={color:'wit',qty:0};return o;},{});
     buildArmList();
     buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
