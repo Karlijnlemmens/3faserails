@@ -16,7 +16,7 @@
    veranderen. Laden met een gewoon <script src="armatuur-groepen.js">, vóór de code
    van de tool; geen module, want die weigert te laden vanaf schijf (file://).
 
-   node tools/controleer-logica.mjs test de herkenning (119 groepen plus de gevallen
+   node tools/controleer-logica.mjs test de herkenning (120 groepen plus de gevallen
    die er ooit naast zaten). */
 const ARM_GROEPEN = [
   {id:'ag01', naam:'Punto', zoektermen:[]},
@@ -146,6 +146,10 @@ const ARM_GROEPEN = [
   {id:'ag114', naam:'Eclipse', zoektermen:[]},
   {id:'ag115', naam:'Titandisc', zoektermen:[]},
   {id:'ag116', naam:'Aludisc', zoektermen:[]},
+  /* Alleen de Soladisc IP65 (Ø370, 2032491): de Soladisc-S/M/L is een ander armatuur
+     (IP44) zonder eigen blad. vereist: deze woorden moeten in de omschrijving staan, anders
+     wees "Soladisc" alleen al deze groep aan - ook bij de Soladisc-M IP44. */
+  {id:'ag117', naam:'Soladisc IP65', zoektermen:[], vereist:['ip65']},
   {id:'lichtlijn-prxline', naam:'Lichtlijn PRX-Line', zoektermen:['Line']},
   {id:'lichtlijn-uniline', naam:'Lichtlijn PRX-Uniline', zoektermen:['Uniline']},
   {id:'lichtlijn-retroline', naam:'Lichtlijn Retroline PRX', zoektermen:['Retroline']},
@@ -296,6 +300,7 @@ function armBesteGroep(toks, soorten){
   const heeft = new Set(toks);
   let best=null, bestScore=0, gelijk=false;
   ARM_GROEP_TOKENS.forEach(({g,varianten})=>{
+    if(g.vereist && !g.vereist.every(t=>heeft.has(t))) return;
     const gs = ARM_GROEP_SOORT.get(g);
     if(soorten && soorten.size && gs.size && ![...gs].some(x=>soorten.has(x))) return;
     let score=0;

@@ -77,7 +77,7 @@ const GROEPEN = [
   ['ag110', 'Spot Vapor IP65'],
   /* productlancering september 2026 */
   ['ag111', 'Highbay Essence IP65'], ['ag112', 'Highbay Clean HACCP G3'], ['ag113', 'LED Half-inbouwspot Ario'],
-  ['ag114', 'Eclipse'], ['ag115', 'Titandisc'], ['ag116', 'Aludisc'],
+  ['ag114', 'Eclipse'], ['ag115', 'Titandisc'], ['ag116', 'Aludisc'], ['ag117', 'Soladisc IP65'],
   ['achterpaginas', 'AB Achterpaginas'],
   /* Het hoofdstukblad "Lichtberekening" van het totale projectboek: het armaturenboek zet
      het vóór een ingeladen lichtplan, direct na de introductie. Net als 'achterpaginas'
