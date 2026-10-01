@@ -488,6 +488,7 @@
   .c2-sheetsrow{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px;}
   .c2-montagerij{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:13px; color:var(--ink); font-weight:600; margin-bottom:10px;}
   .c2-montagesub{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .c2-keuzeinfo{display:inline-flex; align-items:center; gap:6px;}
   .c2-ruimterij{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; color:var(--ink); font-weight:600; margin-bottom:10px;}
   .c2-ruimterij input.c2-textinp{flex:0 1 300px; min-width:200px; padding:5px 8px; font-size:12px;}
   .c2-ruimtes{display:flex; gap:6px; flex-wrap:wrap;}
@@ -1128,15 +1129,15 @@ function wiringSvg(letter){
   let rowsSvg = rows.map((r,i)=>{
     const yy = 40+i*32;
     return `<line x1="70" y1="${yy}" x2="180" y2="${yy}" stroke="#5B6B82" stroke-width="2"/>
-      <text x="60" y="${yy+4}" text-anchor="end" font-family="JetBrains Mono" font-size="12" fill="#15202E">${r[0]}</text>
-      <text x="190" y="${yy+4}" font-family="JetBrains Mono" font-size="12" fill="#D6362B" font-weight="700">${r[1]}</text>`;
+      <text x="60" y="${yy+4}" text-anchor="end" font-family="JetBrains Mono, Consolas, monospace" font-size="12" fill="#15202E">${r[0]}</text>
+      <text x="190" y="${yy+4}" font-family="JetBrains Mono, Consolas, monospace" font-size="12" fill="#D6362B" font-weight="700">${r[1]}</text>`;
   }).join('');
   return `<svg viewBox="0 0 340 220" xmlns="http://www.w3.org/2000/svg">
-    <text x="20" y="20" font-family="Nunito Sans" font-size="11" font-weight="700" fill="#5B6B82">SUPPLY</text>
-    <text x="240" y="20" font-family="Nunito Sans" font-size="11" font-weight="700" fill="#5B6B82">TRACK</text>
+    <text x="20" y="20" font-family="Nunito Sans, Arial, sans-serif" font-size="11" font-weight="700" fill="#5B6B82">SUPPLY</text>
+    <text x="240" y="20" font-family="Nunito Sans, Arial, sans-serif" font-size="11" font-weight="700" fill="#5B6B82">TRACK</text>
     ${rowsSvg}
     <rect x="220" y="28" width="90" height="${rows.length*32}" fill="none" stroke="#1E2A4A" stroke-width="2" rx="4"/>
-    <text x="30" y="195" font-family="Nunito Sans" font-size="10.5" fill="#8B98AB">Max. 16A per lijn</text>
+    <text x="30" y="195" font-family="Nunito Sans, Arial, sans-serif" font-size="10.5" fill="#8B98AB">Max. 16A per lijn</text>
   </svg>`;
 }
 document.getElementById('wiringA').innerHTML = `<div class="card">${wiringSvg('A')}</div>`;
@@ -3582,7 +3583,22 @@ function init(){
     b.className='choice-btn'+(p.k===st.powercfg?' sel':'');
     b.textContent=p.l;
     b.addEventListener('click',()=>{ st.powercfg=p.k; pr.querySelectorAll('.choice-btn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); refresh(); });
-    pr.appendChild(b);
+    /* Informatieteken naast de knop (een knop in een knop mag niet), met dezelfde uitleg
+       als de tab "Aansluiting & polariteit": die wordt daar uitgelezen, zodat er geen
+       tweede tekst bijkomt die uit de pas kan lopen. Het schema is wiringSvg(). */
+    const vak=document.createElement('span'); vak.className='c2-keuzeinfo';
+    vak.appendChild(b);
+    const tekst=(sel)=>{ const el=document.querySelector(sel); return el ? el.textContent.replace(/\s+/g,' ').trim() : ''; };
+    const svg = typeof wiringSvg==='function' ? wiringSvg(p.k) : '';
+    vak.appendChild(InfoTeken.maak({
+      titel: p.l,
+      tekst: [tekst('.wtab[data-w="'+p.k+'"] p'), tekst('.wiring-detail[data-wd="'+p.k+'"] .card p'),
+              tekst('.wiring-detail[data-wd="'+p.k+'"] .ts-warn, .wiring-detail[data-wd="'+p.k+'"] .ts-fix')].filter(Boolean),
+      beeld: svg ? 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg) : '',
+      bijschrift: svg ? 'Aansluitschema' : '',
+      breed: 320,
+    }));
+    pr.appendChild(vak);
   });
   /* vormen */
   const sg=$('c2ShapeGrid');
