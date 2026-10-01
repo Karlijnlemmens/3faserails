@@ -1121,24 +1121,85 @@ document.getElementById('crossSectionMini').innerHTML = `
 </svg>`;
 
 /* wiring diagrams A/B/C */
+/* De uitleg bij de drie voedingsconfiguraties, voor het informatieteken in stap 3:
+   eerst wanneer je het kiest, dan drie punten, dan het schema. Kort en zonder
+   vakjargon - binnendienst moet het in een telefoongesprek kunnen uitleggen. Feiten
+   uit het aansluitschema in de presenter van de rail: A één zekering en drie
+   schakelaars, B per fase een zekering en schakelaar, C één driepolige zekering en
+   schakelaar; overal max. 16 A, ook over de nul. */
+const VOEDING_UITLEG = {
+  A:{kies:'Kies dit als er één groep is en de spots in maximaal drie groepen apart aan en uit moeten (of gedimd).',
+     punten:['Aansluiting: één fase (L + N), 230 V.',
+             'De rail heeft drie circuits, elk met een eigen schakelaar of dimmer.',
+             'De drie circuits delen die ene groep: samen max. 16 A (3,7 kVA).'],
+     schema:'Eén zekering, drie schakelaars'},
+  B:{kies:'Kies dit als je meer vermogen nodig hebt dan één groep geeft, en de spots in drie groepen apart aan en uit moeten.',
+     punten:['Aansluiting: drie fasen (L1, L2, L3 + N), 230/400 V.',
+             'Elk circuit zit op een eigen fase, met een eigen zekering en schakelaar.',
+             'Per circuit max. 16 A (samen 3 × 3,7 kVA). Ook de nul mag max. 16 A voeren: verdeel de spots gelijkmatig.'],
+     schema:'Per fase een zekering en een schakelaar'},
+  C:{kies:'Kies dit als de hele rail in één keer aan en uit gaat en je de belasting over drie fasen wilt verdelen.',
+     punten:['Aansluiting: drie fasen (L1, L2, L3 + N), 230/400 V, via één driepolige zekering en schakelaar.',
+             'Per spot stel je op de adapter in op welke fase hij zit.',
+             'Per fase max. 16 A, en de nul ook max. 16 A: verdeel de spots over de drie fasen.'],
+     schema:'Eén driepolige zekering en schakelaar'},
+};
+
+/* Het aansluitschema van een voedingsconfiguratie (A, B of C), naar de schema's in de
+   Pragmalux-presenter van de rail, maar zonder ruis: links de verdeelkast met zekering
+   en schakelaar(s), rechts de rail met zijn vier geleiders in de kleuren van de
+   doorsnede. Een losse SVG met vaste kleuren en lettertypen mét terugval, zodat hij ook
+   als plaatje werkt (het informatieteken in stap 3). */
 function wiringSvg(letter){
-  const rows = letter==='A' ? [['L','L1'],['','L2'],['N','L3'],['','N']] :
-               letter==='B' ? [['L1','L1'],['L2','L2'],['L3','L3'],['N','N']] :
-               [['3L','L1'],['','L2'],['','L3'],['N','N']];
-  let y=40;
-  let rowsSvg = rows.map((r,i)=>{
-    const yy = 40+i*32;
-    return `<line x1="70" y1="${yy}" x2="180" y2="${yy}" stroke="#5B6B82" stroke-width="2"/>
-      <text x="60" y="${yy+4}" text-anchor="end" font-family="JetBrains Mono, Consolas, monospace" font-size="12" fill="#15202E">${r[0]}</text>
-      <text x="190" y="${yy+4}" font-family="JetBrains Mono, Consolas, monospace" font-size="12" fill="#D6362B" font-weight="700">${r[1]}</text>`;
-  }).join('');
-  return `<svg viewBox="0 0 340 220" xmlns="http://www.w3.org/2000/svg">
-    <text x="20" y="20" font-family="Nunito Sans, Arial, sans-serif" font-size="11" font-weight="700" fill="#5B6B82">SUPPLY</text>
-    <text x="240" y="20" font-family="Nunito Sans, Arial, sans-serif" font-size="11" font-weight="700" fill="#5B6B82">TRACK</text>
-    ${rowsSvg}
-    <rect x="220" y="28" width="90" height="${rows.length*32}" fill="none" stroke="#1E2A4A" stroke-width="2" rx="4"/>
-    <text x="30" y="195" font-family="Nunito Sans, Arial, sans-serif" font-size="10.5" fill="#8B98AB">Max. 16A per lijn</text>
-  </svg>`;
+  const F = 'font-family="Nunito Sans, Arial, sans-serif"';
+  const NAVY='#1E2A4A', SLATE='#5A6B84', KLEUR={L1:'#8B4A9C', L2:'#2E7D32', L3:'#C0392B', N:'#2C2C2C'};
+  const Y={L1:50, L2:80, L3:110, N:148};
+  const fase=['L1','L2','L3'];
+  const uit=[];
+  const lijn=(x1,y1,x2,y2,kl,w)=>uit.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${kl||NAVY}" stroke-width="${w||2}" stroke-linecap="round"/>`);
+  const tekst=(x,y,t,o)=>uit.push(`<text x="${x}" y="${y}" ${F} font-size="${(o&&o.pt)||10}" fill="${(o&&o.kl)||SLATE}"${o&&o.vet?' font-weight="700"':''}${o&&o.anker?' text-anchor="'+o.anker+'"':''}>${t}</text>`);
+  const klem=(y,naam)=>{ uit.push(`<circle cx="44" cy="${y}" r="3.2" fill="#fff" stroke="${NAVY}" stroke-width="1.6"/>`); tekst(34,y+3.5,naam,{kl:NAVY,vet:true,anker:'end',pt:10.5}); };
+  const zekering=(y)=>{ uit.push(`<rect x="86" y="${y-6}" width="26" height="12" rx="2" fill="#fff" stroke="${NAVY}" stroke-width="1.6"/>`); lijn(91,y+4,107,y-4,NAVY,1.4); };
+  /* schakelaar: van x 148 tot 174, open stand */
+  const schakelaar=(y)=>{ uit.push(`<circle cx="148" cy="${y}" r="2.6" fill="${NAVY}"/>`); lijn(148,y,170,y-10,NAVY,2); uit.push(`<circle cx="174" cy="${y}" r="2.6" fill="${NAVY}"/>`); };
+  /* kopjes boven de kolommen */
+  tekst(20,22,'VERDEELKAST',{vet:true,pt:9.5});
+  tekst(300,22,'RAIL',{vet:true,pt:9.5,anker:'middle'});
+  /* de rail: een vak met de vier geleiders als gekleurde labels */
+  uit.push(`<rect x="250" y="32" width="100" height="134" rx="9" fill="#F3F7FC" stroke="${NAVY}" stroke-width="1.6"/>`);
+  const railLabel = {A:{L1:'circuit 1',L2:'circuit 2',L3:'circuit 3'}, B:{L1:'circuit 1',L2:'circuit 2',L3:'circuit 3'}, C:{L1:'fase 1',L2:'fase 2',L3:'fase 3'}}[letter];
+  fase.concat('N').forEach(g=>{
+    uit.push(`<rect x="260" y="${Y[g]-9}" width="28" height="18" rx="4" fill="${KLEUR[g]}"/>`);
+    tekst(274,Y[g]+4,g,{kl:'#fff',vet:true,anker:'middle',pt:10});
+    tekst(294,Y[g]+4,g==='N'?'nul':railLabel[g],{kl:NAVY,pt:9.5});
+  });
+  /* de nul gaat altijd recht door */
+  klem(Y.N,'N'); lijn(47,Y.N,250,Y.N,KLEUR.N);
+  let onder='';
+  if(letter==='A'){
+    /* één fase, één zekering, dan drie schakelaars naar de drie circuits */
+    klem(Y.L2,'L'); lijn(47,Y.L2,86,Y.L2); zekering(Y.L2); tekst(99,Y.L2-11,'16 A',{anker:'middle',pt:9,kl:NAVY,vet:true});
+    lijn(112,Y.L2,128,Y.L2); lijn(128,Y.L1,128,Y.L3);
+    fase.forEach((g,i)=>{ uit.push(`<circle cx="128" cy="${Y[g]}" r="2.4" fill="${NAVY}"/>`); lijn(128,Y[g],148,Y[g]); schakelaar(Y[g]);
+      tekst(140,Y[g]-6,String(i+1),{pt:8.5}); lijn(174,Y[g],250,Y[g],KLEUR[g]); });
+    onder='Eén groep · samen max. 16 A (3,7 kVA)';
+  } else if(letter==='B'){
+    /* drie fasen, elk een eigen zekering en schakelaar */
+    fase.forEach((g,i)=>{ klem(Y[g],g); lijn(47,Y[g],86,Y[g]); zekering(Y[g]); lijn(112,Y[g],148,Y[g]); schakelaar(Y[g]);
+      tekst(140,Y[g]-6,String(i+1),{pt:8.5}); lijn(174,Y[g],250,Y[g],KLEUR[g]); });
+    tekst(99,Y.L1-11,'3 × 16 A',{anker:'middle',pt:9,kl:NAVY,vet:true});
+    onder='Per circuit max. 16 A · samen 3 × 3,7 kVA';
+  } else {
+    /* drie fasen, één driepolige zekering en één driepolige schakelaar: alles samen. De
+       streeplijnen (gekoppeld) eerst, dan liggen ze onder de symbolen. */
+    uit.push(`<line x1="99" y1="${Y.L1+6}" x2="99" y2="${Y.L3-6}" stroke="${SLATE}" stroke-width="1.3" stroke-dasharray="3 3"/>`);
+    uit.push(`<line x1="160" y1="${Y.L1-5}" x2="160" y2="${Y.L3-5}" stroke="${SLATE}" stroke-width="1.3" stroke-dasharray="3 3"/>`);
+    fase.forEach(g=>{ klem(Y[g],g); lijn(47,Y[g],86,Y[g]); zekering(Y[g]); lijn(112,Y[g],148,Y[g]); schakelaar(Y[g]); lijn(174,Y[g],250,Y[g],KLEUR[g]); });
+    tekst(99,Y.L1-11,'16 A, 3-polig',{anker:'middle',pt:9,kl:NAVY,vet:true});
+    onder='Per fase max. 16 A · de hele rail schakelt samen';
+  }
+  tekst(20,188,onder,{kl:NAVY,vet:true,pt:10.5});
+  return `<svg viewBox="0 0 360 198" xmlns="http://www.w3.org/2000/svg">${uit.join('')}</svg>`;
 }
 document.getElementById('wiringA').innerHTML = `<div class="card">${wiringSvg('A')}</div>`;
 document.getElementById('wiringB').innerHTML = `<div class="card">${wiringSvg('B')}</div>`;
@@ -3583,20 +3644,19 @@ function init(){
     b.className='choice-btn'+(p.k===st.powercfg?' sel':'');
     b.textContent=p.l;
     b.addEventListener('click',()=>{ st.powercfg=p.k; pr.querySelectorAll('.choice-btn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); refresh(); });
-    /* Informatieteken naast de knop (een knop in een knop mag niet), met dezelfde uitleg
-       als de tab "Aansluiting & polariteit": die wordt daar uitgelezen, zodat er geen
-       tweede tekst bijkomt die uit de pas kan lopen. Het schema is wiringSvg(). */
+    /* Informatieteken naast de knop (een knop in een knop mag niet): wanneer je het kiest,
+       de drie dingen die je moet weten, en het schema (wiringSvg(), naar de presenter van
+       de rail). Teksten in VOEDING_UITLEG. */
     const vak=document.createElement('span'); vak.className='c2-keuzeinfo';
     vak.appendChild(b);
-    const tekst=(sel)=>{ const el=document.querySelector(sel); return el ? el.textContent.replace(/\s+/g,' ').trim() : ''; };
-    const svg = typeof wiringSvg==='function' ? wiringSvg(p.k) : '';
+    const u=VOEDING_UITLEG[p.k];
     vak.appendChild(InfoTeken.maak({
       titel: p.l,
-      tekst: [tekst('.wtab[data-w="'+p.k+'"] p'), tekst('.wiring-detail[data-wd="'+p.k+'"] .card p'),
-              tekst('.wiring-detail[data-wd="'+p.k+'"] .ts-warn, .wiring-detail[data-wd="'+p.k+'"] .ts-fix')].filter(Boolean),
-      beeld: svg ? 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg) : '',
-      bijschrift: svg ? 'Aansluitschema' : '',
-      breed: 320,
+      tekst: u.kies,
+      lijst: u.punten,
+      beeld: 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(wiringSvg(p.k)),
+      bijschrift: u.schema,
+      breed: 340,
     }));
     pr.appendChild(vak);
   });
