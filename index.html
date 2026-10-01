@@ -439,6 +439,9 @@
   .c2-pop button:hover{border-color:var(--navy-900); background:var(--paper);}
 
   .c2-check{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink); font-weight:600; margin-bottom:12px; cursor:pointer;}
+  /* Het blok van de introductiepagina: hetzelfde als in het armaturenboek (de opmaak staat
+     in briefing.js), hier binnen het paneel met een eigen rand. */
+  .c2-briefblok{border:1.5px solid var(--border); border-radius:8px; padding:10px 12px; margin:0 0 16px;}
   .c2-adapterrow{display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink); font-weight:600; margin-bottom:14px;}
   .c2-raildetail{display:flex; flex-direction:column; gap:7px;}
   .c2-railrow{background:var(--paper); border-radius:7px; padding:9px 12px; font-size:12.5px; line-height:1.55;}
@@ -868,8 +871,12 @@
           <span>Datum:</span>
           <input type="date" id="c2Datum" class="c2-textinp">
         </div>
-        <p class="hint" style="margin:0 0 2px;">Contactpersonen — komen op een introductiepagina direct achter het voorblad, net als in het armaturenboek. Een projectuitwerker met een persoonlijke noot krijgt ook het blauwe vlak “Onze specialist”, met foto. Niemand gekozen: geen extra pagina.</p>
-        <div id="c2ContactVelden" style="margin-bottom:16px;"></div>
+        <details class="brief-vouw c2-briefblok" id="c2BriefBlok">
+          <summary>Soort opdracht &amp; briefingpagina<span class="stand" id="c2BriefStand"></span></summary>
+          <label class="c2-check" style="margin:12px 0 0;"><input type="checkbox" id="c2ToonBriefing" checked> Briefing in de PDF</label>
+          <div id="c2BriefVelden"></div>
+          <div id="c2ContactVelden" style="margin-top:16px;"></div>
+        </details>
         <p class="hint" style="margin:0 0 6px;">Totaal projectboek — voeg het lichtplan toe als PDF, bijvoorbeeld de uitvoer uit DIALux of AutoCAD die je al hebt opgeslagen. Het komt in de PDF direct na de introductie (of na het voorblad), achter het hoofdstukblad “Lichtberekening”, net als in het armaturenboek. Zonder lichtplan verandert er niets.</p>
         <input type="file" id="c2LichtplanBestand" accept="application/pdf,.pdf" hidden>
         <div class="lichtplan-keuze" style="margin-bottom:16px;">
@@ -965,6 +972,7 @@
 <script src="medewerkers.js"></script>
 <script src="medewerker-fotos.js"></script>
 <script src="contactpersonen.js"></script>
+<script src="briefing.js"></script>
 <script src="armatuur-groepen.js"></script>
 <script src="zoeken.js"></script>
 <script src="armatuur-rij.js"></script>
@@ -1691,7 +1699,11 @@ let st = { step:1, dali:false, color:'wit', powercfg:'A', shape:null, gRows:2, g
   use4m:false, pick:false,
   /* de armaturenlijst in de PDF, net als in het armaturenboek optioneel */
   toonLijst:true,
-  /* wie er op de introductiepagina staan (ids uit medewerkers.js), zoals in het armaturenboek */
+  /* de introductiepagina achter het voorblad, dezelfde als in het armaturenboek (briefing.js):
+     de briefing - soort opdracht en de vier bronnen - en wie er onder de contactgegevens
+     staan (ids uit medewerkers.js). toonBriefing uit: alleen de contactpersonen, en zonder
+     die geen introductiepagina. */
+  toonBriefing:true, soort:'lichtberekening', bestek:'', tekeningen:'', armaturenboek:'', email:'',
   projectuitwerker:'', accountmanager:'', binnendienst:'',
   /* totaal projectboek: het ingeladen lichtplan, {naam, paginas} of null; de PDF zelf
      houdt lichtplan.js bij (Lichtplan.pdf), net als in het armaturenboek */
@@ -2660,6 +2672,8 @@ function warnings(B){
     if(montageVan(sh.id).wijze!=='geen' || !n) return;
     w.push({t:'tip', m:'Kies in stap 4 een montagewijze'+(st.sheets.length>1?' voor \u201c'+sh.name.replace(/</g,'&lt;')+'\u201d':'')
       +' \u2014 '+(st.sheets.length>1?'dit tekenvlak':'deze tekening')+' heeft '+n+' montagepunten (om de meter, incl. uiteinden; hoeken en kruisingen gedeeld).'}); });
+  /* de briefingpagina, zoals in het armaturenboek - pas vanaf de stap met de projectgegevens */
+  if(st.toonBriefing !== false && st.step>=6 && briefingWaarschuwing(st)) w.push({t:'warn', m: briefingWaarschuwing(st)});
   return w;
 }
 
@@ -2707,10 +2721,18 @@ function renderSheetsBar(){
 /* Staat de tool nog op te starten? Dan is een verversing geen wijziging van de
    gebruiker, en hoeft er niets bewaard of gewaarschuwd te worden. */
 let startKlaar = false;
+/* De kop van het dichtgeklapte briefingblok zegt wat erin staat (briefingStand() in
+   briefing.js); met het vinkje uit verdwijnen de soort opdracht en de bronnen. */
+function briefingBijwerken(){
+  const aan = st.toonBriefing !== false;
+  $('c2BriefVelden').hidden = !aan;
+  $('c2BriefStand').textContent = aan ? briefingStand(st) : '\u2014 briefing niet in de PDF';
+}
 function refresh(){
   if(startKlaar) ProjectOpslag.gewijzigd();
   if(st.step===3) st.step=4;   /* Voeding is verborgen; een project dat daar stond gaat naar Vorm */
   zorgVoorLegeSlot();
+  briefingBijwerken();
   const B=computeBOM(); lastBOM=B;
   renderSheetsBar();
   /* stepper */
@@ -2864,19 +2886,14 @@ async function buildPdf(){
   /* --- voorblad --- */
   omslag({naam:st.proj, nr:st.projNr, inst:st.installateur, datum:datumNL(st.datum)});
 
-  /* --- introductiepagina met de contactpersonen, zoals in het armaturenboek: de
-         maten en de tekening zijn tekenContactpersonen() in contactpersonen.js. Alleen
-         als er iemand gekozen is - een project zonder contactpersonen krijgt precies de
-         PDF van voorheen. Daarna terug naar de sectienaam van de pagina's hierna, want
-         een vervolgpagina neemt de laatst gezette naam over in zijn kop. --- */
-  if(contactPersonen(st).length){
-    zetSectie('Introductie');
-    beginPage(true);
-    paginaKop('Introductie',
-      (st.proj||'').trim() + ((st.proj||'').trim()? '  \u2014  ':'') + datumNL(st.datum));
-    y = CONTACT.boven;
-    await tekenContactpersonen(HS, st, {haal:()=>y, zet:v=>{ y=v; }}, 0);
-    flush();
+  /* --- introductiepagina, dezelfde als in het armaturenboek: de briefing en de
+         contactpersonen, tekenIntroductie() in briefing.js. Zonder briefing (het vinkje
+         uit) alleen de contactpersonen, en zonder die ook geen pagina. Daarna terug naar
+         de sectienaam van de pagina's hierna, want een vervolgpagina neemt de laatst
+         gezette naam over in zijn kop. --- */
+  const metBriefing = st.toonBriefing !== false;
+  if(metBriefing || contactPersonen(st).length){
+    await tekenIntroductie(HS, st, {haal:()=>y, zet:v=>{ y=v; }}, metBriefing);
     zetSectie('Installatieoverzicht');
   }
   /* Tot hier voorblad en introductie; het totale projectboek zet hierna het lichtplan
@@ -3319,6 +3336,7 @@ async function maakPdfBytes(){
       + 'Toevoegen: zet de PDF in presenters-bron/ en draai "node tools/maak-presenters.mjs".');
   }
   if(Lichtplan.ontbreekt()) meldingen.push(Lichtplan.exportMelding());
+  if(st.toonBriefing !== false && briefingExportMelding(st)) meldingen.push(briefingExportMelding(st));
   if(meldingen.length) alert(meldingen.join('\n\n')+'\n\nDe PDF wordt verder gewoon gegenereerd.');
   try{
     const bytes = await assembleFinalPdf();
@@ -3643,7 +3661,9 @@ function init(){
          Bij het opstarten gebeurt dit hierna nog een keer; dat kan geen kwaad. */
       buildArmList();
       buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
+      briefingKeuze($('c2BriefVelden'), st, refresh, 'c2Brief_');
       contactKeuze($('c2ContactVelden'), st, refresh, 'c2Contact_');
+      $('c2ToonBriefing').checked = st.toonBriefing !== false;
       Lichtplan.verf();
       $('c2DaliRow').querySelectorAll('.choice-btn').forEach(b=>
         b.classList.toggle('sel', (b.textContent==='DALI') === !!st.dali));
@@ -3745,6 +3765,8 @@ function init(){
   $('c2RuimteAdd').addEventListener('click', voegRuimtesToe);
   $('c2RuimteInp').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); voegRuimtesToe(); } });
   $('c2Proj').addEventListener('input', e=>{ st.proj=e.target.value; });
+  /* na het typen: de melding over de projectnaam op de briefingpagina bijwerken */
+  $('c2Proj').addEventListener('change', refresh);
   $('c2ProjNr').addEventListener('input', e=>{ st.projNr=e.target.value; });
   $('c2Inst').addEventListener('input', e=>{ st.installateur=e.target.value; });
   $('c2Datum').addEventListener('input', e=>{ st.datum=e.target.value; });
@@ -3756,8 +3778,12 @@ function init(){
   })(); }
   buildArmList();
   buildProdList($('c2OverigList'), ADAPTERS_OVERIG, st.overig, [{k:'wit',l:'Wit'},{k:'zwart',l:'Zwart'},{k:'grijs',l:'Grijs'}]);
-  /* de contactpersonen: contactKeuze() in contactpersonen.js, dezelfde als in het armaturenboek */
+  /* de introductiepagina: de briefing (briefingKeuze() in briefing.js) en de
+     contactpersonen (contactKeuze() in contactpersonen.js), dezelfde als in het armaturenboek */
+  briefingKeuze($('c2BriefVelden'), st, refresh, 'c2Brief_');
   contactKeuze($('c2ContactVelden'), st, refresh, 'c2Contact_');
+  $('c2ToonBriefing').checked = st.toonBriefing !== false;
+  $('c2ToonBriefing').addEventListener('change', e=>{ st.toonBriefing = e.target.checked; refresh(); });
   /* totaal projectboek: het lichtplan, zie lichtplan.js - hetzelfde blok als in het armaturenboek */
   Lichtplan.koppel({
     st: ()=>st,
@@ -3787,7 +3813,11 @@ function init(){
     st.proj=''; st.projNr=''; st.installateur='';
     $('c2Proj').value=''; $('c2ProjNr').value=''; $('c2Inst').value='';
     st.projectuitwerker=''; st.accountmanager=''; st.binnendienst='';
+    st.toonBriefing=true; st.soort='lichtberekening';
+    BRIEF_VELDEN.forEach(v=>{ st[v.id]=''; });
+    briefingKeuze($('c2BriefVelden'), st, refresh, 'c2Brief_');
     contactKeuze($('c2ContactVelden'), st, refresh, 'c2Contact_');
+    $('c2ToonBriefing').checked=true;
     (function(){ const d=new Date();
       st.datum = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
       $('c2Datum').value = st.datum; })();
@@ -3883,6 +3913,7 @@ function init(){
     /* Leeg = er is nog niets getekend en niets ingevuld. Kleur, voeding en de andere
        keuzes van stap 1-2 tellen niet mee: daar kies je zo weer iets anders. */
     isLeeg: ()=> !st.nodes.length && !(st.proj||'').trim() && !(st.projNr||'').trim()
+              && !BRIEF_VELDEN.some(v=> (st[v.id]||'').trim())
               && ARMATUREN.every(a=> armSlotLeeg(st.armaturen[a.id])) && !st.lichtplan,
     omschrijf: ()=> (st.proj||'').trim(),
     bewaar: slaProjectOp,

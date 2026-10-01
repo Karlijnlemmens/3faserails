@@ -1376,21 +1376,20 @@ function is(wat, gekregen, verwacht){
   is('artikelnummer en verpakkingscode horen bij elkaar zoals in PCODES LCODES.xlsx (' + paren + ' paren)', afwijkend, []);
 }
 
-/* ======================= armaturenboek: de briefingtekst ======================= */
+/* ============== de briefingtekst (armaturenboek en railtool) ============== */
 {
   /* De bronnen van de briefing (bestek, technische tekeningen, armaturenboek, e-mail)
      zijn optioneel: alleen wat is ingevuld komt in de tekst, en de zinnen voegen zich
      daarnaar. Een leeg veld gaf vroeger "[Bestek]" in de PDF, ook bij een vergelijking
-     waar geen bestek bij hoorde. */
+     waar geen bestek bij hoorde. De tekst staat in briefing.js, dat het armaturenboek
+     en de railtool allebei laden. */
   console.log('briefingtekst');
-  const b = await laadUit('armaturenboek.html',
+  const b = await laadUit('briefing.js',
     ['briefRegels', 'briefOpsomming', 'BRIEF_VELDEN', 'briefingOpenVelden', 'briefNamen', 'briefGroepen',
-     'briefBronnen', 'briefVraagSlot', 'briefInhoud'],
-    'const st = {}; function zet(o){ Object.keys(st).forEach(k => delete st[k]); Object.assign(st, o); }', ['zet']);
+     'briefBronnen', 'briefVraagSlot', 'briefInhoud']);
   const tekst = segs => segs.map(s => s.v ? '**' + s.t + '**' : s.t).join('');
   const blad = (soort, velden) => {
-    b.zet(Object.assign({proj:'Kantoor Weena'}, velden));
-    const i = b.briefInhoud(soort, 'Kantoor Weena');
+    const i = b.briefInhoud(Object.assign({soort, proj:'Kantoor Weena'}, velden));
     return {vraag: tekst(i.vraag), slot: tekst(i.vraagSlot),
             rest: i.blokken.map(x => x.t || (x.s ? tekst(x.s) : x.items.join(' / ')))};
   };
@@ -1428,8 +1427,10 @@ function is(wat, gekregen, verwacht){
     [niets.vraag, niets.slot, niets.rest[1]],
     ['Het opstellen van een lichtplan voor **Kantoor Weena.**', '',
      'Wij ontwikkelen een lichtconcept dat aansluit op het gevraagde lichtplan. Dit concept voldoet aan de actuele norm NEN-EN 12464-1:2021.']);
-  b.zet({});
-  is('alleen een lege projectnaam is nog een open veld', b.briefingOpenVelden(), ['projectnaam']);
+  is('alleen een lege projectnaam is nog een open veld', b.briefingOpenVelden({}), ['projectnaam']);
+  /* een project van vóór de soort opdracht (de railtool kende hem niet) is een
+     lichtberekening, zoals het paneel hem dan ook toont */
+  is('zonder soort: een lichtberekening', b.briefInhoud({proj:'X'}).vraag[0].t, 'Het opstellen van een lichtplan voor ');
 }
 
 /* ======================= railtool: ruimtes per tekenvlak ======================= */
