@@ -377,15 +377,11 @@ function briefOpsomming(lijst){
             ze samen "de documenten ... en ...".
      aanhalen  het onderwerp van een e-mail staat tussen aanhalingstekens. */
 const BRIEF_VELDEN = [
-  {id:'bestek',        label:'Bestek',                 ev:'het document', mv:'de documenten',
-   uitleg:'Het bestek waar de opdracht op steunt.'},
-  {id:'tekeningen',    label:'Technische tekeningen',  ev:'de tekening',  mv:'de tekeningen',
-   uitleg:'De tekening(en) waar het lichtontwerp of de offerte op is gebaseerd.'},
-  {id:'armaturenboek', label:'Armaturenboek',          ev:'het document', mv:'de documenten',
-   uitleg:'Het boek met de gevraagde armaturen. Bij een vergelijking ook in de disclaimer.'},
+  {id:'bestek',        label:'Bestek',                 ev:'het document', mv:'de documenten'},
+  {id:'tekeningen',    label:'Technische tekeningen',  ev:'de tekening',  mv:'de tekeningen'},
+  {id:'armaturenboek', label:'Armaturenboek',          ev:'het document', mv:'de documenten'},
   {id:'email',         label:'E-mail',                 ev:'de e-mail met als onderwerp', mv:'de e-mails met als onderwerp',
-   aanhalen:true,
-   uitleg:'Kwam de vraag per e-mail? Vul het onderwerp in.'},
+   aanhalen:true},
 ];
 
 /* Wat er op de briefingpagina nog leeg is. De bronnen mogen leeg blijven (dan komen
@@ -1221,9 +1217,7 @@ BRIEF_VELDEN.forEach(v=>{
   ta.placeholder = AB_DOCPLAATS[v.id] || '';
   ta.value = st[v.id] || '';
   ta.addEventListener('input', ()=>{ st[v.id] = ta.value; toonBriefingVelden(); updateSummary(); });
-  const uitleg = document.createElement('p');
-  uitleg.className = 'hint'; uitleg.style.margin = '4px 0 0'; uitleg.textContent = v.uitleg;
-  vak.appendChild(label); vak.appendChild(ta); vak.appendChild(uitleg);
+  vak.appendChild(label); vak.appendChild(ta);
   $('abDocVelden').appendChild(vak);
 });
 /* De drie contactpersonen. Zelfde reden om eerst leeg te maken als hierboven. Zonder
