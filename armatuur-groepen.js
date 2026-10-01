@@ -16,7 +16,7 @@
    veranderen. Laden met een gewoon <script src="armatuur-groepen.js">, vóór de code
    van de tool; geen module, want die weigert te laden vanaf schijf (file://).
 
-   node tools/controleer-logica.mjs test de herkenning (123 groepen plus de gevallen
+   node tools/controleer-logica.mjs test de herkenning (124 groepen plus de gevallen
    die er ooit naast zaten). */
 const ARM_GROEPEN = [
   {id:'ag01', naam:'Punto', zoektermen:[]},
@@ -158,6 +158,9 @@ const ARM_GROEPEN = [
   /* Port-Nova IP65 (2032149 en uitvoeringen): een ander armatuur dan de Port-M en Port-S
      PKVW, met een eigen blad ("LED Portiekarmatuur Port-Nova") */
   {id:'ag120', naam:'Portiekarmatuur Port-Nova', zoektermen:['Port-Nova']},
+  /* Rondisc (2031906 en uitvoeringen). Het blad is zelf opgemaakt in de stijl van de
+     Pragmalux-bladen (tools/familiebladen/): Pragmalux heeft er geen familieblad van. */
+  {id:'ag121', naam:'Rondisc', zoektermen:[]},
   {id:'lichtlijn-prxline', naam:'Lichtlijn PRX-Line', zoektermen:['Line']},
   {id:'lichtlijn-uniline', naam:'Lichtlijn PRX-Uniline', zoektermen:['Uniline']},
   {id:'lichtlijn-retroline', naam:'Lichtlijn Retroline PRX', zoektermen:['Retroline']},

@@ -161,6 +161,12 @@ function is(wat, gekregen, verwacht){
      groep('Port Nova 6W'), groep('Pragmalux LED Portiek Port-M PKVW IP66 IK10 2,75-5W 295-570lm 2700K-4000K 3-CCT'),
      groep('Pragmalux LED Portiek Port-S PKVW IP66 IK10 2,75-5W 275-600lm 2700K-4000K 3-CCT'), groep('Nova')],
     ['ag120', 'ag120', 'ag85', 'ag95', null]);
+  /* De Rondisc (oktober 2026) heeft een eigen, zelf opgemaakt blad; de Rondix (een paneel)
+     blijft de Rondix - de twee namen schelen één letter. */
+  is('een Rondisc is de Rondisc, een Rondix blijft de Rondix',
+    [groep('Pragmalux LED Plafonnière / Wandarmatuur Rondisc Wit Ø348 IP44 IK10 6-12W 650-1500lm 3000K-4000K 2-CCT + bewegingssensor'),
+     groep('Rondisc 12W'), groep('Paneel Rondix'), groep('Rondix')],
+    ['ag121', 'ag121', 'ag33', 'ag33']);
   /* Paneel en bandraster zijn één soort: de Flexcore-presenter heet zelf zo. */
   is('bandraster Flexcore houdt de Flexcore-presenter',
     groep('Pragmalux LED Bandrasterarmatuur Flexcore Microprisma 185x1542mm 26-36W 3600-4800lm'), 'ag30');
@@ -231,8 +237,8 @@ function is(wat, gekregen, verwacht){
      (de Qube IP65 en de Essence G3 IP66, op niets dan het soortwoord en de IP-klasse -
      geen presenter is beter dan de verkeerde), de Clean HACCP valt terecht in tweeën,
      en de Highbay Essence, Titandisc, Aludisc, Eclipse en Soladisc IP65 kregen hun eigen
-     blad. Oktober 2026: de Port-Nova kreeg zijn eigen blad. */
-  is('families met één presenter: ondergrens 153', eens >= 153, true);
+     blad. Oktober 2026: de Port-Nova en de Rondisc kregen hun eigen blad. */
+  is('families met één presenter: ondergrens 154', eens >= 154, true);
   is('geen suggestie op een echt artikel', onterecht, 0);
   console.log('  catalogus: ' + eens + ' families eenduidig, ' + gesplitst.length + ' gesplitst, '
             + zonder + ' zonder presenter.');

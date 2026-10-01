@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<!-- Alles laadt vanaf de hoofdmap van de repo: pdf-lib, de tekenlaag en (via die) de
+     lettertypen en logo's in merk/. -->
+<base href="../../">
+<title>Familieblad maken</title>
+<style>
+  body{font:14px/1.5 sans-serif; margin:24px; color:#1A253C;}
+  button{font:inherit; padding:6px 14px; margin-right:8px;}
+  iframe{width:100%; height:80vh; border:1px solid #CBD0DA; margin-top:12px;}
+</style>
+</head>
+<body>
+<!-- Een familieblad in de stijl van de Pragmalux-bladen, voor een armatuur waarvan
+     Pragmalux (nog) geen blad heeft. Hulpmiddel, geen tool: openen vanaf schijf,
+     "PDF opslaan", het bestand in presenters-bron/ zetten als <id>.pdf en dan
+     node tools/comprimeer-presenters.mjs en node tools/maak-presenters.mjs, zoals bij
+     elk ander blad (docs/gedeeld.md, "Adding presenter PDFs").
+
+     familieblad.html?blad=rondisc tekent tools/familiebladen/rondisc.js. De maten
+     zijn nagemeten op het familieblad van de Port-Nova (oktober 2026), het jongste
+     echte blad: dezelfde kop, dezelfde tabellen, dezelfde voetregel. -->
+<h1 id="kop">Familieblad</h1>
+<p><button id="opslaan" disabled>PDF opslaan</button><span id="stand">bezig…</span></p>
+<iframe id="voorbeeld" title="Voorbeeld"></iframe>
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="pdf-huisstijl.js"></script>
+<script>
+const BLAD = new URLSearchParams(location.search).get('blad') || 'rondisc';
+document.write('<script src="tools/familiebladen/' + BLAD.replace(/[^a-z0-9-]/g, '') + '.js"><\/script>');
+</script>
+<script>
+/* De voetregel van de Pragmalux-familiebladen, letterlijk. */
+const VOETREGEL = '©2026 Pragmalux - PDL Lighting B.V. Alle rechten voorbehouden. PDL Lighting B.V. doet '
+  + 'geen uitspraken over en geeft geen garanties voor de nauwkeurigheid of volledigheid van de informatie in '
+  + 'dit document en kan op geen enkele wijze aansprakelijk worden gesteld voor handelingen die op deze '
+  + 'informatie worden gebaseerd. De informatie in dit document is niet bedoeld als offerte en maakt geen deel '
+  + 'uit van enige aanbieding of overeenkomst, Fouten en omissies voorbehouden.';
+
+async function maakBlad(B){
+  const doc = await PDFLib.PDFDocument.create();
+  doc.setTitle(B.titelDun + ' ' + B.titelVet);
+  doc.setProducer('Pragmalux');
+  let pg = null, y = 0;
+  const paginas = [];
+  const HS = await PdfHuisstijl.tekenaar(doc, {
+    haalY:()=>y, zetY:v=>{y=v;}, haalPg:()=>pg, zetPg:p=>{pg=p;},
+    paginas, fonts:'pragmalux', logos:['pmLicht','pmDonker'], voet:false,
+  });
+  const {W, C, zetThema, text, meet, line, rect, circle, poly, wrapBreedte, logo,
+         beginPage, sluitBeeldIn, beeldPassend} = HS;
+  zetThema('pragmalux');
+  const NAVY = C.hoofd, GRIJS = '#F0F0F0', LIJN = '#8E97AB';
+  const beeld = async uri => uri ? sluitBeeldIn(PdfHuisstijl.b64Bytes(uri.split(',')[1])) : null;
+  const foto = await beeld(B.foto), sfeer = await beeld(B.sfeer);
+
+  /* een vinkje zoals in de lijsten van de bladen: twee streepjes */
+  function vink(x, yt){
+    line(x, yt+3.6, x+2.1, yt+5.8, 0.9, NAVY, true);
+    line(x+2.1, yt+5.8, x+6, yt+1.2, 0.9, NAVY, true);
+  }
+  /* een pijlpunt voor de maatlijnen */
+  function punt(x, yt, richting){
+    const d = richting * 4;
+    poly([[x, yt], [x+d, yt-1.6], [x+d, yt+1.6]], NAVY);
+  }
+  /* tekst in regels op echte breedte; geeft de y onder de laatste regel */
+  function alinea(t, x, yt, breedte, pt, regel, kleur){
+    wrapBreedte(t, breedte, pt, {}).forEach((r, i)=> text(x, yt + i*regel, pt, r, {color:kleur||NAVY}));
+    return yt + wrapBreedte(t, breedte, pt, {}).length * regel;
+  }
+  function kop(t, x, yt, pt){ text(x, yt, pt||13, t, {cond:true, bold:true, color:NAVY}); }
+  /* het garantieblokje van de bladen: het getal groot, "jaar garantie" ernaast en een
+     strookje "premium kwaliteit" eronder. s schaalt (1 = de maat in de kop van pagina 1) */
+  function garantie(x, yt, s, opDonker){
+    const voor = opDonker ? C.wit : NAVY, achter = opDonker ? NAVY : C.wit;
+    const b = 52*s, h = 24*s;
+    rect(x, yt, b, h, null, voor, 0.8);
+    text(x + 5*s, yt + 1.5*s, 21*s, String(B.garantieJaar), {cond:true, bold:true, color:voor});
+    text(x + 19*s, yt + 5*s, 7.6*s, 'JAAR', {cond:true, bold:true, color:voor});
+    text(x + 19*s, yt + 12.5*s, 7.6*s, 'GARANTIE', {cond:true, bold:false, color:voor});
+    rect(x, yt + h, b, 7.5*s, voor);
+    text(x + b/2, yt + h + 1.6*s, 5*s, 'PREMIUM KWALITEIT', {cond:true, bold:true, color:achter, align:'center'});
+  }
+
+  /* ================= pagina 1 ================= */
+  beginPage(true);
+  rect(0, 0, W, 181, NAVY);
+  logo(35, 35, 24.7, true);
+  line(35, 99, 253, 99, 0.6, LIJN);
+  text(35, 108, 26.7, B.titelDun, {cond:true, bold:false, color:C.wit});
+  text(35, 133, 28.5, B.titelVet, {cond:true, bold:true, color:C.wit});
+  line(35, 163, 253, 163, 0.6, LIJN);
+
+  if(B.garantieJaar) garantie(508, 34, 1, true);
+
+  /* boven: links de kop en de tekst, rechts de productfoto */
+  const L = 35, LB = 238, R = 300, RB = 260;
+  kop(B.kop, L, 203.6, 14.3);
+  let yl = alinea(B.intro, L, 224, LB, 7.8, 11.2);
+  if(foto) beeldPassend(foto, R, 192, RB, 158);
+
+  /* een donkere band met de kengetallen, zoals de productkaart ze geeft */
+  const by = Math.max(yl, 350) + 44, bh = 58;
+  rect(L, by, 560-L, bh, NAVY);
+  const kolom = (560-L) / B.kengetallen.length;
+  B.kengetallen.forEach(([naam, waarde], i)=>{
+    const cx = L + kolom*i + kolom/2;
+    text(cx, by + 11, 15, naam, {cond:true, bold:true, color:C.wit, align:'center'});
+    text(cx, by + 31, 11, waarde, {color:C.wit, align:'center'});
+    if(i) line(L + kolom*i, by + 12, L + kolom*i, by + bh - 12, 0.5, C.hoofd2);
+  });
+  if(B.voetnoot) text(560, by + bh + 4, 6.2, B.voetnoot, {color:C.grey, align:'right'});
+
+  /* onder: links de kenmerken, rechts de sfeerfoto */
+  yl = by + bh + 40;
+  kop('KENMERKEN', L, yl, 11.5);
+  yl += 19;
+  B.kenmerken.forEach(k=>{
+    vink(L, yl);
+    yl = alinea(k, L+11, yl, LB-11, 7.8, 11.2) + 2.5;
+  });
+  if(sfeer) beeldPassend(sfeer, R, by + bh + 40, RB, RB * sfeer.height / sfeer.width);
+
+  /* ================= pagina 2 ================= */
+  beginPage(true);
+  const dun = B.titelDun + ' ';
+  const bDun = text(36, 11.8, 22, dun, {cond:true, bold:false, color:NAVY});
+  text(36 + bDun, 11.8, 22, B.titelVet, {cond:true, bold:true, color:NAVY});
+  logo(563 - HS.logoBreedte(17), 13, 17, false);
+  line(36, 35.5, 563, 35.5, 0.75, NAVY);
+
+  /* PRODUCTGEGEVENS: labels in een donkere kolom, waarden om en om grijs */
+  kop('PRODUCTGEGEVENS', 36, 51.5, 12.5);
+  const RIJ = 15.75, LBL = 85, WRD = 186;
+  B.productgegevens.forEach(([l, w], i)=>{
+    const ry = 64.7 + i*RIJ;
+    rect(36, ry, LBL, RIJ, NAVY);
+    if(i) line(36, ry, 36+LBL, ry, 0.4, C.hoofd2);
+    if(i % 2 === 0) rect(36+LBL, ry, WRD, RIJ, GRIJS);
+    text(38.5, ry+4.2, 7.8, l, {color:C.wit});
+    text(36+LBL+2.5, ry+4.2, 7.8, w, {color:NAVY});
+  });
+  const naTabel = 64.7 + B.productgegevens.length*RIJ;
+
+  /* de rij ronde kenmerken naast de tabel, zoals op de bladen; een donkere ertussen */
+  (B.badges || []).forEach((bd, i)=>{
+    const cx = 316 + 10.7 + i*24.7, cy = 75.4, r = 10.7;
+    circle(cx, cy, r, bd.donker ? NAVY : C.wit, bd.donker ? null : '#9AA0AD', 0.6);
+    const kleur = bd.donker ? C.wit : NAVY;
+    bd.tekst.forEach((r2, j)=> text(cx, cy - bd.tekst.length*3.4 + j*6.8, 6.6, r2,
+      {cond:true, bold:true, color:kleur, align:'center'}));
+  });
+  if(B.garantieJaar) garantie(316, 90.5, 0.5, false);
+
+  /* AFMETINGEN: een ronde armatuur van boven, met de diameter */
+  let naRechts = 0;
+  if(B.afmeting && B.afmeting.rond){
+    kop('AFMETINGEN', 316, 120, 12.5);
+    const cx = 395, cy = 172, r = 34;
+    circle(cx, cy, r, null, NAVY, 0.9);
+    circle(cx, cy, r-5, null, LIJN, 0.5);
+    const ly = cy + r + 12;
+    line(cx-r, cy+4, cx-r, ly+4, 0.4, NAVY);
+    line(cx+r, cy+4, cx+r, ly+4, 0.4, NAVY);
+    line(cx-r+4, ly, cx+r-4, ly, 0.5, NAVY);
+    punt(cx-r, ly, 1); punt(cx+r, ly, -1);
+    text(cx, ly+3, 6.5, 'Ø' + B.afmeting.rond, {color:NAVY, align:'center'});
+    naRechts = ly + 12;
+  }
+
+  /* een tabel zoals BESTELGEGEVENS: donkere kopregel, rijen om en om grijs */
+  function tabel(titel, yt, kolommen, rijen){
+    kop(titel, 36, yt, 12.5);
+    let ty = yt + 13.3;
+    const X = [36]; kolommen.forEach(k=> X.push(X[X.length-1] + k.b));
+    rect(36, ty, X[X.length-1]-36, 16, NAVY);
+    kolommen.forEach((k, i)=>{
+      text(X[i]+2.5, ty+4.2, 8.4, k.kop, {color:C.wit});
+      if(i) line(X[i], ty, X[i], ty+16, 0.6, C.wit);
+    });
+    ty += 16;
+    rijen.forEach((rij, n)=>{
+      const regels = rij.map((w, i)=> wrapBreedte(w, kolommen[i].b - 6, 7.9, {}));
+      const hoog = Math.max(...regels.map(r=>r.length));
+      const rh = Math.max(16.5, hoog*11.5 + 5);
+      if(n % 2 === 1) rect(36, ty, X[X.length-1]-36, rh, GRIJS);
+      regels.forEach((rr, i)=>{
+        const start = ty + (rh - rr.length*11.5)/2 + 1.3;
+        rr.forEach((r, j)=> text(X[i]+2.5, start + j*11.5, 7.9, r, {color:NAVY}));
+        if(i) line(X[i], ty, X[i], ty+rh, 0.6, C.wit);
+      });
+      ty += rh;
+    });
+    return ty;
+  }
+  let ty = tabel('BESTELGEGEVENS', Math.max(naTabel, naRechts) + 22, [
+      {kop:'Artikelcode', b:100}, {kop:'Omschrijving', b:294}, {kop:'W', b:50}, {kop:'lm', b:57}, {kop:'Kleur', b:26}],
+    B.bestel);
+  if(B.componenten && B.componenten.length)
+    ty = tabel('COMPONENTEN', ty + 22, [{kop:'Artikelcode', b:100}, {kop:'Omschrijving', b:427}], B.componenten);
+
+  /* de voetregel van de bladen, onderaan de laatste pagina */
+  wrapBreedte(VOETREGEL, 533, 5.5, {}).forEach((r, i)=> text(31, 806 + i*7.4, 5.5, r, {color:'#3A3A3A'}));
+
+  return doc.save();
+}
+
+(async ()=>{
+  const B = (window.FAMILIEBLADEN || {})[BLAD];
+  if(!B){ document.getElementById('stand').textContent = 'Geen blad "' + BLAD + '".'; return; }
+  document.getElementById('kop').textContent = 'Familieblad ' + B.titelVet + ' (' + B.id + ')';
+  const bytes = await maakBlad(B);
+  window.__pdfBytes = bytes;
+  const url = URL.createObjectURL(new Blob([bytes], {type:'application/pdf'}));
+  document.getElementById('voorbeeld').src = url;
+  const knop = document.getElementById('opslaan');
+  knop.disabled = false;
+  knop.onclick = ()=>{ const a = document.createElement('a'); a.href = url; a.download = B.id + '.pdf'; a.click(); };
+  document.getElementById('stand').textContent = 'klaar - ' + Math.round(bytes.length/1024) + ' kB';
+})().catch(err=>{ document.getElementById('stand').textContent = 'Mislukt: ' + err.message; console.error(err); });
+</script>
+</body>
+</html>
