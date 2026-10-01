@@ -75,6 +75,8 @@ const GROEPEN = [
   ['ag104', 'Spot Squadro'], ['ag105', 'Straatverlichting Strada'], ['ag106', 'Waterdicht Essence Classic G2'],
   ['ag107', 'Waterdicht Essence Slim'], ['ag108', 'Waterdicht Typhoon'], ['ag109', 'Pendelarmatuur Orion'],
   ['ag110', 'Spot Vapor IP65'],
+  /* productlancering september 2026 */
+  ['ag111', 'Highbay Essence IP65'], ['ag112', 'Highbay Clean HACCP G3'], ['ag113', 'LED Half-inbouwspot Ario'],
   ['achterpaginas', 'AB Achterpaginas'],
   /* Het hoofdstukblad "Lichtberekening" van het totale projectboek: het armaturenboek zet
      het vóór een ingeladen lichtplan, direct na de introductie. Net als 'achterpaginas'

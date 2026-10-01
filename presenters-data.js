@@ -38,6 +38,9 @@ window.PRESENTER_FILES = [
   'ag109',   /* Pendelarmatuur Orion */
   'ag11',   /* Fendi */
   'ag110',   /* Spot Vapor IP65 */
+  'ag111',   /* Highbay Essence IP65 */
+  'ag112',   /* Highbay Clean HACCP G3 */
+  'ag113',   /* LED Half-inbouwspot Ario */
   'ag12',   /* Altoflood */
   'ag13',   /* Paneel Essence G3 */
   'ag14',   /* Downlight Essence G2 */

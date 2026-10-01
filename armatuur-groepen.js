@@ -16,7 +16,7 @@
    veranderen. Laden met een gewoon <script src="armatuur-groepen.js">, vóór de code
    van de tool; geen module, want die weigert te laden vanaf schijf (file://).
 
-   node tools/controleer-logica.mjs test de herkenning (113 groepen plus de gevallen
+   node tools/controleer-logica.mjs test de herkenning (116 groepen plus de gevallen
    die er ooit naast zaten). */
 const ARM_GROEPEN = [
   {id:'ag01', naam:'Punto', zoektermen:[]},
@@ -86,7 +86,11 @@ const ARM_GROEPEN = [
   {id:'ag65', naam:'Sparta UGR', zoektermen:['Sparta UGR']},
   {id:'ag66', naam:'Gevelarmatuur Deca', zoektermen:['Deca']},
   {id:'ag67', naam:'Gevelarmatuur Squalo', zoektermen:['Squalo']},
-  {id:'ag68', naam:'Highbay Clean IP69K G2', zoektermen:['Clean IP69K']},
+  /* Een Clean zonder generatie blijft de G2, zoals altijd (het blad heet "Clean HACCP
+     IP69K G2"); de G3 (ag112) wint alleen als er G3 staat. Vandaar de zoektermen: zonder
+     "Highbay Clean HACCP" werd "Highbay Clean HACCP 100W" de G3 (drie woorden raak tegen
+     twee), en zonder "Clean HACCP G2" kwam de G2 op een gelijkspel uit. */
+  {id:'ag68', naam:'Highbay Clean IP69K G2', zoektermen:['Clean IP69K','Clean HACCP G2','Highbay Clean HACCP','Highbay Clean','Clean HACCP']},
   {id:'ag69', naam:'Batten Essence', zoektermen:['Batten Essence']},
   {id:'ag70', naam:'Batten Lumea', zoektermen:['Lumea']},
   {id:'ag71', naam:'Highbay Storm G3', zoektermen:['Storm G3','Storm']},
@@ -129,6 +133,15 @@ const ARM_GROEPEN = [
   {id:'ag108', naam:'Waterdicht Typhoon', zoektermen:['Typhoon']},
   {id:'ag109', naam:'Pendelarmatuur Orion', zoektermen:['Pendel Orion']},
   {id:'ag110', naam:'Spot Vapor IP65', zoektermen:['Vapor']},
+  /* Productlancering september 2026 (productupdate_9-26.xlsx en de familiebladen). */
+  {id:'ag111', naam:'Highbay Essence IP65', zoektermen:['Essence IP65']},
+  {id:'ag112', naam:'Highbay Clean HACCP G3', zoektermen:['Clean HACCP G3','Clean G3']},
+  /* De Ario met ingebouwde LED (12W, CRI95, driver) - een ander blad dan de Ario GU10
+     (ag09), die een GU10-fitting heeft. Een omschrijving die GU10 noemt blijft ag09;
+     "LED Half-inbouwspot Ario ... 12W" wordt deze. De zoekterm begint met "Ario": een
+     variant moet met zijn eerste woord raken, en "half" alleen raakte ook "half
+     afgeschermd" van de Aludisc. Zie ARM_SERIES voor de keuze. */
+  {id:'ag113', naam:'LED Half-inbouwspot Ario', zoektermen:['Ario Half-inbouwspot']},
   {id:'lichtlijn-prxline', naam:'Lichtlijn PRX-Line', zoektermen:['Line']},
   {id:'lichtlijn-uniline', naam:'Lichtlijn PRX-Uniline', zoektermen:['Uniline']},
   {id:'lichtlijn-retroline', naam:'Lichtlijn Retroline PRX', zoektermen:['Retroline']},
@@ -284,7 +297,9 @@ function armBesteGroep(toks, soorten){
     let score=0;
     varianten.forEach(v=>{
       if(!heeft.has(v[0])) return;
-      if(!v.some(t=>heeft.has(t) && !ARM_TYPEWOORDEN.has(t) && !ARM_SOORT[t])) return;
+      /* een IP-klasse is ook geen naam: "Wandarmatuur Titandisc-M ... IP65" werd
+         anders Wandarmatuur Qube IP65, op "wandarmatuur" en "ip65" */
+      if(!v.some(t=>heeft.has(t) && !ARM_TYPEWOORDEN.has(t) && !ARM_SOORT[t] && !/^ip\d/.test(t))) return;
       const hits = v.filter(t=>heeft.has(t)).length;
       const s = hits*100 + (hits===v.length?50:0) + v.join('').length;
       if(s>score) score=s;
@@ -357,6 +372,12 @@ const ARM_SERIES = [
     ['ag15', 'Mondial PIR'],
     ['ag24', 'Mondial Nood'],
     ['ag26', 'Mondial Track'],
+  ]},
+  /* De Ario bestaat met een GU10-fitting en met ingebouwde LED, elk met een eigen blad.
+     Wie alleen "Ario" typt, krijgt de GU10 (zoals altijd) en kan hier omzetten. */
+  {serie:'Ario', keuzes:[
+    ['ag09', 'Ario GU10'],
+    ['ag113', 'Ario LED'],
   ]},
 ];
 /* De keuzes voor de serie waar deze groep bij hoort, of null als hij alleen staat. */

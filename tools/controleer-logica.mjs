@@ -119,8 +119,33 @@ function is(wat, gekregen, verwacht){
     groep('Pragmalux LED Paneel 60x60cm Essence G2 34W 4000K UGR<19 (4x14W) Excl. LED Driver'), 'ag13');
   is('een paneel Clean is geen highbay',
     groep('Pragmalux LED Paneel 60x60cm Clean IP65 Prisma 39W 3000K 4236lm UGR<19'), null);
-  is('een highbay Essence is geen waterdichte Essence',
-    groep('Pragmalux LED Highbay Essence IP65 100-200W 3000K-5000K 3CCT 15500-32000lm 90D Zwart'), null);
+  /* Sinds september 2026 heeft de Highbay Essence een eigen blad; vóór die tijd gaf dit
+     null, en dat was goed: de waterdichte Essence is het niet. */
+  is('een highbay Essence is de Highbay Essence IP65, geen waterdichte Essence',
+    groep('Pragmalux LED Highbay Essence IP65 100-200W 3000K-5000K 3CCT 15500-32000lm 90D Zwart'), 'ag111');
+
+  /* De productlancering van september 2026 (productupdate_9-26.xlsx). */
+  is('Clean HACCP G3 is de G3', groep('Pragmalux LED Highbay Clean HACCP G3 IP66&IP69K C4 100-200W 3000K-5000K 3CCT 18500-38000lm 90D 0-10V Dimbaar Grijs RAL9006 (250-400W)'), 'ag112');
+  is('Clean HACCP G2 blijft de G2', groep('Pragmalux LED Highbay Clean HACCP G2 100W 4000K 13500lm 90D Wit 0-10V Dimbaar'), 'ag68');
+  is('Clean HACCP zonder generatie blijft de G2', groep('Pragmalux LED Highbay Clean HACCP 100W 4000K 14000lm 90D Wit - 1-10V Dimbaar (250W)'), 'ag68');
+  is('getypt: Clean G3 en Clean HACCP', [groep('Clean G3'), groep('Clean HACCP'), groep('Highbay Clean')], ['ag112', 'ag68', 'ag68']);
+  is('de LED-Ario is de LED Half-inbouwspot Ario',
+    groep('Pragmalux LED Half-inbouwspot Ario zaagmaat Ø70 zwart RAL9004 12W 850-900lm 2700-3000-4000K 3CCT CRI95 36° incl.Osram DALI2 driver'), 'ag113');
+  is('de Ario met GU10-fitting blijft de Ario GU10',
+    groep('Pragmalux Half-inbouwspot Ario zaagmaat Ø70 zwart RAL9004 - Incl. GU10 Fitting en junction box'), 'ag09');
+  is('alleen "Ario" blijft de GU10, met de LED als tweede keuze',
+    [groep('Ario zwart'), m.armSerieKeuze('ag09').keuzes.map(k => k.id)], ['ag09', ['ag09', 'ag113']]);
+  is('"half afgeschermd" maakt van een Aludisc geen Ario',
+    groep('Pragmalux LED Plafonnière / Wandarmatuur Aludisc-M Zwart half afgeschermd Ø340 IP66 IK10 C4 10-23W 750-1800lm 3000K-3500K-4000K 3-CCT'), null);
+  /* Een IP-klasse is geen naam: op "wandarmatuur" en "IP65" werden de Titandisc, de
+     Soladisc, de Facio en de Parono de Qube IP65, en de Cyclone HT werd op
+     "waterdicht" en "IP66" de Essence G3 IP66. */
+  is('een Titandisc IP65 is geen Qube IP65',
+    groep('Pragmalux LED Plafonnière / Wandarmatuur Titandisc-M Grijs Ø360 IP65 IK10 7-14W 690-1500lm 3000K-3500K-4000K 3-CCT'), null);
+  is('een Facio IP65 is de Facio', groep('Pragmalux LED Wandarmatuur Facio IP65 Up/Down 6W 500lm 2700K'), 'ag50');
+  is('een Cyclone HT IP66 is geen Essence G3 IP66',
+    groep('Pragmalux LED TL Waterdicht Armatuur Cyclone HT IP66 150cm 42W 4000K 7000lm Alu+PC 3x2,5mm Doorvoerbedrading'), null);
+  is('de Qube zelf blijft de Qube', [groep('Wandarmatuur Qube IP65'), groep('Qube')], ['ag88', 'ag88']);
   /* Paneel en bandraster zijn één soort: de Flexcore-presenter heet zelf zo. */
   is('bandraster Flexcore houdt de Flexcore-presenter',
     groep('Pragmalux LED Bandrasterarmatuur Flexcore Microprisma 185x1542mm 26-36W 3600-4800lm'), 'ag30');
@@ -181,9 +206,15 @@ function is(wat, gekregen, verwacht){
     }
     if(!ids.size) zonder++; else if(ids.size === 1) eens++; else gesplitst.push(f.naam);
   }
+  /* De Clean HACCP is in de prijslijst één serie, maar de G3 heeft een eigen blad
+     (september 2026). */
   is('families die over groepen vallen', gesplitst.sort(),
-    ['LED Paneel Sigma', 'LED Portiek Port PKVW', 'LED TL Waterdicht Armatuur Essence Classic']);
-  is('families met één presenter: ondergrens 151', eens >= 151, true);
+    ['LED Highbay Clean HACCP', 'LED Paneel Sigma', 'LED Portiek Port PKVW', 'LED TL Waterdicht Armatuur Essence Classic']);
+  /* Was 151. Naar 148 in september 2026, en dat is winst: de Soladisc en de Titandisc
+     hadden de presenter van de Qube IP65 en de Cyclone HT die van de Essence G3 IP66,
+     op niets dan het soortwoord en de IP-klasse - geen presenter is beter dan de
+     verkeerde. De Highbay Essence kwam erbij, de Clean HACCP valt nu terecht in tweeën. */
+  is('families met één presenter: ondergrens 148', eens >= 148, true);
   is('geen suggestie op een echt artikel', onterecht, 0);
   console.log('  catalogus: ' + eens + ' families eenduidig, ' + gesplitst.length + ' gesplitst, '
             + zonder + ' zonder presenter.');

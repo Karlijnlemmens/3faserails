@@ -27868,6 +27868,95 @@
           },
           "cct_tekst": "2700-3000-4000K 3CCT",
           "cri": "95",
+          "buitenmaat_mm": 80,
+          "afmetingen_tekst": "zaagmaat Ø80",
+          "type": "LED Half-inbouwspot Ario zaagmaat",
+          "uitvoering": "inbouw",
+          "artikelcode": "2030152",
+          "basiscode": "2030152",
+          "omschrijving": "Pragmalux LED Half-inbouwspot Ario zaagmaat Ø80 bronze RAL8000 12W 850-900lm 2700-3000-4000K 3CCT CRI95 36° incl.Osram fase dimbare driver",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø80"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 12.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 850,
+            "max": 900
+          },
+          "cct_tekst": "2700-3000-4000K 3CCT",
+          "cri": "95",
+          "buitenmaat_mm": 80,
+          "afmetingen_tekst": "zaagmaat Ø80",
+          "type": "LED Half-inbouwspot Ario zaagmaat",
+          "uitvoering": "inbouw",
+          "artikelcode": "2030176",
+          "basiscode": "2030176",
+          "omschrijving": "Pragmalux LED Half-inbouwspot Ario zaagmaat Ø80 goud RAL1036 12W 850-900lm 2700-3000-4000K 3CCT CRI95 36° incl.Osram fase dimbare driver",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø80"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 12.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 850,
+            "max": 900
+          },
+          "cct_tekst": "2700-3000-4000K 3CCT",
+          "cri": "95",
+          "buitenmaat_mm": 80,
+          "afmetingen_tekst": "zaagmaat Ø80",
+          "type": "LED Half-inbouwspot Ario zaagmaat",
+          "uitvoering": "inbouw",
+          "artikelcode": "2030183",
+          "basiscode": "2030183",
+          "omschrijving": "Pragmalux LED Half-inbouwspot Ario zaagmaat Ø80 gunmetal RAL7031 12W 850-900lm 2700-3000-4000K 3CCT CRI95 36° incl.Osram fase dimbare driver",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø80"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 12.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 850,
+            "max": 900
+          },
+          "cct_tekst": "2700-3000-4000K 3CCT",
+          "cri": "95",
+          "buitenmaat_mm": 70,
+          "afmetingen_tekst": "zaagmaat Ø70",
+          "type": "LED Half-inbouwspot Ario zaagmaat",
+          "kleur": "zwart",
+          "uitvoering": "inbouw",
+          "artikelcode": "2030190",
+          "basiscode": "2030190",
+          "omschrijving": "Pragmalux LED Half-inbouwspot Ario zaagmaat Ø70 zwart RAL9004 12W 850-900lm 2700-3000-4000K 3CCT CRI95 36° incl.Osram fase dimbare driver",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø70"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 12.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 850,
+            "max": 900
+          },
+          "cct_tekst": "2700-3000-4000K 3CCT",
+          "cri": "95",
           "buitenmaat_mm": 70,
           "afmetingen_tekst": "zaagmaat Ø70",
           "type": "LED Half-inbouwspot Ario zaagmaat",
@@ -27922,6 +28011,99 @@
           "omschrijving": "Pragmalux LED Half-inbouwspot Ario zaagmaat Ø70 goud RAL1036 12W 850-900lm 2700-3000-4000K 3CCT CRI95 36° incl.Osram fase dimbare driver",
           "driver_inbegrepen": false,
           "afmeting": "Ø70"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 12.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 850,
+            "max": 900
+          },
+          "cct_tekst": "2700-3000-4000K 3CCT",
+          "cri": "95",
+          "buitenmaat_mm": 70,
+          "afmetingen_tekst": "zaagmaat Ø70",
+          "type": "LED Half-inbouwspot Ario zaagmaat",
+          "uitvoering": "inbouw",
+          "artikelcode": "2030244",
+          "basiscode": "2030244",
+          "omschrijving": "Pragmalux LED Half-inbouwspot Ario zaagmaat Ø70 gunmetal RAL7031 12W 850-900lm 2700-3000-4000K 3CCT CRI95 36° incl.Osram fase dimbare driver",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø70"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 12.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 850,
+            "max": 900
+          },
+          "cct_tekst": "2700-3000-4000K 3CCT",
+          "cri": "95",
+          "buitenmaat_mm": 80,
+          "afmetingen_tekst": "zaagmaat Ø80",
+          "type": "LED Half-inbouwspot Ario zaagmaat",
+          "kleur": "zwart",
+          "uitvoering": "inbouw",
+          "dimprotocol": "dali2",
+          "artikelcode": "2030251",
+          "basiscode": "2030251",
+          "omschrijving": "Pragmalux LED Half-inbouwspot Ario zaagmaat Ø80 zwart RAL9004 12W 850-900lm 2700-3000-4000K 3CCT CRI95 36° incl.Osram DALI2 driver",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø80"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 12.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 850,
+            "max": 900
+          },
+          "cct_tekst": "2700-3000-4000K 3CCT",
+          "cri": "95",
+          "buitenmaat_mm": 80,
+          "afmetingen_tekst": "zaagmaat Ø80",
+          "type": "LED Half-inbouwspot Ario zaagmaat",
+          "kleur": "wit",
+          "uitvoering": "inbouw",
+          "dimprotocol": "dali2",
+          "artikelcode": "2030268",
+          "basiscode": "2030268",
+          "omschrijving": "Pragmalux LED Half-inbouwspot Ario zaagmaat Ø80 wit RAL9003 12W 850-900lm 2700-3000-4000K 3CCT CRI95 36° incl.Osram DALI2 driver",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø80"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 12.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 850,
+            "max": 900
+          },
+          "cct_tekst": "2700-3000-4000K 3CCT",
+          "cri": "95",
+          "buitenmaat_mm": 80,
+          "afmetingen_tekst": "zaagmaat Ø80",
+          "type": "LED Half-inbouwspot Ario zaagmaat",
+          "uitvoering": "inbouw",
+          "dimprotocol": "dali2",
+          "artikelcode": "2030275",
+          "basiscode": "2030275",
+          "omschrijving": "Pragmalux LED Half-inbouwspot Ario zaagmaat Ø80 bronze RAL8000 12W 850-900lm 2700-3000-4000K 3CCT CRI95 36° incl.Osram DALI2 driver",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø80"
         },
         {
           "vermogen_w": {
@@ -27990,6 +28172,99 @@
           "artikelcode": "2030312",
           "basiscode": "2030312",
           "omschrijving": "Pragmalux LED Half-inbouwspot Ario zaagmaat Ø70 zwart RAL9004 12W 850-900lm 2700-3000-4000K 3CCT CRI95 36° incl.Osram DALI2 driver",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø70"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 12.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 850,
+            "max": 900
+          },
+          "cct_tekst": "2700-3000-4000K 3CCT",
+          "cri": "95",
+          "buitenmaat_mm": 70,
+          "afmetingen_tekst": "zaagmaat Ø70",
+          "type": "LED Half-inbouwspot Ario zaagmaat",
+          "kleur": "wit",
+          "uitvoering": "inbouw",
+          "dimprotocol": "dali2",
+          "artikelcode": "2030329",
+          "basiscode": "2030329",
+          "omschrijving": "Pragmalux LED Half-inbouwspot Ario zaagmaat Ø70 wit RAL9003 12W 850-900lm 2700-3000-4000K 3CCT CRI95 36° incl.Osram DALI2 driver",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø70"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 12.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 850,
+            "max": 900
+          },
+          "cct_tekst": "2700-3000-4000K 3CCT",
+          "cri": "95",
+          "buitenmaat_mm": 70,
+          "afmetingen_tekst": "zaagmaat Ø70",
+          "type": "LED Half-inbouwspot Ario zaagmaat",
+          "uitvoering": "inbouw",
+          "dimprotocol": "dali2",
+          "artikelcode": "2030336",
+          "basiscode": "2030336",
+          "omschrijving": "Pragmalux LED Half-inbouwspot Ario zaagmaat Ø70 bronze RAL8000 12W 850-900lm 2700-3000-4000K 3CCT CRI95 36° incl.Osram DALI2 driver",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø70"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 12.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 850,
+            "max": 900
+          },
+          "cct_tekst": "2700-3000-4000K 3CCT",
+          "cri": "95",
+          "buitenmaat_mm": 70,
+          "afmetingen_tekst": "zaagmaat Ø70",
+          "type": "LED Half-inbouwspot Ario zaagmaat",
+          "uitvoering": "inbouw",
+          "dimprotocol": "dali2",
+          "artikelcode": "2030350",
+          "basiscode": "2030350",
+          "omschrijving": "Pragmalux LED Half-inbouwspot Ario zaagmaat Ø70 goud RAL1036 12W 850-900lm 2700-3000-4000K 3CCT CRI95 36° incl.Osram DALI2 driver",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø70"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 12.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 850,
+            "max": 900
+          },
+          "cct_tekst": "2700-3000-4000K 3CCT",
+          "cri": "95",
+          "buitenmaat_mm": 70,
+          "afmetingen_tekst": "zaagmaat Ø70",
+          "type": "LED Half-inbouwspot Ario zaagmaat",
+          "uitvoering": "inbouw",
+          "dimprotocol": "dali2",
+          "artikelcode": "2030367",
+          "basiscode": "2030367",
+          "omschrijving": "Pragmalux LED Half-inbouwspot Ario zaagmaat Ø70 gunmetal RAL7031 12W 850-900lm 2700-3000-4000K 3CCT CRI95 36° incl.Osram DALI2 driver",
           "driver_inbegrepen": false,
           "afmeting": "Ø70"
         }
@@ -48377,6 +48652,91 @@
       "id": "led-plafonni-re-wandarmatuur-aludisc",
       "naam": "LED Plafonnière / Wandarmatuur Aludisc",
       "varianten": [
+        {
+          "vermogen_w": {
+            "min": 4.5,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 430,
+            "max": 900
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Aludisc-S",
+          "kleur": "zwart",
+          "ip": 66,
+          "artikelcode": "2032569",
+          "basiscode": "2032569",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Aludisc-S Zwart Ø270 IP66 IK10 C4 4,5-9W 430-900lm 3000K-3500K-4000K 3-CCT",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.5,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 430,
+            "max": 900
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Aludisc-S",
+          "kleur": "zwart",
+          "ip": 66,
+          "sensor": true,
+          "artikelcode": "2032569-S",
+          "basiscode": "2032569",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Aludisc-S Zwart Ø270 IP66 IK10 C4 4,5-9W 430-900lm 3000K-3500K-4000K 3-CCT + step-dim daglicht & bewegingssensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.5,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 430,
+            "max": 900
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Aludisc-S",
+          "kleur": "zwart",
+          "ip": 66,
+          "artikelcode": "2032569-WS",
+          "basiscode": "2032569-WS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Aludisc-S Zwart Ø270 IP66 IK10 C4 4,5-9W 430-900lm 3000K-3500K-4000K 3-CCT + draadloos sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 10.0,
+            "max": 23.0
+          },
+          "lichtstroom_lm": {
+            "min": 960,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Aludisc-M",
+          "kleur": "zwart",
+          "ip": 66,
+          "artikelcode": "2032590",
+          "basiscode": "2032590",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Aludisc-M Zwart Ø340 IP66 IK10 C4 10-23W 960-2300lm 3000K-3500K-4000K 3-CCT",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
         {
           "vermogen_w": {
             "min": 10.0,
