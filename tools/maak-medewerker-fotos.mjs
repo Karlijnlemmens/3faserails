@@ -15,7 +15,8 @@
  * en daar weigert de browser een los plaatje in een PDF te zetten - hetzelfde als bij
  * armatuur-beelden.js en bandraster-beelden.js. De foto's gaan ongewijzigd mee
  * (JPEG, een paar honderd pixels), dus er is geen browser nodig om ze te verkleinen.
- * De originelen komen uit "Contactgegevens - Update sep 2026.pdf". */
+ * De originelen komen uit "Contactgegevens - Update sep 2026.pdf". De nieuwe
+ * profielfoto's (oktober 2026, 2000x2000) gaan eerst door tools/maak-pasfoto.mjs. */
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
