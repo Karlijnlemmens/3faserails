@@ -1230,6 +1230,36 @@ function is(wat, gekregen, verwacht){
   is('een kapotte regel valt weg', lp.lichtplanLijst([a, null, {paginas:2}]), [a]);
 }
 
+/* ============== het projectenboek onder de 10 MB: pdf-verkleinen.js ============== */
+{
+  /* Boven de grens maakt PdfVerkleinen de foto's lichter. Een vlakke afbeelding staat
+     in een PDF vaak met PNG-voorspellers opgeslagen; die moeten precies terug, anders
+     wordt de foto rommel. En een /Decode die iets doet (kleuren omkeren) mag niet door
+     de JPEG-omzetting heen, een neutrale ([0 1] per kleur, van Ghostscript) wel. */
+  console.log('pdf verkleinen');
+  const v = await laadUit('pdf-verkleinen.js', ['pngOntvoorspel', 'decodeNeutraal']);
+  /* een kleine RGB-afbeelding van 4x3, elke rij met een andere voorspeller gecodeerd */
+  const kol = 4, kl = 3, rij = kol * kl;
+  const pix = Uint8Array.from({length: rij * 5}, (_, i) => (i * 37 + (i >> 3) * 11) & 255);
+  const paeth = (a, b, c) => { const p = a + b - c, pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c);
+    return (pa <= pb && pa <= pc) ? a : pb <= pc ? b : c; };
+  const gecodeerd = [];
+  for(let r = 0; r < 5; r++){
+    gecodeerd.push(r);   /* rij r met voorspeller r: geen, links, boven, gemiddelde, Paeth */
+    for(let x = 0; x < rij; x++){
+      const o = pix[r * rij + x], a = x >= kl ? pix[r * rij + x - kl] : 0, b = r ? pix[(r - 1) * rij + x] : 0,
+            c = r && x >= kl ? pix[(r - 1) * rij + x - kl] : 0;
+      const voorspeld = [0, a, b, (a + b) >> 1, paeth(a, b, c)][r];
+      gecodeerd.push((o - voorspeld) & 255);
+    }
+  }
+  is('PNG-voorspellers (alle vijf) gaan precies terug', Array.from(v.pngOntvoorspel(Uint8Array.from(gecodeerd), kol, kl)), Array.from(pix));
+  is('een neutrale /Decode mag, een die iets doet niet',
+    [v.decodeNeutraal(null, 3), v.decodeNeutraal([0, 1, 0, 1, 0, 1], 3), v.decodeNeutraal([0, 1], 1),
+     v.decodeNeutraal([1, 0], 1), v.decodeNeutraal([0, 255], 1), v.decodeNeutraal([0, 1], 3), v.decodeNeutraal([NaN], 1)],
+    [true, true, true, false, false, false, false]);
+}
+
 /* ===================== tabelcellen: een te lang woord ===================== */
 {
   /* Een woord breder dan zijn kolom liep de volgende kolom in (de armaturenlijst:

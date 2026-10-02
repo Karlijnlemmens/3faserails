@@ -175,6 +175,7 @@ PAGINAS.forEach(p => {
     ['medewerker-fotos.js', /\bMEDEWERKER_FOTOS\b/],
     ['contactpersonen.js', /\b(contactKeuze|tekenContactpersonen|contactPersonen|medewerkerVan)\(/],
     ['lichtplan.js',     /\b(Lichtplan\.|lichtplanDelen\()/],
+    ['pdf-verkleinen.js', /\bPdfVerkleinen\./],
     ['briefing.js',      /\b(briefingKeuze|tekenIntroductie|briefingStand|briefingWaarschuwing)\(/],
     /* briefing.js leunt op contactpersonen.js (de contactpersonen onder de briefing) */
     ['contactpersonen.js', /\b(briefingKeuze|tekenIntroductie)\(/],

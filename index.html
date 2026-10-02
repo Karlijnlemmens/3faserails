@@ -966,6 +966,7 @@
 </div>
 
 <script src="vendor/pdf-lib.min.js"></script>
+<script src="pdf-verkleinen.js"></script>
 <script src="presenters-data.js"></script>
 <script src="pdf-huisstijl.js"></script>
 <script src="medewerkers.js"></script>
@@ -3285,19 +3286,21 @@ function slaProjectOp(){
 /* Gedeelde weg voor downloaden en Preview PDF: controleert of de tekening
    compleet is, waarschuwt over gaten in het armaturenboek en levert de bytes.
    Geeft null terug als er niets te maken valt. */
-/* Hoe groot de gemaakte PDF is, en of dat nog te mailen valt. De presenters zijn
-   fotografie op drukwerkkwaliteit en pdf-lib kan die niet verkleinen zodra ze in een
-   pagina zitten, dus het aantal typen bepaalt het gewicht: gemeten 3,0 MB bij één type
-   en 5,8 MB bij zes. Boven de grens hieronder begint mail te weigeren. */
-const PDF_MAILGRENS_MB = 8;
-function meldPdfGrootte(bytes, vak){
-  const mb = bytes.length / 1048576;
-  const tekst = mb.toFixed(1).replace('.', ',') + ' MB';
-  if(vak) vak.textContent = 'Zo ziet de installateur het document — ' + tekst + '.';
-  if(mb < PDF_MAILGRENS_MB) return;
-  Melding.letop('Deze PDF is ' + tekst + ' — veel mailservers weigeren bijlagen boven de '
-      + PDF_MAILGRENS_MB + ' MB. Deel hem als link, of comprimeer eerst de presenters.',
-      {duur:9000});
+/* Hoe groot de gemaakte PDF is, en of dat nog te mailen valt. Boven de grens hieronder
+   begint mail te weigeren; daarom maakt PdfVerkleinen (pdf-verkleinen.js) de foto's in
+   het boek lichter zodra het erboven zit - tekenwerk kan niet kleiner, dus soms blijft
+   het erboven en zegt de tool dat. */
+const PDF_MAILGRENS_MB = 10;
+/* r is wat PdfVerkleinen.tot() teruggaf */
+function meldPdfGrootte(r, vak){
+  const mbTekst = n => (n / 1048576).toFixed(1).replace('.', ',') + ' MB';
+  const tekst = mbTekst(r.bytes.length);
+  if(vak) vak.textContent = 'Zo ziet de installateur het document — ' + tekst
+    + (r.verkleind ? ' (was ' + mbTekst(r.voor) + '; de foto\'s zijn lichter gemaakt)' : '') + '.';
+  if(r.gehaald) return;
+  Melding.letop('Deze PDF is ' + tekst + (r.verkleind ? ', ook nu de foto\'s lichter zijn gemaakt' : '')
+      + ' — veel mailservers weigeren bijlagen boven de ' + PDF_MAILGRENS_MB + ' MB. Wat overblijft is '
+      + 'vooral tekenwerk. Deel hem als link, of maak het boek met minder armatuurtypen.', {duur:9000});
 }
 async function maakPdfBytes(){
   const cmP=compMap(); const fedP=new Set(st.feeds.map(f=>feedComp(f,cmP.m)));
@@ -3338,9 +3341,9 @@ async function maakPdfBytes(){
   if(st.toonBriefing !== false && briefingExportMelding(st)) meldingen.push(briefingExportMelding(st));
   if(meldingen.length) alert(meldingen.join('\n\n')+'\n\nDe PDF wordt verder gewoon gegenereerd.');
   try{
-    const bytes = await assembleFinalPdf();
-    meldPdfGrootte(bytes, $('pdfPreviewHint'));
-    return bytes;
+    const r = await PdfVerkleinen.tot(await assembleFinalPdf(), PDF_MAILGRENS_MB);
+    meldPdfGrootte(r, $('pdfPreviewHint'));
+    return r.bytes;
   }
   catch(err){ console.error(err); alert('De PDF kon niet worden gegenereerd: '+(err&&err.message?err.message:err)); return null; }
 }
