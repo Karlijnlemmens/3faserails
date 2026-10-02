@@ -217,12 +217,11 @@
 
       <div class="cfg-block">
         <h4>Totaal projectboek</h4>
-        <p class="hint">Voeg het lichtplan toe als PDF, bijvoorbeeld de uitvoer uit DIALux of AutoCAD die je al hebt opgeslagen. Het komt in het boek direct na de introductie, achter het hoofdstukblad “Lichtberekening”. Zonder lichtplan blijft het een gewoon armaturenboek.</p>
-        <input type="file" id="abLichtplanBestand" accept="application/pdf,.pdf" hidden>
+        <p class="hint">Voeg het lichtplan toe als PDF, bijvoorbeeld de uitvoer uit DIALux of AutoCAD die je al hebt opgeslagen; meer PDF's mag ook. Ze komen in het boek direct na de introductie, achter het hoofdstukblad “Lichtberekening”, in de volgorde van de lijst. Zonder lichtplan blijft het een gewoon armaturenboek.</p>
+        <input type="file" id="abLichtplanBestand" accept="application/pdf,.pdf" multiple hidden>
+        <div class="lichtplan-lijst" id="abLichtplanLijst"></div>
         <div class="lichtplan-keuze">
           <button type="button" id="abLichtplanKnop">Lichtplan (PDF) kiezen</button>
-          <span class="lichtplan-naam" id="abLichtplanNaam"></span>
-          <button type="button" id="abLichtplanWeg" class="weg" title="Lichtplan weghalen" aria-label="Lichtplan weghalen" hidden>×</button>
         </div>
       </div>
 
@@ -892,8 +891,8 @@ $('abToonLijst').addEventListener('change', e=>{ st.toonLijst = e.target.checked
 /* ---------- totaal projectboek: het lichtplan, zie lichtplan.js ---------- */
 Lichtplan.koppel({
   st: ()=>st,
-  knop: $('abLichtplanKnop'), bestand: $('abLichtplanBestand'), naam: $('abLichtplanNaam'),
-  weg: $('abLichtplanWeg'), overzicht: $('abTotLicht'),
+  knop: $('abLichtplanKnop'), bestand: $('abLichtplanBestand'), lijst: $('abLichtplanLijst'),
+  overzicht: $('abTotLicht'),
   opWijziging: updateSummary,
 });
 $('abProj').addEventListener('input', e=>{ st.proj=e.target.value; updateSummary(); });

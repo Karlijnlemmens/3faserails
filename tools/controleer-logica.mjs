@@ -1218,6 +1218,16 @@ function is(wat, gekregen, verwacht){
     ['eigen 0-1', 'lichtberekening', 'lichtplan', 'eigen 1-5']);
   is('railtool zonder lichtplan: zoals voorheen', r.railBoekDelen(1, 5, false).map(kort),
     ['eigen 0-5', 'rail', 'presenters', 'achterpaginas']);
+
+  /* Sinds oktober 2026 kunnen er meer lichtplannen in: st.lichtplan is een lijst. Een
+     project van daarvoor heeft er één, als {naam, paginas}; dat moet als lijst van één
+     terugkomen, en geen lichtplan blijft leeg. */
+  const lp = await laadUit('lichtplan.js', ['lichtplanLijst']);
+  const a = {naam:'BG.pdf', paginas:4}, b = {naam:'1e verdieping.pdf', paginas:6};
+  is('oud project: één lichtplan wordt een lijst van één', lp.lichtplanLijst(a), [a]);
+  is('nieuw project: de lijst zoals hij is', lp.lichtplanLijst([a, b]), [a, b]);
+  is('geen lichtplan: een lege lijst', [lp.lichtplanLijst(null), lp.lichtplanLijst(undefined), lp.lichtplanLijst([])], [[], [], []]);
+  is('een kapotte regel valt weg', lp.lichtplanLijst([a, null, {paginas:2}]), [a]);
 }
 
 /* ===================== tabelcellen: een te lang woord ===================== */

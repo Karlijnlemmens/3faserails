@@ -877,12 +877,11 @@
           <div id="c2BriefVelden"></div>
           <div id="c2ContactVelden" style="margin-top:16px;"></div>
         </details>
-        <p class="hint" style="margin:0 0 6px;">Totaal projectboek — voeg het lichtplan toe als PDF, bijvoorbeeld de uitvoer uit DIALux of AutoCAD die je al hebt opgeslagen. Het komt in de PDF direct na de introductie (of na het voorblad), achter het hoofdstukblad “Lichtberekening”, net als in het armaturenboek. Zonder lichtplan verandert er niets.</p>
-        <input type="file" id="c2LichtplanBestand" accept="application/pdf,.pdf" hidden>
+        <p class="hint" style="margin:0 0 6px;">Totaal projectboek — voeg het lichtplan toe als PDF, bijvoorbeeld de uitvoer uit DIALux of AutoCAD die je al hebt opgeslagen; meer PDF's mag ook. Ze komen in de PDF direct na de introductie (of na het voorblad), achter het hoofdstukblad “Lichtberekening”, in de volgorde van de lijst, net als in het armaturenboek. Zonder lichtplan verandert er niets.</p>
+        <input type="file" id="c2LichtplanBestand" accept="application/pdf,.pdf" multiple hidden>
+        <div class="lichtplan-lijst" id="c2LichtplanLijst"></div>
         <div class="lichtplan-keuze" style="margin-bottom:16px;">
           <button type="button" id="c2LichtplanKnop">Lichtplan (PDF) kiezen</button>
-          <span class="lichtplan-naam" id="c2LichtplanNaam"></span>
-          <button type="button" id="c2LichtplanWeg" class="weg" title="Lichtplan weghalen" aria-label="Lichtplan weghalen" hidden>×</button>
         </div>
         <p class="hint" style="margin:0 0 6px;">Armaturen — vul de volledige naam en artikelcode in en typ het aantal per type. Er komt steeds een lege regel bij. Bij DALI-dimbaar geldt per armatuur een aparte artikelcode.</p>
         <div class="c2-prodlist" id="c2ArmList"></div>
@@ -3787,8 +3786,8 @@ function init(){
   /* totaal projectboek: het lichtplan, zie lichtplan.js - hetzelfde blok als in het armaturenboek */
   Lichtplan.koppel({
     st: ()=>st,
-    knop: $('c2LichtplanKnop'), bestand: $('c2LichtplanBestand'), naam: $('c2LichtplanNaam'),
-    weg: $('c2LichtplanWeg'), overzicht: $('c2TotLicht'),
+    knop: $('c2LichtplanKnop'), bestand: $('c2LichtplanBestand'), lijst: $('c2LichtplanLijst'),
+    overzicht: $('c2TotLicht'),
     opWijziging: refresh,
   });
   /* acties */
