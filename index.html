@@ -976,6 +976,7 @@
 <script src="armatuur-groepen.js"></script>
 <script src="zoeken.js"></script>
 <script src="armatuur-rij.js"></script>
+<script src="catalogus-data.js"></script>
 <script src="info-teken.js"></script>
 <script src="melding.js"></script>
 <script src="lichtplan.js"></script>
@@ -3482,7 +3483,9 @@ function maakArmRij(a){
     codeInp.value = st.dali ? (s.codeDali||'') : (s.code||'');
     /* pas na commit (blur/Enter) checken op 'special', niet op elke toetsaanslag:
        isSpecial(s) leest uit s.code/s.codeDali, niet uit het live inputveld. */
-    codeInp.addEventListener('change', ()=>{ if(st.dali) s.codeDali=codeInp.value; else s.code=codeInp.value; delen.verf(); refresh(); });
+    /* een artikelcode uit de catalogus vult de volledige naam in (armNaamVeldUitCode() in armatuur-rij.js) */
+    codeInp.addEventListener('change', ()=>{ if(st.dali) s.codeDali=codeInp.value; else s.code=codeInp.value;
+      armNaamVeldUitCode(s, codeInp.value, nameInp); delen.verf(); refresh(); });
     [codeNaamInp,nameInp,codeInp].forEach(inp=>inp.addEventListener('keydown', e=>{ if(e.key==='Enter') inp.blur(); }));
     const qty=document.createElement('input'); qty.type='text'; qty.inputMode='numeric'; qty.className='c2-qtyinp';
     qty.value=String(s.qty);

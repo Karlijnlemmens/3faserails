@@ -277,6 +277,7 @@
 <script src="armatuur-groepen.js"></script>
 <script src="zoeken.js"></script>
 <script src="armatuur-rij.js"></script>
+<script src="catalogus-data.js"></script>
 <script src="info-teken.js"></script>
 <script src="melding.js"></script>
 <script src="lichtplan.js"></script>
@@ -717,7 +718,8 @@ function maakArmRij(a){
   const codeInp=document.createElement('input'); codeInp.type='text'; codeInp.className='c2-textinp c2-armcode';
   codeInp.placeholder='Artikelcode — of "special"';
   codeInp.value = s.code||'';
-  codeInp.addEventListener('change', ()=>{ s.code=codeInp.value; delen.verf(); updateSummary(); });
+  /* een artikelcode uit de catalogus vult de volledige naam in (armNaamVeldUitCode() in armatuur-rij.js) */
+  codeInp.addEventListener('change', ()=>{ s.code=codeInp.value; armNaamVeldUitCode(s, s.code, nameInp); delen.verf(); updateSummary(); });
   [codeNaamInp,nameInp,codeInp].forEach(inp=>inp.addEventListener('keydown', e=>{ if(e.key==='Enter') inp.blur(); }));
   const qty=document.createElement('input'); qty.type='text'; qty.inputMode='numeric'; qty.className='c2-qtyinp';
   qty.value=String(s.qty);

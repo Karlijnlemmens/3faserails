@@ -259,7 +259,7 @@ die wijst de regel aan waar het misgaat.
 
 ## Bouwen
 
-Vier commando's, in deze volgorde — bij allebei de routes hetzelfde:
+Vijf commando's, in deze volgorde — bij allebei de routes hetzelfde:
 
 ```
 cd vergelijker
@@ -267,6 +267,7 @@ python bouw-data.py
 python controleer-data.py
 python bouw-tool.py
 python bouw-armaturen-data.py
+node ..\tools\maak-catalogus-data.mjs
 ```
 
 Wat ze doen:
@@ -277,9 +278,12 @@ Wat ze doen:
 | `controleer-data.py` | *(alleen kijken)* | meldingen op je scherm |
 | `bouw-tool.py` | `armaturen.json` + de template | `..\vergelijking.html` |
 | `bouw-armaturen-data.py` | `armaturen.json` | `..\armaturen-data.js` |
+| `maak-catalogus-data.mjs` | `data/bron/catalogus.csv` | `..\catalogus-data.js` |
 
-Dat laatste script wordt makkelijk vergeten: de presenters-tool leest een eigen
-kopie van de data, en zonder die stap loopt die achter.
+De laatste twee worden makkelijk vergeten: de presenters-tool leest een eigen
+kopie van de data, en het armaturenboek en de railtool vullen bij een ingetypte
+artikelcode de naam in uit `catalogus-data.js`. Zonder die stappen lopen ze achter;
+`node tools/controleer-alles.mjs` meldt het dan.
 
 ## Lees de meldingen
 

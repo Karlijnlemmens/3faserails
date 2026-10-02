@@ -1260,6 +1260,40 @@ function is(wat, gekregen, verwacht){
     [true, true, true, false, false, false, false]);
 }
 
+/* ============== de naam uit de catalogus bij een ingetypte artikelcode ============== */
+{
+  /* Typ je in het armaturenboek of de railtool alleen de artikelcode, dan komt de
+     volledige naam uit de catalogus (catalogus-data.js, gebouwd uit catalogus.csv). Een
+     artikelcode telt één-op-één of niet: een code die er bijna op lijkt is een ander
+     artikel. En een zelf getypte naam wordt nooit overschreven. */
+  console.log('naam uit de catalogus');
+  const venster = {};
+  new Function('window', readFileSync(join(root, 'catalogus-data.js'), 'utf8'))(venster);
+  const CAT = venster.CATALOGUS;
+  const csvRegels = readFileSync(join(root, 'vergelijker/data/bron/catalogus.csv'), 'utf8').split(/\r?\n/).slice(1).filter(Boolean).length;
+  is('elke artikelcode uit de catalogus staat erin', Object.keys(CAT).length, csvRegels);
+  const r = await laadUit('armatuur-rij.js', ['catalogusNaam', 'armNaamUitCode']);
+  const dura = 'Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 max.18W 1725-2075lm 2200K-2700K 2-CCT + Casambi driver';
+  is('een code uit de catalogus geeft de omschrijving (dubbele spaties enkel)',
+    [r.catalogusNaam('1084459-CA', CAT), r.catalogusNaam(' 1084459-ca ', CAT), r.catalogusNaam('1047515', CAT).startsWith('Pragmalux LED Inbouw')],
+    [dura, dura, true]);
+  is('geen bijna-treffer: het basisartikel of een andere uitgang is iets anders',
+    [r.catalogusNaam('1084459', CAT), r.catalogusNaam('1084459-SN', CAT), r.catalogusNaam('1084459-C', CAT), r.catalogusNaam('', CAT)],
+    [null, null, null, null]);
+  const K = {'A1':'Armatuur een', 'B2':'Armatuur twee'};
+  is('lege naam: invullen', r.armNaamUitCode({name:''}, 'a1', K), {soort:'gevuld', naam:'Armatuur een'});
+  is('eigen naam: blijft staan', r.armNaamUitCode({name:'Punto 15W wit'}, 'A1', K), {soort:'eigen naam'});
+  is('automatische naam, andere bekende code: de nieuwe naam',
+    r.armNaamUitCode({name:'Armatuur een', naamUitCatalogus:'Armatuur een'}, 'B2', K), {soort:'gevuld', naam:'Armatuur twee'});
+  is('automatische naam, onbekende code: de oude naam weg',
+    r.armNaamUitCode({name:'Armatuur een', naamUitCatalogus:'Armatuur een'}, 'X9', K), {soort:'gewist', naam:''});
+  is('aangepaste automatische naam telt als eigen naam',
+    r.armNaamUitCode({name:'Armatuur een, wit', naamUitCatalogus:'Armatuur een'}, 'B2', K), {soort:'eigen naam'});
+  is('onbekende code zonder naam, special en leeg',
+    [r.armNaamUitCode({name:''}, 'X9', K).soort, r.armNaamUitCode({name:''}, 'Special', K).soort, r.armNaamUitCode({name:''}, '  ', K).soort],
+    ['onbekend', 'leeg', 'leeg']);
+}
+
 /* ===================== tabelcellen: een te lang woord ===================== */
 {
   /* Een woord breder dan zijn kolom liep de volgende kolom in (de armaturenlijst:

@@ -144,7 +144,7 @@ PAGINAS.forEach(p => {
        boek, en liepen uit elkaar zolang ze elk hun eigen regel hadden. */
     for(const f of ['specialPresenterId','armGroepVanRij','armTypeOnbekend','armEigenPresenters','armWisselRijen',
                     'stempelZwart','armBoekGroepen','stempelPresenter','armLijstKolommen','armRijDelen','armVolgBijwerken',
-                    'armSlotLeeg','armAccessoires','armAccessoireDelen'])
+                    'armSlotLeeg','armAccessoires','armAccessoireDelen','catalogusNaam','armNaamUitCode','armNaamVeldUitCode'])
       if(new RegExp('function\\s+' + f + '\\s*\\(').test(t)) meld(p + ' heeft een eigen ' + f + '(); die hoort alleen in armatuur-rij.js');
     /* alleen de twee tools die een armaturenboek maken; bandrasters.html heeft een
        eigen stempelCode() voor de bestekcode op zijn productblad, en dat is iets anders */
@@ -176,6 +176,8 @@ PAGINAS.forEach(p => {
     ['contactpersonen.js', /\b(contactKeuze|tekenContactpersonen|contactPersonen|medewerkerVan)\(/],
     ['lichtplan.js',     /\b(Lichtplan\.|lichtplanDelen\()/],
     ['pdf-verkleinen.js', /\bPdfVerkleinen\./],
+    /* de naam bij een ingetypte artikelcode komt uit de catalogus */
+    ['catalogus-data.js', /\barmNaamVeldUitCode\(/],
     ['briefing.js',      /\b(briefingKeuze|tekenIntroductie|briefingStand|briefingWaarschuwing)\(/],
     /* briefing.js leunt op contactpersonen.js (de contactpersonen onder de briefing) */
     ['contactpersonen.js', /\b(briefingKeuze|tekenIntroductie)\(/],
@@ -225,6 +227,8 @@ PAGINAS.forEach(p => {
                           'python3 vergelijker/bouw-armaturen-data.py'],
     'vergelijking.html': [['armaturen.json', 'vergelijker/data/armaturen.json'], ['index-template.html', 'vergelijker/index-template.html'],
                           'python3 vergelijker/bouw-tool.py'],
+    /* de artikelcodes waarmee het armaturenboek en de railtool de naam invullen */
+    'catalogus-data.js': [['catalogus.csv', 'vergelijker/data/bron/catalogus.csv'], 'node tools/maak-catalogus-data.mjs'],
   };
   for(const [bestand, lijst] of Object.entries(bronnen)){
     const kop = lees(bestand).slice(0, 2000);

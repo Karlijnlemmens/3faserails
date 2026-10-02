@@ -248,6 +248,56 @@ function armLijstKolommen(rijen, artikel, oms){
   return {cols, waarden, regels};
 }
 
+/* ======================= de naam uit de catalogus ======================= */
+
+/* De omschrijving van een artikelcode uit de catalogus (catalogus-data.js, gebouwd uit
+   vergelijker/data/bron/catalogus.csv), of null. Alleen een exacte code telt -
+   hoofdletters en spaties eromheen maken niet uit, maar een code die er bijna op lijkt is
+   een ander artikel. catalogus mag weg; dan window.CATALOGUS. */
+function catalogusNaam(code, catalogus){
+  const c = String(code || '').trim().toUpperCase();
+  const cat = catalogus || (typeof window !== 'undefined' && window.CATALOGUS) || {};
+  return c && Object.prototype.hasOwnProperty.call(cat, c) ? cat[c] : null;
+}
+/* Wat er met de naam moet nadat er een artikelcode is ingetypt; verandert zelf niets.
+   obj is de regel of het accessoire: {name, naamUitCatalogus}. De naam komt uit de
+   catalogus als het naamveld leeg is, of als de naam er eerder zo in kwam (dan hoort hij
+   bij de vorige code). Een zelf getypte of aangepaste naam blijft altijd staan. Staat de
+   nieuwe code niet in de catalogus terwijl de naam bij een vorige code hoorde, dan gaat
+   die naam weg: anders staat er een naam bij een code waar hij niet bij hoort.
+     {soort:'gevuld', naam}   de omschrijving uit de catalogus
+     {soort:'gewist', naam:''} de oude automatische naam weg
+     {soort:'eigen naam'}     gevonden, maar er staat een eigen naam
+     {soort:'onbekend'}       niet in de catalogus
+     {soort:'leeg'}           geen code, of "special" */
+function armNaamUitCode(obj, code, catalogus){
+  const c = String(code || '').trim();
+  if(!c || c.toLowerCase() === 'special') return {soort:'leeg'};
+  const naam = String(obj.name || '').trim();
+  const automatisch = !!naam && naam === obj.naamUitCatalogus;
+  const oms = catalogusNaam(c, catalogus);
+  if(!oms) return automatisch ? {soort:'gewist', naam:''} : {soort:'onbekend'};
+  if(naam && !automatisch) return {soort:'eigen naam'};
+  return {soort:'gevuld', naam:oms};
+}
+/* Het naamveld bijwerken na een ingetypte code. De nieuwe naam gaat via dezelfde
+   'change' als een getypte naam, zodat de tool hem net zo verwerkt (de typeherkenning,
+   een keuze binnen een serie). Staat de code niet in de catalogus en is er geen naam,
+   dan zegt de tool dat. */
+function armNaamVeldUitCode(obj, code, naamInp){
+  const r = armNaamUitCode(obj, code);
+  if(r.soort === 'gevuld' || r.soort === 'gewist'){
+    obj.naamUitCatalogus = r.naam;
+    naamInp.value = r.naam;
+    naamInp.dispatchEvent(new Event('change'));
+  }
+  if(r.soort !== 'gevuld' && r.soort !== 'eigen naam' && r.soort !== 'leeg' && !String(obj.name || '').trim()
+     && typeof Melding !== 'undefined')
+    Melding.letop('Artikelcode ' + String(code).trim() + ' staat niet in de catalogus van de tool — '
+      + 'vul de volledige naam zelf in.', {bij: naamInp});
+  return r.soort;
+}
+
 /* ======================= de regel in beeld ======================= */
 
 /* De accessoires onder een armatuurregel: de knop "+ Accessoire" voor op de regel en
@@ -275,7 +325,8 @@ function armAccessoireDelen(o){
     (s.accessoires || []).forEach((acc, i)=>{
       const r = document.createElement('div'); r.className = 'c2-accrow';
       const label = document.createElement('span'); label.className = 'c2-acclabel'; label.textContent = '↳ accessoire';
-      const code = veld('c2-textinp c2-acccode', 'Artikelcode', acc.code, v=>{ acc.code = v; });
+      /* een artikelcode uit de catalogus vult de naam in, net als op de regel zelf */
+      const code = veld('c2-textinp c2-acccode', 'Artikelcode', acc.code, v=>{ acc.code = v; armNaamVeldUitCode(acc, v, naam); });
       const naam = veld('c2-textinp c2-accnaam', 'Naam (bijv. Mondial opbouwset)', acc.name, v=>{ acc.name = v; });
       const qty = veld('c2-qtyinp', '–', acc.qty > 0 ? String(acc.qty) : '', v=>{
         acc.qty = Math.max(0, parseInt(v) || 0); qty.value = acc.qty > 0 ? String(acc.qty) : '';
