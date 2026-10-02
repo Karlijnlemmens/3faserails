@@ -34,7 +34,7 @@ window.MEDEWERKERS = {
        + 'tot leven te brengen met de juiste verlichting.'},
     {id:'harrie', naam:'Harrie van der Linden', functie:'Lichtadviseur/Lichtplanner',
      kaartFunctie:'Lichtadviseur / Lichtplanner',
-     tel:'040 209 49 22', email:'harrie@distrilight.com',
+     tel:'040 209 49 22', email:'harrie@distrilight.com', rond:true,
      noot:'Bij Distrilight geloven we in “samen”. Immers, het is ook in ons belang dat u die opdracht '
        + 'scoort. Wij willen óók dat u met een goed en onderbouwd lichtplan naar uw opdrachtgevers gaat, '
        + 'zodat u die deal kunt maken. Mijn licht-technische specialisatie en mijn elektrotechnische '
@@ -67,7 +67,7 @@ window.MEDEWERKERS = {
        + 'Met onze servicegerichte aanpak kunnen wij onze klanten zoveel mogelijk ontzorgen en zetten '
        + 'wij samen een mooi resultaat neer.'},
     {id:'christophe', naam:'Christophe Canoy', functie:'Projectmanager',
-     tel:'040 209 49 26', mobiel:'062 714 11 90', email:'christophe@distrilight.com',
+     tel:'040 209 49 26', mobiel:'062 714 11 90', email:'christophe@distrilight.com', rond:true,
      noot:'Bij Distrilight ben ik bij veel projecten betrokken van groot tot klein. Hierbij overleg ik '
        + 'graag met de installateur om een goed plan te presenteren, waar zowel de installateur, '
        + 'opdrachtgever als Distrilight achter staan. Dit begint al bij de aanvraag met het '
