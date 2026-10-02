@@ -43,7 +43,7 @@ window.MEDEWERKERS = {
        + 'lichtplannen die een blijvende indruk maken op uw opdrachtgevers.'},
     {id:'iris', naam:'Iris Braan', functie:'Lichtadviseur/Lichtplanner',
      kaartFunctie:'Lichtadviseur / Lichtplanner',
-     tel:'040 209 49 23', email:'iris@distrilight.com',
+     tel:'040 209 49 23', email:'iris@distrilight.com', rond:true,
      noot:'Als lichtontwerper bij Distrilight is mijn doel om installateurs te ontzorgen en te '
        + 'ondersteunen met doordachte, praktische oplossingen gedurende het hele traject.\n'
        + 'Met enthousiasme en betrokkenheid werk ik aan heldere concepten waarin kwaliteit en '
@@ -60,7 +60,7 @@ window.MEDEWERKERS = {
        + 'ook in de praktijk kloppen.'},
     {id:'luuk', naam:'Luuk Stavenuiter', functie:'Lichtadviseur/Lichtplanner',
      kaartFunctie:'Lichtadviseur / Lichtplanner',
-     tel:'040 209 49 25', email:'luuk@distrilight.com',
+     tel:'040 209 49 25', email:'luuk@distrilight.com', rond:true,
      noot:'Als lichtadviseur en lichtplanner bij Distrilight richt ik mij volledig op het ondersteunen '
        + 'van de installateur bij hun verlichtingsprojecten. Door veel aandacht te besteden aan de wensen '
        + 'van de klant kom ik met creatieve en praktische oplossingen die goed passen bij het project. '
