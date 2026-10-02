@@ -48,7 +48,7 @@ window.PRESENTER_FILES = [
   'ag118',   /* Soladisc IP44 */
   'ag119',   /* Waterdicht Cyclone */
   'ag120',   /* Portiekarmatuur Port-Nova */
-  'ag121',   /* Rondisc (zelf opgemaakt, zie tools/familiebladen/) */
+  'ag121',   /* Rondisc */
   'ag12',   /* Altoflood */
   'ag13',   /* Paneel Essence G3 */
   'ag14',   /* Downlight Essence G2 */

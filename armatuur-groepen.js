@@ -158,8 +158,8 @@ const ARM_GROEPEN = [
   /* Port-Nova IP65 (2032149 en uitvoeringen): een ander armatuur dan de Port-M en Port-S
      PKVW, met een eigen blad ("LED Portiekarmatuur Port-Nova") */
   {id:'ag120', naam:'Portiekarmatuur Port-Nova', zoektermen:['Port-Nova']},
-  /* Rondisc (2031906 en uitvoeringen). Het blad is zelf opgemaakt in de stijl van de
-     Pragmalux-bladen (tools/familiebladen/): Pragmalux heeft er geen familieblad van. */
+  /* Rondisc (2031906 en uitvoeringen). Eerst een zelf opgemaakt blad
+     (tools/familiebladen/), sinds oktober 2026 het echte familieblad. */
   {id:'ag121', naam:'Rondisc', zoektermen:[]},
   {id:'lichtlijn-prxline', naam:'Lichtlijn PRX-Line', zoektermen:['Line']},
   {id:'lichtlijn-uniline', naam:'Lichtlijn PRX-Uniline', zoektermen:['Uniline']},

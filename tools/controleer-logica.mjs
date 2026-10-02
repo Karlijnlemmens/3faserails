@@ -161,7 +161,7 @@ function is(wat, gekregen, verwacht){
      groep('Port Nova 6W'), groep('Pragmalux LED Portiek Port-M PKVW IP66 IK10 2,75-5W 295-570lm 2700K-4000K 3-CCT'),
      groep('Pragmalux LED Portiek Port-S PKVW IP66 IK10 2,75-5W 275-600lm 2700K-4000K 3-CCT'), groep('Nova')],
     ['ag120', 'ag120', 'ag85', 'ag95', null]);
-  /* De Rondisc (oktober 2026) heeft een eigen, zelf opgemaakt blad; de Rondix (een paneel)
+  /* De Rondisc (oktober 2026) heeft een eigen blad; de Rondix (een paneel)
      blijft de Rondix - de twee namen schelen één letter. */
   is('een Rondisc is de Rondisc, een Rondix blijft de Rondix',
     [groep('Pragmalux LED Plafonnière / Wandarmatuur Rondisc Wit Ø348 IP44 IK10 6-12W 650-1500lm 3000K-4000K 2-CCT + bewegingssensor'),

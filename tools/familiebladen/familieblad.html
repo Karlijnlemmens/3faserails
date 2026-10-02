@@ -19,9 +19,12 @@
      node tools/comprimeer-presenters.mjs en node tools/maak-presenters.mjs, zoals bij
      elk ander blad (docs/gedeeld.md, "Adding presenter PDFs").
 
-     familieblad.html?blad=rondisc tekent tools/familiebladen/rondisc.js. De maten
+     familieblad.html?blad=<naam> tekent tools/familiebladen/<naam>.js. De maten
      zijn nagemeten op het familieblad van de Port-Nova (oktober 2026), het jongste
-     echte blad: dezelfde kop, dezelfde tabellen, dezelfde voetregel. -->
+     echte blad: dezelfde kop, dezelfde tabellen, dezelfde voetregel. Het eerste blad
+     was dat van de Rondisc (rondisc.js, in de git-geschiedenis tot oktober 2026: daar
+     staat hoe zo'n gegevensbestand eruitziet); toen het echte familieblad kwam, ging
+     het weg. -->
 <h1 id="kop">Familieblad</h1>
 <p><button id="opslaan" disabled>PDF opslaan</button><span id="stand">bezig…</span></p>
 <iframe id="voorbeeld" title="Voorbeeld"></iframe>
@@ -29,8 +32,8 @@
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="pdf-huisstijl.js"></script>
 <script>
-const BLAD = new URLSearchParams(location.search).get('blad') || 'rondisc';
-document.write('<script src="tools/familiebladen/' + BLAD.replace(/[^a-z0-9-]/g, '') + '.js"><\/script>');
+const BLAD = new URLSearchParams(location.search).get('blad') || '';
+if(BLAD) document.write('<script src="tools/familiebladen/' + BLAD.replace(/[^a-z0-9-]/g, '') + '.js"><\/script>');
 </script>
 <script>
 /* De voetregel van de Pragmalux-familiebladen, letterlijk. */
@@ -211,7 +214,9 @@ async function maakBlad(B){
 
 (async ()=>{
   const B = (window.FAMILIEBLADEN || {})[BLAD];
-  if(!B){ document.getElementById('stand').textContent = 'Geen blad "' + BLAD + '".'; return; }
+  if(!B){ document.getElementById('stand').textContent = BLAD
+    ? 'Geen blad "' + BLAD + '" in tools/familiebladen/.'
+    : 'Geef het blad mee: familieblad.html?blad=<naam>, voor tools/familiebladen/<naam>.js.'; return; }
   document.getElementById('kop').textContent = 'Familieblad ' + B.titelVet + ' (' + B.id + ')';
   const bytes = await maakBlad(B);
   window.__pdfBytes = bytes;
