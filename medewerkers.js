@@ -74,11 +74,17 @@ window.MEDEWERKERS = {
        + 'inventariseren van de behoeften en wensen. Na de opdracht ga ik hier graag mee aan de slag '
        + 'om te zorgen voor een goede begeleiding van assemblage en logistiek, ook dat is van groot '
        + 'belang voor een tijdige oplevering.'},
+    {id:'julia', naam:'Julia Versteden', functie:'Lichtadviseur/Lichtplanner',
+     kaartFunctie:'Lichtadviseur / Lichtplanner',
+     tel:'040 209 49 28', email:'julia@distrilight.com', rond:true,
+     noot:'Als lichtadviseur bij Distrilight vind ik het belangrijk om verder te kijken dan alleen de '
+       + 'technische eisen van een project. Ik denk mee over de juiste balans tussen functionaliteit, '
+       + 'prijs, duurzaamheid en de beleving van de gebruiker. Met oog voor de wensen van de klant en '
+       + 'ruimte voor creativiteit werk ik aan praktische lichtoplossingen die passen bij het project '
+       + 'én de mensen die ermee werken.'},
     /* nog geen foto en noot: alleen de contactgegevens */
     {id:'olivia', naam:'Olivia Askew', functie:'Lichtadviseur/Lichtplanner',
      tel:'040 209 49 27', email:'olivia@distrilight.com'},
-    {id:'julia', naam:'Julia Versteden', functie:'Lichtadviseur/Lichtplanner',
-     tel:'040 209 49 28', email:'julia@distrilight.com'},
   ],
 
   accountmanagers: [
