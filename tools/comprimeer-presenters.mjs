@@ -50,6 +50,15 @@ const status = existsSync(statusBestand) ? JSON.parse(readFileSync(statusBestand
  * alleen dat bestand opnieuw comprimeren. */
 const IMAGE_DPI = 150;
 
+/* Uitzonderingen op bestandsnaam: een blad met een maattekening als beeld en kleine
+ * cijfers erin. Op 150 dpi worden die cijfers onleesbaar, en een maat die je niet kunt
+ * lezen is erger dan een groter bestand. */
+const DPI_PER_BESTAND = {
+  /* Verto: de maten 86, 170 en Ø60 vielen op 150 dpi weg ("1/0"); 300 dpi leest als het
+   * origineel, 0,61 -> 0,97 MB (oktober 2026). */
+  'ag123.pdf': 300,
+};
+
 const GS_KANDIDATEN = ['gswin64c', 'gswin32c', 'gs'];
 
 /* Meteen na installeren staat Ghostscript nog niet per se op het PATH van een
@@ -121,9 +130,10 @@ for(const bestand of pdfs){
 
   const voorMaat = huidigeBytes.length;
   const tmp = huidig + '.tmp';
+  const dpi = DPI_PER_BESTAND[bestand.toLowerCase()] || IMAGE_DPI;
   const args = [
     '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.4', '-dPDFSETTINGS=/ebook',
-    '-dColorImageResolution=' + IMAGE_DPI, '-dGrayImageResolution=' + IMAGE_DPI,
+    '-dColorImageResolution=' + dpi, '-dGrayImageResolution=' + dpi,
     '-dNOPAUSE', '-dBATCH', '-dQUIET', '-dSAFER',
     '-sOutputFile=' + tmp, origineel,
   ];
@@ -140,7 +150,8 @@ for(const bestand of pdfs){
   const gebruik = naBytes.length < voorMaat ? naBytes : huidigeBytes;
   writeFileSync(huidig, gebruik);
   status[bestand] = hash(gebruik);
-  rapport.push({ bestand, voorMaat, naMaat: gebruik.length, overgeslagen: gebruik === huidigeBytes, reden: gebruik === huidigeBytes ? 'al compact' : null });
+  rapport.push({ bestand, voorMaat, naMaat: gebruik.length, overgeslagen: gebruik === huidigeBytes, reden: gebruik === huidigeBytes ? 'al compact' : null,
+                eigenDpi: dpi !== IMAGE_DPI ? dpi : null });
 }
 writeFileSync(statusBestand, JSON.stringify(status, null, 2));
 
@@ -150,7 +161,8 @@ console.log('\nResultaat (' + IMAGE_DPI + ' dpi):');
 for(const r of rapport){
   totVoor += r.voorMaat; totNa += r.naMaat;
   const pct = r.overgeslagen ? '(' + r.reden + ')' : '-' + (100 - (r.naMaat / r.voorMaat * 100)).toFixed(0) + '%';
-  console.log('  ' + r.bestand.padEnd(28) + mb(r.voorMaat).padStart(10) + ' -> ' + mb(r.naMaat).padStart(10) + '   ' + pct);
+  console.log('  ' + r.bestand.padEnd(28) + mb(r.voorMaat).padStart(10) + ' -> ' + mb(r.naMaat).padStart(10) + '   ' + pct
+              + (r.eigenDpi ? '   (' + r.eigenDpi + ' dpi)' : ''));
 }
 console.log('\nTotaal: ' + mb(totVoor) + ' -> ' + mb(totNa) + '  (-' + (100 - (totNa / totVoor * 100)).toFixed(0) + '%)');
 console.log('\nOriginelen staan veilig in presenters-bron/origineel/. Draai nu:\n  node tools/maak-presenters.mjs\nom presenters/*.js opnieuw te bakken van deze kleinere bestanden.');

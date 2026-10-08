@@ -16,7 +16,7 @@
    veranderen. Laden met een gewoon <script src="armatuur-groepen.js">, vóór de code
    van de tool; geen module, want die weigert te laden vanaf schijf (file://).
 
-   node tools/controleer-logica.mjs test de herkenning (124 groepen plus de gevallen
+   node tools/controleer-logica.mjs test de herkenning (126 groepen plus de gevallen
    die er ooit naast zaten). */
 const ARM_GROEPEN = [
   {id:'ag01', naam:'Punto', zoektermen:[]},
@@ -161,6 +161,13 @@ const ARM_GROEPEN = [
   /* Rondisc (2031906 en uitvoeringen). Eerst een zelf opgemaakt blad
      (tools/familiebladen/), sinds oktober 2026 het echte familieblad. */
   {id:'ag121', naam:'Rondisc', zoektermen:[]},
+  /* Opus (2033597 en 2033672, 1300 en 1495 mm, met uplight, PIR, DALI2 en/of nood):
+     het blad heet "LED Opbouwarmatuur Opus". De naam bewust zonder "Opbouwarmatuur": dat
+     woord telt dan mee en trok de twee artikelen die de Opus met de Batten Lumea deelt
+     (afstandsbediening 1099828, PIR-sensor 1099804) van de Lumea weg. */
+  {id:'ag122', naam:'Opus', zoektermen:[]},
+  /* Verto 60 up/down (2033474, 2033481, 2033498, 2033504): "LED Wandarmatuur Verto" */
+  {id:'ag123', naam:'Wandarmatuur Verto', zoektermen:['Verto']},
   {id:'lichtlijn-prxline', naam:'Lichtlijn PRX-Line', zoektermen:['Line']},
   {id:'lichtlijn-uniline', naam:'Lichtlijn PRX-Uniline', zoektermen:['Uniline']},
   {id:'lichtlijn-retroline', naam:'Lichtlijn Retroline PRX', zoektermen:['Retroline']},

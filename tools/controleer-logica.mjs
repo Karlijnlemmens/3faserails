@@ -167,6 +167,18 @@ function is(wat, gekregen, verwacht){
     [groep('Pragmalux LED Plafonnière / Wandarmatuur Rondisc Wit Ø348 IP44 IK10 6-12W 650-1500lm 3000K-4000K 2-CCT + bewegingssensor'),
      groep('Rondisc 12W'), groep('Paneel Rondix'), groep('Rondix')],
     ['ag121', 'ag121', 'ag33', 'ag33']);
+  /* Opus en Verto (oktober 2026) hebben elk een eigen blad. De afstandsbediening en de
+     PIR-sensor heten "Batten Lumea IP44 /Opbouwarmatuur Opus" en blijven bij de Lumea,
+     waar ze al hoorden; de Qube blijft de enige wandarmatuur met IP65. */
+  is('een Opus is de Opus en een Verto de Verto, de gedeelde accessoires blijven Lumea',
+    [groep('Pragmalux LED Opbouwarmatuur Opus prisma up/down 160x1495mm 35-60W 4750-8700lm 3000K-4000K 2CCT UGR<19 wit RAL9003 + PIR sensor'),
+     groep('Opus 1300'),
+     groep('Pragmalux LED Wandarmatuur Verto 60 Up/Down IP40 IK06 Ø60x170mm 2x5W 730-800lm 2700-3000-4000K 3CCT CRI90 70° Wit RAL9016 DALI2'),
+     groep('Verto zwart'),
+     groep('Pragmalux LED Batten Lumea IP44 /Opbouwarmatuur Opus accessoire afstandsbediening'),
+     groep('Pragmalux LED Batten Lumea IP44 /Opbouwarmatuur Opus component PIR sensor'),
+     groep('Wandarmatuur Qube IP65')],
+    ['ag122', 'ag122', 'ag123', 'ag123', 'ag70', 'ag70', 'ag88']);
   /* Paneel en bandraster zijn één soort: de Flexcore-presenter heet zelf zo. */
   is('bandraster Flexcore houdt de Flexcore-presenter',
     groep('Pragmalux LED Bandrasterarmatuur Flexcore Microprisma 185x1542mm 26-36W 3600-4800lm'), 'ag30');
@@ -237,8 +249,9 @@ function is(wat, gekregen, verwacht){
      (de Qube IP65 en de Essence G3 IP66, op niets dan het soortwoord en de IP-klasse -
      geen presenter is beter dan de verkeerde), de Clean HACCP valt terecht in tweeën,
      en de Highbay Essence, Titandisc, Aludisc, Eclipse en Soladisc IP65 kregen hun eigen
-     blad. Oktober 2026: de Port-Nova en de Rondisc kregen hun eigen blad. */
-  is('families met één presenter: ondergrens 154', eens >= 154, true);
+     blad. Oktober 2026: de Port-Nova en de Rondisc kregen hun eigen blad, daarna de Opus
+     en de Verto (154 -> 157). */
+  is('families met één presenter: ondergrens 157', eens >= 157, true);
   is('geen suggestie op een echt artikel', onterecht, 0);
   console.log('  catalogus: ' + eens + ' families eenduidig, ' + gesplitst.length + ' gesplitst, '
             + zonder + ' zonder presenter.');
