@@ -1290,9 +1290,17 @@ function is(wat, gekregen, verwacht){
   is('een code uit de catalogus geeft de omschrijving (dubbele spaties enkel)',
     [r.catalogusNaam('1084459-CA', CAT), r.catalogusNaam(' 1084459-ca ', CAT), r.catalogusNaam('1047515', CAT).startsWith('Pragmalux LED Inbouw')],
     [dura, dura, true]);
+  /* De Sparta Pro 1043890 bestaat alleen als -PH en -PH-DA: het kale nummer en een andere
+     uitgang zijn een ander artikel (of geen). Hier stond eerst de Dura 1084459, tot de hele
+     Dura-lijst erbij kwam. */
   is('geen bijna-treffer: het basisartikel of een andere uitgang is iets anders',
-    [r.catalogusNaam('1084459', CAT), r.catalogusNaam('1084459-SN', CAT), r.catalogusNaam('1084459-C', CAT), r.catalogusNaam('', CAT)],
+    [r.catalogusNaam('1043890', CAT), r.catalogusNaam('1043890-DA', CAT), r.catalogusNaam('1084459-C', CAT), r.catalogusNaam('', CAT)],
     [null, null, null, null]);
+  /* Oktober 2026: de volledige Dura-lijst (208 artikelen, 192 nieuw) staat in de catalogus,
+     met het voorbeeld waarmee om deze functie gevraagd werd. */
+  is('1084459-SN geeft de naam uit het voorbeeld van de vraag', r.catalogusNaam('1084459-SN', CAT),
+    'Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + bewegingssensor + noodmodule 1uur autotest');
+  is('Dura-artikelen in de catalogus: ondergrens 208', Object.values(CAT).filter(o => /\bDura-[SM]\b/.test(o)).length >= 208, true);
   const K = {'A1':'Armatuur een', 'B2':'Armatuur twee'};
   is('lege naam: invullen', r.armNaamUitCode({name:''}, 'a1', K), {soort:'gevuld', naam:'Armatuur een'});
   is('eigen naam: blijft staan', r.armNaamUitCode({name:'Punto 15W wit'}, 'A1', K), {soort:'eigen naam'});

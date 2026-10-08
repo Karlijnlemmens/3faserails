@@ -49060,6 +49060,205 @@
       "varianten": [
         {
           "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084398",
+          "basiscode": "1084398",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084398-2SD-MP",
+          "basiscode": "1084398-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084398-2SD-MP-N",
+          "basiscode": "1084398-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) master + PIR Sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084398-2SD-S",
+          "basiscode": "1084398-2SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084398-2SD-S-N",
+          "basiscode": "1084398-2SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084398-3SD-MP",
+          "basiscode": "1084398-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084398-3SD-MP-N",
+          "basiscode": "1084398-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) master + PIR Sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084398-3SD-S",
+          "basiscode": "1084398-3SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084398-3SD-S-N",
+          "basiscode": "1084398-3SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
             "min": null,
             "max": 9.0,
             "opmerking": "ondergrens afhankelijk van gekozen driver"
@@ -49121,6 +49320,475 @@
           "buitenmaat_mm": 270,
           "afmetingen_tekst": "Ø270",
           "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084398-CA-PS",
+          "basiscode": "1084398-CA-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 max.9W 1050-1100lm 3000K-3500K-4000K 3-CCT + Casambi PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 9.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 1050,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084398-CA-PSN",
+          "basiscode": "1084398-CA-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 max.9W 1050-1100lm 3000K-3500K-4000K 3-CCT + Casambi PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "artikelcode": "1084398-DA",
+          "basiscode": "1084398-DA",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + dali",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084398-DAN",
+          "basiscode": "1084398-DAN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + dali + DALI noodmodule 1H autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084398-DS",
+          "basiscode": "1084398-DS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + daglichtsensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084398-DSN",
+          "basiscode": "1084398-DSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + daglichtsensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.5,
+            "max": 8.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 850
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084398-FD",
+          "basiscode": "1084398-FD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4,5-8W 450-850lm 3000K-3500K-4000K 3-CCT Fase dimbaar",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084398-N",
+          "basiscode": "1084398",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084398-PS",
+          "basiscode": "1084398-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084398-PSN",
+          "basiscode": "1084398-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084398-S",
+          "basiscode": "1084398",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + bewegingssensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084398-SN",
+          "basiscode": "1084398",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + bewegingssensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084404",
+          "basiscode": "1084404",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084404-2SD-MP",
+          "basiscode": "1084404-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084404-2SD-MP-N",
+          "basiscode": "1084404-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) master + PIR Sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084404-2SD-S",
+          "basiscode": "1084404-2SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084404-2SD-S-N",
+          "basiscode": "1084404-2SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084404-3SD-MP",
+          "basiscode": "1084404-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084404-3SD-MP-N",
+          "basiscode": "1084404-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) master + PIR Sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084404-3SD-S",
+          "basiscode": "1084404-3SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084404-3SD-S-N",
+          "basiscode": "1084404-3SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 9.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 1050,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
           "kleur": "zwart",
           "dimprotocol": "casambi",
           "ip": 64,
@@ -49155,6 +49823,498 @@
           "driver": "Casambi",
           "driver_inbegrepen": true,
           "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 9.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 1050,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084404-CA-PS",
+          "basiscode": "1084404-CA-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 max.9W 1050-1100lm 3000K-3500K-4000K 3-CCT + Casambi PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 9.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 1050,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084404-CA-PSN",
+          "basiscode": "1084404-CA-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 max.9W 1050-1100lm 3000K-3500K-4000K 3-CCT + Casambi PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "artikelcode": "1084404-DA",
+          "basiscode": "1084404-DA",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + dali (200mA)",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084404-DAN",
+          "basiscode": "1084404-DAN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + dali + DALI noodmodule 1H autotest (200mA)",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084404-DS",
+          "basiscode": "1084404-DS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + daglichtsensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084404-DSN",
+          "basiscode": "1084404-DSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + daglichtsensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.5,
+            "max": 8.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 850
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084404-FD",
+          "basiscode": "1084404-FD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4,5-8W 450-850lm 3000K-3500K-4000K 3-CCT Fase dimbaar",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084404-N",
+          "basiscode": "1084404",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084404-PS",
+          "basiscode": "1084404-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084404-PSN",
+          "basiscode": "1084404-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084404-S",
+          "basiscode": "1084404",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + bewegingssensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 450,
+            "max": 1100
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084404-SN",
+          "basiscode": "1084404",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 450-1100lm 3000K-3500K-4000K 3-CCT + bewegingssensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084411",
+          "basiscode": "1084411",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084411-2SD-MP",
+          "basiscode": "1084411-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084411-2SD-MP-N",
+          "basiscode": "1084411-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) master + PIR Sensor& noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084411-2SD-S",
+          "basiscode": "1084411-2SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084411-2SD-S-N",
+          "basiscode": "1084411-2SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084411-3SD-MP",
+          "basiscode": "1084411-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084411-3SD-MP-N",
+          "basiscode": "1084411-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) master + PIR Sensor& noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084411-3SD-S",
+          "basiscode": "1084411-3SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084411-3SD-S-N",
+          "basiscode": "1084411-3SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084411-C-N",
+          "basiscode": "1084411-C",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + Bluetooth Mesh Driver CASAMBI + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
         },
         {
           "vermogen_w": {
@@ -49219,6 +50379,499 @@
           "buitenmaat_mm": 340,
           "afmetingen_tekst": "Ø340",
           "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084411-CA-PS",
+          "basiscode": "1084411-CA-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 max.18W 2200-2300lm 3000K-3500K-4000K 3-CCT + Casambi PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 18.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 2200,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084411-CA-PSN",
+          "basiscode": "1084411-CA-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 max.18W 2200-2300lm 3000K-3500K-4000K 3-CCT + Casambi PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "artikelcode": "1084411-DA",
+          "basiscode": "1084411-DA",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + dali",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084411-DAN",
+          "basiscode": "1084411-DAN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + dali + DALI noodmodule 1H autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084411-DS",
+          "basiscode": "1084411-DS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + daglichtsensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084411-DSN",
+          "basiscode": "1084411-DSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + daglichtsensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 17.5
+          },
+          "lichtstroom_lm": {
+            "min": 1050,
+            "max": 2200
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084411-FD",
+          "basiscode": "1084411-FD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-17,5W 1050-2200lm 3000K-3500K-4000K 3-CCT Fase dimbaar",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084411-N",
+          "basiscode": "1084411",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084411-PS",
+          "basiscode": "1084411-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084411-PSN",
+          "basiscode": "1084411-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084411-S",
+          "basiscode": "1084411",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + bewegingssensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084411-SC-N",
+          "basiscode": "1084411-SC",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + Bluetooth Mesh bewegingssensor CASAMBI + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084411-SN",
+          "basiscode": "1084411",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + bewegingssensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084428",
+          "basiscode": "1084428",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084428-2SD-MP",
+          "basiscode": "1084428-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084428-2SD-MP-N",
+          "basiscode": "1084428-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) master + PIR Sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084428-2SD-S",
+          "basiscode": "1084428-2SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084428-2SD-S-N",
+          "basiscode": "1084428-2SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 2-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084428-3SD-MP",
+          "basiscode": "1084428-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084428-3SD-MP-N",
+          "basiscode": "1084428-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) master + PIR Sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084428-3SD-S",
+          "basiscode": "1084428-3SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084428-3SD-S-N",
+          "basiscode": "1084428-3SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT 3-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 18.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 2200,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
           "kleur": "zwart",
           "dimprotocol": "casambi",
           "ip": 64,
@@ -49253,6 +50906,475 @@
           "driver": "Casambi",
           "driver_inbegrepen": true,
           "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 18.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 2200,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084428-CA-PS",
+          "basiscode": "1084428-CA-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 max.18W 2200-2300lm 3000K-3500K-4000K 3-CCT + Casambi PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 18.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 2200,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084428-CA-PSN",
+          "basiscode": "1084428-CA-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 max.18W 2200-2300lm 3000K-3500K-4000K 3-CCT + Casambi PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "artikelcode": "1084428-DA",
+          "basiscode": "1084428-DA",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + dali",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084428-DAN",
+          "basiscode": "1084428-DAN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + dali + DALI noodmodule 1H autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084428-DS",
+          "basiscode": "1084428-DS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + daglichtsensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084428-DSN",
+          "basiscode": "1084428-DSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + daglichtsensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 17.5
+          },
+          "lichtstroom_lm": {
+            "min": 1050,
+            "max": 2200
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084428-FD",
+          "basiscode": "1084428-FD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-17,5W 1050-2200lm 3000K-3500K-4000K 3-CCT Fase dimbaar",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084428-N",
+          "basiscode": "1084428",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084428-PS",
+          "basiscode": "1084428-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084428-PSN",
+          "basiscode": "1084428-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084428-S",
+          "basiscode": "1084428",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + bewegingssensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 950,
+            "max": 2300
+          },
+          "cct_tekst": "3000K-3500K-4000K 3-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084428-SN",
+          "basiscode": "1084428",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 950-2300lm 3000K-3500K-4000K 3-CCT + bewegingssensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084435",
+          "basiscode": "1084435",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084435-2SD-MP",
+          "basiscode": "1084435-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 2-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084435-2SD-MP-N",
+          "basiscode": "1084435-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 2-step dim (100-10%) master + PIR Sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084435-2SD-S",
+          "basiscode": "1084435-2SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 2-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084435-2SD-S-N",
+          "basiscode": "1084435-2SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 2-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084435-3SD-MP",
+          "basiscode": "1084435-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 3-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084435-3SD-MP-N",
+          "basiscode": "1084435-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 3-step dim (100-10%) master + PIR Sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084435-3SD-S",
+          "basiscode": "1084435-3SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 3-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084435-3SD-S-N",
+          "basiscode": "1084435-3SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 3-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
         },
         {
           "vermogen_w": {
@@ -49317,6 +51439,475 @@
           "buitenmaat_mm": 270,
           "afmetingen_tekst": "Ø270",
           "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084435-CA-PS",
+          "basiscode": "1084435-CA-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 max.9W 825-1000lm 2200K-2700K 2-CCT + Casambi PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 9.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 825,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084435-CA-PSN",
+          "basiscode": "1084435-CA-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 max.9W 825-1000lm 2200K-2700K 2-CCT + Casambi PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "artikelcode": "1084435-DA",
+          "basiscode": "1084435-DA",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + dali",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084435-DAN",
+          "basiscode": "1084435-DAN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + dali + DALI noodmodule 1H autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084435-DS",
+          "basiscode": "1084435-DS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + daglichtsensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084435-DSN",
+          "basiscode": "1084435-DSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + daglichtsensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.5,
+            "max": 8.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 775
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084435-FD",
+          "basiscode": "1084435-FD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4,5-8W 375-775lm 2200K-2700K 2-CCT Fase dimbaar",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084435-N",
+          "basiscode": "1084435",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084435-PS",
+          "basiscode": "1084435-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084435-PSN",
+          "basiscode": "1084435-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084435-S",
+          "basiscode": "1084435",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + bewegingssensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084435-SN",
+          "basiscode": "1084435",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Wit Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + bewegingssensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084442",
+          "basiscode": "1084442",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084442-2SD-MP",
+          "basiscode": "1084442-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 2-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084442-2SD-MP-N",
+          "basiscode": "1084442-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 2-step dim (100-10%) master + PIR Sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084442-2SD-S",
+          "basiscode": "1084442-2SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 2-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084442-2SD-S-N",
+          "basiscode": "1084442-2SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 2-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084442-3SD-MP",
+          "basiscode": "1084442-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 3-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084442-3SD-MP-N",
+          "basiscode": "1084442-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 3-step dim (100-10%) master + PIR Sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084442-3SD-S",
+          "basiscode": "1084442-3SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 3-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084442-3SD-S-N",
+          "basiscode": "1084442-3SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT 3-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 9.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 825,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
           "kleur": "zwart",
           "dimprotocol": "casambi",
           "ip": 64,
@@ -49351,6 +51942,475 @@
           "driver": "Casambi",
           "driver_inbegrepen": true,
           "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 9.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 825,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084442-CA-PS",
+          "basiscode": "1084442-CA-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 max.9W 825-1000lm 2200K-2700K 2-CCT + Casambi PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 9.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 825,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084442-CA-PSN",
+          "basiscode": "1084442-CA-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 max.9W 825-1000lm 2200K-2700K 2-CCT + Casambi PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "artikelcode": "1084442-DA",
+          "basiscode": "1084442-DA",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + dali",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084442-DAN",
+          "basiscode": "1084442-DAN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + dali + DALI noodmodule 1H autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084442-DS",
+          "basiscode": "1084442-DS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + daglichtsensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084442-DSN",
+          "basiscode": "1084442-DSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + daglichtsensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.5,
+            "max": 8.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 775
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084442-FD",
+          "basiscode": "1084442-FD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4,5-8W 375-775lm 2200K-2700K 2-CCT Fase dimbaar",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084442-N",
+          "basiscode": "1084442",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084442-PS",
+          "basiscode": "1084442-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084442-PSN",
+          "basiscode": "1084442-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084442-S",
+          "basiscode": "1084442",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + bewegingssensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 4.0,
+            "max": 9.0
+          },
+          "lichtstroom_lm": {
+            "min": 375,
+            "max": 1000
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 270,
+          "afmetingen_tekst": "Ø270",
+          "type": "LED Plafonnière / Wandarmatuur Dura-S",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084442-SN",
+          "basiscode": "1084442",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-S Zwart Ø270 IP64 IK10 4-9W 375-1000lm 2200K-2700K 2-CCT + bewegingssensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø270"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084459",
+          "basiscode": "1084459",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084459-2SD-MP",
+          "basiscode": "1084459-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 2-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084459-2SD-MP-N",
+          "basiscode": "1084459-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 2-step dim (100-10%) master + PIR Sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084459-2SD-S",
+          "basiscode": "1084459-2SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 2-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084459-2SD-S-N",
+          "basiscode": "1084459-2SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 2-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084459-3SD-MP",
+          "basiscode": "1084459-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 3-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084459-3SD-MP-N",
+          "basiscode": "1084459-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 3-step dim (100-10%) master + PIR Sensor& noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084459-3SD-S",
+          "basiscode": "1084459-3SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 3-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084459-3SD-S-N",
+          "basiscode": "1084459-3SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 3-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
         },
         {
           "vermogen_w": {
@@ -49415,6 +52475,475 @@
           "buitenmaat_mm": 340,
           "afmetingen_tekst": "Ø340",
           "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084459-CA-PS",
+          "basiscode": "1084459-CA-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 max.18W 1725-2075lm 2200K-2700K 2-CCT + Casambi PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 18.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 1725,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084459-CA-PSN",
+          "basiscode": "1084459-CA-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 max.18W 1725-2075lm 2200K-2700K 2-CCT + Casambi PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "artikelcode": "1084459-DA",
+          "basiscode": "1084459-DA",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + dali",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084459-DAN",
+          "basiscode": "1084459-DAN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + dali + DALI noodmodule 1H autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084459-DS",
+          "basiscode": "1084459-DS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + daglichtsensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084459-DSN",
+          "basiscode": "1084459-DSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + daglichtsensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 17.5
+          },
+          "lichtstroom_lm": {
+            "min": 850,
+            "max": 2050
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "artikelcode": "1084459-FD",
+          "basiscode": "1084459-FD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-17,5W 850-2050lm 2200K-2700K 2-CCT Fase dimbaar",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084459-N",
+          "basiscode": "1084459",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084459-PS",
+          "basiscode": "1084459-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084459-PSN",
+          "basiscode": "1084459-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084459-S",
+          "basiscode": "1084459",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + bewegingssensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "wit",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084459-SN",
+          "basiscode": "1084459",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + bewegingssensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084466",
+          "basiscode": "1084466",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084466-2SD-MP",
+          "basiscode": "1084466-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 2-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084466-2SD-MP-N",
+          "basiscode": "1084466-2SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 2-step dim (100-10%) master + PIR Sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084466-2SD-S",
+          "basiscode": "1084466-2SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 2-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084466-2SD-S-N",
+          "basiscode": "1084466-2SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 2-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084466-3SD-MP",
+          "basiscode": "1084466-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 3-step dim (100-10%) master + PIR Sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084466-3SD-MP-N",
+          "basiscode": "1084466-3SD-MP",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 3-step dim (100-10%) master + PIR Sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084466-3SD-S",
+          "basiscode": "1084466-3SD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 3-step dim (100-10%) slave = geen sensor",
+          "driver_inbegrepen": false,
+          "sensor": true,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084466-3SD-S-N",
+          "basiscode": "1084466-3SD-S",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT 3-step dim (100-10%) slave = geen sensor & noodmodule 1uur zelftest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 18.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 1725,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
           "kleur": "zwart",
           "dimprotocol": "casambi",
           "ip": 64,
@@ -49448,6 +52977,276 @@
           "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 max.18W 1725-2075lm 2200K-2700K 2-CCT + Casambi driver + noodmodule 1uur autotest",
           "driver": "Casambi",
           "driver_inbegrepen": true,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 18.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 1725,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084466-CA-PS",
+          "basiscode": "1084466-CA-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 max.18W 1725-2075lm 2200K-2700K 2-CCT + Casambi PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": null,
+            "max": 18.0,
+            "opmerking": "ondergrens afhankelijk van gekozen driver"
+          },
+          "lichtstroom_lm": {
+            "min": 1725,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "dimprotocol": "casambi",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084466-CA-PSN",
+          "basiscode": "1084466-CA-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 max.18W 1725-2075lm 2200K-2700K 2-CCT + Casambi PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "artikelcode": "1084466-DA",
+          "basiscode": "1084466-DA",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + dali",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "dimprotocol": "dali",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084466-DAN",
+          "basiscode": "1084466-DAN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + dali + DALI noodmodule 1H autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084466-DS",
+          "basiscode": "1084466-DS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + daglichtsensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084466-DSN",
+          "basiscode": "1084466-DSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + daglichtsensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 17.5
+          },
+          "lichtstroom_lm": {
+            "min": 850,
+            "max": 2050
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "artikelcode": "1084466-FD",
+          "basiscode": "1084466-FD",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-17,5W 850-2050lm 2200K-2700K 2-CCT Fase dimbaar",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "noodverlichting": "1u",
+          "artikelcode": "1084466-N",
+          "basiscode": "1084466",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084466-PS",
+          "basiscode": "1084466-PS",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + PIR sensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084466-PSN",
+          "basiscode": "1084466-PSN",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + PIR sensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "artikelcode": "1084466-S",
+          "basiscode": "1084466",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + bewegingssensor",
+          "driver_inbegrepen": false,
+          "afmeting": "Ø340"
+        },
+        {
+          "vermogen_w": {
+            "min": 8.0,
+            "max": 18.0
+          },
+          "lichtstroom_lm": {
+            "min": 750,
+            "max": 2075
+          },
+          "cct_tekst": "2200K-2700K 2-CCT",
+          "buitenmaat_mm": 340,
+          "afmetingen_tekst": "Ø340",
+          "type": "LED Plafonnière / Wandarmatuur Dura-M",
+          "kleur": "zwart",
+          "ip": 64,
+          "sensor": true,
+          "noodverlichting": "1u",
+          "artikelcode": "1084466-SN",
+          "basiscode": "1084466",
+          "omschrijving": "Pragmalux LED Plafonnière / Wandarmatuur Dura-M Zwart Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + bewegingssensor + noodmodule 1uur autotest",
+          "driver_inbegrepen": false,
           "afmeting": "Ø340"
         }
       ],
