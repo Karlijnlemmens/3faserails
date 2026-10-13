@@ -10,7 +10,7 @@ A suite of standalone HTML tools, in Dutch, for Distrilight's inside-sales staff
 
 | tool | file | what it does | read first |
 |---|---|---|---|
-| 3 fase rail | `index.html` | knowledge base for the Pragmalux PRX 3-Fase Rail plus the **Railconfigurator**: draw a track layout, get the full bill of materials and an installer PDF | `docs/railtool.md` |
+| 3 fase rail | `index.html` | knowledge base for the Pragmalux PRX 3-Fase Rail plus the **Railconfigurator** (3-fase, 3-fase DALI and, since October 2026, the 1-fase rail): draw a track layout, get the full bill of materials and an installer PDF | `docs/railtool.md` |
 | Armaturenboek | `armaturenboek.html` | pick the fixtures of a project and compose the book: cover, briefing, optionally the lichtplan ("totaal projectboek"), armaturenlijst, one presenter per fixture type | `docs/armaturenboek.md` |
 | Presenters | `presenters.html` | a Pragmalux product sheet for a product family, from the product data | `docs/presenters.md` |
 | DLC specials | `dlc.html` | a DLC product sheet for a fixture that is not in the product data, from pasted supplier text | `docs/dlc.md` |
@@ -54,7 +54,7 @@ A suite of standalone HTML tools, in Dutch, for Distrilight's inside-sales staff
 | `merk/`, `vendor/` | brand assets (`merk-data.js`); `pdf-lib` and `fontkit` |
 | `vergelijker/` | the vergelijker's sources: template, product data (`data/`), the Python data pipeline and its checks |
 | `tools/` | check scripts and data-prep utilities (Node/Python on a dev machine, never loaded by the app) |
-| `docs/` | the per-tool documentation (`<tool>.md`, `gedeeld.md`); `ontwerp/` the supplied design of the briefing page, `verificatie/` the railconfigurator's design and verification documents, `bronnen/` the source workbooks (the bandraster intake, the PCODES/LCODES table) |
+| `docs/` | the per-tool documentation (`<tool>.md`, `gedeeld.md`); `ontwerp/` the supplied design of the briefing page, `verificatie/` the railconfigurator's design and verification documents, `bronnen/` the source workbooks (the bandraster intake, the PCODES/LCODES table) and the 1-fase rail's article list |
 
 ## Working in this codebase
 

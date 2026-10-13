@@ -1499,6 +1499,87 @@ function is(wat, gekregen, verwacht){
   is('artikelnummer en verpakkingscode horen bij elkaar zoals in PCODES LCODES.xlsx (' + paren + ' paren)', afwijkend, []);
 }
 
+/* ======================= railtool: de 1-fase rail ======================= */
+{
+  /* De artikelen van de 1-fase rail staan in docs/bronnen/1-fase-rail.csv (het
+     artikelexport van de binnendienst, 13-10-2026: artikelnummer, omschrijving,
+     leverancierscode). Elke code in de tool moet daar staan, op de plek die bij zijn
+     omschrijving hoort (een 2 m vierkant wit op rail.opbouw.wit[2], een T Links Binnen op
+     de sleutel die T_1F_NAAM zo noemt), met de verpakkingscode die erbij staat, en elk
+     artikel van de lijst moet in de tool terug te vinden zijn. */
+  console.log('1-fase rail');
+  const t = await laadUit('index.html', ['PCODES_1F', 'T_1F_NAAM', 'KKT_1F', 'LCODES_1F', 'ADAPTERS_OVERIG_1F', 'MM_1F', 'MM_3F', 'PCODES'],
+    "ADAPTERS_OVERIG_1F.forEach(a=> Object.values(a.codes).forEach(c=>{ c.l = KKT_1F[c.p] || ''; }));");
+  const regels = readFileSync(join(root, 'docs/bronnen/1-fase-rail.csv'), 'utf8').split(/\r?\n/).slice(1).filter(Boolean)
+    .map(r => r.match(/^([^,]*),("(?:[^"]|"")*"|[^,]*),(.*)$/)).map(m => [m[1], m[2].replace(/^"|"$/g, '').replace(/""/g, '"'), m[3]]);
+  const bron = new Map(regels.map(r => [r[0], r[1]])), lev = new Map(regels.map(r => [r[0], r[2]]));
+  const P = t.PCODES_1F, K = {wit:'Wit', zwart:'Zwart'}, fout = [], gebruikt = new Set();
+  const moet = (code, woord, pad) => {
+    gebruikt.add(code);
+    const o = bron.get(code);
+    if(!o) fout.push(pad + ': ' + code + ' staat niet in de lijst');
+    else if(!o.includes(woord)) fout.push(pad + ': ' + code + ' is "' + o + '", verwacht "' + woord + '"');
+  };
+  for(const [prof, woord] of [['opbouw', 'Vierkant'], ['inbouw', 'Inbouw']])
+    for(const k in P.rail[prof]) for(const m in P.rail[prof][k]) moet(P.rail[prof][k][m], m + 'M ' + woord + ' ' + K[k], 'rail.' + prof + '.' + k + '.' + m);
+  for(const k in K){
+    moet(P.aansluit[k].R, 'Aansluitstuk ' + K[k] + ' Rechts', 'aansluit.' + k + '.R');
+    moet(P.aansluit[k].L, 'Aansluitstuk ' + K[k] + ' Links', 'aansluit.' + k + '.L');
+    moet(P.bocht[k].binnen, 'Bocht Binnen ' + K[k], 'bocht.' + k + '.binnen');
+    moet(P.bocht[k].buiten, 'Bocht Buiten ' + K[k], 'bocht.' + k + '.buiten');
+    for(const sl in t.T_1F_NAAM) moet(P.tkoppel[k][sl], 'T-Koppelstuk ' + K[k] + ' ' + t.T_1F_NAAM[sl], 'tkoppel.' + k + '.' + sl);
+    [['kruis', 'Kruis Koppelstuk '], ['midden', 'Middenvoeding '], ['eindkap', 'Eindkap '], ['elkoppel', 'Elektrisch Koppelstuk '],
+     ['verstelbaar', 'Verstelbare Hoek '], ['afdekEind', 'Afdekplaat Inbouwrail Eindvoeding '], ['afdekTussen', 'Afdekplaat Inbouwrail Tussenkoppeling ']]
+      .forEach(([sl, w]) => moet(P[sl][k], w + K[k], sl + '.' + k));
+    for(const len in P.ophangset[k]) moet(P.ophangset[k][len], 'Ophangset Verstelbaar ' + len + 'M incl. Beugel en Kap ' + K[k], 'ophangset.' + k + '.' + len);
+  }
+  moet(P.beugelLang, 'Ophangbeugel Lang', 'beugelLang');
+  /* de losse onderdelen: het juiste artikel, en de keuze (kleur, lengte) die er bij staat */
+  const SOORT = {e01:/Rail Adapter (Wit|Zwart) 10kg/, e02:/Adapter Mini/, e03:/Adapter 78mm/, e04:/Trekontlasting (Wit|Zwart)$/,
+    e05:/Trekontlasting Draaibaar/, e06:/Slot connection tool/, e07:/Eindvoeding/, e08:/Tussenkoppeling/, e09:/Ophangset Verstelbaar/,
+    e10:/Ophangbeugel Lang/, e11:/Ophangbeugel Kort/, e12:/Ophangkabel/, e13:/Plafondklem/, e14:/Snelspanner/, e15:/Schuko adapter/};
+  t.ADAPTERS_OVERIG_1F.forEach(a => Object.entries(a.codes).forEach(([opt, c]) => {
+    gebruikt.add(c.p);
+    const o = bron.get(c.p) || '';
+    /* 'wit 1,5 m' wordt Wit en 1,5M, zoals de lijst ze schrijft */
+    const woorden = opt === '-' ? [] : opt.replace(/ m$/, 'M').split(' ').map(w => K[w] || w);
+    if(!SOORT[a.id] || !SOORT[a.id].test(o)) fout.push(a.id + ' (' + a.name + '): ' + c.p + ' is "' + o + '"');
+    else if(!woorden.every(w => o.includes(w))) fout.push(a.id + ' ' + opt + ': ' + c.p + ' is "' + o + '"');
+  }));
+  is('elke 1-fase code staat op zijn plek, zoals in 1-fase-rail.csv', fout, []);
+  is('alle ' + bron.size + ' artikelen van de lijst zitten in de tool', [...bron.keys()].filter(c => !gebruikt.has(c)), []);
+  /* De T-koppelstukken (zie PCODES_1F): Binnen/Buiten is de balkzijde (R = buiten),
+     Links/Rechts de steelzijde (1 = rechts); en de nummers lopen op in de volgorde van de
+     Nordic-typen GB36, 37, 39, 40 = R1, L2, R2, L1 - zoals bij de 3-fase rail, waar die
+     volgorde op 17-7-2026 is vastgesteld. */
+  is('T-namen volgen balk- en steelzijde', Object.entries(t.T_1F_NAAM).filter(([sl, n]) =>
+    n !== (sl[1] === '1' ? 'Rechts' : 'Links') + ' ' + (sl[0] === 'R' ? 'Buiten' : 'Binnen')), []);
+  const oplopend = tab => ['R1', 'L2', 'R2', 'L1'].map(sl => +tab[sl]).every((v, i, r) => !i || v > r[i - 1]);
+  is('T-nummers lopen op als R1, L2, R2, L1 (1-fase wit en zwart, en de 3-fase rail)',
+    [oplopend(P.tkoppel.wit), oplopend(P.tkoppel.zwart), oplopend(t.PCODES.tkoppel.wit), oplopend(t.PCODES.tkoppel.zwart)], [true, true, true, true]);
+  /* Artikelnummer en verpakkingscode horen bij elkaar zoals in het export; waar het
+     export geen leverancierscode heeft ("** " met het eigen nummer: de ophangset) is de
+     verpakkingscode leeg. */
+  const paren = [];
+  const loopPaar = (p, l, pad) => {
+    if(typeof p === 'string'){ const v = lev.get(p) || ''; if((v.startsWith('KKT') ? v : '') !== l) paren.push(pad + ': ' + p + ' / ' + l + ' (export: ' + v + ')'); return; }
+    for(const k of Object.keys(p)) loopPaar(p[k], l[k], pad + '.' + k);
+  };
+  loopPaar(P, t.LCODES_1F, 'PCODES_1F');
+  t.ADAPTERS_OVERIG_1F.forEach(a => Object.entries(a.codes).forEach(([o, c]) => loopPaar(c.p, c.l, a.id + '.' + o)));
+  is('artikelnummer en verpakkingscode van de 1-fase rail zoals in het export', paren, []);
+  /* De vier T's tegen de catalogus van Nordic: het type dat het polariteitsschema bij de
+     sleutel van nodeVariants() geeft (R1 = GB36, L2 = GB37, R2 = GB39, L1 = GB40), en de
+     KKT-code die de catalogus bij dat type en die kleur noemt. */
+  const NORDIC_T = {R1:{wit:'KKT303243', zwart:'KKT303241'}, L2:{wit:'KKT303248', zwart:'KKT303246'},
+                    R2:{wit:'KKT303258', zwart:'KKT303256'}, L1:{wit:'KKT303263', zwart:'KKT303261'}};
+  is('T-koppelstukken: het Nordic-type van het polariteitsschema', ['wit', 'zwart'].map(k => Object.keys(NORDIC_T).map(sl => t.LCODES_1F.tkoppel[k][sl])),
+    ['wit', 'zwart'].map(k => Object.keys(NORDIC_T).map(sl => NORDIC_T[sl][k])));
+  /* de maten van de koppelstukken buiten de rail, uit de maattekeningen van Nordic */
+  is('maten 1-fase', t.MM_1F, {aansluit:55, eindkap:4, bochtArm:55, tBarArm:40, tStemArm:55, kruisArm:40, midden:80, elkoppel:0});
+  is('maten 3-fase ongewijzigd', t.MM_3F, {aansluit:66, eindkap:3, bochtArm:66, tBarArm:50, tStemArm:66, kruisArm:50, midden:100, elkoppel:0});
+}
+
 /* ============== de briefingtekst (armaturenboek en railtool) ============== */
 {
   /* De bronnen van de briefing (bestek, technische tekeningen, armaturenboek, e-mail)
