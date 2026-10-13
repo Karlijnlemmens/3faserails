@@ -189,6 +189,11 @@
           <label><input type="checkbox" id="abToonLijst" checked><span>Armaturenlijst in de PDF</span></label>
         </div>
         <p class="hint" style="margin:-6px 0 12px;">Uit betekent: geen overzichtstabel met alle armaturen in het boek. Het voorblad, de briefingpagina, het hoofdstukblad Armaturen en de presenters blijven staan.</p>
+        <input type="file" id="abExcelBestand" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" hidden>
+        <div class="axl-keuze">
+          <button type="button" id="abExcelKnop">Armaturen uit Excel inladen</button>
+          <span>kolom A de code, I de artikelcode, J de omschrijving</span>
+        </div>
         <div class="c2-prodlist" id="abArmList"></div>
       </div>
 
@@ -280,6 +285,7 @@
 <script src="catalogus-data.js"></script>
 <script src="info-teken.js"></script>
 <script src="melding.js"></script>
+<script src="armaturen-excel.js"></script>
 <script src="lichtplan.js"></script>
 <script src="project-opslag.js"></script>
 <script>
@@ -898,6 +904,16 @@ Lichtplan.koppel({
   st: ()=>st,
   knop: $('abLichtplanKnop'), bestand: $('abLichtplanBestand'), lijst: $('abLichtplanLijst'),
   overzicht: $('abTotLicht'),
+  opWijziging: updateSummary,
+});
+/* armaturen uit een Excel-lijst: armaturen-excel.js, net als in de railtool */
+ArmaturenExcel.koppel({
+  knop: $('abExcelKnop'), bestand: $('abExcelBestand'),
+  regelIds: ()=>ARMATUREN.map(a=>a.id),
+  regel: id=>st.armaturen[id],
+  nieuweRegel: ()=>voegArmatuurSlotToe().id,
+  artikelVeld: ()=>'code',
+  herbouw: buildArmList,
   opWijziging: updateSummary,
 });
 $('abProj').addEventListener('input', e=>{ st.proj=e.target.value; updateSummary(); });

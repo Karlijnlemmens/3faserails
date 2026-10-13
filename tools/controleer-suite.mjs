@@ -159,6 +159,9 @@ PAGINAS.forEach(p => {
     /* en met het lichtplan van het totale projectboek */
     if(/function\s+lichtplanDelen\s*\(/.test(t)) meld(p + ' heeft een eigen lichtplanDelen(); die hoort alleen in lichtplan.js');
     if(/function\s+verkleinInStappen\s*\(/.test(t)) meld(p + ' heeft een eigen verkleinInStappen(); die hoort alleen in pdf-verkleinen.js');
+    /* en met de Excel-lijst: beide tools lezen hem op dezelfde manier */
+    for(const f of ['excelRijen','csvRijen','excelArmatuurRegels','excelVergelijk','woordVerschil'])
+      if(new RegExp('function\\s+' + f + '\\s*\\(').test(t)) meld(p + ' heeft een eigen ' + f + '(); die hoort alleen in armaturen-excel.js');
     if(['index.html','armaturenboek.html'].includes(p) && /function\s+(paintBadge|updateSpecialUI|updateStempelUI|stempelCode)\s*\(/.test(t))
       meld(p + ' bouwt zijn eigen armatuurlabel, uploadknop of stempel; die horen uit armRijDelen()/stempelPresenter() in armatuur-rij.js');
   });
@@ -191,6 +194,12 @@ PAGINAS.forEach(p => {
     ['melding.js',       /\barmRijDelen\(/],
     /* lichtplan.js maakt een lichtplan bij het inladen lichter met pdf-verkleinen.js */
     ['pdf-verkleinen.js', /\bLichtplan\./],
+    /* armaturen-excel.js vult de regels zoals armatuur-rij.js ze kent, met de naam uit de
+       catalogus, en zegt wat hij deed met een melding */
+    ['armaturen-excel.js', /\bArmaturenExcel\./],
+    ['armatuur-rij.js',  /\bArmaturenExcel\./],
+    ['catalogus-data.js', /\bArmaturenExcel\./],
+    ['melding.js',       /\bArmaturenExcel\./],
   ];
   PAGINAS.forEach(p => {
     const t = lees(p);

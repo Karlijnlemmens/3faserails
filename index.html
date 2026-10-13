@@ -890,6 +890,11 @@
           <button type="button" id="c2LichtplanKnop">Lichtplan (PDF) kiezen</button>
         </div>
         <p class="hint" style="margin:0 0 6px;">Armaturen — vul de volledige naam en artikelcode in en typ het aantal per type. Er komt steeds een lege regel bij. Bij DALI-dimbaar geldt per armatuur een aparte artikelcode.</p>
+        <input type="file" id="c2ExcelBestand" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" hidden>
+        <div class="axl-keuze">
+          <button type="button" id="c2ExcelKnop">Armaturen uit Excel inladen</button>
+          <span>kolom A de code, I de artikelcode, J de omschrijving</span>
+        </div>
         <div class="c2-prodlist" id="c2ArmList"></div>
         <label class="c2-check" style="margin-top:6px;"><input type="checkbox" id="c2ToonLijst" checked> Armaturenlijst in de PDF</label>
         <p class="hint" style="margin:10px 0 6px;">Adapters &amp; overig — kies kleur en typ het aantal per product.</p>
@@ -985,6 +990,7 @@
 <script src="catalogus-data.js"></script>
 <script src="info-teken.js"></script>
 <script src="melding.js"></script>
+<script src="armaturen-excel.js"></script>
 <script src="lichtplan.js"></script>
 <script src="project-opslag.js"></script>
 <script src="rail-figuren.js"></script>
@@ -4067,6 +4073,17 @@ function init(){
     st: ()=>st,
     knop: $('c2LichtplanKnop'), bestand: $('c2LichtplanBestand'), lijst: $('c2LichtplanLijst'),
     overzicht: $('c2TotLicht'),
+    opWijziging: refresh,
+  });
+  /* armaturen uit een Excel-lijst: armaturen-excel.js, net als in het armaturenboek. De
+     artikelcode gaat in het veld dat nu in beeld is: bij DALI-dimbaar de DALI-code. */
+  ArmaturenExcel.koppel({
+    knop: $('c2ExcelKnop'), bestand: $('c2ExcelBestand'),
+    regelIds: ()=>ARMATUREN.map(a=>a.id),
+    regel: id=>st.armaturen[id],
+    nieuweRegel: ()=>voegArmatuurSlotToe().id,
+    artikelVeld: ()=>st.dali ? 'codeDali' : 'code',
+    herbouw: buildArmList,
     opWijziging: refresh,
   });
   /* acties */

@@ -17,6 +17,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { deflateRawSync } from 'node:zlib';
 import { bladRijen } from './werkboek.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -1639,6 +1640,115 @@ function is(wat, gekregen, verwacht){
   /* een project van vóór de soort opdracht (de railtool kende hem niet) is een
      lichtberekening, zoals het paneel hem dan ook toont */
   is('zonder soort: een lichtberekening', b.briefInhoud({proj:'X'}).vraag[0].t, 'Het opstellen van een lichtplan voor ');
+}
+
+/* ============== armaturen uit een Excel-lijst: armaturen-excel.js ============== */
+{
+  /* Het armaturenboek en de railtool lezen een Excel-lijst in: kolom A de code, I de
+     artikelcode, J de omschrijving. De naam komt uit de catalogus zoals bij intypen; de
+     omschrijving uit de lijst is de controle, en wijkt hij af dan kiest de gebruiker. */
+  console.log('Excel-lijst inlezen');
+  const xl = await laadUit('armaturen-excel.js',
+    ['excelRijen', 'csvRijen', 'EXCEL_KOLOM', 'enkel', 'EXCEL_KOPWOORD', 'excelArmatuurRegels', 'excelVergelijk', 'woordVerschil'],
+    snijUit(readFileSync(join(root, 'armatuur-rij.js'), 'utf8'), 'catalogusNaam'));
+  const venster = {};
+  new Function('window', readFileSync(join(root, 'catalogus-data.js'), 'utf8'))(venster);
+  const CAT = venster.CATALOGUS;
+
+  /* tools/proef-armaturen.xlsx, gemaakt met openpyxl (tools/maak-proef-armaturen.py):
+     tekst in de cel zelf (inlineStr), ingepakt, een getal als artikelcode, opgemaakte
+     tekst in één cel, een titel, een kopregel, een tussenkop, en een tweede blad */
+  const rijen = await xl.excelRijen(new Uint8Array(readFileSync(join(root, 'tools/proef-armaturen.xlsx'))));
+  is('de proeflijst: elf rijen, kolom A op plek 0 en I op plek 8 (een getal blijft zoals het staat)',
+    [rijen.length, rijen[3][0], rijen[3][1], rijen[3][8], rijen[3].slice(4, 8)], [11, 'A', '12', '1092379', ['', '', '', '']]);
+  const regels = xl.excelArmatuurRegels(rijen);
+  const mondial120 = CAT['1092379'], dura = CAT['1084459-SN'];
+  is('de proeflijst: titel, kopregel, lege regel en tussenkop tellen niet; het tweede blad ook niet', regels, [
+    {rij:4, code:'A', artikelcode:'1092379', omschrijving:mondial120},
+    {rij:5, code:'B', artikelcode:'1084459-SN', omschrijving:dura.replace('1uur', '3uur')},
+    {rij:6, code:'C', artikelcode:'9999999', omschrijving:'Eigen armatuur & zo'},
+    {rij:7, code:'D', artikelcode:'1047515', omschrijving:''},
+    {rij:9, code:'E', artikelcode:'8888888', omschrijving:''},
+    {rij:10, code:'F', artikelcode:'1092409', omschrijving:'Pragmalux LED Downlight Mondial IP54 platte frame alu wit Ø132 buitenmaat - gatmaat Ø120'},
+    {rij:11, code:'G', artikelcode:'1092416', omschrijving:CAT['1092416']}]);
+  is('per regel: gelijk, anders, niet in de catalogus, zonder omschrijving, geen van beide',
+    regels.map(r => xl.excelVergelijk(r, CAT).soort), ['gelijk', 'anders', 'excel', 'catalogus', 'leeg', 'gelijk', 'gelijk']);
+  is('een verschil geeft beide omschrijvingen; zonder verschil de naam uit de catalogus',
+    [xl.excelVergelijk(regels[1], CAT), xl.excelVergelijk(regels[0], CAT), xl.excelVergelijk(regels[2], CAT), xl.excelVergelijk(regels[3], CAT)],
+    [{soort:'anders', catalogus:dura, excel:dura.replace('1uur', '3uur')}, {soort:'gelijk', naam:mondial120},
+     {soort:'excel', naam:'Eigen armatuur & zo'}, {soort:'catalogus', naam:CAT['1047515']}]);
+  /* "1 op 1": een hoofdletter of een leesteken is een verschil, een spatie niet */
+  is('gelijk is letterlijk, op spaties na',
+    ['ip54', 'IP54,', ' IP54  '].map(w => xl.excelVergelijk({artikelcode:'1092379', omschrijving:mondial120.replace('IP54', w)}, CAT).soort),
+    ['anders', 'anders', 'gelijk']);
+
+  /* wat de gebruiker gemarkeerd ziet */
+  const anders = ([a, b]) => [a.filter(w => !w.mee).map(w => w.w), b.filter(w => !w.mee).map(w => w.w)];
+  is('het verschil per woord: alleen 1uur tegen 3uur', anders(xl.woordVerschil(dura, dura.replace('1uur', '3uur'))), [['1uur'], ['3uur']]);
+  is('een woord erbij, eraf en anders', [anders(xl.woordVerschil('a b c', 'a x b c')), anders(xl.woordVerschil('a b c d', 'a c d')),
+    anders(xl.woordVerschil('LED 12W wit', 'LED 18W  wit'))], [[[], ['x']], [['b'], []], [['12W'], ['18W']]]);
+
+  /* Zoals Excel zelf schrijft: tekst in een gedeelde lijst (sharedStrings.xml), opgemaakte
+     tekst in stukken (<r>), de uitspraakhulp (<rPh>) die er niet bij hoort, een formule met
+     zijn uitkomst, en een eerste blad dat niet sheet1.xml heet - Excel houdt de bestandsnaam
+     als je een blad naar voren sleept. Half ingepakt, half niet. */
+  const maakZip = (delen) => {
+    const lokaal = [], centraal = []; let plek = 0;
+    for(const [naam, tekst, pak] of delen){
+      const n = Buffer.from(naam), ruw = Buffer.from(tekst, 'utf8'), data = pak ? deflateRawSync(ruw) : ruw;
+      const l = Buffer.alloc(30); l.writeUInt32LE(0x04034b50, 0); l.writeUInt16LE(20, 4); l.writeUInt16LE(pak ? 8 : 0, 8);
+      l.writeUInt32LE(data.length, 18); l.writeUInt32LE(ruw.length, 22); l.writeUInt16LE(n.length, 26);
+      const c = Buffer.alloc(46); c.writeUInt32LE(0x02014b50, 0); c.writeUInt16LE(20, 4); c.writeUInt16LE(20, 6);
+      c.writeUInt16LE(pak ? 8 : 0, 10); c.writeUInt32LE(data.length, 20); c.writeUInt32LE(ruw.length, 24);
+      c.writeUInt16LE(n.length, 28); c.writeUInt32LE(plek, 42);
+      lokaal.push(l, n, data); centraal.push(c, n); plek += 30 + n.length + data.length;
+    }
+    const cd = Buffer.concat(centraal), e = Buffer.alloc(22);
+    e.writeUInt32LE(0x06054b50, 0); e.writeUInt16LE(delen.length, 8); e.writeUInt16LE(delen.length, 10);
+    e.writeUInt32LE(cd.length, 12); e.writeUInt32LE(plek, 16);
+    return new Uint8Array(Buffer.concat([...lokaal, cd, e]));
+  };
+  const S = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"';
+  const zip = maakZip([
+    ['xl/workbook.xml', '<workbook ' + S + ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'
+      + '<sheet name="Lijst" sheetId="3" r:id="rId3"/><sheet name="Oud" sheetId="1" r:id="rId1"/></sheets></workbook>', true],
+    ['xl/_rels/workbook.xml.rels', '<Relationships><Relationship Id="rId1" Type="x/worksheet" Target="worksheets/sheet1.xml"/>'
+      + '<Relationship Id="rId3" Type="x/worksheet" Target="worksheets/sheet3.xml"/></Relationships>', false],
+    ['xl/sharedStrings.xml', '<sst ' + S + ' count="5" uniqueCount="5">'
+      + '<si><t>Code</t></si><si><t>Artikelcode</t></si><si><t>Omschrijving</t></si>'
+      + '<si><r><t xml:space="preserve">Downlight </t></r><r><rPr><b/></rPr><t>Mondial</t></r>'
+      + '<rPh sb="0" eb="1"><t>X</t></rPh><t xml:space="preserve"> &amp; frame</t></si>'
+      + '<si><t>A1</t></si></sst>', true],
+    ['xl/worksheets/sheet1.xml', '<worksheet ' + S + '><sheetData><row r="1"><c r="I1" t="inlineStr"><is><t>FOUT</t></is></c>'
+      + '<c r="J1" t="inlineStr"><is><t>het verkeerde blad</t></is></c></row></sheetData></worksheet>', true],
+    ['xl/worksheets/sheet3.xml', '<worksheet ' + S + '><sheetData>'
+      + '<row r="2" spans="1:10"><c r="A2" t="s"><v>0</v></c><c r="I2" t="s"><v>1</v></c><c r="J2" t="s"><v>2</v></c></row>'
+      + '<row r="3"><c r="A3" t="s" s="1"><v>4</v></c><c r="B3" s="2"/><c r="I3" s="1"><v>1092379</v></c><c r="J3" t="s"><v>3</v></c></row>'
+      + '<row r="5"><c r="A5" t="str"><f>A3&amp;"b"</f><v>A1b</v></c><c r="I5" t="str"><f>I3</f><v>1092379</v></c>'
+      + '<c r="J5" t="s"><v>3</v></c></row>'
+      + '</sheetData></worksheet>', false],
+  ]);
+  const leesFout = async bytes => { try{ await xl.excelRijen(bytes); return ''; }catch(err){ return err.message; } };
+  is('de zip zoals Excel hem schrijft leest zonder fout', await leesFout(zip), '');
+  const ex = await xl.excelRijen(zip).catch(() => []);
+  is('zoals Excel schrijft: gedeelde tekst, stukken, formules, het eerste blad via de rels', xl.excelArmatuurRegels(ex), [
+    {rij:3, code:'A1', artikelcode:'1092379', omschrijving:'Downlight Mondial & frame'},
+    {rij:5, code:'A1b', artikelcode:'1092379', omschrijving:'Downlight Mondial & frame'}]);
+  is('een lege rij tussendoor blijft een lege rij', [ex.length, ex[0], ex[3]], [5, [], []]);
+  /* een kapotte zip: de inhoudsopgave klopt, de ingepakte inhoud niet */
+  const kapot = maakZip([['xl/workbook.xml', '<workbook/>', true]]);
+  kapot.fill(0xFF, 30 + 'xl/workbook.xml'.length, 30 + 'xl/workbook.xml'.length + 4);
+  is('geen zip, of een kapotte: een fout die iets zegt',
+    [await leesFout(new Uint8Array(Buffer.from('Code;Artikelcode\nA;1092379\n'))), await leesFout(kapot)],
+    ['dit is geen Excel-bestand (.xlsx)', 'het bestand is beschadigd']);
+
+  /* een .csv zoals Excel hem opslaat: puntkomma's, aanhalingstekens, BOM, CRLF */
+  const csv = '﻿Code;B;C;D;E;F;G;H;Artikelcode;Omschrijving\r\n'
+    + 'A;;;;;;;;1092379;"Downlight; met ""puntkomma"""\r\n;;;;;;;;;\r\nB;;;;;;;;1047515;\r\n';
+  is('een .csv met puntkomma\'s', xl.excelArmatuurRegels(xl.csvRijen(csv)), [
+    {rij:2, code:'A', artikelcode:'1092379', omschrijving:'Downlight; met "puntkomma"'},
+    {rij:4, code:'B', artikelcode:'1047515', omschrijving:''}]);
+  is('en een met komma\'s', xl.csvRijen('a,b,"c,d"\n1,2,3'), [['a', 'b', 'c,d'], ['1', '2', '3']]);
 }
 
 /* ======================= railtool: ruimtes per tekenvlak ======================= */
