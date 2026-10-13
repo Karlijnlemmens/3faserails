@@ -16,7 +16,7 @@
    veranderen. Laden met een gewoon <script src="armatuur-groepen.js">, vóór de code
    van de tool; geen module, want die weigert te laden vanaf schijf (file://).
 
-   node tools/controleer-logica.mjs test de herkenning (130 groepen plus de gevallen
+   node tools/controleer-logica.mjs test de herkenning (132 groepen plus de gevallen
    die er ooit naast zaten). */
 const ARM_GROEPEN = [
   {id:'ag01', naam:'Punto', zoektermen:[]},
@@ -191,6 +191,14 @@ const ARM_GROEPEN = [
   {id:'ag125', naam:'Zena Rond 2V', zoektermen:['Zena 2V', 'Zena Round 2V'], stempelKleur:'#1A253C', stempelBreedte:175},
   {id:'ag126', naam:'Zena Vierkant', zoektermen:['Zena Square'], stempelKleur:'#1A253C', stempelBreedte:175},
   {id:'ag127', naam:'Zena Vierkant 2V', zoektermen:['Zena Square 2V'], stempelKleur:'#1A253C', stempelBreedte:175},
+  /* Valento (oktober 2026): het blad "Opbouwarmatuur Valento" (versie 08042026). De
+     bestelgegevens noemen 25 codes - rond en rechthoek dubbel en drievoudig, vierkant
+     viervoudig - maar de foto's en de maattekeningen tonen ook de enkele rond en vierkant;
+     die tien (2026957 ... 2026995, 2027107 ... 2027145) krijgen het blad dus ook. De naam kaal,
+     zoals de Opus: "Opbouwarmatuur" telt anders mee als naamwoord. */
+  {id:'ag128', naam:'Valento', zoektermen:[]},
+  /* Waldo (oktober 2026): "Wandarmatuur Waldo", halfrond en rechthoek, 2026605 ... 2026698 */
+  {id:'ag129', naam:'Wandarmatuur Waldo', zoektermen:['Waldo']},
   {id:'lichtlijn-prxline', naam:'Lichtlijn PRX-Line', zoektermen:['Line']},
   {id:'lichtlijn-uniline', naam:'Lichtlijn PRX-Uniline', zoektermen:['Uniline']},
   {id:'lichtlijn-retroline', naam:'Lichtlijn Retroline PRX', zoektermen:['Retroline']},

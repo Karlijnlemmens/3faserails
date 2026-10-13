@@ -57,6 +57,9 @@ const DPI_PER_BESTAND = {
   /* Verto: de maten 86, 170 en Ø60 vielen op 150 dpi weg ("1/0"); 300 dpi leest als het
    * origineel, 0,61 -> 0,97 MB (oktober 2026). */
   'ag123.pdf': 300,
+  /* Valento: de maattekening is een plaatje; op 150 dpi werd "300mm" niet meer van
+   * "200mm" te onderscheiden (oktober 2026). */
+  'ag128.pdf': 300,
 };
 
 const GS_KANDIDATEN = ['gswin64c', 'gswin32c', 'gs'];

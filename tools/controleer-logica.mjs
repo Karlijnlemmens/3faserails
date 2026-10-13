@@ -183,13 +183,31 @@ function is(wat, gekregen, verwacht){
   /* De Zena (oktober 2026): vier bladen, elk met zijn eigen codes - rond en vierkant,
      enkel en 2V. Per blad de codes die erop staan, met de omschrijving uit de spotlijst
      van de binnendienst (vergelijker/data/bron/spots.csv). */
-  const spotOms = Object.fromEntries(readFileSync(join(root, 'vergelijker/data/bron/spots.csv'), 'utf8').split(/\r?\n/).slice(1)
-    .filter(Boolean).map(r => r.match(/^([^,]*),[^,]*,(.*)$/)).filter(Boolean).map(m => [m[1], m[2].replace(/^"|"$/g, '')]));
+  const spotOms = Object.fromEntries(['catalogus.csv', 'spots.csv', 'wandarmaturen.csv', 'opbouwarmaturen.csv'].reverse()
+    .flatMap(f => readFileSync(join(root, 'vergelijker/data/bron/' + f), 'utf8').split(/\r?\n/).slice(1).filter(Boolean))
+    .map(r => r.match(/^([^,]*),[^,]*,(.*)$/)).filter(Boolean).map(m => [m[1], m[2].replace(/^"|"$/g, '')]));
   const zenaBladen = {ag124: ['4608082', '4608099', '4608143', '4608211'], ag125: ['4605968', '4606170', '4606187'],
                       ag126: ['4608105', '4608112', '4608150', '4608228'], ag127: ['4606194', '4606200', '4606446']};
   is('Zena: elke code van een blad krijgt dat blad',
     Object.entries(zenaBladen).map(([id, codes]) => [id, codes.map(c => groep(spotOms[c] || ''))]),
     Object.entries(zenaBladen).map(([id, codes]) => [id, codes.map(() => id)]));
+  /* Valento, Waldo en het nieuwe Ario-blad (half-inbouwspot én 1- en 3-fase railspot, versie
+     14072026): elke code uit de bestelgegevens krijgt dat blad. Bij de Valento ook de tien
+     enkele (rond en vierkant single): die staan niet in de tabel, wel op de foto's en in de
+     maattekening. */
+  const reeks = (...c) => c;
+  const bladen = {
+    ag128: reeks('2027008', '2027015', '2027022', '2027039', '2027046', '2027053', '2027060', '2027077', '2027084', '2027091',
+                 '2027152', '2027169', '2027176', '2027183', '2027190', '2027206', '2027213', '2027220', '2027237', '2027244',
+                 '2027251', '2027268', '2027275', '2027282', '2027299',
+                 '2026957', '2026964', '2026971', '2026988', '2026995', '2027107', '2027114', '2027121', '2027138', '2027145'),
+    ag129: reeks('2026605', '2026612', '2026629', '2026636', '2026643', '2026650', '2026667', '2026674', '2026681', '2026698'),
+    ag09: reeks('2028111', '2028128', '2028135', '2028142', '2028159', '2028166', '2028173', '2028180', '2028197', '2028203',
+                '2036314', '2036307', '2036291', '2036284', '2028210', '2028227', '2028234', '2028241'),
+  };
+  is('Valento (35), Waldo (10), Ario half-inbouw + railspot (18): elke code zijn blad',
+    Object.entries(bladen).map(([id, codes]) => [id, codes.length, codes.filter(c => groep(spotOms[c] || '') !== id)]),
+    [['ag128', 35, []], ['ag129', 10, []], ['ag09', 18, []]]);
   /* Getypt, ook met de Engelse namen van de bladen; alleen "Zena" is de ronde, zoals
      "Ario" de GU10. Zonder de zoekterm won de langste naam, Vierkant 2V. */
   is('Zena getypt: rond, 2V, vierkant, Engels, en kaal de ronde',

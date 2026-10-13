@@ -81,6 +81,7 @@ const GROEPEN = [
   ['ag118', 'Soladisc IP44'], ['ag119', 'Waterdicht Cyclone'], ['ag120', 'Portiekarmatuur Port-Nova'], ['ag121', 'Rondisc'],
   ['ag122', 'Opus'], ['ag123', 'Wandarmatuur Verto'],
   ['ag124', 'Zena Rond'], ['ag125', 'Zena Rond 2V'], ['ag126', 'Zena Vierkant'], ['ag127', 'Zena Vierkant 2V'],
+  ['ag128', 'Valento'], ['ag129', 'Wandarmatuur Waldo'],
   ['achterpaginas', 'AB Achterpaginas'],
   /* Het hoofdstukblad "Lichtberekening" van het totale projectboek: het armaturenboek zet
      het vóór een ingeladen lichtplan, direct na de introductie. Net als 'achterpaginas'

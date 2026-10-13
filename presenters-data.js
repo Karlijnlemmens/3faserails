@@ -55,6 +55,8 @@ window.PRESENTER_FILES = [
   'ag125',   /* Zena Rond 2V */
   'ag126',   /* Zena Vierkant */
   'ag127',   /* Zena Vierkant 2V */
+  'ag128',   /* Valento */
+  'ag129',   /* Wandarmatuur Waldo */
   'ag12',   /* Altoflood */
   'ag13',   /* Paneel Essence G3 */
   'ag14',   /* Downlight Essence G2 */
