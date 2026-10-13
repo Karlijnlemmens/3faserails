@@ -1367,12 +1367,12 @@ function is(wat, gekregen, verwacht){
   const venster = {};
   new Function('window', readFileSync(join(root, 'catalogus-data.js'), 'utf8'))(venster);
   const CAT = venster.CATALOGUS;
-  /* uit catalogus.csv en spots.csv (de spotlijst van de binnendienst, alleen voor het
-     opzoeken - zie tools/maak-catalogus-data.mjs) */
-  const bronCodes = ['catalogus.csv', 'spots.csv'].flatMap(f => readFileSync(join(root, 'vergelijker/data/bron/' + f), 'utf8')
+  /* uit catalogus.csv, spots.csv en wandarmaturen.csv (de spot- en wandarmaturenlijst van
+     de binnendienst, alleen voor het opzoeken - zie tools/maak-catalogus-data.mjs) */
+  const bronCodes = ['catalogus.csv', 'spots.csv', 'wandarmaturen.csv'].flatMap(f => readFileSync(join(root, 'vergelijker/data/bron/' + f), 'utf8')
     .split(/\r?\n/).slice(1).filter(Boolean).map(r => r.split(',')[0].trim().toUpperCase()));
   is('elke artikelcode uit de bronnen staat erin, en niets anders', Object.keys(CAT).sort(), [...new Set(bronCodes)].sort());
-  is('codes: ondergrens 5782 (5283 en 499 spots)', Object.keys(CAT).length >= 5782, true);
+  is('codes: ondergrens 5862 (5283, 499 spots, 80 wandarmaturen)', Object.keys(CAT).length >= 5862, true);
   const r0 = c => Object.prototype.hasOwnProperty.call(CAT, c) ? CAT[c] : null;
   /* De spots die in een echte projectlijst niets vonden (oktober 2026), en de uitgefaseerde
      die op verzoek van de binnendienst niet zijn meegenomen */
@@ -1381,6 +1381,15 @@ function is(wat, gekregen, verwacht){
     ['Pragmalux 1-fase Railspot Ario zwart RAL9004 - Incl. GU10 Fitting',
      'Pragmalux Inbouwspot Zena Vierkant Kantelbaar wit RAL9003 - Incl. GU10 Fitting',
      'Pragmalux Inbouwspot Zena Vierkant Kantelbaar Zwart RAL9004 - Incl. GU10 Fitting']);
+  is('de wandarmaturenlijst: Waldo (ook uit die projectlijst), Pareto en Qube gevonden',
+    ['2026650', '2026490', '2000513'].map(c => r0(c)),
+    ['Pragmalux wandarmatuur Waldo Rechthoek up/down zwart RAL9004 - incl. GU10 Fitting',
+     'Pragmalux wandarmatuur Pareto 54 Rond up/down Ø54x254mm bronze RAL7048 - incl. GU10 fitting',
+     'Pragmalux LED wandarmatuur IP65 Qube Up/Down wit 6W 2x160lm 2700K CRI>80 instelbare lichtbundel - fase dimbaar']);
+  /* Staat een code in meer bronnen met een andere omschrijving, dan wint catalogus.csv.
+     Bij het toevoegen gold dat voor één code: de lijst zegt 6,5-14W. */
+  is('in meer bronnen: de catalogus wint', r0('2032491-WS'),
+    'Pragmalux LED Plafonnière / Wandarmatuur Soladisc IP65 IK10 Ø370 7-14W 700-1600lm 3000-3500-4000K 3-CCT + draadloos sensor');
   is('uitgefaseerd niet meegenomen', ['9011482', '4309324', '70811800', '72139100'].map(c => r0(c)), [null, null, null, null]);
   const r = await laadUit('armatuur-rij.js', ['catalogusNaam', 'armNaamUitCode']);
   const dura = 'Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 max.18W 1725-2075lm 2200K-2700K 2-CCT + Casambi driver';
