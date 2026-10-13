@@ -1809,7 +1809,8 @@ const ADAPTERS_OVERIG_1F = [
    uitleg:['Nog vast te leggen: waar hij bij hoort.']},
   {id:'e15', name:'Schuko adapter 1-fase (stopcontact 230V)', codes:{wit:{p:'2037243'}, zwart:{p:'2037236'}},
    uitleg:['Adapter met een schuko-stopcontact: hiermee kan een gewone 230V-stekker op de 1-fase rail.',
-           'Nog vast te leggen: de maximale belasting per adapter.']},
+           'Belastbaar tot 16 A, 250 V; trekkracht tot 100 N, buigmoment tot 2,5 Nm.',
+           'Er past een draaibare nippel M10 op (12 mm hoog, gat 7,4 mm).']},
 ];
 /* de verpakkingscode van elk los onderdeel uit dezelfde tabel */
 ADAPTERS_OVERIG_1F.forEach(a=> Object.values(a.codes).forEach(c=>{ c.l = KKT_1F[c.p] || ''; }));
