@@ -16,7 +16,7 @@
    veranderen. Laden met een gewoon <script src="armatuur-groepen.js">, vóór de code
    van de tool; geen module, want die weigert te laden vanaf schijf (file://).
 
-   node tools/controleer-logica.mjs test de herkenning (126 groepen plus de gevallen
+   node tools/controleer-logica.mjs test de herkenning (130 groepen plus de gevallen
    die er ooit naast zaten). */
 const ARM_GROEPEN = [
   {id:'ag01', naam:'Punto', zoektermen:[]},
@@ -168,6 +168,29 @@ const ARM_GROEPEN = [
   {id:'ag122', naam:'Opus', zoektermen:[]},
   /* Verto 60 up/down (2033474, 2033481, 2033498, 2033504): "LED Wandarmatuur Verto" */
   {id:'ag123', naam:'Wandarmatuur Verto', zoektermen:['Verto']},
+  /* Zena (oktober 2026): vier bladen, en elk hoort bij zijn eigen codes - de rond en de
+     vierkant, enkel en als 2V (twee spots in één frame, Ø185x93):
+       Zena Rond         4608082 4608099 4608143 4608211
+       Zena Rond 2V      4605968 4606170 4606187
+       Zena Vierkant     4608105 4608112 4608150 4608228
+       Zena Vierkant 2V  4606194 4606200 4606446
+     De omschrijving zegt het ("Inbouwspot Zena Rond 2V Kantelbaar ..."); "2V" staat in de
+     naam van de groep, dus het valt niet weg als een spanning. De bladen zelf zijn Engels
+     ("Zena Round", "Zena Square"), dus die namen wijzen er ook heen. Wie alleen "Zena" (of
+     "Zena 2V") typt, krijgt de ronde, zoals "Ario" de GU10 geeft - zonder die zoekterm won de
+     langste naam, Vierkant 2V. Omzetten kan in het label (ARM_SERIES). De drie uitvoeringen
+     "met bladveren" (B4608082, B4608099, B4608211) staan niet op het blad, maar heten Zena Rond
+     en krijgen dat blad.
+     De Zena-bladen (versie oktober 2020) hebben een witte kop, geen donkere balk: een witte
+     stempel viel weg. Daarom, net als de Dio, het donkerblauw van de koppen. En de titel
+     staat op de hoogte van de stempel: hij eindigt op x 263 (ZENA SQUARE 2V, de langste;
+     gemeten in de PDF), de stempel staat rechts op 449,9, dus met een goot van 12 blijft er
+     175 pt over in plaats van de gewone 250 - anders liep een lange opmerking over de titel
+     (stempelBreedte, zie stempelPresenter() in armatuur-rij.js). */
+  {id:'ag124', naam:'Zena Rond', zoektermen:['Zena', 'Zena Round'], stempelKleur:'#1A253C', stempelBreedte:175},
+  {id:'ag125', naam:'Zena Rond 2V', zoektermen:['Zena 2V', 'Zena Round 2V'], stempelKleur:'#1A253C', stempelBreedte:175},
+  {id:'ag126', naam:'Zena Vierkant', zoektermen:['Zena Square'], stempelKleur:'#1A253C', stempelBreedte:175},
+  {id:'ag127', naam:'Zena Vierkant 2V', zoektermen:['Zena Square 2V'], stempelKleur:'#1A253C', stempelBreedte:175},
   {id:'lichtlijn-prxline', naam:'Lichtlijn PRX-Line', zoektermen:['Line']},
   {id:'lichtlijn-uniline', naam:'Lichtlijn PRX-Uniline', zoektermen:['Uniline']},
   {id:'lichtlijn-retroline', naam:'Lichtlijn Retroline PRX', zoektermen:['Retroline']},
@@ -405,6 +428,14 @@ const ARM_SERIES = [
   {serie:'Ario', keuzes:[
     ['ag09', 'Ario GU10'],
     ['ag113', 'Ario LED'],
+  ]},
+  /* De Zena: rond of vierkant, enkel of 2V - vier bladen. De omschrijving zegt welke;
+     wie alleen "Zena" typt krijgt de ronde en kan hier omzetten. */
+  {serie:'Zena', keuzes:[
+    ['ag124', 'Zena Rond'],
+    ['ag125', 'Zena Rond 2V'],
+    ['ag126', 'Zena Vierkant'],
+    ['ag127', 'Zena Vierkant 2V'],
   ]},
 ];
 /* De keuzes voor de serie waar deze groep bij hoort, of null als hij alleen staat. */

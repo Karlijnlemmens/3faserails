@@ -3428,7 +3428,7 @@ async function assembleFinalPdf(){
   /* De stempel - twee stijlen, dezelfde plek als in het armaturenboek, meerdere
      codes onder elkaar - staat in armatuur-rij.js (stempelPresenter()). */
 
-  const appendPresenter = async(id, codes, kleur, zwart, special, opmerkingen)=>{
+  const appendPresenter = async(id, codes, kleur, zwart, special, opmerkingen, breedte)=>{
     const b64 = await presenterData(id);
     if(!b64){ console.warn('Presenter "'+id+'" is nog niet toegevoegd (presenters/'+id+'.js of presenters-data.js) \u2014 overgeslagen.'); return 0; }
     try{
@@ -3436,7 +3436,7 @@ async function assembleFinalPdf(){
       const idx = d.getPageIndices();
       const pgs = await finalDoc.copyPages(d, idx);
       pgs.forEach(p=>finalDoc.addPage(p));
-      stempelPresenter(pgs[0], codes, kleur||'#FFFFFF', zwart, stempelFont, special, opmerkingen); /* alleen op pagina 1 */
+      stempelPresenter(pgs[0], codes, kleur||'#FFFFFF', zwart, stempelFont, special, opmerkingen, breedte); /* alleen op pagina 1 */
       return pgs.length;
     }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); return 0; }
   };
@@ -3449,7 +3449,7 @@ async function assembleFinalPdf(){
     /* het familieblad van de 3-fase rail; voor de 1-fase rail is er (nog) geen */
     else if(deel.bron==='rail'){ if(!eenFase()) presenterTotaal += await appendPresenter('rail'); } /* de rail heeft geen code */
     else if(deel.bron==='presenters'){
-      for(const g of bookGroups) presenterTotaal += await appendPresenter(g.id, g.code, g.kleur, g.zwart, g.special, g.opmerking);
+      for(const g of bookGroups) presenterTotaal += await appendPresenter(g.id, g.code, g.kleur, g.zwart, g.special, g.opmerking, g.breedte);
     }
     else if(deel.bron==='achterpaginas') presenterTotaal += await appendPresenter('achterpaginas'); /* vaste achterpagina's, helemaal achteraan */
   }

@@ -180,6 +180,22 @@ function is(wat, gekregen, verwacht){
      groep('Pragmalux LED Batten Lumea IP44 /Opbouwarmatuur Opus component PIR sensor'),
      groep('Wandarmatuur Qube IP65')],
     ['ag122', 'ag122', 'ag123', 'ag123', 'ag70', 'ag70', 'ag88']);
+  /* De Zena (oktober 2026): vier bladen, elk met zijn eigen codes - rond en vierkant,
+     enkel en 2V. Per blad de codes die erop staan, met de omschrijving uit de spotlijst
+     van de binnendienst (vergelijker/data/bron/spots.csv). */
+  const spotOms = Object.fromEntries(readFileSync(join(root, 'vergelijker/data/bron/spots.csv'), 'utf8').split(/\r?\n/).slice(1)
+    .filter(Boolean).map(r => r.match(/^([^,]*),[^,]*,(.*)$/)).filter(Boolean).map(m => [m[1], m[2].replace(/^"|"$/g, '')]));
+  const zenaBladen = {ag124: ['4608082', '4608099', '4608143', '4608211'], ag125: ['4605968', '4606170', '4606187'],
+                      ag126: ['4608105', '4608112', '4608150', '4608228'], ag127: ['4606194', '4606200', '4606446']};
+  is('Zena: elke code van een blad krijgt dat blad',
+    Object.entries(zenaBladen).map(([id, codes]) => [id, codes.map(c => groep(spotOms[c] || ''))]),
+    Object.entries(zenaBladen).map(([id, codes]) => [id, codes.map(() => id)]));
+  /* Getypt, ook met de Engelse namen van de bladen; alleen "Zena" is de ronde, zoals
+     "Ario" de GU10. Zonder de zoekterm won de langste naam, Vierkant 2V. */
+  is('Zena getypt: rond, 2V, vierkant, Engels, en kaal de ronde',
+    ['Zena rond zwart', 'Zena rond 2V', 'zena vierkant wit', 'Zena vierkant 2v', 'Zena', 'Zena 2V', 'Zena Round White',
+     'Zena MR16 Spot Square 2V Black', 'Inbouwspot met bladveren Zena Rond'].map(groep),
+    ['ag124', 'ag125', 'ag126', 'ag127', 'ag124', 'ag125', 'ag124', 'ag127', 'ag124']);
   /* Paneel en bandraster zijn één soort: de Flexcore-presenter heet zelf zo. */
   is('bandraster Flexcore houdt de Flexcore-presenter',
     groep('Pragmalux LED Bandrasterarmatuur Flexcore Microprisma 185x1542mm 26-36W 3600-4800lm'), 'ag30');
@@ -367,6 +383,16 @@ function is(wat, gekregen, verwacht){
     [3, true, lang, codeOp('B', 1, 2 * 9)]);
   const heelLang = Array(30).fill('woordje').join(' ');
   const krimp = r.stempelOpmerkingRegels(heelLang, {widthOfTextAtSize: (t, k) => t.length * k * 0.6}, 150);
+  /* Een blad met minder ruimte naast de stempel (de Zena: de titel staat op die hoogte)
+     geeft zijn eigen breedte mee; de opmerking blijft daarbinnen */
+  const smal = tekenen(['R2'], false, false, [lang]);
+  const smalZena = []; r.stempelPresenter({getSize: () => ({width: 595.28, height: 841.89}),
+    drawText: (t, o) => smalZena.push(o.x)}, ['R2'], '#1A253C', false, {widthOfTextAtSize: (t, k) => t.length * k * 0.6}, false, [lang], 175);
+  is('stempelbreedte: de Zena houdt de opmerking binnen 175 pt, gewoon mag 250',
+    [Math.min(...smal.map(g => g.x)) < rechts - 175, Math.min(...smalZena) >= rechts - 175 - 0.01],
+    [true, true]);
+  is('de breedte komt uit de groep', r.armBoekGroepen([{g:{id:'ag124', stempelKleur:'#1A253C', stempelBreedte:175}, rijen:[{s:rij({aanduiding:'R1'})}]}])
+    .map(x => [x.kleur, x.breedte]), [['#1A253C', 175]]);
   is('te lang voor drie regels: kleiner, tot 6 pt', [krimp[0].grootte, krimp.length > 3], [6, true]);
   /* het rood hangt af van de kop: helderder op de donkere balk (witte stempel) */
   const roodVan = (zwart, kleur) => { let c; r.stempelPresenter({getSize: () => ({width: 595, height: 842}),
@@ -383,14 +409,14 @@ function is(wat, gekregen, verwacht){
   const g = {id:'ag01', stempelKleur:undefined};
   const boek = [{g, rijen:[{s:rij({aanduiding:'A'})}, {s:rij({aanduiding:' A '})}, {s:rij({aanduiding:'B', stempel:'zwart'})}]}];
   is('stempel: unieke codes onder elkaar, zwart als een regel erom vraagt', r.armBoekGroepen(boek),
-    [{id:'ag01', code:['A', 'B'], opmerking:['', ''], kleur:'#FFFFFF', zwart:true, special:false}]);
+    [{id:'ag01', code:['A', 'B'], opmerking:['', ''], kleur:'#FFFFFF', breedte:null, zwart:true, special:false}]);
   is('wit is de standaard', r.stempelZwart(rij({})), false);
   /* Een special is meestal een DLC-blad: daar valt de stempel op wit papier. */
   is('special: standaard zwart', r.stempelZwart(rij({}), true), true);
   is('special: zelf op wit gezet blijft wit', r.stempelZwart(rij({stempel:'wit'}), true), false);
   is('special gaat mee naar het boek',
     r.armBoekGroepen([{g:{id:'sparm03', special:true}, rijen:[{s:rij({aanduiding:'S1'})}]}]),
-    [{id:'sparm03', code:['S1'], opmerking:[''], kleur:'#FFFFFF', zwart:true, special:true}]);
+    [{id:'sparm03', code:['S1'], opmerking:[''], kleur:'#FFFFFF', breedte:null, zwart:true, special:true}]);
   /* De opmerking uit kolom L (of zelf getypt) gaat met zijn code naar de presenter */
   is('opmerkingen per code: samengevoegd als het er meer zijn, een opmerking zonder code achteraan',
     r.armBoekGroepen([{g, rijen:[{s:rij({aanduiding:'A', opmerking:'Niet IK10'})}, {s:rij({aanduiding:'B'})},

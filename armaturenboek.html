@@ -512,8 +512,8 @@ async function assembleArmaturenboekPdf(){
   }
   /* De stempel zelf - twee stijlen, gemeten plek, krimpen bij een lange code -
      staat in armatuur-rij.js, zodat de railtool op precies dezelfde plek stempelt. */
-  const stempelCode = (pagina, codes, kleur, zwart, special, opmerkingen)=> stempelPresenter(pagina, codes, kleur, zwart, stempelFont, special, opmerkingen);
-  const appendPresenter = async(id, codes, kleur, zwart, special, opmerkingen)=>{
+  const stempelCode = (pagina, codes, kleur, zwart, special, opmerkingen, breedte)=> stempelPresenter(pagina, codes, kleur, zwart, stempelFont, special, opmerkingen, breedte);
+  const appendPresenter = async(id, codes, kleur, zwart, special, opmerkingen, breedte)=>{
     const b64 = await presenterData(id);
     if(!b64){ console.warn('Presenter "'+id+'" is nog niet toegevoegd (presenters/'+id+'.js) — overgeslagen.'); return 0; }
     try{
@@ -521,7 +521,7 @@ async function assembleArmaturenboekPdf(){
       const idx = d.getPageIndices();
       const pgs = await finalDoc.copyPages(d, idx);
       pgs.forEach(p=>finalDoc.addPage(p));
-      stempelCode(pgs[0], codes, kleur||'#FFFFFF', zwart, special, opmerkingen);
+      stempelCode(pgs[0], codes, kleur||'#FFFFFF', zwart, special, opmerkingen, breedte);
       return pgs.length;
     }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); return 0; }
   };
@@ -532,7 +532,7 @@ async function assembleArmaturenboekPdf(){
     else if(deel.bron==='lichtberekening') erbij += await appendPresenter('lichtberekening'); /* AB Lichtberekening, geen stempel */
     else if(deel.bron==='lichtplan') erbij += await Lichtplan.voegToe(finalDoc);
     else if(deel.bron==='presenters'){
-      for(const g of bookGroups) erbij += await appendPresenter(g.id, g.code, g.kleur, g.zwart, g.special, g.opmerking);
+      for(const g of bookGroups) erbij += await appendPresenter(g.id, g.code, g.kleur, g.zwart, g.special, g.opmerking, g.breedte);
     }
     else if(deel.bron==='achterpaginas') erbij += await appendPresenter('achterpaginas'); /* AB Achterpaginas, helemaal achteraan */
   }

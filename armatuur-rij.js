@@ -150,6 +150,8 @@ function armBoekGroepen(boek){
       code,
       opmerking: code.map(opmerkingVan),
       kleur: b.g.stempelKleur || '#FFFFFF',
+      /* een blad met minder vrije ruimte naast de stempel (zie stempelPresenter) */
+      breedte: b.g.stempelBreedte || null,
       zwart: b.rijen.some(r=>stempelZwart(r.s, b.g.special)),
       special: !!b.g.special,
     };
@@ -195,7 +197,8 @@ const STEMPEL_SPECIAL = {marge: 595.28 - 435.85, basislijn: 35.2};
    IK10"), klein en rood links naast zijn code, op dezelfde basislijn. Alle opmerkingen
    eindigen op één lijn, een tussenruimte links van de breedste code, zodat codes en
    opmerkingen twee nette kolommen vormen. Ze blijven binnen dezelfde veilige breedte als
-   de codes; een lange opmerking loopt door op een volgende regel (en de code eronder
+   de codes (250 pt, of de stempelBreedte van de groep); een lange opmerking loopt door op
+   een volgende regel (en de code eronder
    schuift mee), en wordt kleiner als hij anders meer dan drie regels zou nemen. Zonder
    opmerkingen staat alles precies waar het stond.
    Twee roden: het rood van de PDF's (#D6362B) haalt op de donkere kopbalk van de
@@ -204,12 +207,14 @@ const STEMPEL_SPECIAL = {marge: 595.28 - 435.85, basislijn: 35.2};
    (een zwarte stempel, of een groep met een eigen stempelkleur) het gewone (4,7 op wit). */
 const STEMPEL_OPMERKING = {korps:7.5, minKorps:6, regelhoogte:9, tussen:9, maxRegels:3,
   opDonker:[1, 0.294, 0.243], opLicht:[0.84, 0.21, 0.17]};
-function stempelPresenter(pagina, codes, kleur, zwart, font, special, opmerkingen){
+function stempelPresenter(pagina, codes, kleur, zwart, font, special, opmerkingen, breedte){
   if(!pagina || !codes || !codes.length) return;
   const korps=11, regelhoogte=13;
   const marge = special ? STEMPEL_SPECIAL.marge : 32+113.4 /* +4cm naar links t.o.v. de rechtermarge */;
   const basislijn = special ? STEMPEL_SPECIAL.basislijn : zwart ? 27.2 : 35.5;
-  const veiligeBreedte = 250, minKorps = 7;
+  /* breedte: een groep met een smallere vrije ruimte (stempelBreedte in armatuur-groepen.js,
+     zoals de Zena, waar de titel op de hoogte van de stempel staat) */
+  const veiligeBreedte = breedte || 250, minKorps = 7;
   const {width, height} = pagina.getSize();
   const c = zwart
     ? PDFLib.rgb(0,0,0)
