@@ -1367,12 +1367,12 @@ function is(wat, gekregen, verwacht){
   const venster = {};
   new Function('window', readFileSync(join(root, 'catalogus-data.js'), 'utf8'))(venster);
   const CAT = venster.CATALOGUS;
-  /* uit catalogus.csv, spots.csv en wandarmaturen.csv (de spot- en wandarmaturenlijst van
-     de binnendienst, alleen voor het opzoeken - zie tools/maak-catalogus-data.mjs) */
-  const bronCodes = ['catalogus.csv', 'spots.csv', 'wandarmaturen.csv'].flatMap(f => readFileSync(join(root, 'vergelijker/data/bron/' + f), 'utf8')
+  /* uit catalogus.csv en de lijsten van de binnendienst - spots, wandarmaturen, de
+     Valento - die alleen voor het opzoeken zijn (zie tools/maak-catalogus-data.mjs) */
+  const bronCodes = ['catalogus.csv', 'spots.csv', 'wandarmaturen.csv', 'opbouwarmaturen.csv'].flatMap(f => readFileSync(join(root, 'vergelijker/data/bron/' + f), 'utf8')
     .split(/\r?\n/).slice(1).filter(Boolean).map(r => r.split(',')[0].trim().toUpperCase()));
   is('elke artikelcode uit de bronnen staat erin, en niets anders', Object.keys(CAT).sort(), [...new Set(bronCodes)].sort());
-  is('codes: ondergrens 5862 (5283, 499 spots, 80 wandarmaturen)', Object.keys(CAT).length >= 5862, true);
+  is('codes: ondergrens 5897 (5283, 499 spots, 80 wandarmaturen, 35 Valento)', Object.keys(CAT).length >= 5897, true);
   const r0 = c => Object.prototype.hasOwnProperty.call(CAT, c) ? CAT[c] : null;
   /* De spots die in een echte projectlijst niets vonden (oktober 2026), en de uitgefaseerde
      die op verzoek van de binnendienst niet zijn meegenomen */
@@ -1381,6 +1381,9 @@ function is(wat, gekregen, verwacht){
     ['Pragmalux 1-fase Railspot Ario zwart RAL9004 - Incl. GU10 Fitting',
      'Pragmalux Inbouwspot Zena Vierkant Kantelbaar wit RAL9003 - Incl. GU10 Fitting',
      'Pragmalux Inbouwspot Zena Vierkant Kantelbaar Zwart RAL9004 - Incl. GU10 Fitting']);
+  is('de Valento uit die projectlijst gevonden', ['2026995', '2027152'].map(c => r0(c)),
+    ['Pragmalux opbouwarmatuur Valento rond single kantelbaar Ø65 bronze RAL7048 - incl. GU10 Fitting',
+     'Pragmalux opbouwarmatuur Valento rechthoek dubbel kantelbaar Ø65 zwart RAL9004 - incl. GU10 Fitting']);
   is('de wandarmaturenlijst: Waldo (ook uit die projectlijst), Pareto en Qube gevonden',
     ['2026650', '2026490', '2000513'].map(c => r0(c)),
     ['Pragmalux wandarmatuur Waldo Rechthoek up/down zwart RAL9004 - incl. GU10 Fitting',

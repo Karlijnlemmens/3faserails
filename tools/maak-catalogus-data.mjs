@@ -1,15 +1,15 @@
 #!/usr/bin/env node
-/* Bouwt catalogus-data.js uit vergelijker/data/bron/catalogus.csv, spots.csv en
- * wandarmaturen.csv: van elke
+/* Bouwt catalogus-data.js uit vergelijker/data/bron/catalogus.csv, spots.csv,
+ * wandarmaturen.csv en opbouwarmaturen.csv: van elke
  * artikelcode de omschrijving, zodat het armaturenboek en de railtool bij een ingetypte
  * artikelcode de volledige naam kunnen invullen (armNaamUitCode() in armatuur-rij.js) en een
  * ingeladen Excel-lijst kunnen controleren (armaturen-excel.js).
  *
  * catalogus.csv is ook de bron van de productdata van de vergelijker (bouw-data.py);
- * spots.csv en wandarmaturen.csv alleen van dit bestand. Dat zijn de spotlijst en de lijst
- * van wandarmaturen van de binnendienst (oktober 2026; bij de spots de uitgefaseerde
- * weggelaten, bij de wandarmaturen de 186 Dura's, die al in catalogus.csv staan): zonder
- * die lijsten vonden de Zena, de Ario 1-fase railspot, de Waldo en honderden andere niets. In de vergelijker zouden ze 39 families
+ * de andere drie alleen van dit bestand. Dat zijn lijsten van de binnendienst (oktober
+ * 2026): alle spots (de uitgefaseerde weggelaten), alle wandarmaturen (zonder de 186 Dura's,
+ * die al in catalogus.csv staan) en de opbouwarmatuur Valento. Zonder die lijsten vonden de
+ * Zena, de Ario 1-fase railspot, de Waldo, de Valento en honderden andere niets. In de vergelijker zouden ze 39 families
  * opleveren, waaronder losse lampen en spots zonder lichtstroom of maat in hun
  * omschrijving - die eisen eerst werk aan de productdata. Staat een code in meer dan één
  * bron, dan wint de eerste: catalogus.csv. Van de 459 dubbelen bij het toevoegen was er
@@ -32,7 +32,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const BRONNEN = ['catalogus.csv', 'spots.csv', 'wandarmaturen.csv'];
+const BRONNEN = ['catalogus.csv', 'spots.csv', 'wandarmaturen.csv', 'opbouwarmaturen.csv'];
 const bronPad = naam => 'vergelijker/data/bron/' + naam;
 const vinger = tekst => createHash('sha256').update(tekst.replace(/\r\n/g, '\n'), 'utf8').digest('hex').slice(0, 16);
 
