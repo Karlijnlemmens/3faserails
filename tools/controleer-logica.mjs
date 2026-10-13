@@ -1367,8 +1367,21 @@ function is(wat, gekregen, verwacht){
   const venster = {};
   new Function('window', readFileSync(join(root, 'catalogus-data.js'), 'utf8'))(venster);
   const CAT = venster.CATALOGUS;
-  const csvRegels = readFileSync(join(root, 'vergelijker/data/bron/catalogus.csv'), 'utf8').split(/\r?\n/).slice(1).filter(Boolean).length;
-  is('elke artikelcode uit de catalogus staat erin', Object.keys(CAT).length, csvRegels);
+  /* uit catalogus.csv en spots.csv (de spotlijst van de binnendienst, alleen voor het
+     opzoeken - zie tools/maak-catalogus-data.mjs) */
+  const bronCodes = ['catalogus.csv', 'spots.csv'].flatMap(f => readFileSync(join(root, 'vergelijker/data/bron/' + f), 'utf8')
+    .split(/\r?\n/).slice(1).filter(Boolean).map(r => r.split(',')[0].trim().toUpperCase()));
+  is('elke artikelcode uit de bronnen staat erin, en niets anders', Object.keys(CAT).sort(), [...new Set(bronCodes)].sort());
+  is('codes: ondergrens 5782 (5283 en 499 spots)', Object.keys(CAT).length >= 5782, true);
+  const r0 = c => Object.prototype.hasOwnProperty.call(CAT, c) ? CAT[c] : null;
+  /* De spots die in een echte projectlijst niets vonden (oktober 2026), en de uitgefaseerde
+     die op verzoek van de binnendienst niet zijn meegenomen */
+  is('de spotlijst: Ario 1-fase railspot en Zena gevonden',
+    ['2036284', '4608105', '4608112'].map(c => r0(c)),
+    ['Pragmalux 1-fase Railspot Ario zwart RAL9004 - Incl. GU10 Fitting',
+     'Pragmalux Inbouwspot Zena Vierkant Kantelbaar wit RAL9003 - Incl. GU10 Fitting',
+     'Pragmalux Inbouwspot Zena Vierkant Kantelbaar Zwart RAL9004 - Incl. GU10 Fitting']);
+  is('uitgefaseerd niet meegenomen', ['9011482', '4309324', '70811800', '72139100'].map(c => r0(c)), [null, null, null, null]);
   const r = await laadUit('armatuur-rij.js', ['catalogusNaam', 'armNaamUitCode']);
   const dura = 'Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 max.18W 1725-2075lm 2200K-2700K 2-CCT + Casambi driver';
   is('een code uit de catalogus geeft de omschrijving (dubbele spaties enkel)',

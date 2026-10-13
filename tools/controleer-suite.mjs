@@ -241,7 +241,8 @@ PAGINAS.forEach(p => {
     'vergelijking.html': [['armaturen.json', 'vergelijker/data/armaturen.json'], ['index-template.html', 'vergelijker/index-template.html'],
                           'python3 vergelijker/bouw-tool.py'],
     /* de artikelcodes waarmee het armaturenboek en de railtool de naam invullen */
-    'catalogus-data.js': [['catalogus.csv', 'vergelijker/data/bron/catalogus.csv'], 'node tools/maak-catalogus-data.mjs'],
+    'catalogus-data.js': [['catalogus.csv', 'vergelijker/data/bron/catalogus.csv'], ['spots.csv', 'vergelijker/data/bron/spots.csv'],
+                          'node tools/maak-catalogus-data.mjs'],
   };
   for(const [bestand, lijst] of Object.entries(bronnen)){
     const kop = lees(bestand).slice(0, 2000);
