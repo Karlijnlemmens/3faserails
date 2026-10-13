@@ -144,7 +144,8 @@ PAGINAS.forEach(p => {
        boek, en liepen uit elkaar zolang ze elk hun eigen regel hadden. */
     for(const f of ['specialPresenterId','armGroepVanRij','armTypeOnbekend','armEigenPresenters','armWisselRijen',
                     'stempelZwart','armBoekGroepen','stempelPresenter','armLijstKolommen','armRijDelen','armVolgBijwerken',
-                    'armSlotLeeg','armAccessoires','armAccessoireDelen','catalogusNaam','armNaamUitCode','armNaamVeldUitCode'])
+                    'armSlotLeeg','armAccessoires','armAccessoireDelen','catalogusNaam','armNaamUitCode','armNaamVeldUitCode',
+                    'stempelOpmerkingRegels','armKolomKeuze'])
       if(new RegExp('function\\s+' + f + '\\s*\\(').test(t)) meld(p + ' heeft een eigen ' + f + '(); die hoort alleen in armatuur-rij.js');
     /* alleen de twee tools die een armaturenboek maken; bandrasters.html heeft een
        eigen stempelCode() voor de bestekcode op zijn productblad, en dat is iets anders */
@@ -160,7 +161,7 @@ PAGINAS.forEach(p => {
     if(/function\s+lichtplanDelen\s*\(/.test(t)) meld(p + ' heeft een eigen lichtplanDelen(); die hoort alleen in lichtplan.js');
     if(/function\s+verkleinInStappen\s*\(/.test(t)) meld(p + ' heeft een eigen verkleinInStappen(); die hoort alleen in pdf-verkleinen.js');
     /* en met de Excel-lijst: beide tools lezen hem op dezelfde manier */
-    for(const f of ['excelRijen','csvRijen','excelArmatuurRegels','excelVergelijk','woordVerschil'])
+    for(const f of ['excelRijen','csvRijen','excelArmatuurRegels','excelDelen','excelVergelijk','woordVerschil'])
       if(new RegExp('function\\s+' + f + '\\s*\\(').test(t)) meld(p + ' heeft een eigen ' + f + '(); die hoort alleen in armaturen-excel.js');
     if(['index.html','armaturenboek.html'].includes(p) && /function\s+(paintBadge|updateSpecialUI|updateStempelUI|stempelCode)\s*\(/.test(t))
       meld(p + ' bouwt zijn eigen armatuurlabel, uploadknop of stempel; die horen uit armRijDelen()/stempelPresenter() in armatuur-rij.js');
@@ -174,7 +175,7 @@ PAGINAS.forEach(p => {
     ['zoeken.js',        /\b(zoekNormaal|zoekWoorden|tekstPast|bevatWoord|codeSleutel|lijktCode|besteSuggestie)\(/],
     /* armSuggestie() staat in armatuur-groepen.js maar rekent met bewerkAfstand() uit zoeken.js */
     ['zoeken.js',        /\barmSuggestie\(/],
-    ['armatuur-rij.js',  /\b(armGroepVanRij|armRijDelen|stempelPresenter|armLijstKolommen|armBoekGroepen|armWisselRijen|armEigenPresenters|specialPresenterId|armSlotLeeg|armAccessoires|armAccessoireDelen)\(/],
+    ['armatuur-rij.js',  /\b(armGroepVanRij|armRijDelen|stempelPresenter|armLijstKolommen|armBoekGroepen|armWisselRijen|armEigenPresenters|specialPresenterId|armSlotLeeg|armAccessoires|armAccessoireDelen|armKolomKeuze)\(/],
     ['medewerkers.js',   /\b(MEDEWERKERS|MEDEWERKER_ROLLEN)\b/],
     ['medewerker-fotos.js', /\bMEDEWERKER_FOTOS\b/],
     ['contactpersonen.js', /\b(contactKeuze|tekenContactpersonen|contactPersonen|medewerkerVan)\(/],

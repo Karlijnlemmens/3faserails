@@ -188,11 +188,12 @@
         <div class="ab-keuze" style="margin-bottom:12px;">
           <label><input type="checkbox" id="abToonLijst" checked><span>Armaturenlijst in de PDF</span></label>
         </div>
+        <div id="abKolomKeuze" style="margin:-4px 0 12px;"></div>
         <p class="hint" style="margin:-6px 0 12px;">Uit betekent: geen overzichtstabel met alle armaturen in het boek. Het voorblad, de briefingpagina, het hoofdstukblad Armaturen en de presenters blijven staan.</p>
         <input type="file" id="abExcelBestand" accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" hidden>
         <div class="axl-keuze">
           <button type="button" id="abExcelKnop">Armaturen uit Excel inladen</button>
-          <span>kolom A de code, I de artikelcode, J de omschrijving</span>
+          <span>kolom A de code, F het aantal, I de artikelcode (accessoires erachter met een +), J de omschrijving, L de opmerking</span>
         </div>
         <div class="c2-prodlist" id="abArmList"></div>
       </div>
@@ -302,6 +303,9 @@ const OPGESLAGEN_PROJECT = /*__PROJECT_DATA_START__*/null/*__PROJECT_DATA_END__*
    uit; de rest van het boek verandert er niet van. */
 const st = { proj:'', projNr:'', installateur:'', datum:'', soort:'lichtberekening',
              bestek:'', tekeningen:'', armaturenboek:'', email:'', toonLijst:true, armaturen:{},
+             /* welke kolommen er in de armaturenlijst staan (armKolomKeuze() in armatuur-rij.js);
+                een kolom die hier niet in staat, staat aan */
+             lijstKolommen:{},
              /* wie er onder "Contactgegevens" op de briefingpagina staan (ids uit medewerkers.js) */
              projectuitwerker:'', accountmanager:'', binnendienst:'',
              /* totaal projectboek: het ingeladen lichtplan, {naam, paginas} of null; de PDF
@@ -450,7 +454,7 @@ async function buildArmaturenboekPdf(){
         .filter(r=> r.s && !armSlotLeeg(r.s));
       /* regels: elke armatuur met zijn accessoires eronder - zonder eigen CODE en in de
          kleur van hun armatuur (armLijstKolommen() in armatuur-rij.js) */
-      const {cols, regels} = armLijstKolommen(rijenVoorTabel, armCode, armOms);
+      const {cols, regels} = armLijstKolommen(rijenVoorTabel, armCode, armOms, st.lijstKolommen);
       let TB=tableStart(cols);
       regels.forEach(g=> tableRow(TB, g.waarden, {vervolg:g.vervolg}));
       y+=10;
@@ -508,8 +512,8 @@ async function assembleArmaturenboekPdf(){
   }
   /* De stempel zelf - twee stijlen, gemeten plek, krimpen bij een lange code -
      staat in armatuur-rij.js, zodat de railtool op precies dezelfde plek stempelt. */
-  const stempelCode = (pagina, codes, kleur, zwart, special)=> stempelPresenter(pagina, codes, kleur, zwart, stempelFont, special);
-  const appendPresenter = async(id, codes, kleur, zwart, special)=>{
+  const stempelCode = (pagina, codes, kleur, zwart, special, opmerkingen)=> stempelPresenter(pagina, codes, kleur, zwart, stempelFont, special, opmerkingen);
+  const appendPresenter = async(id, codes, kleur, zwart, special, opmerkingen)=>{
     const b64 = await presenterData(id);
     if(!b64){ console.warn('Presenter "'+id+'" is nog niet toegevoegd (presenters/'+id+'.js) — overgeslagen.'); return 0; }
     try{
@@ -517,7 +521,7 @@ async function assembleArmaturenboekPdf(){
       const idx = d.getPageIndices();
       const pgs = await finalDoc.copyPages(d, idx);
       pgs.forEach(p=>finalDoc.addPage(p));
-      stempelCode(pgs[0], codes, kleur||'#FFFFFF', zwart, special);
+      stempelCode(pgs[0], codes, kleur||'#FFFFFF', zwart, special, opmerkingen);
       return pgs.length;
     }catch(err){ console.warn('Presenter "'+id+'" kon niet worden geladen:', err); return 0; }
   };
@@ -528,7 +532,7 @@ async function assembleArmaturenboekPdf(){
     else if(deel.bron==='lichtberekening') erbij += await appendPresenter('lichtberekening'); /* AB Lichtberekening, geen stempel */
     else if(deel.bron==='lichtplan') erbij += await Lichtplan.voegToe(finalDoc);
     else if(deel.bron==='presenters'){
-      for(const g of bookGroups) erbij += await appendPresenter(g.id, g.code, g.kleur, g.zwart, g.special);
+      for(const g of bookGroups) erbij += await appendPresenter(g.id, g.code, g.kleur, g.zwart, g.special, g.opmerking);
     }
     else if(deel.bron==='achterpaginas') erbij += await appendPresenter('achterpaginas'); /* AB Achterpaginas, helemaal achteraan */
   }
@@ -736,12 +740,13 @@ function maakArmRij(a){
      De regel en zijn accessoires zitten in één blok, zodat ze samen onder elkaar staan. */
   const acc = armAccessoireDelen({s, opWijziging:updateSummary});
   row.appendChild(delen.volg);
-  row.appendChild(codeNaamInp); row.appendChild(codeInp); row.appendChild(nameInp); row.appendChild(delen.badge);
+  row.appendChild(codeNaamInp); row.appendChild(delen.opmKnop);
+  row.appendChild(codeInp); row.appendChild(nameInp); row.appendChild(delen.badge);
   row.appendChild(delen.upload); row.appendChild(delen.stempel);
   const staart=document.createElement('span'); staart.className='c2-armstaart';
   staart.appendChild(qty); staart.appendChild(acc.knop); row.appendChild(staart);
   const blok=document.createElement('div'); blok.className='c2-armblok';
-  blok.appendChild(row); blok.appendChild(acc.lijst);
+  blok.appendChild(row); blok.appendChild(delen.opmerking); blok.appendChild(acc.lijst);
   return blok;
 }
 /* Verwisselt de INHOUD van twee regels, niet de slots zelf: arm01..armNN blijven op
@@ -859,6 +864,8 @@ function herstelProject(bron){
      niet heeft, bleef anders in het teruggehaalde project staan (nagemeten). */
   ARMATUREN.length = 12;
   st.armaturen = ARMATUREN.reduce((o,a)=>{o[a.id]={aanduiding:'',name:'',code:'',groep:'',qty:0};return o;},{});
+  /* een project van vóór de kolomkeuze heeft ze allemaal aan, niet de keuze van het vorige project */
+  st.lijstKolommen = {};
   Object.keys(st).forEach(k=>{
     if(!Object.prototype.hasOwnProperty.call(s,k)) return;
     if(k==='armaturen'){ st[k] = Object.assign({}, st[k], s[k]); }
@@ -897,7 +904,11 @@ toonBriefingVelden();
 /* Terugval op true: een project dat vóór deze optie is opgeslagen kent de sleutel
    nog niet, en daar hoorde de armaturenlijst er gewoon bij. */
 $('abToonLijst').checked = st.toonLijst !== false;
-$('abToonLijst').addEventListener('change', e=>{ st.toonLijst = e.target.checked; });
+/* welke kolommen er in de armaturenlijst komen: armKolomKeuze() in armatuur-rij.js, net als in de railtool */
+const kolomKeuze = armKolomKeuze({keuze: ()=> st.lijstKolommen || (st.lijstKolommen = {}),
+  lijstAan: ()=> st.toonLijst !== false, opWijziging: updateSummary});
+$('abKolomKeuze').replaceChildren(kolomKeuze.el);   /* een opgeslagen projectbestand heeft de vorige nog in zijn HTML */
+$('abToonLijst').addEventListener('change', e=>{ st.toonLijst = e.target.checked; kolomKeuze.verf(); });
 
 /* ---------- totaal projectboek: het lichtplan, zie lichtplan.js ---------- */
 Lichtplan.koppel({
@@ -954,6 +965,7 @@ function zetProjectInScherm(){
   $('abDatum').value = st.datum || '';
   briefingKeuze($('abBriefVelden'), st, briefingGewijzigd, 'abBrief_');
   $('abToonLijst').checked = st.toonLijst !== false;
+  kolomKeuze.verf();
   Lichtplan.verf();
   contactKeuze($('abContactVelden'), st, briefingGewijzigd, 'abContact_');
   toonBriefingVelden();

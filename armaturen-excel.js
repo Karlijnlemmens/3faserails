@@ -2,13 +2,16 @@
    (armaturenboek.html) en de railtool (index.html), zodat beide het op dezelfde manier
    doen.
 
-   Uit de lijst komen drie kolommen: A de code van het armatuur (in de tool "Code", de
-   aanduiding op de tekening), I de artikelcode en J de omschrijving; de rest wordt
-   genegeerd. De artikelcode vult de naam in zoals hij dat bij intypen ook doet: uit de
-   catalogus (catalogusNaam() in armatuur-rij.js). De omschrijving uit de lijst is er ter
-   controle. Is hij woord voor woord gelijk aan die uit de catalogus, dan is er niets aan
-   de hand; wijkt hij af, dan kiest de gebruiker per regel welke blijft. Staat de
-   artikelcode niet in de catalogus, dan komt de omschrijving uit de lijst.
+   Uit de lijst komen vijf kolommen: A de code van het armatuur (in de tool "Code", de
+   aanduiding op de tekening), F het totale aantal, I de artikelcode, J de omschrijving
+   en L de opmerking (die komt klein en rood naast de code op de presenter); de rest
+   wordt genegeerd. Accessoires staan op de regel van hun armatuur, met een + tussen de
+   artikelcodes en tussen de omschrijvingen. De artikelcode vult de naam in zoals hij dat
+   bij intypen ook doet: uit de catalogus (catalogusNaam() in armatuur-rij.js). De
+   omschrijving uit de lijst is er ter controle. Is hij woord voor woord gelijk aan die
+   uit de catalogus, dan is er niets aan de hand; wijkt hij af, dan kiest de gebruiker
+   per artikel welke blijft. Staat de artikelcode niet in de catalogus, dan komt de
+   omschrijving uit de lijst.
 
    De regels komen in de lege regels van de tool, achter wat er al staat; er wordt niets
    overschreven.
@@ -21,7 +24,7 @@
    Een gewoon <script src>, geen module: modules laden niet vanaf schijf. Laden na
    armatuur-rij.js, catalogus-data.js en melding.js. excelRijen(), csvRijen(),
    excelArmatuurRegels(), excelVergelijk() en woordVerschil() staan op het hoogste
-   niveau, zodat tools/controleer-logica.mjs ze kan uitsnijden. */
+   niveau, net als excelDelen(), zodat tools/controleer-logica.mjs ze kan uitsnijden. */
 
 /* ---------------------------------------------------------------- lezen ---- */
 
@@ -121,28 +124,88 @@ function csvRijen(tekst){
 
 /* ------------------------------------------------------ de armaturen eruit ---- */
 
-const EXCEL_KOLOM = {code:0, artikelcode:8, omschrijving:9};   /* A, I, J */
+/* A de code, F het totale aantal, I de artikelcode(s), J de omschrijving(en), L de
+   opmerking - zoals inside sales de lijst maakt (B tot en met E zijn de aantallen per
+   ruimte, G het armatuur uit het bestek, H en K een voorbeeldplaatje). */
+const EXCEL_KOLOM = {code:0, aantal:5, artikelcode:8, omschrijving:9, opmerking:11};   /* A, F, I, J, L */
 const enkel = s => String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
 
-/* De armaturen uit de rijen: {rij, code, artikelcode, omschrijving}, rij is het
-   rijnummer in Excel. Een rij zonder artikelcode en zonder omschrijving telt niet (een
-   lege regel, een tussenkop met alleen iets in kolom A), en een kopregel ook niet: daar
-   staat in kolom I of J een kolomnaam. */
+/* De armaturen uit de rijen: {rij, code, artikelcode, codes, omschrijving, aantal,
+   opmerking}; rij is het rijnummer in Excel. Een rij zonder artikelcode en zonder
+   omschrijving telt niet (een lege regel, een tussenkop met alleen iets in kolom A, een
+   regel met alleen een 0 in de totaalkolom), en een kopregel ook niet: daar staat in
+   kolom I of J een kolomnaam.
+   Een armatuur met accessoires staat op één regel, met een + tussen de artikelcodes:
+   "1000947-OS + 1000282" is het armatuur 1000947-OS met accessoire 1000282. codes is
+   die reeks, het armatuur voorop; de omschrijvingen staan op dezelfde manier in J en
+   worden pas met de catalogus erbij gesplitst (excelDelen()). Het aantal is het totaal
+   uit kolom F, 0 als er niets of geen getal staat. */
 const EXCEL_KOPWOORD = /^(artikel ?(code|nummer|nr\.?)|art\.? ?(nr\.?|nummer|code)|omschrijving|beschrijving|description|item ?(number|code)|sku|code|type)$/i;
 function excelArmatuurRegels(rijen){
   const uit = [];
   rijen.forEach((r, i) => {
-    const regel = {rij: i + 1, code: enkel(r[EXCEL_KOLOM.code]), artikelcode: enkel(r[EXCEL_KOLOM.artikelcode]),
-                   omschrijving: enkel(r[EXCEL_KOLOM.omschrijving])};
+    const veld = k => enkel(r[EXCEL_KOLOM[k]]);
+    const regel = {rij: i + 1, code: veld('code'), artikelcode: veld('artikelcode'), omschrijving: veld('omschrijving')};
     if(!regel.artikelcode && !regel.omschrijving) return;
     if(EXCEL_KOPWOORD.test(regel.artikelcode) || EXCEL_KOPWOORD.test(regel.omschrijving)) return;
+    regel.codes = regel.artikelcode.split('+').map(enkel).filter(Boolean);
+    if(!regel.codes.length) regel.codes = [''];
+    const n = parseFloat(veld('aantal').replace(',', '.'));
+    regel.aantal = isFinite(n) && n > 0 ? Math.round(n) : 0;
+    regel.opmerking = veld('opmerking');
     uit.push(regel);
   });
   return uit;
 }
 
-/* De omschrijving uit de lijst naast die uit de catalogus. "Gelijk" is woord voor woord,
-   op spaties na (de catalogus maakt van een dubbele spatie al een enkele).
+/* De omschrijving uit J in stukken, één per artikelcode: [{artikelcode, omschrijving}].
+   Ook in J staat een + tussen de stukken, maar een omschrijving kan zelf een + hebben
+   ("2-CCT + bewegingssensor", "UGR<19 +Osram Driver"), dus niet elke + is een grens. De
+   catalogus beslist: van alle manieren om te knippen wint die waarbij de stukken het
+   minst verschillen van de namen in de catalogus (woorden die er in het ene wel en in
+   het andere niet staan). Weet de catalogus het niet - een code die er niet in staat -
+   dan wint de knip met de meeste stukken, en daarna die met de grenzen zo ver
+   mogelijk naar achteren: een armatuur heeft vaker een + in zijn naam dan een
+   accessoire. Zijn er minder stukken dan codes, dan blijft de omschrijving van de
+   laatste leeg. */
+function excelDelen(regel, catalogus){
+  const codes = regel.codes && regel.codes.length ? regel.codes : [enkel(regel.artikelcode)];
+  const t = enkel(regel.omschrijving), n = codes.length;
+  if(n === 1) return [{artikelcode: codes[0], omschrijving: t}];
+  const cat = codes.map(c => enkel(catalogusNaam(c, catalogus) || ''));
+  const plussen = [];
+  for(let i = 0; i < t.length; i++) if(t[i] === '+') plussen.push(i);
+  const knip = sneden => {
+    const d = []; let van = 0;
+    sneden.forEach(p => { d.push(t.slice(van, p).trim()); van = p + 1; });
+    d.push(t.slice(van).trim());
+    while(d.length < n) d.push('');
+    return d;
+  };
+  const kosten = d => d.reduce((k, stuk, i) => {
+    if(!cat[i] || !stuk) return k;
+    const [a, b] = woordVerschil(cat[i], stuk);
+    return k + a.filter(w => !w.mee).length + b.filter(w => !w.mee).length;
+  }, 0);
+  let beste = knip([]), besteK = kosten(beste), stappen = 0;
+  /* in oplopende volgorde; bij gelijke kosten wint de laatste, dus meer stukken en
+     grenzen verder naar achteren */
+  const probeer = (van, gekozen, aantal) => {
+    if(++stappen > 20000) return;
+    if(gekozen.length === aantal){
+      const d = knip(gekozen), k = kosten(d);
+      if(k <= besteK){ besteK = k; beste = d; }
+      return;
+    }
+    for(let i = van; i < plussen.length; i++) probeer(i + 1, gekozen.concat(plussen[i]), aantal);
+  };
+  for(let aantal = 1; aantal <= Math.min(n - 1, plussen.length); aantal++) probeer(0, [], aantal);
+  return codes.map((c, i) => ({artikelcode: c, omschrijving: beste[i]}));
+}
+
+/* De omschrijving uit de lijst naast die uit de catalogus, per artikel (een stuk uit
+   excelDelen()). "Gelijk" is woord voor woord, op spaties na (de catalogus maakt van een
+   dubbele spatie al een enkele).
      {soort:'gelijk',   naam}                beide hetzelfde
      {soort:'anders',   catalogus, excel}    de gebruiker kiest
      {soort:'catalogus', naam}               geen omschrijving in de lijst
@@ -193,35 +256,56 @@ const ArmaturenExcel = (function(){
     throw new Error('dit is geen Excel-bestand (.xlsx) of .csv');
   }
 
-  /* De regels in de lege regels van de tool, achter wat er al staat. Bij een verschil
-     staat eerst de omschrijving uit de catalogus erin; de keuze volgt in het venster. */
+  /* De regels in de lege regels van de tool, achter wat er al staat: de code, de
+     artikelcode, de naam, het aantal, de opmerking en de accessoires. Bij een verschil
+     staat eerst de omschrijving uit de catalogus erin; de keuze volgt in het venster.
+     Een accessoire krijgt het aantal van zijn regel: "1000947-OS + 1000282" met 8 in
+     de totaalkolom is acht keer het paneel met zijn noodmodule. */
   function vul(regels){
     const telling = {gelijk:0, anders:0, catalogus:0, excel:0, leeg:0}, verschillen = [];
-    let plek = 0;
+    let plek = 0, accessoires = 0;
     regels.forEach(regel => {
       const ids = o.regelIds();
       while(plek < ids.length && !armSlotLeeg(o.regel(ids[plek]))) plek++;
       const id = plek < ids.length ? ids[plek] : o.nieuweRegel();
       plek++;
-      const s = o.regel(id), v = excelVergelijk(regel);
-      telling[v.soort]++;
+      const s = o.regel(id), delen = excelDelen(regel);
+      const namen = delen.map((d, i) => {
+        const v = excelVergelijk(d);
+        telling[v.soort]++;
+        if(v.soort === 'anders') verschillen.push({id, regel, deel: i, artikelcode: d.artikelcode, catalogus: v.catalogus, excel: v.excel, keuze: null});
+        const naam = v.soort === 'anders' ? v.catalogus : v.naam;
+        return {naam, auto: (v.soort === 'excel' || v.soort === 'leeg') ? '' : naam};
+      });
       s.aanduiding = regel.code;
-      s[o.artikelVeld()] = regel.artikelcode;
-      const naam = v.soort === 'anders' ? v.catalogus : v.naam;
-      s.name = naam;
-      s.naamUitCatalogus = (v.soort === 'excel' || v.soort === 'leeg') ? '' : naam;
+      s[o.artikelVeld()] = delen[0].artikelcode;
+      s.name = namen[0].naam;
+      s.naamUitCatalogus = namen[0].auto;
       s.groep = '';
-      if(v.soort === 'anders') verschillen.push({id, regel, catalogus: v.catalogus, excel: v.excel, keuze: null});
+      s.qty = regel.aantal;
+      s.opmerking = regel.opmerking;
+      s.accessoires = delen.slice(1).map((d, i) => ({code: d.artikelcode, name: namen[i + 1].naam, naamUitCatalogus: namen[i + 1].auto, qty: regel.aantal}));
+      accessoires += s.accessoires.length;
     });
-    return {telling, verschillen};
+    return {telling, verschillen, accessoires};
+  }
+
+  /* Waar een gekozen naam heen gaat: deel 0 is het armatuur, 1 en verder zijn de
+     accessoires. Een gekozen omschrijving uit de lijst is een eigen naam: die blijft
+     staan als de artikelcode later verandert. */
+  function zetKeuze(v){
+    const s = o.regel(v.id), doel = v.deel ? (s.accessoires || [])[v.deel - 1] : s;
+    if(!doel) return;
+    doel.name = v.keuze === 'excel' ? v.excel : v.catalogus;
+    doel.naamUitCatalogus = v.keuze === 'excel' ? '' : v.catalogus;
   }
 
   /* De keuze per verschil, in een venster dat pas dicht gaat als alles gekozen is. */
   function kies(verschillen, klaar){
     const dlg = document.createElement('dialog'); dlg.className = 'axl-venster';
     dlg.innerHTML = '<h3>De omschrijving wijkt af van de catalogus</h3>'
-      + '<p class="axl-uitleg">Bij ' + (verschillen.length === 1 ? 'deze regel' : 'deze ' + verschillen.length + ' regels')
-      + ' is de omschrijving in de Excel-lijst niet woord voor woord gelijk aan die in de catalogus. Kies per regel welke blijft; '
+      + '<p class="axl-uitleg">Bij ' + (verschillen.length === 1 ? 'dit artikel' : 'deze ' + verschillen.length + ' artikelen')
+      + ' is de omschrijving in de Excel-lijst niet woord voor woord gelijk aan die in de catalogus. Kies per artikel welke blijft; '
       + 'wat verschilt, is gemarkeerd.</p>'
       + '<div class="axl-alles"><button type="button" data-alles="catalogus">Overal de catalogus</button>'
       + '<button type="button" data-alles="excel">Overal de Excel-lijst</button></div>'
@@ -236,7 +320,7 @@ const ArmaturenExcel = (function(){
     verschillen.forEach((v, i) => {
       const [wc, wx] = woordVerschil(v.catalogus, v.excel);
       const blok = document.createElement('fieldset'); blok.className = 'axl-regel';
-      blok.innerHTML = '<legend>' + esc(v.regel.code || 'Regel ' + v.regel.rij) + ' &middot; ' + esc(v.regel.artikelcode)
+      blok.innerHTML = '<legend>' + esc(v.regel.code || 'Regel ' + v.regel.rij) + ' &middot; ' + (v.deel ? 'accessoire ' : '') + esc(v.artikelcode)
         + ' <span>(Excel-rij ' + v.regel.rij + ')</span></legend>'
         + '<label><input type="radio" name="axl' + i + '" value="catalogus"><b>Catalogus</b><span>' + metVerschil(wc) + '</span></label>'
         + '<label><input type="radio" name="axl' + i + '" value="excel"><b>Excel-lijst</b><span>' + metVerschil(wx) + '</span></label>';
@@ -260,12 +344,14 @@ const ArmaturenExcel = (function(){
     try{ regels = excelArmatuurRegels(await leesBestand(bestand)); }
     catch(err){ Melding.fout(bestand.name + ' kon niet worden ingelezen: ' + (err && err.message || err) + '.', {bij: o.knop}); return; }
     if(!regels.length){
-      Melding.letop('In ' + bestand.name + ' staan geen armaturen: de tool leest de code uit kolom A, de artikelcode uit kolom I en de omschrijving uit kolom J.', {bij: o.knop});
+      Melding.letop('In ' + bestand.name + ' staan geen armaturen: de tool leest de code uit kolom A, het aantal uit F, de artikelcode uit I, '
+        + 'de omschrijving uit J en de opmerking uit L - een regel telt als er in I of J iets staat.', {bij: o.knop});
       return;
     }
-    const {telling, verschillen} = vul(regels);
+    const {telling, verschillen, accessoires} = vul(regels);
     o.herbouw(); o.opWijziging();
-    const kop = regels.length + (regels.length === 1 ? ' armatuur' : ' armaturen') + ' ingeladen uit ' + bestand.name;
+    const kop = regels.length + (regels.length === 1 ? ' armatuur' : ' armaturen')
+      + (accessoires ? ' met ' + accessoires + (accessoires === 1 ? ' accessoire' : ' accessoires') : '') + ' ingeladen uit ' + bestand.name;
     const delen = [];
     if(telling.gelijk) delen.push(telling.gelijk + ' gelijk aan de catalogus');
     if(telling.catalogus) delen.push(telling.catalogus + ' zonder omschrijving in de lijst, naam uit de catalogus');
@@ -276,11 +362,7 @@ const ArmaturenExcel = (function(){
     const meld = () => (telling.excel || telling.leeg ? Melding.letop : Melding.goed)(kop + ': ' + delen.join(' · ') + '.', {duur: 12000});
     if(!verschillen.length){ meld(); return; }
     kies(verschillen, () => {
-      verschillen.forEach(v => {
-        const s = o.regel(v.id), naam = v.keuze === 'excel' ? v.excel : v.catalogus;
-        s.name = naam;
-        s.naamUitCatalogus = v.keuze === 'excel' ? '' : naam;   /* een gekozen eigen omschrijving blijft staan */
-      });
+      verschillen.forEach(zetKeuze);
       o.herbouw(); o.opWijziging();
       const xl = verschillen.filter(v => v.keuze === 'excel').length, cat = verschillen.length - xl;
       delen.push(verschillen.length + ' afwijkend, gehouden: ' + [cat ? cat + '× de catalogus' : '', xl ? xl + '× de Excel-lijst' : ''].filter(Boolean).join(', '));

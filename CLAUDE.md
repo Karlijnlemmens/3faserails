@@ -41,9 +41,9 @@ A suite of standalone HTML tools, in Dutch, for Distrilight's inside-sales staff
 | `suite-stijl.css`, `fonts/` | palette, badge row, focus ring; the screen fonts |
 | `pdf-huisstijl.js` | the PDF drawing layer shared by the three PDF tools |
 | `armatuur-groepen.js` | fixture types (`ARM_GROEPEN`) and their recognition (`matchArmGroep`) |
-| `armatuur-rij.js` | one fixture row and the book that follows from it, shared by the armaturenboek and the railtool so both make it the same way |
+| `armatuur-rij.js` | one fixture row and the book that follows from it (the code stamp with its red remark, the armaturenlijst and its column ticks), shared by the armaturenboek and the railtool so both make it the same way |
 | `medewerkers.js`, `medewerker-fotos.js` | the colleagues who can appear as contact persons in the armaturenboek and the railtool (contact details, personal notes, photos); public by agreement — see `docs/armaturenboek.md` |
-| `armaturen-excel.js` | fills the fixture rows from an Excel list (column A the code, I the article code, J the description), the name from the catalogue and the list's description as the check, with a choice window where they differ — shared by the armaturenboek and the railtool |
+| `armaturen-excel.js` | fills the fixture rows from inside sales' Excel list (A the code, F the total quantity, I the article code with its accessories behind a +, J the description, L the remark for the presenter), the name from the catalogue and the list's description as the check, with a choice window where they differ — shared by the armaturenboek and the railtool |
 | `contactpersonen.js` | the contact block and the "Onze specialist" card, shared by the armaturenboek and the railtool |
 | `briefing.js` | the introduction page behind the cover — briefing text per soort opdracht, its panel block and the drawing — shared by the armaturenboek and the railtool, so both make exactly the same page |
 | `lichtplan.js` | the "totaal projectboek": the lichtplan PDFs (one or more) after the introduction, behind the chapter page Lichtberekening — shared by the armaturenboek and the railtool |

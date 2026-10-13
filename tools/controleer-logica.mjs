@@ -267,9 +267,10 @@ function is(wat, gekregen, verwacht){
   const r = await laadUit('armatuur-rij.js',
     ['specialPresenterId', 'armGroepVanRij', 'armTypeOnbekend', 'armEigenPresenters', 'armWisselRijen',
      'STEMPELSTIJLEN', 'stempelZwart', 'armBoekGroepen', 'armLijstKolommen', 'STEMPEL_SPECIAL', 'armSlotLeeg',
-     'armAccessoires'],
+     'armAccessoires', 'ARM_LIJST_KOLOMMEN', 'STEMPEL_OPMERKING', 'stempelPresenter', 'stempelOpmerkingRegels'],
     readFileSync(join(root, 'zoeken.js'), 'utf8') + '\n' + readFileSync(join(root, 'armatuur-groepen.js'), 'utf8')
     + '\nconst window = globalThis; globalThis.PRESENTER_DATA = {};'
+    + '\nconst PDFLib = {rgb: (r, g, b) => [r, g, b]};'
     + '\nconst PdfHuisstijl = {presenterAanwezig: id => !!globalThis.PRESENTER_DATA[id]};');
   const D = globalThis.PRESENTER_DATA;
   const rij = (x) => Object.assign({aanduiding:'', name:'', code:'', groep:'', qty:0}, x);
@@ -316,6 +317,64 @@ function is(wat, gekregen, verwacht){
     [alleenAcc.cols.map(c => c.h), alleenAcc.regels.map(g => g.waarden.slice(0, 2)), (alleenAcc.regels[1] || {waarden:[]}).waarden[2]],
     [['Artikelcode', 'Omschrijving', 'Aantal'], [['', 'Mondial opbouw'], ['', 'Opbouwset']], '5']);
 
+  /* Welke kolommen er in de armaturenlijst komen, per kolom uit te vinken; Omschrijving
+     blijft altijd, en de vrijgekomen breedte gaat naar Omschrijving */
+  const tweeRijen = [{s:mondial}, {s:rij({aanduiding:'H2', name:'Punto 15W', code:'2001111', qty:8})}];
+  const metKeuze = keuze => { const l = r.armLijstKolommen(tweeRijen, x => x.s.code, x => x.s.name, keuze);
+    return [l.cols.map(c => c.h).join('/'), l.cols.reduce((t, c) => t + c.w, 0), l.regels[1].waarden.join(' | ')]; };
+  is('kolommen uitvinken: aantal, artikelcode, code; geen keuze of {} is alles',
+    [metKeuze(), metKeuze({}), metKeuze({aantal:false}), metKeuze({artikel:false}), metKeuze({code:false, aantal:true}),
+     metKeuze({code:false, artikel:false, aantal:false})],
+    [['Code/Artikelcode/Omschrijving/Aantal', 515, ' | 2013261 | Mondial opbouwset zwart | 24'],
+     ['Code/Artikelcode/Omschrijving/Aantal', 515, ' | 2013261 | Mondial opbouwset zwart | 24'],
+     ['Code/Artikelcode/Omschrijving', 515, ' | 2013261 | Mondial opbouwset zwart'],
+     ['Code/Omschrijving/Aantal', 515, ' | Mondial opbouwset zwart | 24'],
+     ['Artikelcode/Omschrijving/Aantal', 515, '2013261 | Mondial opbouwset zwart | 24'],
+     ['Omschrijving', 515, 'Mondial opbouwset zwart']]);
+  is('de vinkjes zijn Code, Artikelcode en Aantal', r.ARM_LIJST_KOLOMMEN.map(k => k.k), ['code', 'artikel', 'aantal']);
+
+  /* De stempel met opmerkingen, op een nagebootste pagina: wat er getekend wordt, waar.
+     Letters van 0,6 korps breed. Zonder opmerkingen precies wat het altijd was. */
+  const tekenen = (codes, zwart, special, opm) => {
+    const getekend = [];
+    const pagina = {getSize: () => ({width: 595.28, height: 841.89}),
+      drawText: (t, o) => getekend.push({t, x: +o.x.toFixed(2), y: +o.y.toFixed(2), size: o.size, rood: o.color[1] < 0.5})};
+    r.stempelPresenter(pagina, codes, '#FFFFFF', zwart, {widthOfTextAtSize: (t, k) => t.length * k * 0.6}, special, opm);
+    return getekend;
+  };
+  const rechts = 595.28 - 145.4, b1 = 841.89 - 35.5 - 11 * 0.78;
+  const codeOp = (t, i, extra = 0) => ({t, x: +(rechts - t.length * 6.6).toFixed(2), y: +(b1 - i * 13 - extra).toFixed(2), size: 11, rood: false});
+  is('zonder opmerkingen: de codes rechts uitgelijnd onder elkaar, zoals altijd',
+    [tekenen(['CODE A', 'B'], false, false), tekenen(['CODE A', 'B'], false, false, ['', ''])],
+    [[codeOp('CODE A', 0), codeOp('B', 1)], [codeOp('CODE A', 0), codeOp('B', 1)]]);
+  /* De opmerking: rood, 7,5 pt, op de basislijn van zijn code, en alle opmerkingen
+     eindigen op één lijn een tussenruimte links van de breedste code */
+  const lijn = rechts - 'CODE A'.length * 6.6 - r.STEMPEL_OPMERKING.tussen;
+  const opmOp = (t, y, k = 7.5) => ({t, x: +(lijn - t.length * k * 0.6).toFixed(2), y: +y.toFixed(2), size: k, rood: true});
+  is('een opmerking naast zijn code, alle opmerkingen op één lijn rechts',
+    tekenen(['CODE A', 'B'], false, false, ['Niet IK10', 'zwart']),
+    [codeOp('CODE A', 0), opmOp('Niet IK10', b1), codeOp('B', 1), opmOp('zwart', b1 - 13)]);
+  is('ook als de breedste code niet de eerste is', tekenen(['B', 'CODE A'], false, false, ['zwart', 'Niet IK10']),
+    [codeOp('B', 0), opmOp('zwart', b1), codeOp('CODE A', 1), opmOp('Niet IK10', b1 - 13)]);
+  /* Een lange opmerking loopt door op een volgende regel; de code eronder schuift mee */
+  const ruimte = 250 - 'CODE A'.length * 6.6 - r.STEMPEL_OPMERKING.tussen;
+  const lang = 'Let op: dit armatuur wordt zonder bevestigingsbeugel geleverd, die apart bestellen';
+  const gewikkeld = r.stempelOpmerkingRegels(lang, {widthOfTextAtSize: (t, k) => t.length * k * 0.6}, ruimte);
+  const getekendLang = tekenen(['CODE A', 'B'], false, false, [lang, '']);
+  is('een lange opmerking: regels binnen de ruimte, samen weer de hele tekst, de volgende code eronder',
+    [gewikkeld.length, gewikkeld.every(g => g.tw <= ruimte), gewikkeld.map(g => g.tekst).join(' '),
+     getekendLang[getekendLang.length - 1]],
+    [3, true, lang, codeOp('B', 1, 2 * 9)]);
+  const heelLang = Array(30).fill('woordje').join(' ');
+  const krimp = r.stempelOpmerkingRegels(heelLang, {widthOfTextAtSize: (t, k) => t.length * k * 0.6}, 150);
+  is('te lang voor drie regels: kleiner, tot 6 pt', [krimp[0].grootte, krimp.length > 3], [6, true]);
+  /* het rood hangt af van de kop: helderder op de donkere balk (witte stempel) */
+  const roodVan = (zwart, kleur) => { let c; r.stempelPresenter({getSize: () => ({width: 595, height: 842}),
+    drawText: (t, o) => { if(t === 'x') c = o.color; }}, ['A'], kleur, zwart, {widthOfTextAtSize: (t, k) => t.length * k}, false, ['x']); return c; };
+  is('rood: helder op de donkere kop, het gewone op een lichte', [roodVan(false, '#FFFFFF'), roodVan(true, '#FFFFFF'), roodVan(false, '#1F5FA3')],
+    [r.STEMPEL_OPMERKING.opDonker, r.STEMPEL_OPMERKING.opLicht, r.STEMPEL_OPMERKING.opLicht]);
+  is('niets of spaties is geen opmerking', [r.stempelOpmerkingRegels('', null, 100), r.stempelOpmerkingRegels('   ', null, 100)], [[], []]);
+
   is('uploadknop bij een onherkend type', r.armTypeOnbekend(rij({}), 'Onbekend armatuur 12W', false), true);
   is('geen uploadknop bij een herkend type', r.armTypeOnbekend(rij({}), 'Punto 15W', false), false);
   is('uploadknop bij special', r.armTypeOnbekend(rij({}), 'Punto 15W', true), true);
@@ -324,14 +383,22 @@ function is(wat, gekregen, verwacht){
   const g = {id:'ag01', stempelKleur:undefined};
   const boek = [{g, rijen:[{s:rij({aanduiding:'A'})}, {s:rij({aanduiding:' A '})}, {s:rij({aanduiding:'B', stempel:'zwart'})}]}];
   is('stempel: unieke codes onder elkaar, zwart als een regel erom vraagt', r.armBoekGroepen(boek),
-    [{id:'ag01', code:['A', 'B'], kleur:'#FFFFFF', zwart:true, special:false}]);
+    [{id:'ag01', code:['A', 'B'], opmerking:['', ''], kleur:'#FFFFFF', zwart:true, special:false}]);
   is('wit is de standaard', r.stempelZwart(rij({})), false);
   /* Een special is meestal een DLC-blad: daar valt de stempel op wit papier. */
   is('special: standaard zwart', r.stempelZwart(rij({}), true), true);
   is('special: zelf op wit gezet blijft wit', r.stempelZwart(rij({stempel:'wit'}), true), false);
   is('special gaat mee naar het boek',
     r.armBoekGroepen([{g:{id:'sparm03', special:true}, rijen:[{s:rij({aanduiding:'S1'})}]}]),
-    [{id:'sparm03', code:['S1'], kleur:'#FFFFFF', zwart:true, special:true}]);
+    [{id:'sparm03', code:['S1'], opmerking:[''], kleur:'#FFFFFF', zwart:true, special:true}]);
+  /* De opmerking uit kolom L (of zelf getypt) gaat met zijn code naar de presenter */
+  is('opmerkingen per code: samengevoegd als het er meer zijn, een opmerking zonder code achteraan',
+    r.armBoekGroepen([{g, rijen:[{s:rij({aanduiding:'A', opmerking:'Niet IK10'})}, {s:rij({aanduiding:'B'})},
+      {s:rij({aanduiding:'A', opmerking:' Niet  IK10 '})}, {s:rij({aanduiding:'C', opmerking:'zwart'})},
+      {s:rij({aanduiding:'C', opmerking:'3000K'})}, {s:rij({name:'Punto', opmerking:'zonder code'})}]}]).map(x => [x.code, x.opmerking]),
+    [[['A', 'B', 'C', ''], ['Niet IK10', '', 'zwart · 3000K', 'zonder code']]]);
+  is('een regel met alleen een opmerking telt mee', [r.armSlotLeeg(rij({opmerking:'Niet IK10'})), r.armSlotLeeg(rij({opmerking:'  '}))],
+    [false, true]);
 
   /* De plek op een special tegen de kop van het DLC-blad, gemeten op een blad uit
      dlc.html: balk over de hele breedte tot y 23,7, het schuine logovlak met zijn
@@ -1644,35 +1711,53 @@ function is(wat, gekregen, verwacht){
 
 /* ============== armaturen uit een Excel-lijst: armaturen-excel.js ============== */
 {
-  /* Het armaturenboek en de railtool lezen een Excel-lijst in: kolom A de code, I de
-     artikelcode, J de omschrijving. De naam komt uit de catalogus zoals bij intypen; de
-     omschrijving uit de lijst is de controle, en wijkt hij af dan kiest de gebruiker. */
+  /* Het armaturenboek en de railtool lezen een Excel-lijst in: kolom A de code, F het
+     totale aantal, I de artikelcode(s), J de omschrijving(en), L de opmerking. De naam
+     komt uit de catalogus zoals bij intypen; de omschrijving uit de lijst is de controle,
+     en wijkt hij af dan kiest de gebruiker. Accessoires staan op de regel van hun
+     armatuur, met een + ertussen. */
   console.log('Excel-lijst inlezen');
   const xl = await laadUit('armaturen-excel.js',
-    ['excelRijen', 'csvRijen', 'EXCEL_KOLOM', 'enkel', 'EXCEL_KOPWOORD', 'excelArmatuurRegels', 'excelVergelijk', 'woordVerschil'],
+    ['excelRijen', 'csvRijen', 'EXCEL_KOLOM', 'enkel', 'EXCEL_KOPWOORD', 'excelArmatuurRegels', 'excelDelen',
+     'excelVergelijk', 'woordVerschil'],
     snijUit(readFileSync(join(root, 'armatuur-rij.js'), 'utf8'), 'catalogusNaam'));
   const venster = {};
   new Function('window', readFileSync(join(root, 'catalogus-data.js'), 'utf8'))(venster);
   const CAT = venster.CATALOGUS;
 
-  /* tools/proef-armaturen.xlsx, gemaakt met openpyxl (tools/maak-proef-armaturen.py):
-     tekst in de cel zelf (inlineStr), ingepakt, een getal als artikelcode, opgemaakte
-     tekst in één cel, een titel, een kopregel, een tussenkop, en een tweede blad */
+  /* tools/proef-armaturen.xlsx, gemaakt met openpyxl (tools/maak-proef-armaturen.py) in
+     de opmaak van de lijst die inside sales zelf maakt: drie kopregels, aantallen per
+     ruimte en een totaal, tekst in de cel zelf (inlineStr), een getal als artikelcode,
+     opgemaakte tekst in één cel, een tussenkop, accessoires met een +, regels met alleen
+     een 0 in de totaalkolom, en een tweede blad */
   const rijen = await xl.excelRijen(new Uint8Array(readFileSync(join(root, 'tools/proef-armaturen.xlsx'))));
-  is('de proeflijst: elf rijen, kolom A op plek 0 en I op plek 8 (een getal blijft zoals het staat)',
-    [rijen.length, rijen[3][0], rijen[3][1], rijen[3][8], rijen[3].slice(4, 8)], [11, 'A', '12', '1092379', ['', '', '', '']]);
+  is('de proeflijst: twintig rijen, kolom A op plek 0, F op 5 en I op 8 (een getal blijft zoals het staat)',
+    [rijen.length, rijen[3][0], rijen[3][1], rijen[3][5], rijen[3][8], rijen[3].slice(2, 5)], [20, 'A', '12', '12', '1092379', ['', '', '']]);
   const regels = xl.excelArmatuurRegels(rijen);
   const mondial120 = CAT['1092379'], dura = CAT['1084459-SN'];
-  is('de proeflijst: titel, kopregel, lege regel en tussenkop tellen niet; het tweede blad ook niet', regels, [
-    {rij:4, code:'A', artikelcode:'1092379', omschrijving:mondial120},
-    {rij:5, code:'B', artikelcode:'1084459-SN', omschrijving:dura.replace('1uur', '3uur')},
-    {rij:6, code:'C', artikelcode:'9999999', omschrijving:'Eigen armatuur & zo'},
-    {rij:7, code:'D', artikelcode:'1047515', omschrijving:''},
-    {rij:9, code:'E', artikelcode:'8888888', omschrijving:''},
-    {rij:10, code:'F', artikelcode:'1092409', omschrijving:'Pragmalux LED Downlight Mondial IP54 platte frame alu wit Ø132 buitenmaat - gatmaat Ø120'},
-    {rij:11, code:'G', artikelcode:'1092416', omschrijving:CAT['1092416']}]);
-  is('per regel: gelijk, anders, niet in de catalogus, zonder omschrijving, geen van beide',
-    regels.map(r => xl.excelVergelijk(r, CAT).soort), ['gelijk', 'anders', 'excel', 'catalogus', 'leeg', 'gelijk', 'gelijk']);
+  const NOOD = 'Pragmalux Noodmodule Kit t.b.v. Panelen & Downlights 3 uur met autotest';
+  const DRIVER = 'Philips Driver Xitanium 20W/m 300mA 44V DS I 230V incl. DC kabel';
+  const r = (rij, code, artikelcode, omschrijving, aantal = 0, opmerking = '', codes = [artikelcode]) =>
+    ({rij, code, artikelcode, omschrijving, codes, aantal, opmerking});
+  is('de proeflijst: kopregels, tussenkop, nullen en het tweede blad tellen niet; aantal uit F, opmerking uit L', regels, [
+    r(4, 'A', '1092379', mondial120, 12),
+    r(5, 'B', '1084459-SN', dura.replace('1uur', '3uur'), 4, 'Niet IK10'),
+    r(6, 'C', '9999999', 'Eigen armatuur & zo', 2, 'via de leverancier'),
+    r(7, 'D', '1047515', ''),
+    r(9, 'E', '8888888', ''),
+    r(10, 'F', '1092409', 'Pragmalux LED Downlight Mondial IP54 platte frame alu wit Ø132 buitenmaat - gatmaat Ø120'),
+    r(11, 'G', '1092416', CAT['1092416']),
+    r(12, 'H', '1000947-OS + 1000282', CAT['1000947-OS'] + ' + ' + NOOD, 8, '', ['1000947-OS', '1000282']),
+    r(13, 'K', 'WS1046761 + 9322219-300 + 1000282', CAT['WS1046761'] + ' + ' + DRIVER + ' + ' + NOOD, 4, '',
+      ['WS1046761', '9322219-300', '1000282']),
+    r(14, 'M', '1084459-S+1047515', CAT['1084459-S'] + ' + ' + CAT['1047515'], 6, '', ['1084459-S', '1047515']),
+    r(15, 'S', 'Special', 'DLC - volledige eigen naam special', 3)]);
+  /* per artikel, het armatuur en zijn accessoires apart */
+  const perArtikel = regels.map(x => xl.excelDelen(x, CAT).map(d => d.artikelcode + ' ' + xl.excelVergelijk(d, CAT).soort).join(' + '));
+  is('per artikel: gelijk, anders, niet in de catalogus, zonder omschrijving, geen van beide', perArtikel,
+    ['1092379 gelijk', '1084459-SN anders', '9999999 excel', '1047515 catalogus', '8888888 leeg', '1092409 gelijk', '1092416 gelijk',
+     '1000947-OS gelijk + 1000282 excel', 'WS1046761 gelijk + 9322219-300 excel + 1000282 excel',
+     '1084459-S gelijk + 1047515 gelijk', 'Special excel']);
   is('een verschil geeft beide omschrijvingen; zonder verschil de naam uit de catalogus',
     [xl.excelVergelijk(regels[1], CAT), xl.excelVergelijk(regels[0], CAT), xl.excelVergelijk(regels[2], CAT), xl.excelVergelijk(regels[3], CAT)],
     [{soort:'anders', catalogus:dura, excel:dura.replace('1uur', '3uur')}, {soort:'gelijk', naam:mondial120},
@@ -1681,6 +1766,26 @@ function is(wat, gekregen, verwacht){
   is('gelijk is letterlijk, op spaties na',
     ['ip54', 'IP54,', ' IP54  '].map(w => xl.excelVergelijk({artikelcode:'1092379', omschrijving:mondial120.replace('IP54', w)}, CAT).soort),
     ['anders', 'anders', 'gelijk']);
+
+  /* Het knippen van J. Niet elke + is een grens: "+Osram Driver" en "2-CCT +
+     bewegingssensor" horen bij de naam van het armatuur. */
+  const knip = (codes, oms) => xl.excelDelen({codes, omschrijving: oms}, CAT).map(d => d.omschrijving);
+  const sigma = CAT['1000947-OS'], duraS = CAT['1084459-S'], luna = CAT['1047515'];
+  is('de + in een naam uit de catalogus is geen grens', [knip(['1000947-OS', '1000282'], sigma + ' + ' + NOOD),
+    knip(['1084459-S', '1047515'], duraS + ' + ' + luna)], [[sigma, NOOD], [duraS, luna]]);
+  /* De catalogus kent het armatuur niet: dan de knip met de grenzen het verst naar achteren */
+  is('onbekend: de grenzen zo ver mogelijk naar achteren', knip(['9999999', '8888888'], 'Lamp + sensor + Driver X'),
+    ['Lamp + sensor', 'Driver X']);
+  /* De omschrijving van het armatuur wijkt af (3uur): dan nog wint de knip die er het minst van verschilt */
+  is('een afwijkende naam knipt toch goed', knip(['1084459-SN', '1047515'], dura.replace('1uur', '3uur') + ' + ' + luna),
+    [dura.replace('1uur', '3uur'), luna]);
+  is('minder stukken dan codes: de laatste blijft leeg; één code: niets geknipt',
+    [knip(['1000947-OS', '1000282'], sigma), knip(['1084459-S'], duraS + ' + ' + luna)], [[sigma, ''], [duraS + ' + ' + luna]]);
+  /* het aantal uit F */
+  is('het aantal: een getal, ook als tekst of met een komma; leeg, 0 of tekst is 0',
+    ['5', '8.0', '2,6', '', '0', 'n.t.b.', '-3'].map(f => {
+      const rij = []; rij[0] = 'A'; rij[5] = f; rij[8] = '1092379'; return xl.excelArmatuurRegels([rij])[0].aantal; }),
+    [5, 8, 3, 0, 0, 0, 0]);
 
   /* wat de gebruiker gemarkeerd ziet */
   const anders = ([a, b]) => [a.filter(w => !w.mee).map(w => w.w), b.filter(w => !w.mee).map(w => w.w)];
@@ -1718,12 +1823,14 @@ function is(wat, gekregen, verwacht){
       + '<si><t>Code</t></si><si><t>Artikelcode</t></si><si><t>Omschrijving</t></si>'
       + '<si><r><t xml:space="preserve">Downlight </t></r><r><rPr><b/></rPr><t>Mondial</t></r>'
       + '<rPh sb="0" eb="1"><t>X</t></rPh><t xml:space="preserve"> &amp; frame</t></si>'
-      + '<si><t>A1</t></si></sst>', true],
+      + '<si><t>A1</t></si><si><t xml:space="preserve">Niet IK10 </t></si></sst>', true],
     ['xl/worksheets/sheet1.xml', '<worksheet ' + S + '><sheetData><row r="1"><c r="I1" t="inlineStr"><is><t>FOUT</t></is></c>'
       + '<c r="J1" t="inlineStr"><is><t>het verkeerde blad</t></is></c></row></sheetData></worksheet>', true],
     ['xl/worksheets/sheet3.xml', '<worksheet ' + S + '><sheetData>'
       + '<row r="2" spans="1:10"><c r="A2" t="s"><v>0</v></c><c r="I2" t="s"><v>1</v></c><c r="J2" t="s"><v>2</v></c></row>'
-      + '<row r="3"><c r="A3" t="s" s="1"><v>4</v></c><c r="B3" s="2"/><c r="I3" s="1"><v>1092379</v></c><c r="J3" t="s"><v>3</v></c></row>'
+      + '<row r="3"><c r="A3" t="s" s="1"><v>4</v></c><c r="B3" s="2"><v>3</v></c><c r="C3"><v>4</v></c>'
+      + '<c r="F3"><f>SUM(B3:E3)</f><v>7</v></c><c r="I3" s="1"><v>1092379</v></c><c r="J3" t="s"><v>3</v></c>'
+      + '<c r="L3" t="s"><v>5</v></c></row>'
       + '<row r="5"><c r="A5" t="str"><f>A3&amp;"b"</f><v>A1b</v></c><c r="I5" t="str"><f>I3</f><v>1092379</v></c>'
       + '<c r="J5" t="s"><v>3</v></c></row>'
       + '</sheetData></worksheet>', false],
@@ -1732,8 +1839,8 @@ function is(wat, gekregen, verwacht){
   is('de zip zoals Excel hem schrijft leest zonder fout', await leesFout(zip), '');
   const ex = await xl.excelRijen(zip).catch(() => []);
   is('zoals Excel schrijft: gedeelde tekst, stukken, formules, het eerste blad via de rels', xl.excelArmatuurRegels(ex), [
-    {rij:3, code:'A1', artikelcode:'1092379', omschrijving:'Downlight Mondial & frame'},
-    {rij:5, code:'A1b', artikelcode:'1092379', omschrijving:'Downlight Mondial & frame'}]);
+    {rij:3, code:'A1', artikelcode:'1092379', omschrijving:'Downlight Mondial & frame', codes:['1092379'], aantal:7, opmerking:'Niet IK10'},
+    {rij:5, code:'A1b', artikelcode:'1092379', omschrijving:'Downlight Mondial & frame', codes:['1092379'], aantal:0, opmerking:''}]);
   is('een lege rij tussendoor blijft een lege rij', [ex.length, ex[0], ex[3]], [5, [], []]);
   /* een kapotte zip: de inhoudsopgave klopt, de ingepakte inhoud niet */
   const kapot = maakZip([['xl/workbook.xml', '<workbook/>', true]]);
@@ -1746,8 +1853,8 @@ function is(wat, gekregen, verwacht){
   const csv = '﻿Code;B;C;D;E;F;G;H;Artikelcode;Omschrijving\r\n'
     + 'A;;;;;;;;1092379;"Downlight; met ""puntkomma"""\r\n;;;;;;;;;\r\nB;;;;;;;;1047515;\r\n';
   is('een .csv met puntkomma\'s', xl.excelArmatuurRegels(xl.csvRijen(csv)), [
-    {rij:2, code:'A', artikelcode:'1092379', omschrijving:'Downlight; met "puntkomma"'},
-    {rij:4, code:'B', artikelcode:'1047515', omschrijving:''}]);
+    {rij:2, code:'A', artikelcode:'1092379', omschrijving:'Downlight; met "puntkomma"', codes:['1092379'], aantal:0, opmerking:''},
+    {rij:4, code:'B', artikelcode:'1047515', omschrijving:'', codes:['1047515'], aantal:0, opmerking:''}]);
   is('en een met komma\'s', xl.csvRijen('a,b,"c,d"\n1,2,3'), [['a', 'b', 'c,d'], ['1', '2', '3']]);
 }
 

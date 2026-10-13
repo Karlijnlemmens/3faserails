@@ -28,12 +28,13 @@ function specialPresenterId(armId){ return 'sp'+armId; }
    de armaturenlijst en krijgt zijn presenter: vaak is het aantal nog niet bekend als
    het boek al de deur uit moet. De railtool eiste een aantal en liet zonder aantal de
    hele lijst weg, ook met het vinkje aan; het armaturenboek deed het zo. Spaties
-   alleen tellen niet. */
+   alleen tellen niet. Een opmerking (s.opmerking, voor op de presenter) telt ook: een
+   regel waar alleen die in staat, is niet leeg en wordt dus niet overschreven. */
 function armSlotLeeg(s){
   if(!s) return true;
   const vol = v => String(v||'').trim() !== '';
   return !vol(s.aanduiding) && !vol(s.name) && !vol(s.code) && !vol(s.codeDali) && !((s.qty||0) > 0)
-      && !armAccessoires(s).length;
+      && !armAccessoires(s).length && !vol(s.opmerking);
 }
 
 /* De accessoires van een armatuurregel - een opbouwset bij een Mondial Opbouw, een
@@ -133,15 +134,26 @@ function stempelZwart(s, special){
    hetzelfde type horen - vandaar de unieke lijst, die onder elkaar komt te staan.
    De stempel staat op één pagina, dus er kan er maar één stijl gelden: vraagt een
    van de regels om zwart, dan wordt hij zwart - dat vraag je alleen als de kop van
-   die pagina licht is, en dat is een eigenschap van de pagina zelf. */
+   die pagina licht is, en dat is een eigenschap van de pagina zelf.
+   opmerking loopt gelijk met code: per code de opmerking(en) van zijn regels
+   (s.opmerking), samengevoegd met een middenpunt als er meer verschillende zijn. Een
+   opmerking op een regel zonder code komt achteraan, bij een lege code - hij hoort bij
+   deze presenter en moet er dus op. */
 function armBoekGroepen(boek){
-  return boek.map(b=>({
-    id: b.g.id,
-    code: [...new Set(b.rijen.map(r=>(r.s.aanduiding||'').trim()).filter(Boolean))],
-    kleur: b.g.stempelKleur || '#FFFFFF',
-    zwart: b.rijen.some(r=>stempelZwart(r.s, b.g.special)),
-    special: !!b.g.special,
-  }));
+  return boek.map(b=>{
+    const code = [...new Set(b.rijen.map(r=>(r.s.aanduiding||'').trim()).filter(Boolean))];
+    const opmerkingVan = c => [...new Set(b.rijen.filter(r=>(r.s.aanduiding||'').trim()===c)
+      .map(r=>String(r.s.opmerking||'').replace(/\s+/g,' ').trim()).filter(Boolean))].join(' · ');
+    if(opmerkingVan('')) code.push('');
+    return {
+      id: b.g.id,
+      code,
+      opmerking: code.map(opmerkingVan),
+      kleur: b.g.stempelKleur || '#FFFFFF',
+      zwart: b.rijen.some(r=>stempelZwart(r.s, b.g.special)),
+      special: !!b.g.special,
+    };
+  });
 }
 
 /* De stempel op een special - een geüploade PDF, meestal een DLC-blad uit dlc.html.
@@ -177,8 +189,22 @@ const STEMPEL_SPECIAL = {marge: 595.28 - 435.85, basislijn: 35.2};
    document van de pagina is ingesloten.
 
    Een special (special=true) krijgt een eigen plek, zie STEMPEL_SPECIAL: de plek
-   hierboven is op de Pragmalux-bladen gemeten en valt op een DLC-blad in de kop. */
-function stempelPresenter(pagina, codes, kleur, zwart, font, special){
+   hierboven is op de Pragmalux-bladen gemeten en valt op een DLC-blad in de kop.
+
+   opmerkingen (mag weg) loopt gelijk met codes: de opmerking uit de lijst ("Niet
+   IK10"), klein en rood links naast zijn code, op dezelfde basislijn. Alle opmerkingen
+   eindigen op één lijn, een tussenruimte links van de breedste code, zodat codes en
+   opmerkingen twee nette kolommen vormen. Ze blijven binnen dezelfde veilige breedte als
+   de codes; een lange opmerking loopt door op een volgende regel (en de code eronder
+   schuift mee), en wordt kleiner als hij anders meer dan drie regels zou nemen. Zonder
+   opmerkingen staat alles precies waar het stond.
+   Twee roden: het rood van de PDF's (#D6362B) haalt op de donkere kopbalk van de
+   Pragmalux-bladen maar een contrast van 3,4 - te weinig voor zulke kleine letters -
+   dus daar (een witte stempel) een helderder rood, #FF4B3E (5,0). Op een lichte kop
+   (een zwarte stempel, of een groep met een eigen stempelkleur) het gewone (4,7 op wit). */
+const STEMPEL_OPMERKING = {korps:7.5, minKorps:6, regelhoogte:9, tussen:9, maxRegels:3,
+  opDonker:[1, 0.294, 0.243], opLicht:[0.84, 0.21, 0.17]};
+function stempelPresenter(pagina, codes, kleur, zwart, font, special, opmerkingen){
   if(!pagina || !codes || !codes.length) return;
   const korps=11, regelhoogte=13;
   const marge = special ? STEMPEL_SPECIAL.marge : 32+113.4 /* +4cm naar links t.o.v. de rechtermarge */;
@@ -192,16 +218,52 @@ function stempelPresenter(pagina, codes, kleur, zwart, font, special){
       : PDFLib.rgb(1,1,1);
   /* Meerdere codes voor hetzelfde armatuurtype komen onder elkaar te staan, elk
      apart rechts uitgelijnd, in plaats van samengevoegd op één regel. */
-  codes.forEach((tekst, i)=>{
+  const maat = codes.map(tekst=>{
     let grootte = korps;
     let tw = font.widthOfTextAtSize(tekst, grootte);
     while(tw>veiligeBreedte && grootte>minKorps){
       grootte -= 0.5;
       tw = font.widthOfTextAtSize(tekst, grootte);
     }
-    pagina.drawText(tekst, {x: width-marge-tw, y: height-basislijn-korps*0.78-i*regelhoogte,
-      size: grootte, font, color: c});
+    return {tekst, grootte, tw};
   });
+  const O = STEMPEL_OPMERKING;
+  const rood = (!zwart && /^#?f{6}$/i.test(String(kleur||'#FFFFFF'))) ? O.opDonker : O.opLicht;
+  const codeBreedte = Math.max(0, ...maat.map(m=>m.tw));
+  const opmRechts = width - marge - codeBreedte - (codeBreedte ? O.tussen : 0);
+  const opmRuimte = veiligeBreedte - codeBreedte - (codeBreedte ? O.tussen : 0);
+  /* extra: hoeveel opmerkingsregels er boven deze code al zijn doorgelopen */
+  let extra = 0;
+  maat.forEach((m, i)=>{
+    const y = height-basislijn-korps*0.78-i*regelhoogte-extra*O.regelhoogte;
+    pagina.drawText(m.tekst, {x: width-marge-m.tw, y, size: m.grootte, font, color: c});
+    const regels = stempelOpmerkingRegels((opmerkingen || [])[i], font, opmRuimte);
+    regels.forEach((r, j)=> pagina.drawText(r.tekst, {x: opmRechts-r.tw, y: y-j*O.regelhoogte, size: r.grootte, font,
+      color: PDFLib.rgb(rood[0], rood[1], rood[2])}));
+    extra += Math.max(0, regels.length-1);
+  });
+}
+/* Een opmerking in regels die binnen `ruimte` passen: [{tekst, grootte, tw}]. Op woorden
+   afgebroken; een woord dat zelf te breed is, staat op een eigen regel. Past het niet in
+   O.maxRegels regels, dan een halve punt kleiner, tot O.minKorps. */
+function stempelOpmerkingRegels(tekst, font, ruimte){
+  const O = STEMPEL_OPMERKING;
+  const woorden = String(tekst||'').replace(/\s+/g,' ').trim().split(' ').filter(Boolean);
+  if(!woorden.length) return [];
+  let regels = [];
+  for(let grootte = O.korps; grootte >= O.minKorps; grootte -= 0.5){
+    regels = [];
+    let regel = '';
+    woorden.forEach(w=>{
+      const erbij = regel ? regel+' '+w : w;
+      if(regel && font.widthOfTextAtSize(erbij, grootte) > ruimte){ regels.push(regel); regel = w; }
+      else regel = erbij;
+    });
+    regels.push(regel);
+    regels = regels.map(r=>({tekst:r, grootte, tw:font.widthOfTextAtSize(r, grootte)}));
+    if(regels.length <= O.maxRegels) break;
+  }
+  return regels;
 }
 
 /* ======================= de armaturenlijst ======================= */
@@ -211,22 +273,30 @@ function stempelPresenter(pagina, codes, kleur, zwart, font, special){
    het bestek invult wil ze zo terugzien). Een kolom (Code of Aantal) valt helemaal
    weg als GEEN ENKELE regel er een waarde voor heeft - anders staat hij zinloos
    leeg of vol nullen; de vrijgekomen breedte gaat naar Omschrijving. `artikel` en
-   `oms` geeft de tool, want welke code geldt verschilt (standaard of DALI). */
-function armLijstKolommen(rijen, artikel, oms){
-  const toonCode = rijen.some(r=> (r.s.aanduiding||'').trim());
-  const toonAantal = rijen.some(r=> (r.s.qty||0)>0 || armAccessoires(r.s).some(a=> (a.qty||0)>0));
+   `oms` geeft de tool, want welke code geldt verschilt (standaard of DALI).
+   `keuze` is wat de gebruiker in de PDF wil ({code, artikel, aantal}, zie
+   armKolomKeuze()): false haalt die kolom weg, ook als er waarden zijn. Omschrijving
+   staat er altijd in - zonder is het geen lijst. */
+const ARM_LIJST_KOLOMMEN = [{k:'code', label:'Code'}, {k:'artikel', label:'Artikelcode'}, {k:'aantal', label:'Aantal'}];
+function armLijstKolommen(rijen, artikel, oms, keuze){
+  const wil = k => !keuze || keuze[k] !== false;
+  const toonCode = wil('code') && rijen.some(r=> (r.s.aanduiding||'').trim());
+  const toonArtikel = wil('artikel');
+  const toonAantal = wil('aantal') && rijen.some(r=> (r.s.qty||0)>0 || armAccessoires(r.s).some(a=> (a.qty||0)>0));
   let omschrijvingBreedte = 290;
   if(!toonCode) omschrijvingBreedte += 75;
+  if(!toonArtikel) omschrijvingBreedte += 90;
   if(!toonAantal) omschrijvingBreedte += 60;
   const cols = [];
   if(toonCode) cols.push({w:75,h:'Code'});
-  cols.push({w:90,h:'Artikelcode'});
+  if(toonArtikel) cols.push({w:90,h:'Artikelcode'});
   cols.push({w:omschrijvingBreedte,h:'Omschrijving'});
   if(toonAantal) cols.push({w:60,h:'Aantal'});
   const waarden = (r)=>{
     const basis=[];
     if(toonCode) basis.push((r.s.aanduiding||'').trim());
-    basis.push(artikel(r), oms(r));
+    if(toonArtikel) basis.push(artikel(r));
+    basis.push(oms(r));
     if(toonAantal) basis.push(String(r.s.qty||0));
     return basis;
   };
@@ -236,7 +306,8 @@ function armLijstKolommen(rijen, artikel, oms){
   const accWaarden = (a)=>{
     const basis=[];
     if(toonCode) basis.push('');
-    basis.push((a.code||'').trim(), (a.name||'').trim());
+    if(toonArtikel) basis.push((a.code||'').trim());
+    basis.push((a.name||'').trim());
     if(toonAantal) basis.push((a.qty||0)>0 ? String(a.qty) : '');
     return basis;
   };
@@ -246,6 +317,35 @@ function armLijstKolommen(rijen, artikel, oms){
   const regels = rijen.flatMap(r=> [{waarden:waarden(r), vervolg:false}]
     .concat(armAccessoires(r.s).map(a=> ({waarden:accWaarden(a), vervolg:true}))));
   return {cols, waarden, regels};
+}
+
+/* De vinkjes "welke kolommen in de armaturenlijst": Code, Artikelcode, Aantal (zie
+   ARM_LIJST_KOLOMMEN). o.keuze() geeft het object uit de staat van de tool (st.lijstKolommen,
+   opgeslagen met het project); een kolom die er niet in staat, staat aan - zo blijft een
+   oud project zoals het was. o.opWijziging() laat de tool verversen. Geeft {el, verf};
+   verf() zet de vinkjes weer goed na het herstellen van een project, en grijst ze uit
+   zolang de lijst zelf niet in de PDF komt (o.lijstAan()). */
+function armKolomKeuze(o){
+  const el = document.createElement('div'); el.className = 'c2-kolomkeuze';
+  const kop = document.createElement('span'); kop.textContent = 'Kolommen in de lijst:';
+  el.appendChild(kop);
+  const vinkjes = ARM_LIJST_KOLOMMEN.map(({k, label})=>{
+    const l = document.createElement('label'); const v = document.createElement('input'); v.type = 'checkbox';
+    v.addEventListener('change', ()=>{ o.keuze()[k] = v.checked; o.opWijziging(); });
+    l.append(v, document.createTextNode(' '+label));
+    el.appendChild(l);
+    return {k, v};
+  });
+  const noot = document.createElement('span'); noot.className = 'c2-kolomnoot';
+  noot.textContent = 'Omschrijving staat er altijd in.';
+  el.appendChild(noot);
+  function verf(){
+    const keuze = o.keuze(), aan = !o.lijstAan || o.lijstAan();
+    vinkjes.forEach(({k, v})=>{ v.checked = keuze[k] !== false; v.disabled = !aan; });
+    el.classList.toggle('uit', !aan);
+  }
+  verf();
+  return {el, verf};
 }
 
 /* ======================= de naam uit de catalogus ======================= */
@@ -363,8 +463,10 @@ function armAccessoireDelen(o){
      o.opWijziging() de tool ververst (railtool: refresh, armaturenboek: updateSummary)
      o.verplaats(r)  een regel omhoog (-1) of omlaag (+1); weglaten = geen pijltjes
 
-   Geeft {volg, badge, upload, stempel, verf}; verf() tekent alles opnieuw en
-   hoort na elke wijziging aan de regel die de tool zelf afhandelt. */
+   Geeft {volg, badge, upload, stempel, opmKnop, opmerking, verf}; verf() tekent alles
+   opnieuw en hoort na elke wijziging aan de regel die de tool zelf afhandelt. opmKnop
+   zet de tool direct achter het CODE-veld (het schuift erin); opmerking is de regel met
+   de opmerking, die de tool direct onder de armatuurregel zet. */
 function armRijDelen(o){
   const {a, s, naamInp, codeNaamInp} = o;
   const special = ()=> !!(o.isSpecial && o.isSpecial());
@@ -432,6 +534,31 @@ function armRijDelen(o){
     verf(); o.opWijziging();
   });
 
+  /* --- de opmerking: klein en rood naast de code op de presenter (stempelPresenter()).
+         Het knopje (een potlood) staat ín het CODE-veld, rechts: de opmerking hoort bij
+         de code, en de regel is vol - een knop "+ Opmerking" ernaast duwde de laatste
+         velden naar een tweede regel (railtool, 1280 px). De tool zet het direct achter
+         het CODE-veld; de CSS schuift het erin. De opmerking zelf komt op een regel onder
+         het armatuur, ingesprongen als een accessoire. Staat er een opmerking, dan is die
+         regel er altijd, ook zonder code: anders zie je hem niet en kun je hem niet
+         weghalen. --- */
+  const opmKnop = document.createElement('button'); opmKnop.type='button'; opmKnop.className='c2-opmknop';
+  opmKnop.textContent = '✎';
+  opmKnop.title = 'Opmerking toevoegen: komt klein en in rood naast de code op de presenter - bijvoorbeeld "Niet IK10".';
+  opmKnop.setAttribute('aria-label', 'Opmerking toevoegen');
+  const opmerking = document.createElement('div'); opmerking.className='c2-accrow c2-opmrow';
+  const opmLabel = document.createElement('span'); opmLabel.className='c2-acclabel'; opmLabel.textContent='↳ opmerking';
+  const opmInp = document.createElement('input'); opmInp.type='text'; opmInp.className='c2-textinp c2-opminp';
+  opmInp.placeholder = 'Komt klein en in rood naast de code op de presenter'; opmInp.value = s.opmerking || '';
+  const opmWeg = document.createElement('button'); opmWeg.type='button'; opmWeg.className='c2-accweg';
+  opmWeg.textContent='×'; opmWeg.title='Opmerking weghalen'; opmWeg.setAttribute('aria-label', 'Opmerking weghalen');
+  opmerking.append(opmLabel, opmInp, opmWeg);
+  let opmOpen = false;
+  opmKnop.addEventListener('click', ()=>{ opmOpen = true; verfOpmerking(); opmInp.focus(); });
+  opmInp.addEventListener('change', ()=>{ s.opmerking = opmInp.value; verfOpmerking(); o.opWijziging(); });
+  opmInp.addEventListener('keydown', e=>{ if(e.key==='Enter') opmInp.blur(); });
+  opmWeg.addEventListener('click', ()=>{ s.opmerking = ''; opmInp.value = ''; opmOpen = false; verfOpmerking(); o.opWijziging(); });
+
   function verfUpload(){
     const geladen = aanwezig(specialPresenterId(a.id));
     /* Een lege regel krijgt de knop niet; die zou alleen maar in de weg staan. */
@@ -445,9 +572,18 @@ function armRijDelen(o){
       : 'Upload hier zelf de presenter-PDF voor dit armatuur.';
     weg.style.display = geladen ? '' : 'none';
   }
+  function verfOpmerking(){
+    const heeft = String(s.opmerking||'').trim() !== '';
+    opmerking.style.display = (heeft || opmOpen) ? '' : 'none';
+    const knop = !heeft && !opmOpen && stempel.style.display !== 'none';
+    opmKnop.style.display = knop ? '' : 'none';
+    /* ruimte in het CODE-veld voor het potlood, alleen als het er staat */
+    codeNaamInp.classList.toggle('c2-opmruimte', knop);
+  }
   function verfStempel(){
     const toon = !!groep() && !!(codeNaamInp.value||'').trim();
     stempel.style.display = toon ? '' : 'none';
+    verfOpmerking();
     if(!toon) return;
     const sp = !!(groep() || {}).special;
     const zwart = stempelZwart(s, sp);
@@ -534,7 +670,7 @@ function armRijDelen(o){
   codeNaamInp.addEventListener('input', verfStempel);
 
   verf();
-  return {volg, badge, upload, stempel, verf};
+  return {volg, badge, upload, stempel, opmKnop, opmerking, verf};
 }
 
 /* De ↑ van de eerste en de ↓ van de laatste regel wijzen nergens heen. */
@@ -605,6 +741,20 @@ function armVolgBijwerken(lijst){
   .c2-accweg{flex:0 0 var(--acc-knop, 92px); font:inherit; font-size:15px; color:var(--slate); cursor:pointer;
     padding:0; line-height:1; background:none; border:0;}
   .c2-accweg:hover{color:#B0362B;}
+  /* de opmerking voor op de presenter: het potlood ín het CODE-veld (22 px breed, 34 naar
+     links over het veld heen en 4 terug: per saldo geen breedte, dus de regel blijft zoals
+     hij was), de regel eronder als een accessoire */
+  .c2-opmknop{flex:0 0 22px; width:22px; height:22px; margin:0 4px 0 -34px; padding:0; position:relative; z-index:1;
+    font:inherit; font-size:13px; line-height:1; border:none; border-radius:6px; background:transparent;
+    color:var(--slate); cursor:pointer;}
+  .c2-opmknop:hover{color:#B0362B; background:#FDECEC;}
+  .c2-armrow input.c2-aanduiding.c2-opmruimte{padding-right:26px;}
+  .c2-opmrow input.c2-opminp{flex:1 1 auto; color:#B0362B; font-weight:600;}
+  /* welke kolommen in de armaturenlijst */
+  .c2-kolomkeuze{display:flex; align-items:center; flex-wrap:wrap; gap:4px 14px; font-size:12.5px; color:var(--slate);}
+  .c2-kolomkeuze label{display:inline-flex; align-items:center; gap:5px; cursor:pointer; color:var(--ink);}
+  .c2-kolomkeuze.uit{opacity:.45;}
+  .c2-kolomkeuze .c2-kolomnoot{font-size:11.5px;}
   `;
   document.head.appendChild(st);
 })();
