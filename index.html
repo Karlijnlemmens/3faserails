@@ -1565,6 +1565,13 @@ const PCODES_1F = {
      the straight connector (GB 21) in suspended installations" (handleiding D1923g) */
   ophangset: {wit:{'1,5':'2039636','3':'2039643','5':'2039650'}, zwart:{'1,5':'2039667','3':'2039674','5':'2039681'}},
   beugelLang:'2039568',
+  /* pendel uit losse onderdelen, per punt: plafondklem met kap, ophangkabel, snelspanner
+     (de kabelgrijper, SPW 40 bij Nordic) en de korte ophangbeugel (GBS 33) waar hij in
+     wordt geschroefd; onder een koppeling de lange (GBS 18) in plaats van de korte */
+  plafondklem:{wit:'2039551', zwart:'2039544'},
+  ophangkabel:{'1,5':'2039582','3':'2039605','5':'2039599'},
+  snelspanner:'2039612',
+  beugelKort:'2039575',
 };
 /* de naam van een 1-fase T-koppelstuk bij de sleutel van nodeVariants() */
 const T_1F_NAAM = {R1:'Rechts Buiten', L2:'Links Binnen', R2:'Links Buiten', L1:'Rechts Binnen'};
@@ -1800,13 +1807,15 @@ const ADAPTERS_OVERIG_1F = [
    uitleg:['Lange beugel om de rail op te hangen. Bij een opgehangen rail hoort er een onder elke koppeling, om die te ondersteunen.',
            'Bij pendelmontage telt de tool er zelf een per koppeling.']},
   {id:'e11', name:'Ophangbeugel kort', codes:{'-':{p:'2039575'}},
-   uitleg:['Korte beugel om de rail aan een ophangkabel te hangen.']},
+   uitleg:['Railklem: zit in de rail, en de snelspanner wordt erin geschroefd.',
+           'Met een plafondklem, een ophangkabel en een snelspanner één ophangpunt; onder een koppeling de lange beugel.']},
   {id:'e12', name:'Ophangkabel', codes:{'1,5 m':{p:'2039582'}, '3 m':{p:'2039605'}, '5 m':{p:'2039599'}},
-   uitleg:['Staalkabel om de rail op te hangen, in 1,5, 3 en 5 meter.']},
+   uitleg:['Staalkabel om de rail op te hangen, in 1,5, 3 en 5 meter: van de plafondklem naar de snelspanner.']},
   {id:'e13', name:'Plafondklem + plafondkap excl. staalkabel', codes:{wit:{p:'2039551'}, zwart:{p:'2039544'}},
-   uitleg:['Het plafonddeel van een ophanging: klem met afdekkap, zonder kabel.']},
+   uitleg:['Het plafonddeel van een ophangpunt: klem met afdekkap, zonder kabel.']},
   {id:'e14', name:'Snelspanner 1-fase', codes:{'-':{p:'2039612'}},
-   uitleg:['Nog vast te leggen: waar hij bij hoort.']},
+   uitleg:['Kabelgrijper: klemt de ophangkabel vast en zet hem met het lipje opzij weer los, zodat de rail op hoogte te stellen is.',
+           'Wordt in de ophangbeugel geschroefd.']},
   {id:'e15', name:'Schuko adapter 1-fase (stopcontact 230V)', codes:{wit:{p:'2037243'}, zwart:{p:'2037236'}},
    uitleg:['Adapter met een schuko-stopcontact: hiermee kan een gewone 230V-stekker op de 1-fase rail.',
            'Belastbaar tot 16 A, 250 V; trekkracht tot 100 N, buigmoment tot 2,5 Nm.',
@@ -2274,12 +2283,13 @@ const MOUNTS = {
   /* de 1-fase rail: geschroefd tegen het plafond, aan ophangsets, of ingebouwd */
   plafond: {label:'Direct tegen het plafond (geschroefd)'},
   pendel1f:{label:'Pendel (ophangset verstelbaar)'},
+  pendel1flos:{label:'Pendel (losse onderdelen)'},
   inbouw:  {label:'Inbouw in het plafond'},
 };
 /* welke montagewijzen er bij de gekozen rail horen */
 function montageKeuzes(){
   if(inbouw()) return ['inbouw'];
-  return eenFase() ? ['geen','plafond','pendel1f'] : ['geen','beugel','sys','pendel'];
+  return eenFase() ? ['geen','plafond','pendel1f','pendel1flos'] : ['geen','beugel','sys','pendel'];
 }
 /* De montagewijze geldt per tekenvlak: elk raildesign kan anders hangen (het ene
    tegen het plafond, het andere aan pendels). st.montage houdt per tekenvlak-id de
@@ -2341,6 +2351,7 @@ function ruimteNamen(invoer){
 function montageTekst(mt){
   if(mt.wijze==='plafond') return 'Direct tegen het plafond, geschroefd door de voorgeboorde gaten (\u00d85 mm)';
   if(mt.wijze==='pendel1f') return 'Ophangset verstelbaar '+mt.ophangLen+' m incl. beugel en kap, '+st.color+'; een lange ophangbeugel onder elke koppeling';
+  if(mt.wijze==='pendel1flos') return 'Pendel, per punt een plafondklem met kap ('+st.color+'), ophangkabel '+mt.ophangLen+' m, snelspanner en ophangbeugel; onder elke koppeling de lange ophangbeugel';
   if(mt.wijze==='pendel') return 'Pendelset, plafondbus '+st.color+' en staalkabel '+pendelKabelkleur(mt)+' '+mt.pendelKabelLen+' m';
   if(mt.wijze==='sys') return MOUNTS.sys.label+(mt.sysOphang ? ', met ophangset verstelbaar '+mt.sysOphangLen+' m' : '');
   return MOUNTS[mt.wijze] && mt.wijze!=='geen' ? MOUNTS[mt.wijze].label : '';
@@ -2443,11 +2454,20 @@ function computeBOM(){
     /* 1-fase, pendel: per montagepunt een ophangset, en onder elke koppeling (elektrisch
        koppelstuk) een lange ophangbeugel. Direct tegen het plafond en inbouw: niets - de
        rail gaat met schroeven door de voorgeboorde gaten. */
-    if(mt.wijze==='pendel1f'){
-      add(activeP().ophangset[st.color][mt.ophangLen], activeL().ophangset[st.color][mt.ophangLen],
-        'Ophangset verstelbaar '+mt.ophangLen+'m incl. beugel en kap '+CLRN(st.color), n, null);
+    if(mt.wijze==='pendel1f' || mt.wijze==='pendel1flos'){
+      /* een naad valt altijd op een hele meter vanaf het begin van het segment, dus op een
+         montagepunt: daar komt de lange beugel */
       const naden = sheetEdges(sh.id).reduce((s,e)=>s+railFor(e).seams,0)*ruimteFactor(sh.id);
-      if(naden) add(activeP().beugelLang, activeL().beugelLang, 'Ophangbeugel lang (steun onder de koppeling)', naden, null);
+      const P1=activeP(), L1=activeL(), len=mt.ophangLen;
+      if(mt.wijze==='pendel1f')
+        add(P1.ophangset[st.color][len], L1.ophangset[st.color][len], 'Ophangset verstelbaar '+len+'m incl. beugel en kap '+CLRN(st.color), n, null);
+      else {
+        add(P1.plafondklem[st.color], L1.plafondklem[st.color], 'Plafondklem + plafondkap excl. staalkabel '+CLRN(st.color), n, null);
+        add(P1.ophangkabel[len], L1.ophangkabel[len], 'Ophangkabel '+len+'m', n, null);
+        add(P1.snelspanner, L1.snelspanner, 'Snelspanner', n, null);
+        if(n-naden>0) add(P1.beugelKort, L1.beugelKort, 'Ophangbeugel kort', n-naden, null);
+      }
+      if(naden) add(P1.beugelLang, L1.beugelLang, 'Ophangbeugel lang (steun onder de koppeling)', naden, null);
     }
     if(mt.wijze==='pendel'){
       const code=activeP().pendel[st.color][pendelKabelkleur(mt)][mt.pendelKabelLen], pp=pendelPunten[code];
@@ -3794,7 +3814,7 @@ function renderMountOptions(){
     sel.dataset.keuzes=keuzes.join(',');
   }
   sel.value=mt.wijze; sel.disabled=keuzes.length<2;
-  if(mt.wijze==='pendel1f'){
+  if(mt.wijze==='pendel1f' || mt.wijze==='pendel1flos'){
     row.style.display='flex';
     row.innerHTML='<span>Kabellengte:</span><select id="c2OphangLen" class="c2-select"></select>';
     const lenSel=$('c2OphangLen');

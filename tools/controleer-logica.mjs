@@ -1534,6 +1534,10 @@ function is(wat, gekregen, verwacht){
     for(const len in P.ophangset[k]) moet(P.ophangset[k][len], 'Ophangset Verstelbaar ' + len + 'M incl. Beugel en Kap ' + K[k], 'ophangset.' + k + '.' + len);
   }
   moet(P.beugelLang, 'Ophangbeugel Lang', 'beugelLang');
+  moet(P.beugelKort, 'Ophangbeugel Kort', 'beugelKort');
+  moet(P.snelspanner, 'Snelspanner', 'snelspanner');
+  for(const k in K) moet(P.plafondklem[k], 'Plafondklem + Plafondkap excl. Staalkabel ' + K[k], 'plafondklem.' + k);
+  for(const len in P.ophangkabel) moet(P.ophangkabel[len], 'Ophangkabel ' + len + 'M', 'ophangkabel.' + len);
   /* de losse onderdelen: het juiste artikel, en de keuze (kleur, lengte) die er bij staat */
   const SOORT = {e01:/Rail Adapter (Wit|Zwart) 10kg/, e02:/Adapter Mini/, e03:/Adapter 78mm/, e04:/Trekontlasting (Wit|Zwart)$/,
     e05:/Trekontlasting Draaibaar/, e06:/Slot connection tool/, e07:/Eindvoeding/, e08:/Tussenkoppeling/, e09:/Ophangset Verstelbaar/,
