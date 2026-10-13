@@ -28,10 +28,10 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
    van Node weet dat allemaal wel. */
 function snijUit(tekst, naam){
   const regels = tekst.split('\n');
-  let start = regels.findIndex(r => new RegExp('^(?:const|let|function)\\s+' + naam + '\\b').test(r));
+  let start = regels.findIndex(r => new RegExp('^(?:const|let|(?:async\\s+)?function)\\s+' + naam + '\\b').test(r));
   /* Anders een ingesprongen declaratie, zoals een hulpfunctie binnen de tekenlaag van
      pdf-huisstijl.js - alleen bruikbaar als die niets uit zijn omgeving nodig heeft. */
-  if(start < 0) start = regels.findIndex(r => new RegExp('^\\s+(?:const|let|function)\\s+' + naam + '\\b').test(r));
+  if(start < 0) start = regels.findIndex(r => new RegExp('^\\s+(?:const|let|(?:async\\s+)?function)\\s+' + naam + '\\b').test(r));
   if(start < 0) throw new Error('niet gevonden in de broncode: ' + naam);
   for(let eind = start; eind < Math.min(regels.length, start + 400); eind++){
     const stuk = regels.slice(start, eind + 1).join('\n');
@@ -1250,7 +1250,7 @@ function is(wat, gekregen, verwacht){
      wordt de foto rommel. En een /Decode die iets doet (kleuren omkeren) mag niet door
      de JPEG-omzetting heen, een neutrale ([0 1] per kleur, van Ghostscript) wel. */
   console.log('pdf verkleinen');
-  const v = await laadUit('pdf-verkleinen.js', ['pngOntvoorspel', 'decodeNeutraal']);
+  const v = await laadUit('pdf-verkleinen.js', ['pngOntvoorspel', 'decodeNeutraal', 'verkleinInStappen']);
   /* een kleine RGB-afbeelding van 4x3, elke rij met een andere voorspeller gecodeerd */
   const kol = 4, kl = 3, rij = kol * kl;
   const pix = Uint8Array.from({length: rij * 5}, (_, i) => (i * 37 + (i >> 3) * 11) & 255);
@@ -1271,6 +1271,22 @@ function is(wat, gekregen, verwacht){
     [v.decodeNeutraal(null, 3), v.decodeNeutraal([0, 1, 0, 1, 0, 1], 3), v.decodeNeutraal([0, 1], 1),
      v.decodeNeutraal([1, 0], 1), v.decodeNeutraal([0, 255], 1), v.decodeNeutraal([0, 1], 3), v.decodeNeutraal([NaN], 1)],
     [true, true, true, false, false, false, false]);
+  /* Welke stap wint (verkleinInStappen), met nep-stappen die alleen een grootte hebben:
+     [de grootte die eruit komt, de stappen die gezet zijn]. Het boek (altijd = false) blijft
+     onder de grens onaangeroerd; een lichtplan bij het inladen (altijd = true) krijgt de
+     eerste stap altijd en de volgende alleen zolang het boven de grens zit. */
+  const proef = async (grootte, doel, uitkomsten, altijd) => {
+    const gezet = [];
+    const r = await v.verkleinInStappen({length: grootte}, doel, uitkomsten.length,
+      async i => { gezet.push(i); return uitkomsten[i] == null ? null : {length: uitkomsten[i]}; }, altijd);
+    return [r.length, gezet];
+  };
+  is('het boek onder de grens: niets gedaan', await proef(8, 10, [6, 5, 4, 3], false), [8, []]);
+  is('het boek erboven: de eerste stap die eronder komt wint', await proef(14, 10, [12, 9, 7, 5], false), [9, [0, 1]]);
+  is('het boek: haalt geen stap het, dan de kleinste', await proef(30, 10, [25, null, 20, 22], false), [20, [0, 1, 2, 3]]);
+  is('een lichtplan onder de grens: alleen de eerste stap', await proef(4, 5, [3, 2, 1, 1], true), [3, [0]]);
+  is('een lichtplan waar de eerste stap niets doet, blijft zoals het is', await proef(4, 5, [null, 2, 1, 1], true), [4, [0]]);
+  is('een lichtplan erboven: verder tot het eronder zit', await proef(12, 5, [8, 6, 4, 3], true), [4, [0, 1, 2]]);
 }
 
 /* ============== de naam uit de catalogus bij een ingetypte artikelcode ============== */

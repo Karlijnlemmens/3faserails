@@ -158,6 +158,7 @@ PAGINAS.forEach(p => {
     if(/const\s+(BRIEF|BRIEF_VELDEN)\s*=/.test(t)) meld(p + ' heeft een eigen BRIEF/BRIEF_VELDEN; die horen alleen in briefing.js');
     /* en met het lichtplan van het totale projectboek */
     if(/function\s+lichtplanDelen\s*\(/.test(t)) meld(p + ' heeft een eigen lichtplanDelen(); die hoort alleen in lichtplan.js');
+    if(/function\s+verkleinInStappen\s*\(/.test(t)) meld(p + ' heeft een eigen verkleinInStappen(); die hoort alleen in pdf-verkleinen.js');
     if(['index.html','armaturenboek.html'].includes(p) && /function\s+(paintBadge|updateSpecialUI|updateStempelUI|stempelCode)\s*\(/.test(t))
       meld(p + ' bouwt zijn eigen armatuurlabel, uploadknop of stempel; die horen uit armRijDelen()/stempelPresenter() in armatuur-rij.js');
   });
@@ -188,6 +189,8 @@ PAGINAS.forEach(p => {
     ['armatuur-groepen.js', /\barmRijDelen\(/],
     ['zoeken.js',        /\barmRijDelen\(/],
     ['melding.js',       /\barmRijDelen\(/],
+    /* lichtplan.js maakt een lichtplan bij het inladen lichter met pdf-verkleinen.js */
+    ['pdf-verkleinen.js', /\bLichtplan\./],
   ];
   PAGINAS.forEach(p => {
     const t = lees(p);

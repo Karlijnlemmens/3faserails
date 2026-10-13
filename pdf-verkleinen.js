@@ -23,8 +23,12 @@
 
    Gebruik: const r = await PdfVerkleinen.tot(bytes, 10);
             r.bytes, r.voor en r.na (in bytes), r.verkleind, r.gehaald
+   PdfVerkleinen.licht(bytes, 5) doet hetzelfde, maar zet de eerste stap ook als het
+   bestand al onder de grens zit: voor een lichtplan bij het inladen (lichtplan.js), zodat
+   het projectbestand en het boek niet de volle renderings uit DIALux meeslepen.
    Een gewoon <script src>, geen module; laden na vendor/pdf-lib.min.js.
-   pngOntvoorspel() en decodeNeutraal() staan op het hoogste niveau, voor de controle. */
+   pngOntvoorspel(), decodeNeutraal() en verkleinInStappen() staan op het hoogste niveau,
+   voor de controle. */
 
 /* PNG-voorspellers (DecodeParms /Predictor 10-15) per rij terugdraaien: elke rij begint
    met een byte voor de soort (0 geen, 1 links, 2 boven, 3 gemiddelde, 4 Paeth). Op het
@@ -54,6 +58,21 @@ function pngOntvoorspel(data, kolommen, kleuren){
 function decodeNeutraal(getallen, kleuren){
   if(!getallen) return true;
   return getallen.length === 2 * kleuren && getallen.every((g, i)=> g === i % 2);
+}
+
+/* Welke stap wint. pasToe(i) geeft de bytes na stap i - elke stap begint bij het origineel -
+   of null als die stap niets kon. De eerste stap die onder het doel komt wint; haalt geen
+   enkele het, dan de kleinste. altijd = false (het boek): onder het doel blijft alles zoals
+   het is. altijd = true (een lichtplan bij het inladen): de eerste stap gaat altijd, de
+   volgende alleen zolang het doel niet gehaald is. */
+async function verkleinInStappen(bytes, doel, aantal, pasToe, altijd){
+  let beste = bytes;
+  for(let i = 0; i < aantal; i++){
+    if(beste.length <= doel && (i > 0 || !altijd)) break;
+    const uit = await pasToe(i);
+    if(uit && uit.length < beste.length) beste = uit;
+  }
+  return beste;
 }
 
 const PdfVerkleinen = (function(){
@@ -185,27 +204,28 @@ const PdfVerkleinen = (function(){
     doc.context.assign(k.ref, PDFLib.PDFRawStream.of(d, nieuw.bytes));
   }
 
-  async function tot(bytes, doelMB){
-    const doel = doelMB * 1048576;
-    const voor = bytes.length;
-    if(voor <= doel) return {bytes, voor, na:voor, verkleind:false, gehaald:true};
-    let beste = bytes;
-    for(const stap of STAPPEN){
-      const doc = await PDFLib.PDFDocument.load(bytes, {updateMetadata:false});
-      let aantal = 0;
-      for(const k of kandidaten(doc)){
-        try{
-          const nieuw = await maakOpnieuw(k, stap);
-          if(nieuw){ zetIn(doc, k, nieuw); aantal++; }
-        }catch(err){ /* deze laten we zoals hij is */ }
-      }
-      if(!aantal) continue;
-      const uit = await doc.save({useObjectStreams:true});
-      if(uit.length < beste.length) beste = uit;
-      if(uit.length <= doel) break;
+  /* Stap i op het origineel: de nieuwe bytes, of null als er geen afbeelding veranderde. */
+  async function stap(bytes, i){
+    const doc = await PDFLib.PDFDocument.load(bytes, {updateMetadata:false});
+    let aantal = 0;
+    for(const k of kandidaten(doc)){
+      try{
+        const nieuw = await maakOpnieuw(k, STAPPEN[i]);
+        if(nieuw){ zetIn(doc, k, nieuw); aantal++; }
+      }catch(err){ /* deze laten we zoals hij is */ }
     }
-    return {bytes:beste, voor, na:beste.length, verkleind: beste !== bytes, gehaald: beste.length <= doel};
+    return aantal ? doc.save({useObjectStreams:true}) : null;
   }
 
-  return {tot, STAPPEN};
+  async function verklein(bytes, doelMB, altijd){
+    const doel = doelMB * 1048576, voor = bytes.length;
+    const beste = await verkleinInStappen(bytes, doel, STAPPEN.length, i => stap(bytes, i), altijd);
+    return {bytes:beste, voor, na:beste.length, verkleind: beste !== bytes, gehaald: beste.length <= doel};
+  }
+  /* het boek: alleen als het boven de grens zit */
+  const tot = (bytes, doelMB) => verklein(bytes, doelMB, false);
+  /* een lichtplan bij het inladen: de eerste stap altijd, verder alleen boven de grens */
+  const licht = (bytes, doelMB) => verklein(bytes, doelMB, true);
+
+  return {tot, licht, STAPPEN};
 })();

@@ -21,12 +21,23 @@
    opnieuw gekozen moeten worden, en het boek gaat zonder die lichtplannen de deur uit
    (gemeten met een lichtplan van 12 MB).
 
+   Bij het inladen wordt een lichtplan lichter gemaakt (PdfVerkleinen.licht() uit
+   pdf-verkleinen.js): altijd de eerste stap - alleen foto's groter dan 2000 px gaan naar
+   2000 px, op A4 zo'n 240 dpi en niet te zien - en zit het daarna nog boven LICHTPLAN_MB,
+   dan de volgende stappen tot het eronder zit. Wat in de staat komt is die lichtere
+   versie: het projectbestand (dat de PDF als base64 meedraagt, een derde groter dan het
+   bestand) en het boek slepen zo niet de volle renderings uit DIALux mee. Tekst, tabellen
+   en tekeningen blijven zoals ze zijn. Een lichtplan uit een project dat al opgeslagen
+   was, blijft zoals het is; opnieuw kiezen maakt het lichter.
+
    Een opgeslagen projectbestand laadt dit bestand van de installatiemap, maar heeft
    zijn eigen, oude knoppen (een naam en een kruisje voor één lichtplan). koppel()
    werkt ook daarmee: dan komt de lijst onder de knop en blijven die twee verborgen.
 
    Een gewoon <script src>, geen module: modules laden niet vanaf schijf. Laden na
-   vendor/pdf-lib.min.js, pdf-huisstijl.js en melding.js. lichtplanDelen() en
+   vendor/pdf-lib.min.js, pdf-huisstijl.js en melding.js; pdf-verkleinen.js hoort er ook
+   bij, maar een projectbestand van vóór oktober 2026 laadt dat niet - dan gaat het
+   lichtplan erin zoals het is. lichtplanDelen() en
    lichtplanLijst() staan op het hoogste niveau, zodat tools/controleer-logica.mjs ze
    kan uitsnijden. */
 
@@ -54,16 +65,25 @@ function lichtplanLijst(waarde){
 const Lichtplan = (function(){
   'use strict';
 
+  /* Boven deze grootte gaat een lichtplan bij het inladen verder dan de eerste stap. Het boek
+     mag 10 MB worden; een boek zonder lichtplan is 3 tot 6 MB (één tot zes armatuurtypen),
+     dus 5 MB laat ruimte voor de presenters. */
+  const LICHTPLAN_MB = 5;
+
   /* per lichtplan de PDF als base64, in de volgorde van de lijst; null = niet ingeladen.
      Kan even langer of korter zijn dan de lijst (zetPdf() komt bij het herstellen vóór
      de staat), dus altijd per plaats lezen, nooit inkorten op de lengte van de lijst. */
   let pdfs = [];
   let o = null;            /* wat de tool bij koppel() meegaf */
+  let bezig = false;       /* er wordt ingeladen (en lichter gemaakt) */
 
   const staat = () => (o && o.st()) || {};
   const lijst = () => lichtplanLijst(staat().lichtplan);
   const zetLijst = l => { staat().lichtplan = l.length ? l : null; };
   const pagina = n => n + (n === 1 ? ' pagina' : ' pagina’s');
+  const grootte = n => n < 104858 ? Math.max(1, Math.round(n / 1024)) + ' kB'
+    : (n / 1048576).toFixed(1).replace('.', ',') + ' MB';
+  const b64Grootte = b64 => Math.floor(b64.length * 3 / 4) - (/==$/.test(b64) ? 2 : /=$/.test(b64) ? 1 : 0);
   const namen = l => l.map(lp => '"' + lp.naam + '"').join(', ').replace(/, ([^,]*)$/, ' en $1');
   function ingeladen(){ return lijst().some((lp, i) => !!pdfs[i]); }
   function ontbreekt(){ return lijst().some((lp, i) => !pdfs[i]); }
@@ -79,12 +99,13 @@ const Lichtplan = (function(){
   function verf(){
     if(!o) return;
     const l = lijst();
-    o.knop.textContent = l.length ? '+ Nog een PDF toevoegen' : 'Lichtplan (PDF) kiezen';
+    o.knop.textContent = bezig ? 'Lichtplan wordt ingeladen…' : l.length ? '+ Nog een PDF toevoegen' : 'Lichtplan (PDF) kiezen';
+    o.knop.disabled = bezig;
     o.lijst.textContent = '';
     l.forEach((lp, i)=>{
       const rij = document.createElement('div'); rij.className = 'lichtplan-rij';
       const naam = document.createElement('span'); naam.className = 'lichtplan-naam';
-      naam.textContent = pdfs[i] ? '✓ ' + lp.naam + ' — ' + pagina(lp.paginas)
+      naam.textContent = pdfs[i] ? '✓ ' + lp.naam + ' — ' + pagina(lp.paginas) + ' · ' + grootte(b64Grootte(pdfs[i]))
         : '⚠ ' + lp.naam + ' is niet meer ingeladen — kies het bestand opnieuw';
       naam.classList.toggle('mis', !pdfs[i]);
       rij.appendChild(naam);
@@ -101,37 +122,58 @@ const Lichtplan = (function(){
     }
   }
 
+  /* Het lichtplan lichter (zie boven). Lukt dat niet - een projectbestand zonder
+     pdf-verkleinen.js, een PDF waar pdf-lib over struikelt - dan gaat het erin zoals het is:
+     liever een zwaar lichtplan in het boek dan geen. */
+  async function lichter(bytes){
+    const zo = {bytes, voor:bytes.length, na:bytes.length, verkleind:false};
+    if(typeof PdfVerkleinen === 'undefined' || !PdfVerkleinen.licht) return zo;
+    try{ return await PdfVerkleinen.licht(bytes, LICHTPLAN_MB); }
+    catch(err){ console.warn('Lichtplan kon niet lichter worden gemaakt:', err); return zo; }
+  }
+
   /* Een of meer bestanden erbij. Heet er een zoals een lichtplan dat niet meer ingeladen
      is (een hervat project), dan komt het op die plaats terug; anders achteraan. */
   async function kies(bestanden){
+    bezig = true; verf();
+    try{ await kiesNu(bestanden); }
+    finally{ bezig = false; verf(); }
+  }
+  async function kiesNu(bestanden){
     const goed = [], fout = [], al = [];
     for(const bestand of bestanden){
       try{
-        const bytes = new Uint8Array(await bestand.arrayBuffer());
-        if(String.fromCharCode.apply(null, bytes.subarray(0, 5)) !== '%PDF-') throw new Error('dit is geen PDF-bestand');
-        const d = await PDFLib.PDFDocument.load(bytes, {ignoreEncryption:true});
+        const ruw = new Uint8Array(await bestand.arrayBuffer());
+        if(String.fromCharCode.apply(null, ruw.subarray(0, 5)) !== '%PDF-') throw new Error('dit is geen PDF-bestand');
+        const d = await PDFLib.PDFDocument.load(ruw, {ignoreEncryption:true});
         /* pdf-lib kan een beveiligd PDF niet ontsleutelen: de pagina's komen er dan leeg
            of verminkt uit. Liever nu zeggen dan in het boek bij de klant. */
         if(d.isEncrypted) throw new Error('het is beveiligd. Sla het op zonder beveiliging (of druk het af naar PDF) en kies het opnieuw');
+        const r = await lichter(ruw);
         const l = lijst(), item = {naam: bestand.name, paginas: d.getPageCount()};
-        const b64 = PdfHuisstijl.bytesToB64(bytes);
-        /* hetzelfde bestand nog een keer gekozen: niet dubbel in het boek */
-        if(pdfs.some((p, j)=> p === b64 && j < l.length)){ al.push(bestand.name); continue; }
+        const b64 = PdfHuisstijl.bytesToB64(r.bytes), ruwB64 = r.verkleind ? PdfHuisstijl.bytesToB64(ruw) : b64;
+        /* hetzelfde bestand nog een keer gekozen: niet dubbel in het boek. Het lichter maken
+           geeft elke keer dezelfde bytes; een project van vóór het lichter maken heeft het
+           bestand zoals het was. */
+        if(pdfs.some((p, j)=> (p === b64 || p === ruwB64) && j < l.length)){ al.push(bestand.name); continue; }
         let i = l.findIndex((lp, j)=> lp.naam === bestand.name && !pdfs[j]);
         if(i < 0){ i = l.length; l.push(item); } else l[i] = item;
         pdfs[i] = b64;
         zetLijst(l);
-        goed.push(item);
+        goed.push({paginas: item.paginas, voor: r.voor, na: r.na});
       }catch(err){
         fout.push(bestand.name + ': ' + (err && err.message || err));
       }
     }
     verf();
     if(goed.length) o.opWijziging();
+    const som = k => goed.reduce((s, x)=> s + x[k], 0);
+    const maat = som('na') < som('voor')
+      ? grootte(som('voor')) + ' → ' + grootte(som('na')) + ' (de foto’s zijn lichter gemaakt)' : grootte(som('na'));
     if(goed.length === 1)
-      Melding.goed('Lichtplan ingeladen: ' + pagina(goed[0].paginas) + '. Het komt in het boek na de introductie.');
+      Melding.goed('Lichtplan ingeladen: ' + pagina(goed[0].paginas) + ', ' + maat + '. Het komt in het boek na de introductie.');
     else if(goed.length > 1)
-      Melding.goed(goed.length + ' PDF\'s ingeladen (' + pagina(goed.reduce((s, x)=> s + x.paginas, 0))
+      Melding.goed(goed.length + ' PDF\'s ingeladen (' + pagina(som('paginas')) + ', samen ' + maat
         + '). Ze komen in het boek na de introductie, in de volgorde van de lijst.');
     if(al.length)
       Melding.letop((al.length === 1 ? al[0] + ' staat' : al.join(', ') + ' staan') + ' al in de lijst; niet nog een keer toegevoegd.');
