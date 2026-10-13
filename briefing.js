@@ -76,6 +76,9 @@ const BRIEF_VELDEN = [
 /* Wat er op de briefingpagina nog leeg is. De bronnen mogen leeg blijven (dan komen
    ze er niet in); alleen de projectnaam heeft nog een plaatshouder. */
 function briefingOpenVelden(keuze){
+  /* met een eigen tekst telt alleen wat daar nog staat */
+  if(keuze.briefEigen && String(keuze.briefTekst||'').trim())
+    return String(keuze.briefTekst).includes('[projectnaam]') ? ['projectnaam'] : [];
   return (keuze.proj||'').trim() ? [] : ['projectnaam'];
 }
 /* Wat de tool zegt als er op de pagina nog een plaatshouder komt, zoals Lichtplan.waarschuwing()
@@ -211,6 +214,96 @@ function briefInhoud(keuze){
   };
 }
 
+/* ======================= de eigen tekst ======================= */
+
+/* Wie geen standaardproject heeft, past de tekst zelf aan (oktober 2026: "een tekstvak
+   met alle tekst waar ik kan weghalen en aanvullen"). Het tekstvak begint met de tekst die
+   briefInhoud() maakt, als gewone tekst met een paar tekens voor de opmaak:
+     - de eerste alinea is "De vraag", in het grijze vlak; elke regel begint daar opnieuw
+     - een lege regel begint een nieuwe alinea
+     - **zo** is vet (de projectnaam, de namen van de documenten)
+     - een regel die met "- " begint is een opsommingsteken
+     - een vette regel die op een dubbele punt eindigt en een alinea opent, is een kopje
+       ("**Wat wij bieden:**"); in hoofdletters het kleine kopje ("**DISCLAIMER:**")
+   briefUitTekst() leest dat terug in dezelfde vorm als briefInhoud(), met de afstanden uit
+   het ontwerp: na het grijze vlak naBlok, na een kopje naKop (naDisclaimer na het kleine),
+   een nieuwe alinea naWit, het eerste opsommingsteken onder een regel naLeveren, en verder
+   een regel. Zo valt een onveranderde tekst precies terug op de standaard. */
+
+/* Segmenten als tekst: vet tussen ** - de spaties aan de rand van een vet stuk erbuiten. */
+function briefSegTekst(segs){
+  const runs = [];
+  (segs||[]).forEach(s=>{
+    const v = !!s.v, t = String(s.t);
+    if(runs.length && runs[runs.length-1].v === v) runs[runs.length-1].t += t;
+    else runs.push({t, v});
+  });
+  return runs.map(r=>{
+    if(!r.v || !r.t.trim()) return r.t;
+    const m = /^(\s*)([\s\S]*?)(\s*)$/.exec(r.t);
+    return m[1] + '**' + m[2] + '**' + m[3];
+  }).join('');
+}
+/* Een regel tekst als segmenten: wat tussen ** staat is vet. Een ** zonder partner telt
+   niet als opmaak - dan blijft het staan zoals het getypt is. */
+function briefTekstSeg(regel){
+  const delen = String(regel).split('**');
+  if(delen.length % 2 === 0){ const laatste = delen.pop(); delen[delen.length-1] += '**' + laatste; }
+  return delen.map((t, i)=>({t, v: i % 2 === 1})).filter(x=> x.t !== '')
+    .map(x=> x.v ? x : {t:x.t});
+}
+/* De inhoud van briefInhoud() als tekst voor het tekstvak. */
+function briefTekst(inhoud){
+  const regels = [briefSegTekst(inhoud.vraag)];
+  if(inhoud.vraagSlot && inhoud.vraagSlot.length) regels.push(briefSegTekst(inhoud.vraagSlot));
+  inhoud.blokken.forEach(b=>{
+    if(b.voor === 'naBlok' || b.voor === 'naWit') regels.push('');
+    if(b.k === 'kop' || b.k === 'kopklein') regels.push('**' + b.t + '**');
+    else if(b.k === 'plat') regels.push(b.t);
+    else if(b.k === 'alinea') regels.push(briefSegTekst(b.s));
+    else if(b.k === 'bullets') b.items.forEach(it=> regels.push('- ' + (typeof it === 'string' ? it : briefSegTekst(it))));
+  });
+  return regels.join('\n');
+}
+/* De tekst uit het tekstvak terug als inhoud, of null als er niets staat (dan geldt de
+   standaardtekst). vraagDelen: elke regel van de eerste alinea, in het grijze vlak. */
+function briefUitTekst(tekst){
+  const alineas = String(tekst||'').replace(/\r\n?/g, '\n').split(/\n[ \t]*\n/)
+    .map(a=> a.split('\n').map(r=> r.trim()).filter(Boolean)).filter(a=> a.length);
+  if(!alineas.length) return null;
+  const vraagDelen = alineas[0].map(briefTekstSeg);
+  const blokken = [];
+  alineas.slice(1).forEach((regels, ai)=>{
+    let vorige = null;
+    regels.forEach((r, i)=>{
+      const bullet = /^[-•]\s+/.exec(r);
+      const vet = /^\*\*([^*]+)\*\*$/.exec(r);
+      let soort = bullet ? 'bullet' : (i === 0 && vet && /:$/.test(vet[1])) ? 'kop' : 'tekst';
+      if(soort === 'kop' && /[A-Z]/.test(vet[1]) && vet[1] === vet[1].toUpperCase()) soort = 'kopklein';
+      const voor = i === 0 ? (ai === 0 ? 'naBlok' : 'naWit')
+        : vorige === 'kop' ? 'naKop'
+        : vorige === 'kopklein' ? 'naDisclaimer'
+        : (soort === 'bullet' && vorige !== 'bullet') ? 'naLeveren'
+        : 'regel';
+      if(soort === 'kop' || soort === 'kopklein') blokken.push({k:soort, t:vet[1], voor});
+      else if(soort === 'bullet') blokken.push({k:'bullets', voor, items:[briefTekstSeg(r.slice(bullet[0].length))]});
+      else blokken.push({k:'alinea', voor, s:briefTekstSeg(r)});
+      vorige = soort;
+    });
+  });
+  return {vraag: vraagDelen[0], vraagSlot: [], vraagDelen, blokken};
+}
+/* Wat er op de pagina komt: de eigen tekst als die aan staat en er iets in staat, anders
+   de standaard. Een eigen tekst die niet is veranderd, is gewoon de standaard - dan komt
+   die er precies zo op als zonder vinkje. */
+function briefIntroInhoud(keuze){
+  const standaard = briefInhoud(keuze);
+  if(!keuze.briefEigen) return standaard;
+  const eigen = String(keuze.briefTekst||'');
+  if(eigen.replace(/\r\n?/g, '\n') === briefTekst(standaard)) return standaard;
+  return briefUitTekst(eigen) || standaard;
+}
+
 /* ======================= de keuze in het paneel ======================= */
 
 /* Wat er als voorbeeld in een leeg bronveld staat. */
@@ -260,6 +353,51 @@ function briefingKeuze(vak, keuze, opWijziging, idVoorvoegsel){
     blok.appendChild(label); blok.appendChild(ta);
     vak.appendChild(blok);
   });
+
+  /* De tekst zelf aanpassen: een vinkje, en dan één tekstvak met de hele tekst. Het vak
+     begint met de standaardtekst van dat moment (de soort, de projectnaam, de bronnen);
+     daarna volgt het die niet meer - "Standaardtekst terugzetten" haalt hem opnieuw op.
+     Uitzetten bewaart je tekst: weer aanzetten geeft hem terug. */
+  const eigen = document.createElement('div');
+  eigen.className = 'brief-eigen';
+  const aanLabel = document.createElement('label'); aanLabel.className = 'brief-eigen-aan';
+  const aan = document.createElement('input'); aan.type = 'checkbox'; aan.id = vv+'eigen';
+  const aanTekst = document.createElement('span'); aanTekst.textContent = 'Briefingtekst zelf aanpassen';
+  aanLabel.append(aan, aanTekst);
+  const tekstVak = document.createElement('div'); tekstVak.className = 'brief-eigen-vak';
+  const ta = document.createElement('textarea');
+  ta.className = 'brief-tekst brief-eigen-tekst'; ta.id = vv+'eigentekst'; ta.rows = 16; ta.spellcheck = true;
+  ta.setAttribute('aria-label', 'De briefingtekst');
+  const uitleg = document.createElement('p'); uitleg.className = 'brief-eigen-uitleg';
+  uitleg.textContent = 'De eerste alinea komt in het grijze vlak onder "De vraag:". Een lege regel begint een '
+    + 'nieuwe alinea, **zo** wordt vet, een regel die met - begint wordt een opsommingsteken en een vette regel '
+    + 'die op een dubbele punt eindigt een kopje. Deze tekst volgt de projectnaam en de bronnen hierboven niet meer.';
+  const terug = document.createElement('button'); terug.type = 'button'; terug.className = 'brief-eigen-terug';
+  terug.textContent = 'Standaardtekst terugzetten';
+  terug.title = 'Zet de tekst terug op wat de tool maakt uit de soort opdracht, de projectnaam en de bronnen.';
+  tekstVak.append(ta, uitleg, terug);
+  eigen.append(aanLabel, tekstVak);
+  vak.appendChild(eigen);
+
+  const standaard = ()=> briefTekst(briefInhoud(keuze));
+  const verf = ()=>{ aan.checked = !!keuze.briefEigen; tekstVak.style.display = keuze.briefEigen ? '' : 'none'; };
+  ta.value = keuze.briefTekst || '';
+  verf();
+  aan.addEventListener('change', ()=>{
+    keuze.briefEigen = aan.checked;
+    if(aan.checked && !String(keuze.briefTekst||'').trim()){ keuze.briefTekst = standaard(); ta.value = keuze.briefTekst; }
+    verf();
+    if(aan.checked) ta.focus();
+    if(opWijziging) opWijziging();
+  });
+  ta.addEventListener('input', ()=>{ keuze.briefTekst = ta.value; if(opWijziging) opWijziging(); });
+  terug.addEventListener('click', ()=>{
+    const nieuw = standaard();
+    if(ta.value === nieuw) return;
+    if(ta.value.trim() && !confirm('Je eigen tekst vervangen door de standaardtekst? Wat je hebt aangepast, gaat dan verloren.')) return;
+    keuze.briefTekst = nieuw; ta.value = nieuw;
+    if(opWijziging) opWijziging();
+  });
 }
 
 /* De regel in de kop van het dichtgeklapte blok: de gekozen soort, welke bronnen er op
@@ -270,6 +408,7 @@ function briefingStand(keuze){
   return '— '
     + (keuze.soort === 'vergelijking' ? 'Vergelijking' : 'Lichtberekening')
     + (bronnen.length ? ', ' + bronnen.join(' + ') : ', geen bronnen')
+    + (keuze.briefEigen && String(keuze.briefTekst||'').trim() ? ', eigen tekst' : '')
     + (pu ? ', ' + pu.naam.split(' ')[0] : '');
 }
 
@@ -352,13 +491,15 @@ async function tekenIntroductie(HS, keuze, plek, metBriefing){
     return;
   }
 
-  const inhoud = briefInhoud(keuze);
+  const inhoud = briefIntroInhoud(keuze);
   /* Poppins (cond), zoals in het ontwerp - en zoals de koppen eronder */
   text(B.kopX, B.kopY, B.kopPt, 'Briefing', {bold:true, cond:true, color:C.hoofd});
 
   /* Eerst opmeten: staan er meer documentnamen, dan groeit het grijze vlak mee. */
-  const blokRegels = rijkeRegels(inhoud.vraag, B.blokBreedte, B.pt)
-    .concat(inhoud.vraagSlot.length ? rijkeRegels(inhoud.vraagSlot, B.blokBreedte, B.pt) : []);
+  /* elke regel van "De vraag" begint op een nieuwe regel: de vraag en de slotregel, of de
+     regels van een eigen tekst (vraagDelen) */
+  const vraagDelen = inhoud.vraagDelen || [inhoud.vraag].concat(inhoud.vraagSlot.length ? [inhoud.vraagSlot] : []);
+  const blokRegels = [].concat(...vraagDelen.map(d=> rijkeRegels(d, B.blokBreedte, B.pt)));
   const blokH = Math.max(B.blok.h,
     B.vraagTop + B.naVraag + (blokRegels.length-1)*B.blokRegel + B.pt + B.blokOnder);
 
@@ -396,7 +537,7 @@ async function tekenIntroductie(HS, keuze, plek, metBriefing){
            een vraagteken van maken. Een stip tekenen scheelt een uitbreiding van de
            gedeelde tekstlaag voor dit ene teken. */
         circle(B.bulletX + 2.2, y + B.pt*0.45, 1.5, C.tekst);
-        schrijf([{t:it}], B.bulletTekstX, B.bulletBreedte);
+        schrijf(typeof it === 'string' ? [{t:it}] : it, B.bulletTekstX, B.bulletBreedte);
       });
     }
   });
@@ -441,6 +582,15 @@ async function tekenIntroductie(HS, keuze, plek, metBriefing){
     resize:vertical; min-height:58px;
   }
   .brief-tekst:focus{outline:none; border-color:var(--blue);}
+  .brief-eigen{margin-top:16px; padding-top:12px; border-top:1px dashed var(--border);}
+  .brief-eigen-aan{display:flex; align-items:center; gap:7px; cursor:pointer; font-size:12.5px; font-weight:700; color:var(--ink);}
+  .brief-eigen-aan input{accent-color:var(--blue); margin:0;}
+  .brief-eigen-vak{margin-top:8px;}
+  .brief-eigen-tekst{min-height:260px; line-height:1.5;}
+  .brief-eigen-uitleg{margin:5px 0 8px; font-size:11.5px; color:var(--slate); line-height:1.45;}
+  .brief-eigen-terug{border:1.5px solid var(--border); border-radius:8px; padding:5px 11px; background:#fff;
+    font:inherit; font-size:12px; font-weight:700; color:var(--slate); cursor:pointer;}
+  .brief-eigen-terug:hover{border-color:var(--blue); color:var(--blue-dark);}
   `;
   document.head.appendChild(st);
 })();

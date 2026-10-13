@@ -303,6 +303,8 @@ const OPGESLAGEN_PROJECT = /*__PROJECT_DATA_START__*/null/*__PROJECT_DATA_END__*
    uit; de rest van het boek verandert er niet van. */
 const st = { proj:'', projNr:'', installateur:'', datum:'', soort:'lichtberekening',
              bestek:'', tekeningen:'', armaturenboek:'', email:'', toonLijst:true, armaturen:{},
+             /* de briefingtekst zelf aangepast (briefingKeuze() in briefing.js): aan/uit en de tekst */
+             briefEigen:false, briefTekst:'',
              /* welke kolommen er in de armaturenlijst staan (armKolomKeuze() in armatuur-rij.js);
                 een kolom die hier niet in staat, staat aan */
              lijstKolommen:{},
@@ -864,8 +866,9 @@ function herstelProject(bron){
      niet heeft, bleef anders in het teruggehaalde project staan (nagemeten). */
   ARMATUREN.length = 12;
   st.armaturen = ARMATUREN.reduce((o,a)=>{o[a.id]={aanduiding:'',name:'',code:'',groep:'',qty:0};return o;},{});
-  /* een project van vóór de kolomkeuze heeft ze allemaal aan, niet de keuze van het vorige project */
-  st.lijstKolommen = {};
+  /* een project van vóór de kolomkeuze heeft ze allemaal aan, niet de keuze van het vorige project;
+     net zo houdt het geen eigen briefingtekst van het vorige */
+  st.lijstKolommen = {}; st.briefEigen = false; st.briefTekst = '';
   Object.keys(st).forEach(k=>{
     if(!Object.prototype.hasOwnProperty.call(s,k)) return;
     if(k==='armaturen'){ st[k] = Object.assign({}, st[k], s[k]); }

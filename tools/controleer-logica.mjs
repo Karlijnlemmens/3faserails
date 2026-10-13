@@ -1731,7 +1731,8 @@ function is(wat, gekregen, verwacht){
   console.log('briefingtekst');
   const b = await laadUit('briefing.js',
     ['briefRegels', 'briefOpsomming', 'BRIEF_VELDEN', 'briefingOpenVelden', 'briefNamen', 'briefGroepen',
-     'briefBronnen', 'briefVraagSlot', 'briefInhoud']);
+     'briefBronnen', 'briefVraagSlot', 'briefInhoud', 'briefSegTekst', 'briefTekstSeg', 'briefTekst', 'briefUitTekst',
+     'briefIntroInhoud']);
   const tekst = segs => segs.map(s => s.v ? '**' + s.t + '**' : s.t).join('');
   const blad = (soort, velden) => {
     const i = b.briefInhoud(Object.assign({soort, proj:'Kantoor Weena'}, velden));
@@ -1776,6 +1777,54 @@ function is(wat, gekregen, verwacht){
   /* een project van vóór de soort opdracht (de railtool kende hem niet) is een
      lichtberekening, zoals het paneel hem dan ook toont */
   is('zonder soort: een lichtberekening', b.briefInhoud({proj:'X'}).vraag[0].t, 'Het opstellen van een lichtplan voor ');
+
+  /* De tekst zelf aanpassen (oktober 2026): het tekstvak begint met de standaardtekst
+     (briefTekst) en de pagina leest hem terug (briefUitTekst). Heen en terug moet elke
+     standaardtekst dezelfde regels met dezelfde afstanden opleveren, en een onveranderde
+     tekst is gewoon de standaard. */
+  const vlak = inh => [].concat(
+    (inh.vraagDelen || [inh.vraag].concat(inh.vraagSlot.length ? [inh.vraagSlot] : [])).map(d => ['vraag', b.briefSegTekst(d)]),
+    ...inh.blokken.map(x => x.k === 'bullets'
+      ? x.items.map((it, i) => [i ? 'regel' : x.voor, 'bullet', typeof it === 'string' ? it : b.briefSegTekst(it)])
+      : [[x.voor, x.k === 'kop' || x.k === 'kopklein' ? x.k : 'tekst', x.t || b.briefSegTekst(x.s)]]));
+  const gevallen = [['lichtberekening', {bestek:'Bestek E-01', tekeningen:'Tekening E-01\nTekening E-02'}],
+    ['lichtberekening', {}], ['vergelijking', {email:'Aanvraag verlichting kantoor'}],
+    ['vergelijking', {bestek:'Bestek X', armaturenboek:'Armaturenboek Y'}], ['vergelijking', {bestek:'Bestek X', email:'Offerte hal 2'}]];
+  is('heen en terug: elke standaardtekst geeft dezelfde regels en afstanden',
+    gevallen.map(([soort, v]) => { const i = b.briefInhoud(Object.assign({soort, proj:'Kantoor Weena'}, v));
+      return JSON.stringify(vlak(b.briefUitTekst(b.briefTekst(i)))) === JSON.stringify(vlak(i)); }),
+    gevallen.map(() => true));
+  const k0 = {soort:'lichtberekening', proj:'Kantoor Weena', bestek:'Bestek E-01'};
+  const std = b.briefInhoud(k0), stdTekst = b.briefTekst(std);
+  is('onveranderd, uit of leeg: de standaard', [
+    b.briefIntroInhoud(Object.assign({}, k0, {briefEigen:true, briefTekst:stdTekst})) === null,
+    JSON.stringify(b.briefIntroInhoud(Object.assign({}, k0, {briefEigen:true, briefTekst:stdTekst}))) === JSON.stringify(std),
+    JSON.stringify(b.briefIntroInhoud(Object.assign({}, k0, {briefEigen:false, briefTekst:'iets anders'}))) === JSON.stringify(std),
+    JSON.stringify(b.briefIntroInhoud(Object.assign({}, k0, {briefEigen:true, briefTekst:'  \n \n'}))) === JSON.stringify(std)],
+    [false, true, true, true]);
+  is('de standaardtekst zoals hij in het tekstvak staat', stdTekst.split('\n').slice(0, 4),
+    ['Het opstellen van een lichtplan voor **Kantoor Weena.** Dit plan dient gebaseerd te zijn op de uitgangspunten zoals vastgelegd in het document:',
+     '**Bestek E-01**', '', '**Wat wij bieden:**']);
+  /* aangepast: een regel in de vraag erbij, een kopje met een opsomming erbij, de laatste
+     opsommingsregel weg */
+  const aangepast = stdTekst.replace('**Bestek E-01**', '**Bestek E-01**\nDe ruimte wordt in fases opgeleverd.')
+    .replace(/\n- Ondersteuning[^\n]*/, '') + '\n\n**Planning:**\n- Fase 1 in **maart**\n- Fase 2 in mei';
+  const uit = vlak(b.briefIntroInhoud(Object.assign({}, k0, {briefEigen:true, briefTekst:aangepast})));
+  is('een aangepaste tekst: wat erbij kwam staat erin, met de afstanden uit het ontwerp', [
+    uit.filter(r => r[0] === 'vraag').map(r => r[1]).slice(1),
+    uit.filter(r => r[1] === 'bullet').length, uit.slice(-3)],
+    [['**Bestek E-01**', 'De ruimte wordt in fases opgeleverd.'], 4,
+     [['naWit', 'kop', 'Planning:'], ['naKop', 'bullet', 'Fase 1 in **maart**'], ['regel', 'bullet', 'Fase 2 in mei']]]);
+  is('vet: spaties buiten de tekens, een ** zonder partner blijft staan', [
+    b.briefSegTekst([{t:'het document '}, {t:' X ', v:true}, {t:'.'}]),
+    JSON.stringify(b.briefTekstSeg('prijs **excl. btw')), JSON.stringify(b.briefTekstSeg('**A** en **B**'))],
+    ['het document  **X** .', JSON.stringify([{t:'prijs **excl. btw'}]), JSON.stringify([{t:'A', v:true}, {t:' en '}, {t:'B', v:true}])]);
+  is('een opsomming direct onder een kopje, en een kopje in hoofdletters is het kleine', vlak(b.briefUitTekst('Vraag\n\n**Let op:**\n- a\n\n**DISCLAIMER:**\nTekst')).slice(1),
+    [['naBlok', 'kop', 'Let op:'], ['naKop', 'bullet', 'a'], ['naWit', 'kopklein', 'DISCLAIMER:'], ['naDisclaimer', 'tekst', 'Tekst']]);
+  is('een eigen tekst: alleen een [projectnaam] die er nog staat telt als open veld', [
+    b.briefingOpenVelden({briefEigen:true, briefTekst:'Het plan voor [projectnaam].'}),
+    b.briefingOpenVelden({briefEigen:true, briefTekst:'Het plan voor de hal.'}),
+    b.briefingOpenVelden({briefEigen:false, briefTekst:'Het plan voor de hal.'})], [['projectnaam'], [], ['projectnaam']]);
 }
 
 /* ============== armaturen uit een Excel-lijst: armaturen-excel.js ============== */

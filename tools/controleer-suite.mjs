@@ -154,7 +154,8 @@ PAGINAS.forEach(p => {
       if(new RegExp('function\\s+' + f + '\\s*\\(').test(t)) meld(p + ' heeft een eigen ' + f + '(); die hoort alleen in contactpersonen.js');
     /* en met de briefing: dezelfde introductiepagina in allebei */
     for(const f of ['briefInhoud','briefGroepen','briefBronnen','briefVraagSlot','briefingOpenVelden','briefingKeuze',
-                    'briefingStand','tekenIntroductie','rijkeRegels','aanhalingsteken'])
+                    'briefingStand','tekenIntroductie','rijkeRegels','aanhalingsteken',
+                    'briefTekst','briefUitTekst','briefIntroInhoud','briefSegTekst','briefTekstSeg'])
       if(new RegExp('function\\s+' + f + '\\s*\\(').test(t)) meld(p + ' heeft een eigen ' + f + '(); die hoort alleen in briefing.js');
     if(/const\s+(BRIEF|BRIEF_VELDEN)\s*=/.test(t)) meld(p + ' heeft een eigen BRIEF/BRIEF_VELDEN; die horen alleen in briefing.js');
     /* en met het lichtplan van het totale projectboek */

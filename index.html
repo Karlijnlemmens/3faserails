@@ -1876,6 +1876,8 @@ let st = { step:1, dali:false, color:'wit', powercfg:'A', shape:null, gRows:2, g
      staan (ids uit medewerkers.js). toonBriefing uit: alleen de contactpersonen, en zonder
      die geen introductiepagina. */
   toonBriefing:true, soort:'lichtberekening', bestek:'', tekeningen:'', armaturenboek:'', email:'',
+  /* de briefingtekst zelf aangepast (briefingKeuze() in briefing.js): aan/uit en de tekst */
+  briefEigen:false, briefTekst:'',
   projectuitwerker:'', accountmanager:'', binnendienst:'',
   /* totaal projectboek: het ingeladen lichtplan, {naam, paginas} of null; de PDF zelf
      houdt lichtplan.js bij (Lichtplan.pdf), net als in het armaturenboek */
@@ -3929,8 +3931,9 @@ function init(){
          en die het project niet heeft, bleef anders in het teruggehaalde project staan. */
       ARMATUREN.length = 12;
       st.armaturen = ARMATUREN.reduce((o,a)=>{o[a.id]=legeArmatuur();return o;},{});
-      /* een project van vóór de kolomkeuze heeft ze allemaal aan, niet de keuze van het vorige project */
-      st.lijstKolommen = {};
+      /* een project van vóór de kolomkeuze heeft ze allemaal aan, niet de keuze van het vorige project;
+         net zo houdt het geen eigen briefingtekst van het vorige */
+      st.lijstKolommen = {}; st.briefEigen = false; st.briefTekst = '';
       Object.keys(st).forEach(k=>{
         if(!Object.prototype.hasOwnProperty.call(s,k)) return;
         if(k==='armaturen' || k==='overig'){ st[k] = Object.assign({}, st[k], s[k]); }
@@ -4121,7 +4124,7 @@ function init(){
     st.proj=''; st.projNr=''; st.installateur='';
     $('c2Proj').value=''; $('c2ProjNr').value=''; $('c2Inst').value='';
     st.projectuitwerker=''; st.accountmanager=''; st.binnendienst='';
-    st.toonBriefing=true; st.soort='lichtberekening';
+    st.toonBriefing=true; st.soort='lichtberekening'; st.briefEigen=false; st.briefTekst='';
     BRIEF_VELDEN.forEach(v=>{ st[v.id]=''; });
     briefingKeuze($('c2BriefVelden'), st, refresh, 'c2Brief_');
     contactKeuze($('c2ContactVelden'), st, refresh, 'c2Contact_');
