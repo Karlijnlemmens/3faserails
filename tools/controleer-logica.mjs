@@ -1992,6 +1992,146 @@ function is(wat, gekregen, verwacht){
   is('leeg is niets', r.ruimteNamen('  , '), []);
 }
 
+/* ============ railtool: tekenen, DALI per tekenvlak, koude opbouw ============ */
+{
+  /* De echte tekenacties en de echte stuklijst uit index.html, met een eigen st. Oktober
+     2026, de gebruiker: rail toevoegen aan een bocht, een T-splitsing vanaf een uiteinde,
+     een aftakking op de hoek, elk segment kunnen weghalen, DALI per tekenvlak en een
+     koude opbouw zonder montagemateriaal. */
+  console.log('railtool: tekenen, DALI per tekenvlak, koude opbouw');
+  const namen = ['computeBOM','propagate','edgesAt','armDir','node','other','edge','nodeType','nodeVariants','mTxt','activeP','activeL','eenFase','daliVan',
+    'PCODES','LCODES','PCODES_DALI','LCODES_DALI','feedForNode','nodeSheet','CLRN','ruimteFactor','ruimtesVan','railFor','eLen','armMm','maten',
+    'MM_3F','feedForEdge','inbouw','daliTag','visibleArmaturen','ARMATUREN','overigLijst','ADAPTERS_OVERIG','normalizeMountState','montageKeuzes',
+    'computeMounts','montageVan','sheetEdges','nieuweMontage','pendelKabelkleur','MOUNTS','montageTekst','daliStand','railNaam',
+    'eAxis','rotCCW','dot','compMap','feedComp','feedNodeMag','validateFeeds','mergeCoincident','normalizeNode','normalizeAll',
+    'RICHTINGEN','vrijeRichtingen','addSegFromNode','addTFromEnd','addStub','removeEdge','plusKeuzesPunt','plusKeuzesSegment'];
+  const r = await laadUit('index.html', namen,
+    'let st; let hist=[], hIdx=-1; function snap(){} function refresh(){} function zetSt(s){ st=s; } function huidig(){ return st; }\n'
+    + snijUit(readFileSync(join(root, 'armatuur-rij.js'), 'utf8'), 'armAccessoires'), ['zetSt', 'huidig']);
+  /* een tekening: punten [x,y] in cm, lijnen tussen punt-indexen; alles op tekenvlak s1 tenzij anders */
+  const leeg = () => ({color:'wit', dali:false, rail:'3fase', profiel:'opbouw', use4m:false, nodes:[], edges:[], feeds:[], angles:{},
+    armaturen:{}, overig:{}, montage:{}, ruimtes:{}, daliVlak:{}, sheets:[{id:'s1', name:'Tekenvlak 1'}], sheet:'s1', nid:1, eid:1});
+  function teken(s, pts, ln, sh = 's1'){
+    const basis = s.nid;
+    pts.forEach(([x, y]) => s.nodes.push({id:'n' + (s.nid++), x, y, s:sh}));
+    ln.forEach(([a, b]) => s.edges.push({id:'e' + (s.eid++), a:'n' + (basis + a), b:'n' + (basis + b)}));
+    return s;
+  }
+  const vierkant = () => teken(leeg(), [[0,0],[300,0],[300,200],[0,200]], [[0,1],[1,2],[2,3],[3,0]]);
+  const op = (x, y) => r.huidig().nodes.find(n => n.x === x && n.y === y);
+  const soort = (x, y) => { const n = op(x, y); return n ? r.nodeType(n.id) : 'weg'; };
+  const segTussen = (a, b) => r.huidig().edges.find(e => [e.a, e.b].sort().join() === [op(...a).id, op(...b).id].sort().join());
+  const pijlen = rij => rij.knoppen.map(k => k.s).join('');
+
+  /* een vierkant: aan elke hoek kan rail bij, en elke zijde kan weg */
+  r.zetSt(vierkant());
+  is('vierkant: elke hoek heeft twee vrije kanten', ['0,0','300,0','300,200','0,200'].map(k => r.vrijeRichtingen(op(...k.split(',').map(Number)).id).length), [2, 2, 2, 2]);
+  is('plusje bij een bocht: aftakking, de bocht wordt een T-stuk', r.plusKeuzesPunt(op(0,0).id).map(x => x.label + ' ' + pijlen(x)),
+    ['Aftakking, de bocht wordt een T-stuk ←↑']);
+  r.addSegFromNode(op(0,0).id, {x:0, y:-1});
+  is('rail aan een bocht: de bocht wordt een T-stuk, met een uiteinde 1 m verder', [soort(0,0), soort(0,-100), r.huidig().edges.length], ['t', 'end', 5]);
+  is('plusje bij dat T-stuk: alleen nog de vrije kant, het wordt een kruis', r.plusKeuzesPunt(op(0,0).id).map(x => x.label + ' ' + pijlen(x)),
+    ['Aftakking, het T-stuk wordt een kruis ←']);
+  r.addSegFromNode(op(0,0).id, {x:-1, y:0});
+  is('en dan een kruis, zonder vrije kant meer', [soort(0,0), r.vrijeRichtingen(op(0,0).id).length], ['cross', 0]);
+
+  r.zetSt(vierkant());
+  r.removeEdge(segTussen([0,0], [300,0]).id);
+  is('een zijde van een vierkant weg: een U met twee uiteinden', [r.huidig().edges.length, soort(0,0), soort(300,0), soort(0,200), soort(300,200)],
+    [3, 'end', 'end', 'corner', 'corner']);
+
+  /* een H: de dwarsbalk weg geeft twee trajecten, en de middenvoeding op die balk vervalt */
+  const h = teken(leeg(), [[0,0],[0,200],[0,400],[300,0],[300,200],[300,400]], [[0,1],[1,2],[3,4],[4,5],[1,4]]);
+  r.zetSt(h); const balk = segTussen([0,200], [300,200]);
+  h.feeds = [{kind:'edge', edge:balk.id, side:'R'}];
+  is('een H: twee T-stukken', [soort(0,200), soort(300,200), r.compMap().count], ['t', 't', 1]);
+  r.removeEdge(balk.id);
+  is('dwarsbalk weg: twee rechte rails, twee trajecten, de voeding op de balk weg', [r.huidig().edges.length, r.compMap().count, r.huidig().feeds.length, soort(0,200)],
+    [2, 2, 0, 'weg']);
+
+  /* een T: een helft van de balk weg maakt er een bocht van; de voeding op het punt blijft */
+  const tv = teken(leeg(), [[0,0],[200,0],[400,0],[200,200]], [[0,1],[1,2],[1,3]]);
+  r.zetSt(tv); tv.feeds = [{kind:'node', node:op(200,0).id, side:'R'}];
+  r.removeEdge(segTussen([0,0], [200,0]).id);
+  is('helft van de T-balk weg: een bocht, de voeding blijft op dat punt', [soort(200,0), soort(0,0), r.huidig().feeds.map(f => f.node === op(200,0).id)], ['corner', 'weg', [true]]);
+  r.removeEdge(segTussen([200,0], [400,0]).id);
+  is('nog een weg: een rechte rail, de voeding op het uiteinde (aansluitstuk)', [r.huidig().edges.length, soort(200,0), r.huidig().feeds.length], [1, 'end', 1]);
+  r.removeEdge(r.huidig().edges[0].id);
+  is('het laatste segment blijft staan', r.huidig().edges.length, 1);
+
+  /* een kruis: twee armen weg in een lijn blijft een rechte doorloop, één segment */
+  const kr = teken(leeg(), [[0,0],[100,0],[200,0],[100,-100],[100,100]], [[0,1],[1,2],[3,1],[1,4]]);
+  r.zetSt(kr); r.removeEdge(segTussen([100,-100], [100,0]).id); r.removeEdge(segTussen([100,0], [100,100]).id);
+  is('kruis min twee armen: één segment van 2 m', [r.huidig().edges.length, r.eLen(r.huidig().edges[0])], [1, 200]);
+
+  /* een T-splitsing vanaf een uiteinde, ook als daar de voeding zit */
+  const lijn = teken(leeg(), [[0,0],[0,300]], [[0,1]]);
+  r.zetSt(lijn); lijn.feeds = [{kind:'node', node:op(0,0).id, side:'R'}];
+  const kp = r.plusKeuzesPunt(op(0,0).id);
+  is('plusje bij een uiteinde: verlengen/afslaan en een T-splitsing', kp.map(x => x.label + ' ' + pijlen(x)),
+    ['Verlengen of afslaan →←↑', 'T-splitsing ┬']);
+  kp[1].knoppen[0].doe();
+  is('T-splitsing: het uiteinde wordt een T, 1 m naar beide kanten, de voeding blijft', [soort(0,0), soort(-100,0), soort(100,0), r.huidig().feeds.length],
+    ['t', 'end', 'end', 1]);
+
+  /* het plusje op een segment: in het midden, of op de hoek waar die kant vrij is */
+  r.zetSt(vierkant());
+  const ks = r.plusKeuzesSegment(segTussen([0,0], [300,0]).id);
+  is('plusje op een zijde: midden of op de hoek', ks.map(x => x.label + ' ' + pijlen(x)),
+    ['In het midden ↑↓', 'Op de hoek links ↑', 'Op de hoek rechts ↑']);
+  ks[1].knoppen[0].doe();
+  is('aftakking op de hoek links: die bocht wordt een T-stuk', [soort(0,0), soort(0,-100), soort(300,0)], ['t', 'end', 'corner']);
+  r.zetSt(teken(leeg(), [[0,0],[300,0]], [[0,1]]));
+  is('een rechte rail: alleen in het midden (de uiteinden hebben hun eigen plusje)', r.plusKeuzesSegment(r.huidig().edges[0].id).map(x => x.label), ['In het midden']);
+
+  /* een verstelbare hoek hoort bij een bocht: wordt het een T-stuk, dan vervalt hij */
+  const met = vierkant(); r.zetSt(met); met.angles[op(0,0).id] = 45;
+  r.addSegFromNode(op(0,0).id, {x:0, y:-1});
+  is('ingestelde hoek vervalt als de bocht een T-stuk wordt', Object.keys(r.huidig().angles).length, 0);
+
+  /* ---- DALI per tekenvlak ---- */
+  const tweeVlakken = () => {
+    const s = teken(leeg(), [[0,0],[300,0]], [[0,1]]);
+    teken(s, [[0,0],[300,0]], [[0,1]], 's2');
+    s.sheets.push({id:'s2', name:'Tekenvlak 2'});
+    s.feeds = [{kind:'node', node:'n1', side:'R'}, {kind:'node', node:'n3', side:'R'}];
+    s.montage = {s1:{wijze:'beugel'}, s2:{wijze:'beugel'}};
+    return s;
+  };
+  const regels = s => { r.zetSt(s); const B = r.computeBOM(); return Object.entries(B.items).map(([k, v]) => k + ' ' + v.name + ' x' + v.qty).sort(); };
+  const gemengd = tweeVlakken(); gemengd.daliVlak = {s2:true};
+  is('tekenvlak 2 DALI, 1 niet: elk zijn eigen nummers, DALI in de naam; eindkap en beugel samen', regels(gemengd), [
+    '2000827 Rail 3m Wit x1', '2000858 Aansluitstuk R Wit x1', '2000919 Eindkap Wit x2', '2001329 Plafond Montagebeugel Wit x8',
+    '2001374 PRX 3-Fase Rail buiggereedschap x1', '2001596 Rail 3m DALI Wit x1', '2001626 Aansluitstuk R DALI Wit x1']);
+  is('railnaam van een gemengd project', r.railNaam(), 'PRX 3-Fase Rail en PRX 3-Fase Rail DALI');
+  const omgekeerd = tweeVlakken(); omgekeerd.dali = true; omgekeerd.daliVlak = {s1:false};
+  is('stap 1 op DALI, tekenvlak 1 eigen keuze zonder: hetzelfde andersom', regels(omgekeerd).filter(x => /Rail 3m|Aansluit/.test(x)),
+    ['2000827 Rail 3m Wit x1', '2000858 Aansluitstuk R Wit x1', '2001596 Rail 3m DALI Wit x1', '2001626 Aansluitstuk R DALI Wit x1']);
+  const alles = tweeVlakken(); alles.dali = true;
+  regels(alles);
+  is('alles DALI: de railnaam zegt het; zonder tekening telt stap 1', [r.railNaam(), r.daliVan('s1'), r.daliVan('s2'), r.daliVan(undefined)],
+    ['PRX 3-Fase Rail DALI', true, true, true]);
+  const geen = tweeVlakken(); regels(geen);
+  is('niets DALI: de railnaam zoals hij was', r.railNaam(), 'PRX 3-Fase Rail');
+  const eenF = tweeVlakken(); eenF.rail = '1fase'; eenF.daliVlak = {s2:true}; r.zetSt(eenF);
+  is('de 1-fase rail kent geen DALI, ook niet per tekenvlak', [r.daliVan('s1'), r.daliVan('s2')], [false, false]);
+  /* de verstelbare hoek: in een DALI-tekenvlak zonder nummer, in een gewoon tekenvlak met */
+  const hoek = teken(leeg(), [[0,0],[300,0],[300,200]], [[0,1],[1,2]]);
+  teken(hoek, [[0,0],[300,0],[300,200]], [[0,1],[1,2]], 's2'); hoek.sheets.push({id:'s2', name:'Tekenvlak 2'});
+  hoek.feeds = [{kind:'node', node:'n1', side:'R'}, {kind:'node', node:'n4', side:'R'}]; hoek.angles = {n2:45, n5:45}; hoek.daliVlak = {s2:true};
+  is('verstelbare hoek: gewoon tekenvlak met nummer, DALI-tekenvlak zonder', regels(hoek).filter(x => /Verstelbare/.test(x)),
+    ['2001121 Verstelbare Hoek 45° Wit x1', 'm-geen-verstelbaar-wit Verstelbare Hoek 45° DALI Wit x1']);
+
+  /* ---- koude opbouw ---- */
+  const koud = tweeVlakken(); koud.montage = {s1:{wijze:'koud'}, s2:{wijze:'beugel'}};
+  is('koude opbouw: geen montagemateriaal voor dat tekenvlak, wel voor het andere', regels(koud).filter(x => /Montagebeugel|beugel|Pendel/.test(x)),
+    ['2001329 Plafond Montagebeugel Wit x4']);
+  r.zetSt(leeg());
+  is('koude opbouw is een keuze bij de 3-fase rail, niet bij de 1-fase rail (die heeft "direct tegen het plafond")',
+    [r.montageKeuzes().includes('koud'), (r.zetSt(Object.assign(leeg(), {rail:'1fase'})), r.montageKeuzes().includes('koud'))], [true, false]);
+  is('koude opbouw in de PDF', r.montageTekst({wijze:'koud'}), 'Koude opbouw, de rail direct tegen het plafond, zonder montagemateriaal');
+}
+
 /* ---------------------------------------------------------------- verslag ---- */
 console.log('\n' + gedaan + ' controles, ' + (mis ? mis + ' MIS' : 'alles goed') + '.');
 process.exit(mis ? 1 : 0);

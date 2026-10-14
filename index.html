@@ -431,7 +431,9 @@
   }
   .c2-float input{width:70px; border:none; outline:none; font-family:'JetBrains Mono',monospace; font-size:14px; text-align:right;}
   .c2-float span{font-size:11.5px; color:var(--slate);}
-  .c2-pop{flex-direction:row; padding:5px;}
+  .c2-pop{flex-direction:column; align-items:stretch; gap:4px; padding:6px 8px;}
+  .c2-poprij{display:flex; align-items:center; gap:4px;}
+  .c2-poprij span{flex:1 1 auto; font-size:11.5px; font-weight:600; color:var(--slate); margin-right:6px; white-space:nowrap;}
   .c2-pop button{
     width:34px; height:34px; border:1.5px solid var(--border); background:#fff; border-radius:7px;
     font-size:15px; cursor:pointer; color:var(--navy-900); font-weight:700;
@@ -775,6 +777,7 @@
         <h4>Welke rail?</h4>
         <p class="hint">Bepaalt welke onderdelen en artikelcodes in de stuklijst en de PDF komen. Het tekenen gaat voor alle drie hetzelfde. De 1-fase rail heeft één circuit (230 V, 16 A); de 3-fase rail drie, en is er ook met een DALI-lijn.</p>
         <div class="choice-row" id="c2RailRow"></div>
+        <p class="hint" id="c2RailNoot" style="display:none;margin:8px 0 0;"></p>
         <!-- Stap 1 is één keuze op een verder leeg scherm; deze uitleg vertelt wat er
              daarna gebeurt, zodat het scherm iets zegt tegen wie de tool voor het
              eerst opent. Hij staat alleen in stap 1. -->
@@ -822,6 +825,16 @@
         <div class="c2-sheetsrow">
           <div class="c2-sheets" id="c2Sheets"></div>
         </div>
+        <!-- DALI of niet, per tekenvlak (alleen de 3-fase rail): de keuze van stap 1, tenzij
+             dit tekenvlak een eigen keuze heeft. Zie daliVan(). -->
+        <div class="c2-montagerij" id="c2DaliRij">
+          <span>Rail<span id="c2DaliVlak"></span>:</span>
+          <select id="c2DaliKeuze" class="c2-select">
+            <option value="3fase">3-fase rail</option>
+            <option value="dali">3-fase rail DALI</option>
+          </select>
+          <span class="hint" id="c2DaliNoot" style="margin:0;"></span>
+        </div>
         <!-- De montagewijze hoort bij het tekenvlak dat open staat: elk raildesign kan
              anders hangen. Stond in stap 6 en gold voor alles. -->
         <div class="c2-montagerij">
@@ -829,6 +842,7 @@
           <select id="c2Mount" class="c2-select">
             <option value="geen">&mdash; nog geen keuze &mdash;</option>
             <option value="beugel">Plafond Montagebeugel</option>
+            <option value="koud">Koude opbouw (zonder montagemateriaal)</option>
             <option value="sys">Systeemplafondbeugel</option>
             <option value="pendel">Pendelset (plafondbus + staalkabel)</option>
           </select>
@@ -1604,11 +1618,36 @@ const LCODES_1F = JSON.parse(JSON.stringify(PCODES_1F, (k, v) => typeof v === 's
    deze twee. Bij de 1-fase rail kiest de uitvoering (opbouw/inbouw) de rail zelf. */
 const eenFase = () => st.rail === '1fase';
 const inbouw = () => eenFase() && st.profiel === 'inbouw';
-function activeP(){ return eenFase() ? metRail(PCODES_1F) : st.dali ? PCODES_DALI : PCODES; }
-function activeL(){ return eenFase() ? metRail(LCODES_1F) : st.dali ? LCODES_DALI : LCODES; }
+function activeP(shId){ return eenFase() ? metRail(PCODES_1F) : daliVan(shId) ? PCODES_DALI : PCODES; }
+function activeL(shId){ return eenFase() ? metRail(LCODES_1F) : daliVan(shId) ? LCODES_DALI : LCODES; }
+/* DALI of niet, per tekenvlak (oktober 2026, de gebruiker: "een project waar een aantal
+   rails DALI is en een paar geen DALI. ik wil graag dat ik per tekenvlak kan aanpassen of
+   het DALI is of niet"). De keuze in stap 1 geldt voor elk tekenvlak, tenzij dat tekenvlak
+   in stap 4 een eigen keuze heeft (st.daliVlak). De 1-fase rail kent geen DALI. Zonder
+   tekenvlak (de bestelregels die bij het hele project horen) telt stap 1. De armaturen
+   horen bij het project, niet bij een tekenvlak: hun codeveld volgt stap 1. */
+function daliVan(shId){
+  if(eenFase()) return false;
+  const eigen = st.daliVlak && shId!=null ? st.daliVlak[shId] : undefined;
+  return typeof eigen === 'boolean' ? eigen : !!st.dali;
+}
+/* " DALI" achter de naam van een onderdeel dat er als DALI-versie is (een ander nummer):
+   in een gemengd project staan dezelfde onderdelen dan als twee regels onder elkaar, en
+   moet te zien zijn welke welke is. */
+const daliTag = shId => daliVan(shId) ? ' DALI' : '';
+/* Tekenvlakken met een tekening en hoeveel daarvan DALI zijn. */
+function daliStand(){
+  const vlakken = st.sheets.filter(sh=>st.nodes.some(n=>n.s===sh.id));
+  return {vlakken, dali: vlakken.filter(sh=>daliVan(sh.id))};
+}
 function metRail(t){ return Object.assign({}, t, {rail: t.rail[st.profiel === 'inbouw' ? 'inbouw' : 'opbouw']}); }
 /* De naam van de rail voor in de PDF en de stuklijst. */
-function railNaam(){ return eenFase() ? 'PRX 1-Fase Rail' + (st.profiel === 'inbouw' ? ' inbouw' : '') : 'PRX 3-Fase Rail'; }
+function railNaam(){
+  if(eenFase()) return 'PRX 1-Fase Rail' + (st.profiel === 'inbouw' ? ' inbouw' : '');
+  const d = daliStand();
+  if(!d.vlakken.length) return st.dali ? 'PRX 3-Fase Rail DALI' : 'PRX 3-Fase Rail';
+  return !d.dali.length ? 'PRX 3-Fase Rail' : d.dali.length===d.vlakken.length ? 'PRX 3-Fase Rail DALI' : 'PRX 3-Fase Rail en PRX 3-Fase Rail DALI';
+}
 /* Wat er van een code in beeld en op papier komt. Een code die met 'm-' begint is een
    plaatshouder van de tool zelf: 'm-arm-'/'m-acc-' is een armatuur of accessoire zonder
    ingevulde code, 'm-geen-' een onderdeel dat in deze uitvoering niet bestaat (de
@@ -1888,6 +1927,9 @@ let st = { step:1, dali:false, color:'wit', powercfg:'A', shape:null, gRows:2, g
   montage:{s1:{wijze:'geen', sysOphang:false, sysOphangLen:'3', pendelKabelkleur:'zilver', pendelKabelLen:'3'}},
   /* de ruimtes per tekenvlak (sheet-id -> namen); zie ruimtesVan() */
   ruimtes:{},
+  /* DALI per tekenvlak (sheet-id -> true/false), alleen waar het afwijkt van de keuze in
+     stap 1 (st.dali); zie daliVan() */
+  daliVlak:{},
   sheets:[{id:'s1',name:'Tekenvlak 1'}], sheet:'s1', sid:1 };
 let hist=[], hIdx=-1;
 let lastBOM=null;
@@ -1989,7 +2031,9 @@ function validateFeeds(){
   st.feeds = st.feeds.filter(f=> f.kind==='node' ? (node(f.node)&&feedNodeMag(f.node)) : !!edge(f.edge));
   const {m}=compMap(); const seen={};
   st.feeds = st.feeds.filter(f=>{ const c=feedComp(f,m); if(c===undefined||seen[c]) return false; seen[c]=true; return true; });
-  Object.keys(st.angles).forEach(nId=>{ if(!node(nId)) delete st.angles[nId]; });
+  /* een ingestelde hoek hoort bij een bocht: wordt het punt een T-stuk of een uiteinde,
+     dan vervalt hij, anders komt hij terug als het punt later weer een bocht wordt */
+  Object.keys(st.angles).forEach(nId=>{ if(!node(nId) || nodeType(nId)!=='corner') delete st.angles[nId]; });
 }
 /* Samenvallende punten verbinden: uiteinde op knooppunt -> samenvoegen (bocht/T/kruis),
    uiteinde op segment -> segment splitsen (T), kruisende segmenten -> kruispunt. */
@@ -2043,9 +2087,32 @@ function mergeCoincident(){
     }
   }
 }
+/* De richtingen waar vanaf een punt nog geen rail loopt: bij een uiteinde drie, bij een
+   bocht twee, bij een T-stuk één, bij een kruis geen. */
+const RICHTINGEN = [{x:1,y:0,s:'\u2192'},{x:-1,y:0,s:'\u2190'},{x:0,y:1,s:'\u2193'},{x:0,y:-1,s:'\u2191'}];
+function vrijeRichtingen(nId){
+  const bezet = edgesAt(nId).map(e=>{ const d=armDir(nId,e); return d.x+','+d.y; });
+  return RICHTINGEN.filter(d=>!bezet.includes(d.x+','+d.y));
+}
+/* Een stuk rail van 1 m erbij vanaf een punt, in een vrije richting. Kan vanaf elk punt
+   (oktober 2026, de gebruiker: "ik wil graag dat ik altijd een stuk rails kan toevoegen,
+   ook aan een bocht"): een uiteinde loopt door of slaat af, een bocht wordt een T-stuk,
+   een T-stuk een kruis. Zo wordt een vierkant ook een H of een raster. */
 function addSegFromNode(nId, dir){
   const n=node(nId); const m={id:'n'+(st.nid++), x:n.x+dir.x*100, y:n.y+dir.y*100, s:n.s};
   st.nodes.push(m); st.edges.push({id:'e'+(st.eid++), a:nId, b:m.id});
+  mergeCoincident(); normalizeAll(); validateFeeds(); snap(); refresh();
+}
+/* Een T-splitsing vanaf een uiteinde: naar beide kanten haaks op de rail een stuk van
+   1 m, zodat het uiteinde een T-koppelstuk wordt (oktober 2026, de gebruiker: "je kunt nu
+   geen nieuwe t splitsing maken vanaf een punt"). */
+function addTFromEnd(nId){
+  const es=edgesAt(nId); if(es.length!==1) return;
+  const n=node(nId), d=armDir(nId,es[0]), r=rotCCW(d);
+  [r, {x:-r.x, y:-r.y}].forEach(k=>{
+    const m={id:'n'+(st.nid++), x:n.x+k.x*100, y:n.y+k.y*100, s:n.s};
+    st.nodes.push(m); st.edges.push({id:'e'+(st.eid++), a:nId, b:m.id});
+  });
   mergeCoincident(); normalizeAll(); validateFeeds(); snap(); refresh();
 }
 function addStub(eId, dir){
@@ -2082,16 +2149,23 @@ function normalizeAll(){
     }
   }
 }
-function removeLeafEdge(eId){
-  if(st.edges.length<=1) return;
-  const e=edge(eId);
-  const leaf = edgesAt(e.a).length===1 ? e.a : e.b;
-  const keep = other(e,leaf);
-  st.feeds = st.feeds.filter(f=>!(f.kind==='node'&&f.node===leaf) && !(f.kind==='edge'&&f.edge===eId));
+/* Een segment weghalen - elk segment, niet alleen een open uiteinde (oktober 2026, de
+   gebruiker: "je kunt een hoek ook niet verwijderen, alleen open uiteindes (dus bij een
+   vierkant kun je geen kant op)"). Een punt waar daarna niets meer aan zit, verdwijnt;
+   een bocht wordt een uiteinde, een T-stuk een bocht (of een rechte doorloop, die
+   normalizeAll() samenvoegt), een kruis een T-stuk. Valt de tekening daardoor in twee
+   delen, dan zijn dat twee trajecten met elk een eigen aansluitpunt. Het laatste segment
+   blijft staan; daarvoor is "Tekening wissen". */
+function removeEdge(eId){
+  const e=edge(eId); if(!e || st.edges.length<=1) return;
   st.edges=st.edges.filter(x=>x.id!==eId);
-  st.nodes=st.nodes.filter(n=>n.id!==leaf);
-  normalizeNode(keep);
-  validateFeeds(); snap(); refresh();
+  st.feeds=st.feeds.filter(f=>!(f.kind==='edge'&&f.edge===eId));
+  [e.a, e.b].forEach(nId=>{
+    if(edgesAt(nId).length) return;
+    st.nodes=st.nodes.filter(n=>n.id!==nId);
+    st.feeds=st.feeds.filter(f=>!(f.kind==='node'&&f.node===nId));
+  });
+  normalizeAll(); validateFeeds(); snap(); refresh();
 }
 function setLen(eId,newLen){
   newLen=Math.max(100, Math.min(50000, Math.round(newLen))); /* cm-precisie (installateur zaagt op maat); 500 m = technische bovengrens (rendering), geen productlimiet. Slepen met de muis (c2DragMove) rondt apart af op hele meters. */
@@ -2206,11 +2280,13 @@ function nodeVariants(P){
   const out={};
   st.nodes.forEach(n=>{
     const t=nodeType(n.id); const es=edgesAt(n.id);
+    /* de codetabel van het tekenvlak van dit punt: DALI of niet (daliVan()) */
+    const P_=activeP(n.s), L_=activeL(n.s);
     if(t==='end'){
       const fN=feedForNode(n.id);
       if(fN)
-        out[n.id]={cls:'aansluit', label:'Aansluitstuk '+fN.side, art:activeP().aansluit[st.color][fN.side], artL:activeL().aansluit[st.color][fN.side]};
-      else out[n.id]={cls:'eind', label:'Eindkap', art:activeP().eindkap[st.color], artL:activeL().eindkap[st.color]};
+        out[n.id]={cls:'aansluit', label:'Aansluitstuk '+fN.side, art:P_.aansluit[st.color][fN.side], artL:L_.aansluit[st.color][fN.side]};
+      else out[n.id]={cls:'eind', label:'Eindkap', art:P_.eindkap[st.color], artL:L_.eindkap[st.color]};
       return;
     }
     if(t==='straight'){ out[n.id]={cls:'recht', label:'', art:null, artL:null}; return; }
@@ -2220,16 +2296,16 @@ function nodeVariants(P){
         /* Bij DALI bestaat hij niet en heeft hij dus geen nummer. Hij blijft wel een
            onderdeel van de tekening en de stuklijst, onder een plaatshouder die
            codeTekst() leeg laat (en de tool waarschuwt). */
-        const art = activeP().verstelbaar[st.color];
+        const art = P_.verstelbaar[st.color];
         out[n.id]={cls:'hoek', label:'Verstelbare Hoek '+mTxt(ang)+'°', art: art || ('m-geen-verstelbaar-'+st.color),
-          artL: activeL().verstelbaar[st.color] || ''};
+          artL: L_.verstelbaar[st.color] || ''};
         return;
       }
       const n1=P.nor[es[0].id];
       if(!n1){ out[n.id]={cls:'onb', label:'Bocht ?', art:null, artL:null}; return; }
       const d2=armDir(n.id,es[1]);
       const v = Math.sign(dot(n1,d2))>0 ? 'binnen' : 'buiten';
-      out[n.id]={cls:'bocht', label:'Bocht '+(v==='binnen'?'Binnen':'Buiten'), art:activeP().bocht[st.color][v], artL:activeL().bocht[st.color][v]};
+      out[n.id]={cls:'bocht', label:'Bocht '+(v==='binnen'?'Binnen':'Buiten'), art:P_.bocht[st.color][v], artL:L_.bocht[st.color][v]};
       return;
     }
     if(t==='t'){
@@ -2246,11 +2322,16 @@ function nodeVariants(P){
       /* De 1-fase rail noemt dezelfde vier anders: Binnen/Buiten is de balkzijde,
          Links/Rechts de steelzijde (zie PCODES_1F). */
       const naam = eenFase() ? T_1F_NAAM[side+type] : (side==='R'?'Rechts':'Links')+' Type '+type;
-      out[n.id]={cls:'t', label:'T '+naam, art:activeP().tkoppel[st.color][side+type], artL:activeL().tkoppel[st.color][side+type]};
+      out[n.id]={cls:'t', label:'T '+naam, art:P_.tkoppel[st.color][side+type], artL:L_.tkoppel[st.color][side+type]};
       return;
     }
-    out[n.id]={cls:'kruis', label:'Kruis', art:activeP().kruis[st.color], artL:activeL().kruis[st.color]};
+    out[n.id]={cls:'kruis', label:'Kruis', art:P_.kruis[st.color], artL:L_.kruis[st.color]};
   });
+  /* Een onderdeel uit een DALI-tekenvlak dat als DALI-versie een eigen nummer heeft (of,
+     zoals de verstelbare hoek, juist niet bestaat), krijgt in de stuklijst " DALI" achter
+     zijn naam (daliTag); de eindkap is in beide hetzelfde artikel. */
+  Object.keys(out).forEach(id=>{ const v=out[id];
+    v.dali = daliVan(nodeSheet(id)) && ['aansluit','hoek','bocht','t','kruis'].includes(v.cls); });
   return out;
 }
 
@@ -2291,6 +2372,10 @@ function railFor(e){
 const MOUNTS = {
   geen:    {label:'\u2014 nog geen keuze \u2014'},
   beugel:  {label:'Plafond Montagebeugel'},
+  /* De 3-fase rail kan ook koud tegen het plafond, zonder beugels (oktober 2026, de
+     gebruiker: "de 3-Fase rails kan je ook koud tegen het plafond monteren zonder
+     montagebeugels"). Dan komt er geen montagemateriaal in de stuklijst. */
+  koud:    {label:'Koude opbouw (zonder montagemateriaal)'},
   sys:     {label:'Systeemplafondbeugel'},
   pendel:  {label:'Pendelset (plafondbus + staalkabel)'},
   /* de 1-fase rail: geschroefd tegen het plafond, aan ophangsets, of ingebouwd */
@@ -2302,7 +2387,7 @@ const MOUNTS = {
 /* welke montagewijzen er bij de gekozen rail horen */
 function montageKeuzes(){
   if(inbouw()) return ['inbouw'];
-  return eenFase() ? ['geen','plafond','pendel1f','pendel1flos'] : ['geen','beugel','sys','pendel'];
+  return eenFase() ? ['geen','plafond','pendel1f','pendel1flos'] : ['geen','beugel','koud','sys','pendel'];
 }
 /* De montagewijze geldt per tekenvlak: elk raildesign kan anders hangen (het ene
    tegen het plafond, het andere aan pendels). st.montage houdt per tekenvlak-id de
@@ -2363,6 +2448,7 @@ function ruimteNamen(invoer){
 /* De montage van een tekenvlak in woorden, voor de PDF: leeg zolang er niets gekozen is. */
 function montageTekst(mt){
   if(mt.wijze==='plafond') return 'Direct tegen het plafond, geschroefd door de voorgeboorde gaten (\u00d85 mm)';
+  if(mt.wijze==='koud') return 'Koude opbouw, de rail direct tegen het plafond, zonder montagemateriaal';
   if(mt.wijze==='pendel1f') return 'Ophangset verstelbaar '+mt.ophangLen+' m incl. beugel en kap, '+st.color+'; een lange ophangbeugel onder elke koppeling';
   if(mt.wijze==='pendel1flos') return 'Pendel, per punt een plafondklem met kap ('+st.color+'), ophangkabel '+mt.ophangLen+' m, snelspanner en ophangbeugel; onder elke koppeling de lange ophangbeugel';
   if(mt.wijze==='pendel') return 'Pendelset, plafondbus '+st.color+' en staalkabel '+pendelKabelkleur(mt)+' '+mt.pendelKabelLen+' m';
@@ -2398,13 +2484,13 @@ function computeBOM(){
   /* Alles wat in een tekenvlak getekend is, telt zo vaak als dat tekenvlak ruimtes
      heeft (ruimteFactor()); het buiggereedschap, de armaturen en de adapters niet. */
   st.nodes.forEach(n=>{ const v=V[n.id];
-    if(v&&v.art) add(v.art, v.artL, v.label+' '+CLRN(st.color), ruimteFactor(n.s), 'n:'+n.id); });
-  st.feeds.filter(f=>f.kind==='edge').forEach(f=> add(activeP().midden[st.color], activeL().midden[st.color], 'Middenvoeding '+CLRN(st.color),
-    ruimteFactor(nodeSheet(edge(f.edge).a)),'e:'+f.edge));
+    if(v&&v.art) add(v.art, v.artL, v.label+(v.dali?' DALI':'')+' '+CLRN(st.color), ruimteFactor(n.s), 'n:'+n.id); });
+  st.feeds.filter(f=>f.kind==='edge').forEach(f=>{ const sh=nodeSheet(edge(f.edge).a);
+    add(activeP(sh).midden[st.color], activeL(sh).midden[st.color], 'Middenvoeding'+daliTag(sh)+' '+CLRN(st.color), ruimteFactor(sh),'e:'+f.edge); });
   st.edges.forEach(e=>{
-    const r=railFor(e), keer=ruimteFactor(nodeSheet(e.a));
-    r.pieces.forEach(p=> add(activeP().rail[st.color][p], activeL().rail[st.color][p], (inbouw()?'Inbouwrail ':'Rail ')+p+'m '+CLRN(st.color), keer, 'e:'+e.id));
-    if(r.seams>0) add(activeP().elkoppel[st.color], activeL().elkoppel[st.color], 'Elektrisch Koppelstuk '+CLRN(st.color),r.seams*keer,'e:'+e.id);
+    const sh=nodeSheet(e.a), r=railFor(e), keer=ruimteFactor(sh), P_=activeP(sh), L_=activeL(sh);
+    r.pieces.forEach(p=> add(P_.rail[st.color][p], L_.rail[st.color][p], (inbouw()?'Inbouwrail ':'Rail ')+p+'m'+daliTag(sh)+' '+CLRN(st.color), keer, 'e:'+e.id));
+    if(r.seams>0) add(P_.elkoppel[st.color], L_.elkoppel[st.color], 'Elektrisch Koppelstuk'+daliTag(sh)+' '+CLRN(st.color),r.seams*keer,'e:'+e.id);
     railDetail.push({e, r, keer});
   });
   visibleArmaturen().forEach(a=>{ const s=st.armaturen[a.id]; if(!s||s.qty<=0) return;
@@ -2448,20 +2534,20 @@ function computeBOM(){
   const pendelPunten={};
   st.sheets.forEach(sh=>{ const mt=montageVan(sh.id); if(mt.wijze!=='pendel') return;
     const n=computeMounts(sh.id).count*ruimteFactor(sh.id); if(!n) return;
-    const kk=pendelKabelkleur(mt), len=mt.pendelKabelLen, code=activeP().pendel[st.color][kk][len];
-    pendelPunten[code]=pendelPunten[code]||{codeL:activeL().pendel[st.color][kk][len], kk, len, punten:0};
+    const kk=pendelKabelkleur(mt), len=mt.pendelKabelLen, code=activeP(sh.id).pendel[st.color][kk][len];
+    pendelPunten[code]=pendelPunten[code]||{codeL:activeL(sh.id).pendel[st.color][kk][len], kk, len, punten:0};
     pendelPunten[code].punten+=n; });
   st.sheets.forEach(sh=>{
     const mt=montageVan(sh.id), n=computeMounts(sh.id).count*ruimteFactor(sh.id);
     if(!n) return;
     if(mt.wijze==='beugel'){
-      add(activeP().montagebeugel[st.color], activeL().montagebeugel[st.color], 'Plafond Montagebeugel '+CLRN(st.color), n, null);
+      add(activeP(sh.id).montagebeugel[st.color], activeL(sh.id).montagebeugel[st.color], 'Plafond Montagebeugel '+CLRN(st.color), n, null);
     }
     if(mt.wijze==='sys'){
-      add(activeP().systeembeugel[st.color], activeL().systeembeugel[st.color], 'Systeemplafond beugel '+CLRN(st.color), n, null);
+      add(activeP(sh.id).systeembeugel[st.color], activeL(sh.id).systeembeugel[st.color], 'Systeemplafond beugel '+CLRN(st.color), n, null);
       if(mt.sysOphang){
         const len=mt.sysOphangLen;
-        add(activeP().ophangsetsysteempl[st.color][len], activeL().ophangsetsysteempl[st.color][len], 'ophangsetsysteempl verstelbaar '+len+'m '+CLRN(st.color), n, null);
+        add(activeP(sh.id).ophangsetsysteempl[st.color][len], activeL(sh.id).ophangsetsysteempl[st.color][len], 'ophangsetsysteempl verstelbaar '+len+'m '+CLRN(st.color), n, null);
       }
     }
     /* 1-fase, pendel: per montagepunt een ophangset, en onder elke koppeling (elektrisch
@@ -2471,7 +2557,7 @@ function computeBOM(){
       /* een naad valt altijd op een hele meter vanaf het begin van het segment, dus op een
          montagepunt: daar komt de lange beugel */
       const naden = sheetEdges(sh.id).reduce((s,e)=>s+railFor(e).seams,0)*ruimteFactor(sh.id);
-      const P1=activeP(), L1=activeL(), len=mt.ophangLen;
+      const P1=activeP(sh.id), L1=activeL(sh.id), len=mt.ophangLen;
       if(mt.wijze==='pendel1f')
         add(P1.ophangset[st.color][len], L1.ophangset[st.color][len], 'Ophangset verstelbaar '+len+'m incl. beugel en kap '+CLRN(st.color), n, null);
       else {
@@ -2483,10 +2569,10 @@ function computeBOM(){
       if(naden) add(P1.beugelLang, L1.beugelLang, 'Ophangbeugel lang (steun onder de koppeling)', naden, null);
     }
     if(mt.wijze==='pendel'){
-      const code=activeP().pendel[st.color][pendelKabelkleur(mt)][mt.pendelKabelLen], pp=pendelPunten[code];
+      const code=activeP(sh.id).pendel[st.color][pendelKabelkleur(mt)][mt.pendelKabelLen], pp=pendelPunten[code];
       if(!items[code]) add(code, pp.codeL,
         'Pendelset 10-pack (bus '+CLRN(st.color)+' / kabel '+CLRN(pp.kk)+' '+pp.len+'m)'+' (voor '+pp.punten+' punten)', Math.ceil(pp.punten/10), null);
-      add(activeP().beugelsnel[st.color], activeL().beugelsnel[st.color], 'PRX 3-Fase Rail beugel en snelspanner '+CLRN(st.color)+' (excl. staalkabel)', n, null);
+      add(activeP(sh.id).beugelsnel[st.color], activeL(sh.id).beugelsnel[st.color], 'PRX 3-Fase Rail beugel en snelspanner '+CLRN(st.color)+' (excl. staalkabel)', n, null);
     }
   });
   return {P,V,items,railDetail,errs,mounts};
@@ -2569,9 +2655,15 @@ function renderCanvas(B){
     const w = lab.length*7.5+14;
     if(!st.pick){
       g.push('<g class="c2-lenlab" data-len="'+e.id+'" data-x="'+lx+'" data-y="'+ly+'"><rect x="'+(lx-w/2)+'" y="'+(ly-11)+'" width="'+w+'" height="21" rx="5"/><text x="'+lx+'" y="'+(ly+4)+'" text-anchor="middle">'+lab+'</text><title>Klik om de maat te wijzigen</title></g>');
-      if(eLen(e)>=200){
       const sx = horiz? mx : mx-30, sy = horiz? my+28 : my;
-      g.push('<g class="c2-plus" data-pluse="'+e.id+'"><circle cx="'+sx+'" cy="'+sy+'" r="9"/><text x="'+sx+'" y="'+(sy+4.5)+'" text-anchor="middle">+</text><title>Aftakking toevoegen op dit segment</title></g>');
+      if(eLen(e)>=200){
+      g.push('<g class="c2-plus" data-pluse="'+e.id+'"><circle cx="'+sx+'" cy="'+sy+'" r="9"/><text x="'+sx+'" y="'+(sy+4.5)+'" text-anchor="middle">+</text><title>Aftakking toevoegen: in het midden van dit segment of op de hoek</title></g>');
+      }
+      /* Weghalen kan bij elk segment. Een segment met een open uiteinde heeft zijn kruisje
+         bij dat uiteinde; de rest hier, naast het plusje (of op die plek). */
+      if(edgesAt(e.a).length>1 && edgesAt(e.b).length>1){
+        const kx = eLen(e)>=200 ? (horiz? sx+22 : sx) : sx, ky = eLen(e)>=200 ? (horiz? sy : sy+22) : sy;
+        g.push('<g class="c2-del" data-del="'+e.id+'"><circle cx="'+kx+'" cy="'+ky+'" r="7.5"/><text x="'+kx+'" y="'+(ky+3.6)+'" text-anchor="middle">\u00D7</text><title>Dit segment verwijderen</title></g>');
       }
     }
     if(isFeed){
@@ -2640,6 +2732,7 @@ function renderCanvas(B){
         +(st.pick?'<title>Kies deze hoek als stroomaansluitpunt</title>':'<title>Klik om de hoek in graden aan te passen</title>')+'</rect>');
       if(!st.pick){
         g.push('<text class="c2-tag'+(isFeedN?' red':'')+'" x="'+lx+'" y="'+ly+'" text-anchor="'+anchor+'">'+v.label+(isFeedN?' ⚡':'')+'</text>');
+        g.push(plusBijPunt(nd.id, p));
       }
     } else if(t==='t'||t==='cross'){
       /* Net als bij een hoek: de voeding kost hier geen apart onderdeel, dus een
@@ -2652,6 +2745,7 @@ function renderCanvas(B){
       g.push('<text class="c2-nodeletter" x="'+p.x+'" y="'+(p.y+3.8)+'" text-anchor="middle" font-family="Inter" font-size="9.5" font-weight="700" fill="#fff">'+(t==='t'?'T':'+')+'</text>');
       if(!st.pick){
         g.push('<text class="c2-tag'+(isFeedN?' red':'')+'" x="'+lx+'" y="'+ly+'" text-anchor="'+anchor+'">'+v.label+(isFeedN?' ⚡':'')+'</text>');
+        if(t==='t') g.push(plusBijPunt(nd.id, p));
       }
     }
     out.push('<g id="c2el-n'+nd.id+'">'+titl+g.join('')+'</g>');
@@ -2667,6 +2761,15 @@ function renderCanvas(B){
   bindCanvas(svg);
 }
 
+/* Het plusje bij een bocht of T-stuk: 30 px de vrije kant op - bij een bocht de vrije
+   kant boven of onder, want het label staat schuin ernaast. */
+function plusBijPunt(nId, p){
+  const vrij=vrijeRichtingen(nId); if(!vrij.length) return '';
+  const r=vrij.find(d=>d.y!==0) || vrij[0];
+  const bx=p.x+r.x*30, by=p.y+r.y*30;
+  return '<g class="c2-plus" data-plusn="'+nId+'"><circle cx="'+bx+'" cy="'+by+'" r="9"/><text x="'+bx+'" y="'+(by+4.5)+'" text-anchor="middle">+</text>'
+    +'<title>'+(nodeType(nId)==='corner' ? 'Rail toevoegen aan deze bocht (wordt een T-stuk)' : 'Rail toevoegen aan dit T-stuk (wordt een kruis)')+'</title></g>';
+}
 function svgToScreen(svg, x, y){
   try{
     const p=svg.createSVGPoint(); p.x=x; p.y=y;
@@ -2737,21 +2840,13 @@ function bindCanvas(svg){
       openAngleInput(el.dataset.cornerangle, +el.dataset.x, +el.dataset.y); });
   });
   svg.querySelectorAll('[data-plusn]').forEach(el=>{
-    el.addEventListener('click', ev=>{ ev.stopPropagation();
-      const nId=el.dataset.plusn;
-      const used = edgesAt(nId).map(e=>{ const d=armDir(nId,e); return d.x+','+d.y; });
-      const dirs=[{x:1,y:0,s:'\u2192'},{x:-1,y:0,s:'\u2190'},{x:0,y:1,s:'\u2193'},{x:0,y:-1,s:'\u2191'}]
-        .filter(d=>!used.includes(d.x+','+d.y));
-      openDirPop(ev, dirs, d=>addSegFromNode(nId,d)); });
+    el.addEventListener('click', ev=>{ ev.stopPropagation(); openKeuzePop(ev, plusKeuzesPunt(el.dataset.plusn)); });
   });
   svg.querySelectorAll('[data-pluse]').forEach(el=>{
-    el.addEventListener('click', ev=>{ ev.stopPropagation();
-      const e=edge(el.dataset.pluse);
-      const dirs = eAxis(e)==='h' ? [{x:0,y:1,s:'\u2193'},{x:0,y:-1,s:'\u2191'}] : [{x:1,y:0,s:'\u2192'},{x:-1,y:0,s:'\u2190'}];
-      openDirPop(ev, dirs, d=>addStub(e.id,d)); });
+    el.addEventListener('click', ev=>{ ev.stopPropagation(); openKeuzePop(ev, plusKeuzesSegment(el.dataset.pluse)); });
   });
   svg.querySelectorAll('[data-del]').forEach(el=>{
-    el.addEventListener('click', ev=>{ ev.stopPropagation(); removeLeafEdge(el.dataset.del); });
+    el.addEventListener('click', ev=>{ ev.stopPropagation(); removeEdge(el.dataset.del); });
   });
   if(!svg._c2viewBound){
     svg._c2viewBound=true;
@@ -2848,14 +2943,53 @@ function openAngleInput(nId, vx, vy){
   inp.onkeydown=ev=>{ if(ev.key==='Enter') commit(); if(ev.key==='Escape'){ box.style.display='none'; } };
   inp.onblur=()=>{ if(box.style.display!=='none') commit(); };
 }
-function openDirPop(ev, dirs, cb){
+/* Wat er bij een plusje te kiezen is, in rijen met een kop: [{label, knoppen:[{s, title, doe}]}]. */
+function plusKeuzesPunt(nId){
+  const t=nodeType(nId), vrij=vrijeRichtingen(nId);
+  if(t==='end'){
+    const d=armDir(nId, edgesAt(nId)[0]);
+    /* het teken laat zien hoe de T komt te liggen: de rail loopt van dit uiteinde weg */
+    const tTeken = d.y>0 ? '\u252C' : d.y<0 ? '\u2534' : d.x>0 ? '\u251C' : '\u2524';
+    return [
+      {label:'Verlengen of afslaan', knoppen: vrij.map(r=>({s:r.s, title:'Een stuk rail van 1 m deze kant op', doe:()=>addSegFromNode(nId,r)}))},
+      {label:'T-splitsing', knoppen:[{s:tTeken, title:'Naar beide kanten een stuk rail van 1 m: dit uiteinde wordt een T-koppelstuk', doe:()=>addTFromEnd(nId)}]},
+    ];
+  }
+  return [{label: t==='corner' ? 'Aftakking, de bocht wordt een T-stuk' : 'Aftakking, het T-stuk wordt een kruis',
+           knoppen: vrij.map(r=>({s:r.s, title:'Een stuk rail van 1 m deze kant op', doe:()=>addSegFromNode(nId,r)}))}];
+}
+/* Bij het plusje op een segment: de aftakking in het midden, of op de hoek aan een eind
+   van het segment (oktober 2026, de gebruiker: "dat als je op het plusje klikt je de optie
+   krijgt om een t splitsing te maken of je een afsplitsing in het midden naar een hoek kunt
+   verplaatsen"). Op de hoek kan alleen waar die kant nog vrij is; een bocht wordt daar een
+   T-stuk, een T-stuk een kruis. */
+function plusKeuzesSegment(eId){
+  const e=edge(eId), h=eAxis(e)==='h';
+  const haaks = h ? [{x:0,y:-1,s:'\u2191'},{x:0,y:1,s:'\u2193'}] : [{x:-1,y:0,s:'\u2190'},{x:1,y:0,s:'\u2192'}];
+  const rijen=[{label:'In het midden', knoppen: haaks.map(r=>({s:r.s, title:'Aftakking in het midden van dit segment (op een hele meter)', doe:()=>addStub(eId,r)}))}];
+  const eind = nId => { const n=node(nId), o=node(other(e,nId));
+    return h ? (n.x<o.x ? 'links' : 'rechts') : (n.y<o.y ? 'boven' : 'onder'); };
+  [e.a, e.b].sort((a,b)=> h ? node(a).x-node(b).x : node(a).y-node(b).y).forEach(nId=>{
+    const t=nodeType(nId); if(t!=='corner' && t!=='t') return;
+    const vrij = vrijeRichtingen(nId).filter(d=>haaks.some(r=>r.x===d.x && r.y===d.y));
+    if(!vrij.length) return;
+    rijen.push({label:(t==='corner' ? 'Op de hoek ' : 'Op het T-stuk ')+eind(nId),
+      knoppen: vrij.map(r=>({s:r.s, title:t==='corner' ? 'Aftakking op de hoek: de bocht wordt een T-stuk' : 'Aftakking op het T-stuk: het wordt een kruis',
+                            doe:()=>addSegFromNode(nId,r)}))});
+  });
+  return rijen;
+}
+function openKeuzePop(ev, rijen){
   closeFloats();
-  if(!dirs.length) return;
-  const pop=$('c2Pop');
-  pop.innerHTML = dirs.map((d,i)=>'<button data-i="'+i+'">'+d.s+'</button>').join('');
+  rijen = rijen.filter(r=>r.knoppen.length);
+  if(!rijen.length) return;
+  const pop=$('c2Pop'), knoppen=[];
+  pop.innerHTML = rijen.map(r=>'<div class="c2-poprij"><span>'+r.label+'</span>'
+    + r.knoppen.map(k=>{ knoppen.push(k); return '<button data-i="'+(knoppen.length-1)+'" title="'+k.title+'">'+k.s+'</button>'; }).join('')
+    + '</div>').join('');
   pop.style.display='flex'; pop.style.left=(ev.clientX-20)+'px'; pop.style.top=(ev.clientY+14)+'px';
   pop.querySelectorAll('button').forEach(b=>{
-    b.addEventListener('click', e2=>{ e2.stopPropagation(); pop.style.display='none'; cb(dirs[+b.dataset.i]); });
+    b.addEventListener('click', e2=>{ e2.stopPropagation(); pop.style.display='none'; knoppen[+b.dataset.i].doe(); });
   });
 }
 function closeFloats(){ $('c2Inp').style.display='none'; $('c2AngleInp').style.display='none'; $('c2Pop').style.display='none'; }
@@ -2887,8 +3021,9 @@ function warnings(B){
     : angleCount+' hoeken zijn ingesteld als Verstelbare Hoek \u2014 dit zijn andere koppelstukken dan een vaste Bocht. Controleer de exacte hoekinstelling op locatie.'});
   /* De verstelbare hoek bestaat niet als DALI-versie (zie PCODES_DALI): zeggen, in plaats
      van een nummer te tonen dat bij de gewone rail hoort. */
-  if(st.dali && angleCount>0) w.push({t:'warn', m:'Een verstelbare hoek bestaat niet in DALI-uitvoering \u2014 alleen voor de gewone 3-fase rail. '
-    + 'In de stuklijst en bij de tekening '+(angleCount===1?'staat hij':'staan ze')+' daarom zonder artikelnummer en verpakkingscode. '
+  const daliHoeken = Object.keys(st.angles).filter(nId=>node(nId) && daliVan(node(nId).s)).length;
+  if(daliHoeken>0) w.push({t:'warn', m:'Een verstelbare hoek bestaat niet in DALI-uitvoering \u2014 alleen voor de gewone 3-fase rail. '
+    + 'In de stuklijst en bij de tekening '+(daliHoeken===1?'staat hij':'staan ze')+' daarom zonder artikelnummer en verpakkingscode. '
     + 'Kies een vaste bocht (90\u00b0) of overleg met de leverancier.'});
   /* De inbouwrail krijgt bij elk koppelstuk een afdekplaat (computeBOM()); bij de
      verstelbare hoek zegt de handleiding niet welke. */
@@ -2947,6 +3082,7 @@ function renderSheetsBar(){
     st.sheets.push({id, name:'Tekenvlak '+(st.sheets.length+1)});
     st.montage[id]=nieuweMontage();   /* eigen keuze; ook als dit id eerder gebruikt was */
     st.ruimtes[id]=[];
+    if(st.daliVlak) delete st.daliVlak[id];   /* volgt stap 1 */
     st.sheet=id; view={zoom:1,px:0,py:0}; snap(); goStep(4);
   });
 }
@@ -2998,6 +3134,21 @@ function refresh(){
   $('c2Use4m').closest('label').style.display = eenFase() ? 'none' : '';
   if($('c2Mount').value!==mtNu.wijze) $('c2Mount').value=mtNu.wijze;
   $('c2MountVlak').textContent = st.sheets.length>1 && vlakNu ? ' \u2014 '+vlakNu.name : '';
+  /* DALI per tekenvlak: alleen bij de 3-fase rail, en de noot zegt of dit tekenvlak
+     afwijkt van stap 1 */
+  $('c2DaliRij').style.display = eenFase() ? 'none' : '';
+  $('c2DaliVlak').textContent = $('c2MountVlak').textContent;
+  $('c2DaliKeuze').value = daliVan(st.sheet) ? 'dali' : '3fase';
+  $('c2DaliNoot').textContent = st.sheets.length<2 ? ''
+    : (daliVan(st.sheet)!==!!st.dali ? 'eigen keuze voor dit tekenvlak; stap 1 staat op '+(st.dali?'DALI':'zonder DALI')
+                                      : 'zoals stap 1');
+  /* en in stap 1: welke tekenvlakken een eigen keuze hebben, want een keuze daar zet ze
+     weer allemaal gelijk */
+  const eigenDali = eenFase() ? [] : st.sheets.filter(sh=>daliVan(sh.id)!==!!st.dali);
+  $('c2RailNoot').style.display = eigenDali.length ? '' : 'none';
+  $('c2RailNoot').textContent = eigenDali.length
+    ? 'Eigen keuze per tekenvlak: '+eigenDali.map(sh=>sh.name+(daliVan(sh.id)?' (DALI)':' (zonder DALI)')).join(', ')
+      +'. Een keuze hier geldt weer voor elk tekenvlak.' : '';
   renderMountOptions();
   renderRuimtes(vlakNu);
   document.querySelectorAll('#c2GridRow .stepper-val')[0] && renderGridRow();
@@ -3068,10 +3219,10 @@ function reportData(){
       trGlobal++;
       comps[c].slice().sort((p,q)=>(p.y-q.y)||(p.x-q.x)).forEach(n=>{
         const v=B.V[n.id];
-        if(v&&v.art){ nr++; numOf['n:'+n.id]=nr; legend.push({nr, tr:trGlobal, name:v.label+' '+CLRN(st.color), art:v.art, verpakking:v.artL}); }
+        if(v&&v.art){ nr++; numOf['n:'+n.id]=nr; legend.push({nr, tr:trGlobal, name:v.label+(v.dali?' DALI':'')+' '+CLRN(st.color), art:v.art, verpakking:v.artL}); }
       });
       st.feeds.filter(f=>f.kind==='edge' && m[edge(f.edge).a]===+c).forEach(f=>{
-        nr++; numOf['f:'+f.edge]=nr; legend.push({nr, tr:trGlobal, name:'Middenvoeding '+CLRN(st.color), art:activeP().midden[st.color], verpakking:activeL().midden[st.color]});
+        nr++; numOf['f:'+f.edge]=nr; legend.push({nr, tr:trGlobal, name:'Middenvoeding'+daliTag(sh.id)+' '+CLRN(st.color), art:activeP(sh.id).midden[st.color], verpakking:activeL(sh.id).midden[st.color]});
       });
     });
     sheets.push({id:sh.id, name:sh.name, legend});
@@ -3285,6 +3436,10 @@ async function buildPdf(){
     drawPlan(Mg,y,boxW,boxH,sh.id);
     y+=boxH+8;
     /* de montagewijze van dit tekenvlak: kan per tekenvlak verschillen */
+    /* in een project met DALI- en gewone tekenvlakken zegt elk tekenvlak welke rail het is */
+    const ds=daliStand();
+    if(ds.dali.length && ds.dali.length<ds.vlakken.length)
+      para('Rail: '+(daliVan(sh.id)?'PRX 3-Fase Rail DALI':'PRX 3-Fase Rail')+'.',8.5,C.tekst);
     const mtTxt=montageTekst(montageVan(sh.id)), mtN=computeMounts(sh.id).count;
     if(mtTxt && mtN) para('Montage: '+mtTxt+' \u2014 '+mtN+' montagepunten'+(ruimtes.length>1?' per ruimte':'')+'.',8.5,C.tekst);
     if(si===0) para('Maten zijn raillengtes; koppelstukken komen daar in werkelijkheid bovenop.',8,C.grey);
@@ -3881,6 +4036,8 @@ function bouwKeuzeRijen(){
   RAILS.forEach(r=> keuzeKnop(rr, r.l, r.k===railKeuze(), ()=>{
     st.rail = r.k==='1fase' ? '1fase' : '3fase';
     st.dali = r.k==='3fase-dali';
+    /* een keuze hier geldt weer voor elk tekenvlak (daliVan()) */
+    st.daliVlak = {};
     railGewijzigd();
   }));
   $('c2ProfielBlok').style.display = eenFase() ? '' : 'none';
@@ -3943,6 +4100,8 @@ function init(){
          terughaalt terwijl de tool op de 1-fase rail staat */
       st.rail = s.rail==='1fase' ? '1fase' : '3fase';
       st.profiel = s.profiel==='inbouw' ? 'inbouw' : 'opbouw';
+      /* een project van vóór DALI per tekenvlak: elk tekenvlak volgt stap 1 */
+      st.daliVlak = (s.daliVlak && typeof s.daliVlak==='object') ? s.daliVlak : {};
       /* Geen vaste bovengrens meer aan het aantal regels (zie zorgVoorLegeSlot()): een
          opgeslagen project kan meer sloten hebben dan de 12 waarmee de tool begint - die
          moeten ook in ARMATUREN staan, anders tekent buildArmList() ze nooit. Een project
@@ -4062,6 +4221,13 @@ function init(){
     lijstAan: ()=> st.toonLijst !== false, opWijziging: refresh});
   $('c2KolomKeuze').replaceChildren(kolomKeuze.el);   /* een opgeslagen projectbestand heeft de vorige nog in zijn HTML */
   $('c2Mount').addEventListener('change', e=>{ montageVan(st.sheet).wijze=e.target.value; refresh(); });
+  /* DALI per tekenvlak: alleen bewaard waar het afwijkt van stap 1 */
+  $('c2DaliKeuze').addEventListener('change', e=>{
+    const dali = e.target.value==='dali';
+    st.daliVlak = st.daliVlak || {};
+    if(dali===!!st.dali) delete st.daliVlak[st.sheet]; else st.daliVlak[st.sheet]=dali;
+    refresh();
+  });
   $('c2RuimteAdd').addEventListener('click', voegRuimtesToe);
   $('c2RuimteInp').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); voegRuimtesToe(); } });
   $('c2Proj').addEventListener('input', e=>{ st.proj=e.target.value; });
@@ -4109,7 +4275,7 @@ function init(){
     if(!confirm('Alles weggooien en opnieuw beginnen?\n\nDe tekening, de armaturen en de '
               + 'projectgegevens verdwijnen. Dit kan niet ongedaan gemaakt worden.')) return;
     st.shape=null; st.nodes=[]; st.edges=[]; st.feeds=[]; st.angles={}; st.pick=false; st.step=1;
-    st.montage={s1:nieuweMontage()}; st.ruimtes={};
+    st.montage={s1:nieuweMontage()}; st.ruimtes={}; st.daliVlak={};
     st.toonLijst=true; $('c2ToonLijst').checked=true; st.lijstKolommen={};
     Lichtplan.wis();   /* het lichtplan hoort bij dit project */
     /* geüploade Special-PDF's horen niet bij een specifieke tekening, dus die vervallen mee. */
@@ -4163,7 +4329,7 @@ function init(){
     const uiteinde = sheetNodes('s1').find(n=>nodeType(n.id)==='end');
     if(uiteinde) st.feeds=[{kind:'node', node:uiteinde.id, side:'R'}];
 
-    st.montage={s1:Object.assign(nieuweMontage(), {wijze:'beugel'})}; st.ruimtes={};
+    st.montage={s1:Object.assign(nieuweMontage(), {wijze:'beugel'})}; st.ruimtes={}; st.daliVlak={};
     st.proj='Renovatie kantoorpand Weena 120 te Rotterdam';
     st.projNr='P.24187';
     st.installateur='Van der Velden Elektrotechniek B.V.';
