@@ -2001,8 +2001,10 @@ function is(wat, gekregen, verwacht){
   console.log('railtool: tekenen, DALI per tekenvlak, koude opbouw');
   const namen = ['computeBOM','propagate','edgesAt','armDir','node','other','edge','nodeType','nodeVariants','mTxt','activeP','activeL','eenFase','daliVan',
     'PCODES','LCODES','PCODES_DALI','LCODES_DALI','feedForNode','nodeSheet','CLRN','ruimteFactor','ruimtesVan','railFor','eLen','armMm','maten',
-    'MM_3F','feedForEdge','inbouw','daliTag','visibleArmaturen','ARMATUREN','overigLijst','ADAPTERS_OVERIG','normalizeMountState','montageKeuzes',
-    'computeMounts','montageVan','sheetEdges','nieuweMontage','pendelKabelkleur','MOUNTS','montageTekst','daliStand','railNaam',
+    'MM_3F','feedForEdge','visibleArmaturen','ARMATUREN','overigLijst','ADAPTERS_OVERIG','normalizeMountState','montageKeuzes',
+    'computeMounts','montageVan','sheetEdges','nieuweMontage','pendelKabelkleur','MOUNTS','montageTekst','railStand','railNaam',
+    'RAIL_SOORTEN','railSoort','projectRail','railVan','inbouw','railsInGebruik','heeft3F','heeft1F','railTag','metRail','railKleuren',
+    'railVlakUit','materialenKop','PCODES_1F','KKT_1F','LCODES_1F','MM_1F','T_1F_NAAM','ADAPTERS_OVERIG_1F',
     'eAxis','rotCCW','dot','compMap','feedComp','feedNodeMag','validateFeeds','mergeCoincident','normalizeNode','normalizeAll',
     'RICHTINGEN','vrijeRichtingen','addSegFromNode','addTFromEnd','addStub','removeEdge','plusKeuzesPunt','plusKeuzesSegment'];
   const r = await laadUit('index.html', namen,
@@ -2010,7 +2012,7 @@ function is(wat, gekregen, verwacht){
     + snijUit(readFileSync(join(root, 'armatuur-rij.js'), 'utf8'), 'armAccessoires'), ['zetSt', 'huidig']);
   /* een tekening: punten [x,y] in cm, lijnen tussen punt-indexen; alles op tekenvlak s1 tenzij anders */
   const leeg = () => ({color:'wit', dali:false, rail:'3fase', profiel:'opbouw', use4m:false, nodes:[], edges:[], feeds:[], angles:{},
-    armaturen:{}, overig:{}, montage:{}, ruimtes:{}, daliVlak:{}, sheets:[{id:'s1', name:'Tekenvlak 1'}], sheet:'s1', nid:1, eid:1});
+    armaturen:{}, overig:{}, montage:{}, ruimtes:{}, railVlak:{}, sheets:[{id:'s1', name:'Tekenvlak 1'}], sheet:'s1', nid:1, eid:1});
   function teken(s, pts, ln, sh = 's1'){
     const basis = s.nid;
     pts.forEach(([x, y]) => s.nodes.push({id:'n' + (s.nid++), x, y, s:sh}));
@@ -2099,12 +2101,12 @@ function is(wat, gekregen, verwacht){
     return s;
   };
   const regels = s => { r.zetSt(s); const B = r.computeBOM(); return Object.entries(B.items).map(([k, v]) => k + ' ' + v.name + ' x' + v.qty).sort(); };
-  const gemengd = tweeVlakken(); gemengd.daliVlak = {s2:true};
+  const gemengd = tweeVlakken(); gemengd.railVlak = {s2:'3fase-dali'};
   is('tekenvlak 2 DALI, 1 niet: elk zijn eigen nummers, DALI in de naam; eindkap en beugel samen', regels(gemengd), [
     '2000827 Rail 3m Wit x1', '2000858 Aansluitstuk R Wit x1', '2000919 Eindkap Wit x2', '2001329 Plafond Montagebeugel Wit x8',
     '2001374 PRX 3-Fase Rail buiggereedschap x1', '2001596 Rail 3m DALI Wit x1', '2001626 Aansluitstuk R DALI Wit x1']);
   is('railnaam van een gemengd project', r.railNaam(), 'PRX 3-Fase Rail en PRX 3-Fase Rail DALI');
-  const omgekeerd = tweeVlakken(); omgekeerd.dali = true; omgekeerd.daliVlak = {s1:false};
+  const omgekeerd = tweeVlakken(); omgekeerd.dali = true; omgekeerd.railVlak = {s1:'3fase'};
   is('stap 1 op DALI, tekenvlak 1 eigen keuze zonder: hetzelfde andersom', regels(omgekeerd).filter(x => /Rail 3m|Aansluit/.test(x)),
     ['2000827 Rail 3m Wit x1', '2000858 Aansluitstuk R Wit x1', '2001596 Rail 3m DALI Wit x1', '2001626 Aansluitstuk R DALI Wit x1']);
   const alles = tweeVlakken(); alles.dali = true;
@@ -2113,14 +2115,43 @@ function is(wat, gekregen, verwacht){
     ['PRX 3-Fase Rail DALI', true, true, true]);
   const geen = tweeVlakken(); regels(geen);
   is('niets DALI: de railnaam zoals hij was', r.railNaam(), 'PRX 3-Fase Rail');
-  const eenF = tweeVlakken(); eenF.rail = '1fase'; eenF.daliVlak = {s2:true}; r.zetSt(eenF);
-  is('de 1-fase rail kent geen DALI, ook niet per tekenvlak', [r.daliVan('s1'), r.daliVan('s2')], [false, false]);
+  const eenF = tweeVlakken(); eenF.rail = '1fase'; r.zetSt(eenF);
+  is('een 1-fase project is geen DALI', [r.daliVan('s1'), r.daliVan('s2')], [false, false]);
   /* de verstelbare hoek: in een DALI-tekenvlak zonder nummer, in een gewoon tekenvlak met */
   const hoek = teken(leeg(), [[0,0],[300,0],[300,200]], [[0,1],[1,2]]);
   teken(hoek, [[0,0],[300,0],[300,200]], [[0,1],[1,2]], 's2'); hoek.sheets.push({id:'s2', name:'Tekenvlak 2'});
-  hoek.feeds = [{kind:'node', node:'n1', side:'R'}, {kind:'node', node:'n4', side:'R'}]; hoek.angles = {n2:45, n5:45}; hoek.daliVlak = {s2:true};
+  hoek.feeds = [{kind:'node', node:'n1', side:'R'}, {kind:'node', node:'n4', side:'R'}]; hoek.angles = {n2:45, n5:45}; hoek.railVlak = {s2:'3fase-dali'};
   is('verstelbare hoek: gewoon tekenvlak met nummer, DALI-tekenvlak zonder', regels(hoek).filter(x => /Verstelbare/.test(x)),
     ['2001121 Verstelbare Hoek 45° Wit x1', 'm-geen-verstelbaar-wit Verstelbare Hoek 45° DALI Wit x1']);
+
+  /* ---- de 1-fase rail per tekenvlak ---- */
+  const een3 = tweeVlakken(); een3.railVlak = {s2:'1fase'};
+  is('tekenvlak 2 de 1-fase rail: zijn eigen nummers en "1-fase" in de naam; montagebeugel alleen bij de 3-fase rail', regels(een3), [
+    '2000827 Rail 3m Wit x1', '2000858 Aansluitstuk R Wit x1', '2000919 Eindkap Wit x1', '2001329 Plafond Montagebeugel Wit x4',
+    '2001374 PRX 3-Fase Rail buiggereedschap x1', '2037229 Rail 3m 1-fase Wit x1', '2037564 Aansluitstuk R 1-fase Wit x1', '2037663 Eindkap 1-fase Wit x1']);
+  is('de montagewijze van het 1-fase tekenvlak (stond op de 3-fase beugel) vervalt; de keuzes zijn die van de 1-fase rail',
+    [r.huidig().montage.s2.wijze, r.montageKeuzes('s1'), r.montageKeuzes('s2')],
+    ['geen', ['geen','beugel','koud','sys','pendel'], ['geen','plafond','pendel1f','pendel1flos']]);
+  is('railnaam, Bestelgegevens-kop en de losse onderdelen van allebei', [r.railNaam(), r.materialenKop(),
+    r.overigLijst().some(a => a.id === 'ao01'), r.overigLijst().some(a => a.id === 'e01'), r.railKleuren()],
+    ['PRX 3-Fase Rail en PRX 1-Fase Rail', 'Materialen PRX 3 fase en 1 fase rails', true, true, ['wit','zwart']]);
+  is('maten per tekenvlak: de koppelstukken van de 1-fase rail zijn kleiner (aansluitstuk 55 + eindkap 4)',
+    r.huidig().edges.map(e => r.railFor(e).extraMm), [69, 59]);
+  een3.use4m = true; een3.nodes.forEach(n => { if(n.x === 300) n.x = 400; });
+  is('4 m alleen op de 3-fase rail', een3.edges.map(e => r.railFor(e).pieces.join('+')), ['4', '3+1']);
+  const ib = tweeVlakken(); ib.color = 'zwart'; ib.railVlak = {s2:'1fase-inbouw'}; ib.montage = {s1:{wijze:'beugel'}, s2:{wijze:'inbouw'}};
+  is('tekenvlak 2 de 1-fase inbouwrail: inbouwrail en afdekplaat daar, de rest 3-fase; alleen zwart te kiezen',
+    [regels(ib).filter(x => /Inbouwrail|Afdekplaat|Rail 3m/.test(x)), r.railKleuren()],
+    [['2000810 Rail 3m Zwart x1', '2037205 Inbouwrail 3m 1-fase Zwart x1', '2037632 Afdekplaat inbouwrail eindvoeding Zwart x1'], ['zwart']]);
+  const alleen1 = tweeVlakken(); alleen1.rail = '1fase'; regels(alleen1);
+  is('alleen 1-fase: geen "1-fase" in de namen (zoals het was), geen buiggereedschap, de kop zoals hij was',
+    [regels(alleen1).filter(x => /Rail 3m|buig/.test(x)), r.materialenKop(), r.railNaam()],
+    [['2037229 Rail 3m Wit x2'], 'Materialen PRX 1 fase rails', 'PRX 1-Fase Rail']);
+  /* een opgeslagen project: de rail per tekenvlak, of de DALI-keuze van daarvoor */
+  is('opgeslagen: rail per tekenvlak, DALI per tekenvlak omgezet, onzin weg', [
+    r.railVlakUit({railVlak:{s2:'1fase', s3:'onzin'}}), r.railVlakUit({daliVlak:{s1:false, s2:true}}),
+    r.railVlakUit({rail:'1fase', daliVlak:{s2:true}}), r.railVlakUit({})],
+    [{s2:'1fase'}, {s1:'3fase', s2:'3fase-dali'}, {}, {}]);
 
   /* ---- koude opbouw ---- */
   const koud = tweeVlakken(); koud.montage = {s1:{wijze:'koud'}, s2:{wijze:'beugel'}};

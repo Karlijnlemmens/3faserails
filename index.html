@@ -431,6 +431,8 @@
   }
   .c2-float input{width:70px; border:none; outline:none; font-family:'JetBrains Mono',monospace; font-size:14px; text-align:right;}
   .c2-float span{font-size:11.5px; color:var(--slate);}
+  .c2-prodkop{font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--navy-900); margin:10px 0 4px;}
+  .c2-prodkop:first-child{margin-top:0;}
   .c2-pop{flex-direction:column; align-items:stretch; gap:4px; padding:6px 8px;}
   .c2-poprij{display:flex; align-items:center; gap:4px;}
   .c2-poprij span{flex:1 1 auto; font-size:11.5px; font-weight:600; color:var(--slate); margin-right:6px; white-space:nowrap;}
@@ -825,15 +827,17 @@
         <div class="c2-sheetsrow">
           <div class="c2-sheets" id="c2Sheets"></div>
         </div>
-        <!-- DALI of niet, per tekenvlak (alleen de 3-fase rail): de keuze van stap 1, tenzij
-             dit tekenvlak een eigen keuze heeft. Zie daliVan(). -->
-        <div class="c2-montagerij" id="c2DaliRij">
-          <span>Rail<span id="c2DaliVlak"></span>:</span>
-          <select id="c2DaliKeuze" class="c2-select">
+        <!-- De rail per tekenvlak: de keuze van stap 1, tenzij dit tekenvlak een eigen keuze
+             heeft (3-fase, 3-fase DALI, 1-fase, 1-fase inbouw). Zie railVan(). -->
+        <div class="c2-montagerij" id="c2RailVlakRij">
+          <span>Rail<span id="c2RailVlak"></span>:</span>
+          <select id="c2RailVlakKeuze" class="c2-select">
             <option value="3fase">3-fase rail</option>
-            <option value="dali">3-fase rail DALI</option>
+            <option value="3fase-dali">3-fase rail DALI</option>
+            <option value="1fase">1-fase rail</option>
+            <option value="1fase-inbouw">1-fase rail inbouw</option>
           </select>
-          <span class="hint" id="c2DaliNoot" style="margin:0;"></span>
+          <span class="hint" id="c2RailVlakNoot" style="margin:0;"></span>
         </div>
         <!-- De montagewijze hoort bij het tekenvlak dat open staat: elk raildesign kan
              anders hangen. Stond in stap 6 en gold voor alles. -->
@@ -1613,40 +1617,52 @@ const KKT_1F = {
    staat in het export "** " met het eigen artikelnummer, zoals bij de 3-fase ophangset. */
 const LCODES_1F = JSON.parse(JSON.stringify(PCODES_1F, (k, v) => typeof v === 'string' ? (KKT_1F[v] || '') : v));
 
-/* Actieve codetabel o.b.v. de keuze in stap 1 (1-fase, 3-fase of 3-fase DALI);
-   nodeVariants()/computeBOM() lezen nooit rechtstreeks uit PCODES/LCODES, altijd via
-   deze twee. Bij de 1-fase rail kiest de uitvoering (opbouw/inbouw) de rail zelf. */
-const eenFase = () => st.rail === '1fase';
-const inbouw = () => eenFase() && st.profiel === 'inbouw';
-function activeP(shId){ return eenFase() ? metRail(PCODES_1F) : daliVan(shId) ? PCODES_DALI : PCODES; }
-function activeL(shId){ return eenFase() ? metRail(LCODES_1F) : daliVan(shId) ? LCODES_DALI : LCODES; }
-/* DALI of niet, per tekenvlak (oktober 2026, de gebruiker: "een project waar een aantal
-   rails DALI is en een paar geen DALI. ik wil graag dat ik per tekenvlak kan aanpassen of
-   het DALI is of niet"). De keuze in stap 1 geldt voor elk tekenvlak, tenzij dat tekenvlak
-   in stap 4 een eigen keuze heeft (st.daliVlak). De 1-fase rail kent geen DALI. Zonder
-   tekenvlak (de bestelregels die bij het hele project horen) telt stap 1. De armaturen
-   horen bij het project, niet bij een tekenvlak: hun codeveld volgt stap 1. */
-function daliVan(shId){
-  if(eenFase()) return false;
-  const eigen = st.daliVlak && shId!=null ? st.daliVlak[shId] : undefined;
-  return typeof eigen === 'boolean' ? eigen : !!st.dali;
+/* De rail per tekenvlak (oktober 2026, de gebruiker: eerst "per tekenvlak kan aanpassen of
+   het DALI is of niet", daarna "per tekenvlak ook de 1 fase rail kunt kiezen"). Stap 1 en 2
+   kiezen de rail van het project (st.rail, st.dali, st.profiel); die geldt voor elk
+   tekenvlak, tenzij het tekenvlak in stap 4 een eigen keuze heeft (st.railVlak, alleen waar
+   die afwijkt). Een keuze in stap 1 of 2 zet alle tekenvlakken weer gelijk. Zonder
+   tekenvlak - wat bij het hele project hoort - telt de keuze van het project. De armaturen
+   horen bij het project, niet bij een tekenvlak: hun codeveld (gewoon of DALI) volgt stap 1. */
+const RAIL_SOORTEN = [
+  {k:'3fase',        l:'3-fase rail',        naam:'PRX 3-Fase Rail',         kleuren:['wit','zwart','grijs']},
+  {k:'3fase-dali',   l:'3-fase rail DALI',   naam:'PRX 3-Fase Rail DALI',    kleuren:['wit','zwart','grijs']},
+  {k:'1fase',        l:'1-fase rail',        naam:'PRX 1-Fase Rail',         kleuren:['wit','zwart']},
+  {k:'1fase-inbouw', l:'1-fase rail inbouw', naam:'PRX 1-Fase Rail inbouw',  kleuren:['zwart']},
+];
+const railSoort = k => RAIL_SOORTEN.find(r=>r.k===k);
+function projectRail(){ return st.rail==='1fase' ? (st.profiel==='inbouw' ? '1fase-inbouw' : '1fase') : st.dali ? '3fase-dali' : '3fase'; }
+function railVan(shId){
+  const eigen = st.railVlak && shId!=null ? st.railVlak[shId] : undefined;
+  return railSoort(eigen) ? eigen : projectRail();
 }
-/* " DALI" achter de naam van een onderdeel dat er als DALI-versie is (een ander nummer):
-   in een gemengd project staan dezelfde onderdelen dan als twee regels onder elkaar, en
-   moet te zien zijn welke welke is. */
-const daliTag = shId => daliVan(shId) ? ' DALI' : '';
-/* Tekenvlakken met een tekening en hoeveel daarvan DALI zijn. */
-function daliStand(){
+/* nodeVariants()/computeBOM() lezen nooit rechtstreeks uit PCODES/LCODES, altijd via
+   activeP()/activeL() met het tekenvlak erbij. Bij de 1-fase rail kiest de uitvoering
+   (opbouw/inbouw) de rail zelf. */
+const eenFase = shId => railVan(shId).indexOf('1fase')===0;
+const inbouw = shId => railVan(shId)==='1fase-inbouw';
+const daliVan = shId => railVan(shId)==='3fase-dali';
+function activeP(shId){ return eenFase(shId) ? metRail(PCODES_1F, shId) : daliVan(shId) ? PCODES_DALI : PCODES; }
+function activeL(shId){ return eenFase(shId) ? metRail(LCODES_1F, shId) : daliVan(shId) ? LCODES_DALI : LCODES; }
+function metRail(t, shId){ return Object.assign({}, t, {rail: t.rail[inbouw(shId) ? 'inbouw' : 'opbouw']}); }
+/* Welke rails er in het project zitten: die van elk tekenvlak. Bepaalt de kleuren die er
+   te kiezen zijn, de losse onderdelen, de 4 m-keuze en de tips. */
+const railsInGebruik = () => Array.from(new Set(st.sheets.map(sh=>railVan(sh.id))));
+const heeft3F = () => railsInGebruik().some(k=>k.indexOf('3fase')===0);
+const heeft1F = () => railsInGebruik().some(k=>k.indexOf('1fase')===0);
+/* Achter de naam van een onderdeel dat er in een andere rail met een ander nummer is: " DALI"
+   (altijd - zonder stond DALI nergens op papier), en " 1-fase" als het project ook 3-fase
+   tekenvlakken heeft; dan staan dezelfde namen anders als twee regels onder elkaar. */
+const railTag = shId => daliVan(shId) ? ' DALI' : (eenFase(shId) && heeft3F()) ? ' 1-fase' : '';
+/* De tekenvlakken met een tekening, en welke rails daarop liggen. */
+function railStand(){
   const vlakken = st.sheets.filter(sh=>st.nodes.some(n=>n.s===sh.id));
-  return {vlakken, dali: vlakken.filter(sh=>daliVan(sh.id))};
+  return {vlakken, soorten: Array.from(new Set(vlakken.map(sh=>railVan(sh.id))))};
 }
-function metRail(t){ return Object.assign({}, t, {rail: t.rail[st.profiel === 'inbouw' ? 'inbouw' : 'opbouw']}); }
-/* De naam van de rail voor in de PDF en de stuklijst. */
+/* De naam van de rail voor in de PDF: van de getekende tekenvlakken, of anders van het project. */
 function railNaam(){
-  if(eenFase()) return 'PRX 1-Fase Rail' + (st.profiel === 'inbouw' ? ' inbouw' : '');
-  const d = daliStand();
-  if(!d.vlakken.length) return st.dali ? 'PRX 3-Fase Rail DALI' : 'PRX 3-Fase Rail';
-  return !d.dali.length ? 'PRX 3-Fase Rail' : d.dali.length===d.vlakken.length ? 'PRX 3-Fase Rail DALI' : 'PRX 3-Fase Rail en PRX 3-Fase Rail DALI';
+  const s = railStand().soorten;
+  return (s.length ? s : [projectRail()]).map(k=>railSoort(k).naam).join(' en ');
 }
 /* Wat er van een code in beeld en op papier komt. Een code die met 'm-' begint is een
    plaatshouder van de tool zelf: 'm-arm-'/'m-acc-' is een armatuur of accessoire zonder
@@ -1669,7 +1685,7 @@ const MM_3F = { aansluit:66, eindkap:3, bochtArm:66, tBarArm:50, tStemArm:66, kr
    middenvoeding 80 (145), eindkap 4 (24); het rechte koppelstuk (65) zit helemaal in de
    rail. */
 const MM_1F = { aansluit:55, eindkap:4, bochtArm:55, tBarArm:40, tStemArm:55, kruisArm:40, midden:80, elkoppel:0 };
-const maten = () => eenFase() ? MM_1F : MM_3F;
+const maten = shId => eenFase(shId) ? MM_1F : MM_3F;
 
 /* Armaturen: geen vaste bovengrens, net als in het armaturenboek. Er staan er 12 klaar,
    en zodra de laatste regel niet meer leeg is komt er een lege bij (zorgVoorLegeSlot()).
@@ -1873,7 +1889,7 @@ const ADAPTERS_OVERIG_1F = [
 /* de verpakkingscode van elk los onderdeel uit dezelfde tabel */
 ADAPTERS_OVERIG_1F.forEach(a=> Object.values(a.codes).forEach(c=>{ c.l = KKT_1F[c.p] || ''; }));
 /* de lijst van de rail die gekozen is, en beide samen voor st.overig */
-const overigLijst = () => eenFase() ? ADAPTERS_OVERIG_1F : ADAPTERS_OVERIG;
+const overigLijst = () => (heeft3F() ? ADAPTERS_OVERIG : []).concat(heeft1F() ? ADAPTERS_OVERIG_1F : []);
 const ALLE_OVERIG = ADAPTERS_OVERIG.concat(ADAPTERS_OVERIG_1F);
 const legeOverig = () => ALLE_OVERIG.reduce((o,a)=>{o[a.id]={color:Object.keys(a.codes)[0],qty:0};return o;},{});
 /* De keuze bij een regel: een kleur met een hoofdletter, een maat zoals hij er staat, en
@@ -1927,9 +1943,9 @@ let st = { step:1, dali:false, color:'wit', powercfg:'A', shape:null, gRows:2, g
   montage:{s1:{wijze:'geen', sysOphang:false, sysOphangLen:'3', pendelKabelkleur:'zilver', pendelKabelLen:'3'}},
   /* de ruimtes per tekenvlak (sheet-id -> namen); zie ruimtesVan() */
   ruimtes:{},
-  /* DALI per tekenvlak (sheet-id -> true/false), alleen waar het afwijkt van de keuze in
-     stap 1 (st.dali); zie daliVan() */
-  daliVlak:{},
+  /* de rail per tekenvlak (sheet-id -> '3fase' / '3fase-dali' / '1fase' / '1fase-inbouw'),
+     alleen waar die afwijkt van de keuze in stap 1 en 2; zie railVan() */
+  railVlak:{},
   sheets:[{id:'s1',name:'Tekenvlak 1'}], sheet:'s1', sid:1 };
 let hist=[], hIdx=-1;
 let lastBOM=null;
@@ -2321,23 +2337,24 @@ function nodeVariants(P){
       const type = (ns.x===rr.x && ns.y===rr.y) ? '2' : '1';
       /* De 1-fase rail noemt dezelfde vier anders: Binnen/Buiten is de balkzijde,
          Links/Rechts de steelzijde (zie PCODES_1F). */
-      const naam = eenFase() ? T_1F_NAAM[side+type] : (side==='R'?'Rechts':'Links')+' Type '+type;
+      const naam = eenFase(n.s) ? T_1F_NAAM[side+type] : (side==='R'?'Rechts':'Links')+' Type '+type;
       out[n.id]={cls:'t', label:'T '+naam, art:P_.tkoppel[st.color][side+type], artL:L_.tkoppel[st.color][side+type]};
       return;
     }
     out[n.id]={cls:'kruis', label:'Kruis', art:P_.kruis[st.color], artL:L_.kruis[st.color]};
   });
-  /* Een onderdeel uit een DALI-tekenvlak dat als DALI-versie een eigen nummer heeft (of,
-     zoals de verstelbare hoek, juist niet bestaat), krijgt in de stuklijst " DALI" achter
-     zijn naam (daliTag); de eindkap is in beide hetzelfde artikel. */
-  Object.keys(out).forEach(id=>{ const v=out[id];
-    v.dali = daliVan(nodeSheet(id)) && ['aansluit','hoek','bocht','t','kruis'].includes(v.cls); });
+  /* Achter de naam in de stuklijst (railTag): " DALI" bij een onderdeel dat als DALI-versie
+     een eigen nummer heeft (of, zoals de verstelbare hoek, juist niet bestaat) - de eindkap
+     is in beide hetzelfde artikel; " 1-fase" bij elk onderdeel van de 1-fase rail als er
+     ook 3-fase tekenvlakken zijn. */
+  Object.keys(out).forEach(id=>{ const v=out[id], sh=nodeSheet(id);
+    v.tag = (daliVan(sh) ? ['aansluit','hoek','bocht','t','kruis'].includes(v.cls) : eenFase(sh)) ? railTag(sh) : ''; });
   return out;
 }
 
 /* ---------- railverdeling ---------- */
 function armMm(nId, e){
-  const t=nodeType(nId), MM=maten();
+  const t=nodeType(nId), MM=maten(nodeSheet(nId));
   if(t==='end') return feedForNode(nId)? MM.aansluit : MM.eindkap;
   if(t==='corner') return MM.bochtArm;
   if(t==='t') return e.id===tStem(nId).id ? MM.tStemArm : MM.tBarArm;
@@ -2356,11 +2373,12 @@ function railFor(e){
      alleen in hele meters leverbaar. Prioriteit: 3 m -> 2 m -> 1 m; 4 m alleen op aanvraag. */
   const drawnM = eLen(e)/100;
   const orderM = Math.ceil(drawnM);
-  const maxM = st.use4m && !eenFase() ? 4 : 3;   /* de 1-fase rail kent geen 4 m */
+  const sh = nodeSheet(e.a);
+  const maxM = st.use4m && !eenFase(sh) ? 4 : 3;   /* de 1-fase rail kent geen 4 m */
   const pieces=[]; let rem=orderM;
   while(rem>0){ const p=Math.min(maxM, rem); pieces.push(p); rem-=p; }
   /* werkelijke maat = getekende raillengte + zichtbare inbouwmaten van de koppelstukken eromheen */
-  const extraMm = armMm(e.a,e) + armMm(e.b,e) + (feedForEdge(e.id)?maten().midden:0);
+  const extraMm = armMm(e.a,e) + armMm(e.b,e) + (feedForEdge(e.id)?maten(sh).midden:0);
   return {drawnM, orderM, pieces, seams:pieces.length-1, extraMm};
 }
 
@@ -2384,10 +2402,10 @@ const MOUNTS = {
   pendel1flos:{label:'Pendel (losse onderdelen)'},
   inbouw:  {label:'Inbouw in het plafond'},
 };
-/* welke montagewijzen er bij de gekozen rail horen */
-function montageKeuzes(){
-  if(inbouw()) return ['inbouw'];
-  return eenFase() ? ['geen','plafond','pendel1f','pendel1flos'] : ['geen','beugel','koud','sys','pendel'];
+/* welke montagewijzen er bij de rail van een tekenvlak horen */
+function montageKeuzes(shId){
+  if(inbouw(shId)) return ['inbouw'];
+  return eenFase(shId) ? ['geen','plafond','pendel1f','pendel1flos'] : ['geen','beugel','koud','sys','pendel'];
 }
 /* De montagewijze geldt per tekenvlak: elk raildesign kan anders hangen (het ene
    tegen het plafond, het andere aan pendels). st.montage houdt per tekenvlak-id de
@@ -2395,10 +2413,10 @@ function montageKeuzes(){
    geschiedenis van "Ongedaan", en dan zou het terugdraaien van een versleept punt ook
    de montagekeuze terugdraaien. Een weggehaald tekenvlak houdt zijn regel, zodat
    "Ongedaan" hem terugbrengt; een nieuw tekenvlak begint op "nog geen keuze". */
-function nieuweMontage(){ return {wijze:inbouw()?'inbouw':'geen', sysOphang:false, sysOphangLen:'3', pendelKabelkleur:'zilver', pendelKabelLen:'3', ophangLen:'3'}; }
+function nieuweMontage(shId){ return {wijze:inbouw(shId)?'inbouw':'geen', sysOphang:false, sysOphangLen:'3', pendelKabelkleur:'zilver', pendelKabelLen:'3', ophangLen:'3'}; }
 function montageVan(shId){
   if(!st.montage) st.montage={};
-  if(!st.montage[shId]) st.montage[shId]=nieuweMontage();
+  if(!st.montage[shId]) st.montage[shId]=nieuweMontage(shId);
   return st.montage[shId];
 }
 /* Kabelkleur Zwart bestaat alleen i.c.m. een zwarte plafondbus (= railkleur); voor
@@ -2407,8 +2425,7 @@ function pendelKabelkleur(mt){ return st.color==='zwart' ? mt.pendelKabelkleur :
 /* Zorgt dat de montage-subkeuzes altijd een geldige combinatie voor de huidige
    railkleur vormen \u2014 nodig omdat kleur/kabelkeuze onafhankelijk van elkaar wijzigen. */
 function normalizeMountState(){
-  const keuzes=montageKeuzes();
-  Object.keys(st.montage||{}).forEach(id=>{ const mt=st.montage[id];
+  Object.keys(st.montage||{}).forEach(id=>{ const mt=st.montage[id], keuzes=montageKeuzes(id);
     /* een andere rail gekozen: een montagewijze die bij die rail niet bestaat, vervalt */
     if(!keuzes.includes(mt.wijze)) mt.wijze=keuzes[0];
     if(!['1,5','3','5'].includes(mt.ophangLen)) mt.ophangLen='3';
@@ -2484,13 +2501,13 @@ function computeBOM(){
   /* Alles wat in een tekenvlak getekend is, telt zo vaak als dat tekenvlak ruimtes
      heeft (ruimteFactor()); het buiggereedschap, de armaturen en de adapters niet. */
   st.nodes.forEach(n=>{ const v=V[n.id];
-    if(v&&v.art) add(v.art, v.artL, v.label+(v.dali?' DALI':'')+' '+CLRN(st.color), ruimteFactor(n.s), 'n:'+n.id); });
+    if(v&&v.art) add(v.art, v.artL, v.label+v.tag+' '+CLRN(st.color), ruimteFactor(n.s), 'n:'+n.id); });
   st.feeds.filter(f=>f.kind==='edge').forEach(f=>{ const sh=nodeSheet(edge(f.edge).a);
-    add(activeP(sh).midden[st.color], activeL(sh).midden[st.color], 'Middenvoeding'+daliTag(sh)+' '+CLRN(st.color), ruimteFactor(sh),'e:'+f.edge); });
+    add(activeP(sh).midden[st.color], activeL(sh).midden[st.color], 'Middenvoeding'+railTag(sh)+' '+CLRN(st.color), ruimteFactor(sh),'e:'+f.edge); });
   st.edges.forEach(e=>{
     const sh=nodeSheet(e.a), r=railFor(e), keer=ruimteFactor(sh), P_=activeP(sh), L_=activeL(sh);
-    r.pieces.forEach(p=> add(P_.rail[st.color][p], L_.rail[st.color][p], (inbouw()?'Inbouwrail ':'Rail ')+p+'m'+daliTag(sh)+' '+CLRN(st.color), keer, 'e:'+e.id));
-    if(r.seams>0) add(P_.elkoppel[st.color], L_.elkoppel[st.color], 'Elektrisch Koppelstuk'+daliTag(sh)+' '+CLRN(st.color),r.seams*keer,'e:'+e.id);
+    r.pieces.forEach(p=> add(P_.rail[st.color][p], L_.rail[st.color][p], (inbouw(sh)?'Inbouwrail ':'Rail ')+p+'m'+railTag(sh)+' '+CLRN(st.color), keer, 'e:'+e.id));
+    if(r.seams>0) add(P_.elkoppel[st.color], L_.elkoppel[st.color], 'Elektrisch Koppelstuk'+railTag(sh)+' '+CLRN(st.color),r.seams*keer,'e:'+e.id);
     railDetail.push({e, r, keer});
   });
   visibleArmaturen().forEach(a=>{ const s=st.armaturen[a.id]; if(!s||s.qty<=0) return;
@@ -2516,15 +2533,14 @@ function computeBOM(){
   /* De inbouwrail krijgt bij elk aansluitstuk een afdekplaat voor de eindvoeding en bij
      elke middenvoeding, bocht, T en kruis een voor de tussenkoppeling, in de kleur van de
      rail. Bij de verstelbare hoek zegt de handleiding het niet (zie warnings()). */
-  if(inbouw()){
-    st.nodes.forEach(n=>{ const v=V[n.id]; if(!v||!v.art) return;
-      if(v.cls==='aansluit') add(activeP().afdekEind[st.color], activeL().afdekEind[st.color], 'Afdekplaat inbouwrail eindvoeding '+CLRN(st.color), ruimteFactor(n.s), 'n:'+n.id);
-      if(['bocht','t','kruis'].includes(v.cls)) add(activeP().afdekTussen[st.color], activeL().afdekTussen[st.color], 'Afdekplaat inbouwrail tussenkoppeling '+CLRN(st.color), ruimteFactor(n.s), 'n:'+n.id); });
-    st.feeds.filter(f=>f.kind==='edge').forEach(f=> add(activeP().afdekTussen[st.color], activeL().afdekTussen[st.color], 'Afdekplaat inbouwrail tussenkoppeling '+CLRN(st.color),
-      ruimteFactor(nodeSheet(edge(f.edge).a)), 'e:'+f.edge));
-  }
-  /* buiggereedschap: alleen bij de 3-fase rail (bij de 1-fase rail niet besteld) */
-  if(railDetail.length && !eenFase()) add(activeP().buigtool, activeL().buigtool, 'PRX 3-Fase Rail buiggereedschap',1,null);
+  st.nodes.forEach(n=>{ const v=V[n.id]; if(!v||!v.art||!inbouw(n.s)) return;
+    if(v.cls==='aansluit') add(activeP(n.s).afdekEind[st.color], activeL(n.s).afdekEind[st.color], 'Afdekplaat inbouwrail eindvoeding '+CLRN(st.color), ruimteFactor(n.s), 'n:'+n.id);
+    if(['bocht','t','kruis'].includes(v.cls)) add(activeP(n.s).afdekTussen[st.color], activeL(n.s).afdekTussen[st.color], 'Afdekplaat inbouwrail tussenkoppeling '+CLRN(st.color), ruimteFactor(n.s), 'n:'+n.id); });
+  st.feeds.filter(f=>f.kind==='edge').forEach(f=>{ const sh=nodeSheet(edge(f.edge).a); if(!inbouw(sh)) return;
+    add(activeP(sh).afdekTussen[st.color], activeL(sh).afdekTussen[st.color], 'Afdekplaat inbouwrail tussenkoppeling '+CLRN(st.color), ruimteFactor(sh), 'e:'+f.edge); });
+  /* buiggereedschap: alleen bij de 3-fase rail (bij de 1-fase rail niet besteld); in DALI
+     hetzelfde artikel */
+  if(railDetail.some(d=>!eenFase(nodeSheet(d.e.a)))) add(PCODES.buigtool, LCODES.buigtool, 'PRX 3-Fase Rail buiggereedschap',1,null);
   normalizeMountState();
   const mounts=computeMounts();
   /* Per tekenvlak zijn eigen montagewijze, met zijn eigen montagepunten. Dezelfde
@@ -3014,7 +3030,7 @@ function warnings(B){
      de melding. */
   const adapterQty = (st.overig.ao01 && st.overig.ao01.qty) || 0;
   const trekQty = (st.overig.ao08 && st.overig.ao08.qty) || 0;
-  if(!eenFase() && adapterQty>0 && trekQty<adapterQty) w.push({t:'tip', m:'De 70mm Universal Adapter moet altijd samen met trekontlasting art. 2001947 (PRX trekontlasting brug met 2 schroefjes) besteld worden \u2014 wordt niet automatisch toegevoegd.'});
+  if(heeft3F() && adapterQty>0 && trekQty<adapterQty) w.push({t:'tip', m:'De 70mm Universal Adapter moet altijd samen met trekontlasting art. 2001947 (PRX trekontlasting brug met 2 schroefjes) besteld worden \u2014 wordt niet automatisch toegevoegd.'});
   const angleCount = Object.keys(st.angles).filter(nId=>node(nId)).length;
   if(angleCount>0) w.push({t:'tip', m:angleCount===1
     ? 'E\u00e9n hoek is ingesteld als Verstelbare Hoek \u2014 dit is een ander koppelstuk dan een vaste Bocht. Controleer de exacte hoekinstelling op locatie.'
@@ -3027,11 +3043,12 @@ function warnings(B){
     + 'Kies een vaste bocht (90\u00b0) of overleg met de leverancier.'});
   /* De inbouwrail krijgt bij elk koppelstuk een afdekplaat (computeBOM()); bij de
      verstelbare hoek zegt de handleiding niet welke. */
-  if(inbouw() && angleCount>0) w.push({t:'warn', m:'Een verstelbare hoek in een inbouwrail: welke afdekplaat daarbij hoort, staat niet in de handleiding van de fabrikant '
+  const inbouwHoeken = Object.keys(st.angles).filter(nId=>node(nId) && inbouw(node(nId).s)).length;
+  if(inbouwHoeken>0) w.push({t:'warn', m:'Een verstelbare hoek in een inbouwrail: welke afdekplaat daarbij hoort, staat niet in de handleiding van de fabrikant '
     + '\u2014 de tool zet er geen bij. Overleg met de leverancier, of kies een vaste bocht (90\u00b0).'});
   /* De 1-fase rail heeft een ander, kleiner profiel dan de 3-fase rail: een armatuur met
      een 3-fase adapter (de Punto, Dio en Arda bijvoorbeeld) past er niet in. */
-  if(eenFase() && visibleArmaturen().some(a=>!armSlotLeeg(st.armaturen[a.id])))
+  if(heeft1F() && visibleArmaturen().some(a=>!armSlotLeeg(st.armaturen[a.id])))
     w.push({t:'tip', m:'Op de 1-fase rail passen alleen armaturen met een 1-fase adapter, of met een losse 1-fase adapter (zie Adapters &amp; overig). '
       + 'Een armatuur met een 3-fase adapter past er niet in.'});
   /* per tekenvlak met rails: is er een montagewijze gekozen? */
@@ -3080,9 +3097,9 @@ function renderSheetsBar(){
   if(add) add.addEventListener('click', ()=>{
     const id='s'+(++st.sid);
     st.sheets.push({id, name:'Tekenvlak '+(st.sheets.length+1)});
-    st.montage[id]=nieuweMontage();   /* eigen keuze; ook als dit id eerder gebruikt was */
+    if(st.railVlak) delete st.railVlak[id];   /* volgt stap 1 */
+    st.montage[id]=nieuweMontage(id);   /* eigen keuze; ook als dit id eerder gebruikt was */
     st.ruimtes[id]=[];
-    if(st.daliVlak) delete st.daliVlak[id];   /* volgt stap 1 */
     st.sheet=id; view={zoom:1,px:0,py:0}; snap(); goStep(4);
   });
 }
@@ -3131,23 +3148,21 @@ function refresh(){
   /* de montagewijze van het tekenvlak dat nu open staat */
   const mtNu=montageVan(st.sheet), vlakNu=st.sheets.find(s=>s.id===st.sheet);
   $('c2MountCount').textContent = computeMounts(st.sheet).count;
-  $('c2Use4m').closest('label').style.display = eenFase() ? 'none' : '';
+  $('c2Use4m').closest('label').style.display = heeft3F() ? '' : 'none';
   if($('c2Mount').value!==mtNu.wijze) $('c2Mount').value=mtNu.wijze;
   $('c2MountVlak').textContent = st.sheets.length>1 && vlakNu ? ' \u2014 '+vlakNu.name : '';
-  /* DALI per tekenvlak: alleen bij de 3-fase rail, en de noot zegt of dit tekenvlak
-     afwijkt van stap 1 */
-  $('c2DaliRij').style.display = eenFase() ? 'none' : '';
-  $('c2DaliVlak').textContent = $('c2MountVlak').textContent;
-  $('c2DaliKeuze').value = daliVan(st.sheet) ? 'dali' : '3fase';
-  $('c2DaliNoot').textContent = st.sheets.length<2 ? ''
-    : (daliVan(st.sheet)!==!!st.dali ? 'eigen keuze voor dit tekenvlak; stap 1 staat op '+(st.dali?'DALI':'zonder DALI')
-                                      : 'zoals stap 1');
+  /* de rail van dit tekenvlak; de noot zegt of het afwijkt van stap 1 */
+  $('c2RailVlak').textContent = $('c2MountVlak').textContent;
+  $('c2RailVlakKeuze').value = railVan(st.sheet);
+  $('c2RailVlakNoot').textContent = railVan(st.sheet)!==projectRail()
+    ? 'eigen keuze voor dit tekenvlak; stap 1 staat op '+railSoort(projectRail()).l
+    : (st.sheets.length>1 ? 'zoals stap 1' : '');
   /* en in stap 1: welke tekenvlakken een eigen keuze hebben, want een keuze daar zet ze
      weer allemaal gelijk */
-  const eigenDali = eenFase() ? [] : st.sheets.filter(sh=>daliVan(sh.id)!==!!st.dali);
-  $('c2RailNoot').style.display = eigenDali.length ? '' : 'none';
-  $('c2RailNoot').textContent = eigenDali.length
-    ? 'Eigen keuze per tekenvlak: '+eigenDali.map(sh=>sh.name+(daliVan(sh.id)?' (DALI)':' (zonder DALI)')).join(', ')
+  const eigen = st.sheets.filter(sh=>railVan(sh.id)!==projectRail());
+  $('c2RailNoot').style.display = eigen.length ? '' : 'none';
+  $('c2RailNoot').textContent = eigen.length
+    ? 'Eigen keuze per tekenvlak: '+eigen.map(sh=>sh.name+' ('+railSoort(railVan(sh.id)).l+')').join(', ')
       +'. Een keuze hier geldt weer voor elk tekenvlak.' : '';
   renderMountOptions();
   renderRuimtes(vlakNu);
@@ -3219,15 +3234,24 @@ function reportData(){
       trGlobal++;
       comps[c].slice().sort((p,q)=>(p.y-q.y)||(p.x-q.x)).forEach(n=>{
         const v=B.V[n.id];
-        if(v&&v.art){ nr++; numOf['n:'+n.id]=nr; legend.push({nr, tr:trGlobal, name:v.label+(v.dali?' DALI':'')+' '+CLRN(st.color), art:v.art, verpakking:v.artL}); }
+        if(v&&v.art){ nr++; numOf['n:'+n.id]=nr; legend.push({nr, tr:trGlobal, name:v.label+v.tag+' '+CLRN(st.color), art:v.art, verpakking:v.artL}); }
       });
       st.feeds.filter(f=>f.kind==='edge' && m[edge(f.edge).a]===+c).forEach(f=>{
-        nr++; numOf['f:'+f.edge]=nr; legend.push({nr, tr:trGlobal, name:'Middenvoeding'+daliTag(sh.id)+' '+CLRN(st.color), art:activeP(sh.id).midden[st.color], verpakking:activeL(sh.id).midden[st.color]});
+        nr++; numOf['f:'+f.edge]=nr; legend.push({nr, tr:trGlobal, name:'Middenvoeding'+railTag(sh.id)+' '+CLRN(st.color), art:activeP(sh.id).midden[st.color], verpakking:activeL(sh.id).midden[st.color]});
       });
     });
     sheets.push({id:sh.id, name:sh.name, legend});
   });
   return {B,M,sheets,numOf,trCount:trGlobal};
+}
+/* De kop van de pagina Bestelgegevens, zoals hij altijd was; met 3-fase en 1-fase
+   tekenvlakken allebei. */
+function materialenKop(){
+  const s = railStand().soorten, soorten = s.length ? s : [projectRail()];
+  const een = soorten.filter(k=>k.indexOf('1fase')===0), drie = soorten.length-een.length;
+  if(!een.length) return 'Materialen PRX 3 fase rails';
+  if(!drie) return 'Materialen PRX 1 fase rails'+(een.every(k=>k==='1fase-inbouw')?' inbouw':'');
+  return 'Materialen PRX 3 fase en 1 fase rails';
 }
 async function buildPdf(){
   /* Huisstijl: donker navy + puntjespatroon, condensed kapitalen, navy tabelkoppen,
@@ -3291,7 +3315,7 @@ async function buildPdf(){
   /* eerst de kopbalk: die dekt de rest van de pagina wit af om het patroon te
      begrenzen, dus alles wat eronder komt moet daarna getekend worden */
   /* de kop zoals hij altijd was; de 1-fase rail in dezelfde woorden */
-  paginaKop(eenFase() ? 'Materialen PRX 1 fase rails'+(inbouw()?' inbouw':'') : 'Materialen PRX 3 fase rails',
+  paginaKop(materialenKop(),
     (st.proj||'').trim() + ((st.proj||'').trim()? '  \u2014  ':'') + datumNL(st.datum));
 
   /* --- Bestelgegevens: eerste inhoudelijke sectie, direct onder het kopvlak.
@@ -3436,10 +3460,8 @@ async function buildPdf(){
     drawPlan(Mg,y,boxW,boxH,sh.id);
     y+=boxH+8;
     /* de montagewijze van dit tekenvlak: kan per tekenvlak verschillen */
-    /* in een project met DALI- en gewone tekenvlakken zegt elk tekenvlak welke rail het is */
-    const ds=daliStand();
-    if(ds.dali.length && ds.dali.length<ds.vlakken.length)
-      para('Rail: '+(daliVan(sh.id)?'PRX 3-Fase Rail DALI':'PRX 3-Fase Rail')+'.',8.5,C.tekst);
+    /* in een project met meer soorten rail zegt elk tekenvlak welke rail het is */
+    if(railStand().soorten.length>1) para('Rail: '+railSoort(railVan(sh.id)).naam+'.',8.5,C.tekst);
     const mtTxt=montageTekst(montageVan(sh.id)), mtN=computeMounts(sh.id).count;
     if(mtTxt && mtN) para('Montage: '+mtTxt+' \u2014 '+mtN+' montagepunten'+(ruimtes.length>1?' per ruimte':'')+'.',8.5,C.tekst);
     if(si===0) para('Maten zijn raillengtes; koppelstukken komen daar in werkelijkheid bovenop.',8,C.grey);
@@ -3604,7 +3626,7 @@ async function assembleFinalPdf(){
     else if(deel.bron==='lichtberekening') presenterTotaal += await appendPresenter('lichtberekening'); /* geen stempel */
     else if(deel.bron==='lichtplan') presenterTotaal += await Lichtplan.voegToe(finalDoc);
     /* het familieblad van de 3-fase rail; voor de 1-fase rail is er (nog) geen */
-    else if(deel.bron==='rail'){ if(!eenFase()) presenterTotaal += await appendPresenter('rail'); } /* de rail heeft geen code */
+    else if(deel.bron==='rail'){ if(railStand().soorten.some(k=>k.indexOf('3fase')===0)) presenterTotaal += await appendPresenter('rail'); } /* de rail heeft geen code */
     else if(deel.bron==='presenters'){
       for(const g of bookGroups) presenterTotaal += await appendPresenter(g.id, g.code, g.kleur, g.zwart, g.special, g.opmerking, g.breedte);
     }
@@ -3978,7 +4000,7 @@ function renderMountOptions(){
   normalizeMountState();
   const row=$('c2MountSubRow'), mt=montageVan(st.sheet);
   /* de keuzelijst zelf: alleen de montagewijzen van de gekozen rail */
-  const sel=$('c2Mount'), keuzes=montageKeuzes();
+  const sel=$('c2Mount'), keuzes=montageKeuzes(st.sheet);
   if(sel.dataset.keuzes!==keuzes.join(',')){
     sel.innerHTML=keuzes.map(k=>'<option value="'+k+'">'+(k==='geen'?'&mdash; nog geen keuze &mdash;':MOUNTS[k].label)+'</option>').join('');
     sel.dataset.keuzes=keuzes.join(',');
@@ -4024,8 +4046,12 @@ function renderMountOptions(){
    opbouw of inbouw, en de kleur - alleen de kleuren die er bij die rail zijn. Elke keer
    helemaal opnieuw opgebouwd: wat er te kiezen is, hangt van de rail af. */
 const RAILS = [{k:'1fase', l:'1-fase rail'}, {k:'3fase', l:'3-fase rail'}, {k:'3fase-dali', l:'3-fase rail DALI'}];
-function railKeuze(){ return eenFase() ? '1fase' : st.dali ? '3fase-dali' : '3fase'; }
-function railKleuren(){ return inbouw() ? ['zwart'] : eenFase() ? ['wit','zwart'] : ['wit','zwart','grijs']; }
+function railKeuze(){ return st.rail==='1fase' ? '1fase' : st.dali ? '3fase-dali' : '3fase'; }
+/* de kleuren die er bij elke rail in het project zijn: grijs niet als er een 1-fase
+   tekenvlak is, alleen zwart als er een inbouwrail is */
+function railKleuren(){
+  return railsInGebruik().reduce((k, r)=> k.filter(c=>railSoort(r).kleuren.includes(c)), ['wit','zwart','grijs']);
+}
 function keuzeKnop(rij, html, gekozen, actie){
   const b=document.createElement('button');
   b.className='choice-btn'+(gekozen?' sel':''); b.innerHTML=html;
@@ -4036,30 +4062,59 @@ function bouwKeuzeRijen(){
   RAILS.forEach(r=> keuzeKnop(rr, r.l, r.k===railKeuze(), ()=>{
     st.rail = r.k==='1fase' ? '1fase' : '3fase';
     st.dali = r.k==='3fase-dali';
-    /* een keuze hier geldt weer voor elk tekenvlak (daliVan()) */
-    st.daliVlak = {};
+    /* een keuze hier geldt weer voor elk tekenvlak (railVan()) */
+    st.railVlak = {};
     railGewijzigd();
   }));
-  $('c2ProfielBlok').style.display = eenFase() ? '' : 'none';
+  $('c2ProfielBlok').style.display = st.rail==='1fase' ? '' : 'none';
   const pr=$('c2ProfielRow'); pr.innerHTML='';
   [{k:'opbouw', l:'Opbouw (vierkant)'}, {k:'inbouw', l:'Inbouw'}].forEach(o=> keuzeKnop(pr, o.l, o.k===st.profiel, ()=>{
-    st.profiel=o.k; railGewijzigd();
+    st.profiel=o.k; st.railVlak = {}; railGewijzigd();
   }));
   const cr=$('c2ColorRow'); cr.innerHTML='';
   railKleuren().forEach(c=> keuzeKnop(cr, '<span class="dot '+c+'"></span>'+CLRN(c), c===st.color, ()=>{
     st.color=c; bouwKeuzeRijen(); refresh();
   }));
 }
+/* De rail per tekenvlak uit een opgeslagen project. Een project van vóór de rail per
+   tekenvlak heeft niets: elk tekenvlak volgt stap 1. Een project uit de korte tijd van
+   DALI per tekenvlak (st.daliVlak: sheet-id -> true/false, alleen bij de 3-fase rail)
+   krijgt dezelfde keuze in de nieuwe vorm. Een onbekende waarde valt weg. */
+function railVlakUit(s){
+  const uit={};
+  if(s.railVlak && typeof s.railVlak==='object')
+    Object.keys(s.railVlak).forEach(id=>{ if(railSoort(s.railVlak[id])) uit[id]=s.railVlak[id]; });
+  else if(s.daliVlak && typeof s.daliVlak==='object' && s.rail!=='1fase')
+    Object.keys(s.daliVlak).forEach(id=>{ if(typeof s.daliVlak[id]==='boolean') uit[id]=s.daliVlak[id] ? '3fase-dali' : '3fase'; });
+  return uit;
+}
 /* Een andere rail of uitvoering: een kleur die er niet is, vervalt (grijs bij de 1-fase
    rail, wit bij inbouw), net als een montagewijze die er niet bij hoort; de armaturen
    wisselen tussen de gewone en de DALI-code, en de losse onderdelen zijn die van de rail. */
 function railGewijzigd(){
-  if(!railKleuren().includes(st.color)) st.color=railKleuren()[0];
+  /* een kleur die er bij een van de rails niet is: de eerste die er bij alle wel is, en
+     zeggen - de kleur geldt voor het hele project */
+  if(!railKleuren().includes(st.color)){
+    const was=st.color; st.color=railKleuren()[0];
+    if(startKlaar) Melding.letop('De kleur is nu '+st.color+': '+was+' bestaat niet bij '
+      +railsInGebruik().filter(r=>!railSoort(r).kleuren.includes(was)).map(r=>'de '+railSoort(r).l).join(' en ')+'.');
+  }
   normalizeMountState();
   bouwKeuzeRijen();
   buildArmList();
-  buildProdList($('c2OverigList'), overigLijst(), st.overig);
+  bouwOverig();
   refresh();
+}
+/* De losse onderdelen van de rails in het project; met 3-fase en 1-fase tekenvlakken twee
+   lijsten, elk met een kop. */
+function bouwOverig(){
+  const c=$('c2OverigList');
+  if(!(heeft3F() && heeft1F())){ buildProdList(c, overigLijst(), st.overig); return; }
+  c.innerHTML='';
+  [['3-fase rail', ADAPTERS_OVERIG], ['1-fase rail', ADAPTERS_OVERIG_1F]].forEach(([kop, lijst])=>{
+    const h=document.createElement('div'); h.className='c2-prodkop'; h.textContent=kop; c.appendChild(h);
+    const blok=document.createElement('div'); buildProdList(blok, lijst, st.overig); c.appendChild(blok);
+  });
 }
 
 function init(){
@@ -4100,8 +4155,7 @@ function init(){
          terughaalt terwijl de tool op de 1-fase rail staat */
       st.rail = s.rail==='1fase' ? '1fase' : '3fase';
       st.profiel = s.profiel==='inbouw' ? 'inbouw' : 'opbouw';
-      /* een project van vóór DALI per tekenvlak: elk tekenvlak volgt stap 1 */
-      st.daliVlak = (s.daliVlak && typeof s.daliVlak==='object') ? s.daliVlak : {};
+      st.railVlak = railVlakUit(s);
       /* Geen vaste bovengrens meer aan het aantal regels (zie zorgVoorLegeSlot()): een
          opgeslagen project kan meer sloten hebben dan de 12 waarmee de tool begint - die
          moeten ook in ARMATUREN staan, anders tekent buildArmList() ze nooit. Een project
@@ -4132,7 +4186,7 @@ function init(){
          in zo'n regel typte, belandde in een oude kopie en ging verloren (nagemeten).
          Bij het opstarten gebeurt dit hierna nog een keer; dat kan geen kwaad. */
       buildArmList();
-      buildProdList($('c2OverigList'), overigLijst(), st.overig);
+      bouwOverig();
       briefingKeuze($('c2BriefVelden'), st, refresh, 'c2Brief_');
       contactKeuze($('c2ContactVelden'), st, refresh, 'c2Contact_');
       $('c2ToonBriefing').checked = st.toonBriefing !== false;
@@ -4221,12 +4275,11 @@ function init(){
     lijstAan: ()=> st.toonLijst !== false, opWijziging: refresh});
   $('c2KolomKeuze').replaceChildren(kolomKeuze.el);   /* een opgeslagen projectbestand heeft de vorige nog in zijn HTML */
   $('c2Mount').addEventListener('change', e=>{ montageVan(st.sheet).wijze=e.target.value; refresh(); });
-  /* DALI per tekenvlak: alleen bewaard waar het afwijkt van stap 1 */
-  $('c2DaliKeuze').addEventListener('change', e=>{
-    const dali = e.target.value==='dali';
-    st.daliVlak = st.daliVlak || {};
-    if(dali===!!st.dali) delete st.daliVlak[st.sheet]; else st.daliVlak[st.sheet]=dali;
-    refresh();
+  /* de rail van dit tekenvlak: alleen bewaard waar hij afwijkt van stap 1 */
+  $('c2RailVlakKeuze').addEventListener('change', e=>{
+    st.railVlak = st.railVlak || {};
+    if(e.target.value===projectRail()) delete st.railVlak[st.sheet]; else st.railVlak[st.sheet]=e.target.value;
+    railGewijzigd();
   });
   $('c2RuimteAdd').addEventListener('click', voegRuimtesToe);
   $('c2RuimteInp').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); voegRuimtesToe(); } });
@@ -4243,7 +4296,7 @@ function init(){
     $('c2Datum').value = st.datum;
   })(); }
   buildArmList();
-  buildProdList($('c2OverigList'), overigLijst(), st.overig);
+  bouwOverig();
   /* de introductiepagina: de briefing (briefingKeuze() in briefing.js) en de
      contactpersonen (contactKeuze() in contactpersonen.js), dezelfde als in het armaturenboek */
   briefingKeuze($('c2BriefVelden'), st, refresh, 'c2Brief_');
@@ -4275,7 +4328,7 @@ function init(){
     if(!confirm('Alles weggooien en opnieuw beginnen?\n\nDe tekening, de armaturen en de '
               + 'projectgegevens verdwijnen. Dit kan niet ongedaan gemaakt worden.')) return;
     st.shape=null; st.nodes=[]; st.edges=[]; st.feeds=[]; st.angles={}; st.pick=false; st.step=1;
-    st.montage={s1:nieuweMontage()}; st.ruimtes={}; st.daliVlak={};
+    st.railVlak={}; st.montage={s1:nieuweMontage('s1')}; st.ruimtes={};
     st.toonLijst=true; $('c2ToonLijst').checked=true; st.lijstKolommen={};
     Lichtplan.wis();   /* het lichtplan hoort bij dit project */
     /* geüploade Special-PDF's horen niet bij een specifieke tekening, dus die vervallen mee. */
@@ -4284,7 +4337,7 @@ function init(){
     st.armaturen=ARMATUREN.reduce((o,a)=>{o[a.id]=legeArmatuur();return o;},{});
     st.overig=legeOverig();
     buildArmList();
-    buildProdList($('c2OverigList'), overigLijst(), st.overig);
+    bouwOverig();
     st.sheets=[{id:'s1',name:'Tekenvlak 1'}]; st.sheet='s1'; st.sid=1; view={zoom:1,px:0,py:0};
     /* projectgegevens van het voorblad; de datum gaat terug naar vandaag */
     st.proj=''; st.projNr=''; st.installateur='';
@@ -4329,7 +4382,7 @@ function init(){
     const uiteinde = sheetNodes('s1').find(n=>nodeType(n.id)==='end');
     if(uiteinde) st.feeds=[{kind:'node', node:uiteinde.id, side:'R'}];
 
-    st.montage={s1:Object.assign(nieuweMontage(), {wijze:'beugel'})}; st.ruimtes={}; st.daliVlak={};
+    st.railVlak={}; st.montage={s1:Object.assign(nieuweMontage('s1'), {wijze:'beugel'})}; st.ruimtes={};
     st.proj='Renovatie kantoorpand Weena 120 te Rotterdam';
     st.projNr='P.24187';
     st.installateur='Van der Velden Elektrotechniek B.V.';
@@ -4356,7 +4409,7 @@ function init(){
     $('c2Inst').value=st.installateur; $('c2Datum').value=st.datum;
     $('c2ShapeGrid').querySelectorAll('.shape-card').forEach(x=>x.classList.toggle('sel', x.dataset.shape==='t-vorm'));
     buildArmList();
-    buildProdList($('c2OverigList'), overigLijst(), st.overig);
+    bouwOverig();
     st.step=6; refresh();
   }
   /* index.html?demo opent de tool met het voorbeeld ingevuld; ?demo=pdf toont meteen
