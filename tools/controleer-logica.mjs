@@ -191,7 +191,7 @@ function is(wat, gekregen, verwacht){
   /* De Zena (oktober 2026): vier bladen, elk met zijn eigen codes - rond en vierkant,
      enkel en 2V. Per blad de codes die erop staan, met de omschrijving uit de spotlijst
      van de binnendienst (vergelijker/data/bron/spots.csv). */
-  const spotOms = Object.fromEntries(['catalogus.csv', 'spots.csv', 'wandarmaturen.csv', 'opbouwarmaturen.csv'].reverse()
+  const spotOms = Object.fromEntries(['catalogus.csv', 'spots.csv', 'wandarmaturen.csv', 'opbouwarmaturen.csv', 'noodverlichting-skyline.csv'].reverse()
     .flatMap(f => readFileSync(join(root, 'vergelijker/data/bron/' + f), 'utf8').split(/\r?\n/).slice(1).filter(Boolean))
     .map(r => r.match(/^([^,]*),[^,]*,(.*)$/)).filter(Boolean).map(m => [m[1], m[2].replace(/^"|"$/g, '')]));
   const zenaBladen = {ag124: ['4608082', '4608099', '4608143', '4608211'], ag125: ['4605968', '4606170', '4606187'],
@@ -1511,11 +1511,12 @@ function is(wat, gekregen, verwacht){
   new Function('window', readFileSync(join(root, 'catalogus-data.js'), 'utf8'))(venster);
   const CAT = venster.CATALOGUS;
   /* uit catalogus.csv en de lijsten van de binnendienst - spots, wandarmaturen, de
-     Valento - die alleen voor het opzoeken zijn (zie tools/maak-catalogus-data.mjs) */
-  const bronCodes = ['catalogus.csv', 'spots.csv', 'wandarmaturen.csv', 'opbouwarmaturen.csv'].flatMap(f => readFileSync(join(root, 'vergelijker/data/bron/' + f), 'utf8')
+     Valento, noodverlichting met de Skyline - die alleen voor het opzoeken zijn (zie
+     tools/maak-catalogus-data.mjs) */
+  const bronCodes = ['catalogus.csv', 'spots.csv', 'wandarmaturen.csv', 'opbouwarmaturen.csv', 'noodverlichting-skyline.csv'].flatMap(f => readFileSync(join(root, 'vergelijker/data/bron/' + f), 'utf8')
     .split(/\r?\n/).slice(1).filter(Boolean).map(r => r.split(',')[0].trim().toUpperCase()));
   is('elke artikelcode uit de bronnen staat erin, en niets anders', Object.keys(CAT).sort(), [...new Set(bronCodes)].sort());
-  is('codes: ondergrens 5897 (5283, 499 spots, 80 wandarmaturen, 35 Valento)', Object.keys(CAT).length >= 5897, true);
+  is('codes: ondergrens 6145 (5283, 499 spots, 80 wandarmaturen, 35 Valento, 248 noodverlichting en Skyline)', Object.keys(CAT).length >= 6145, true);
   const r0 = c => Object.prototype.hasOwnProperty.call(CAT, c) ? CAT[c] : null;
   /* De spots die in een echte projectlijst niets vonden (oktober 2026), en de uitgefaseerde
      die op verzoek van de binnendienst niet zijn meegenomen */
@@ -1552,6 +1553,20 @@ function is(wat, gekregen, verwacht){
      met het voorbeeld waarmee om deze functie gevraagd werd. */
   is('1084459-SN geeft de naam uit het voorbeeld van de vraag', r.catalogusNaam('1084459-SN', CAT),
     'Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 8-18W 750-2075lm 2200K-2700K 2-CCT + bewegingssensor + noodmodule 1uur autotest');
+  /* Oktober 2026: de noodverlichting (Dot, Dot Plus, DotXL, Dot IP65, Juno, Maximus, Norma,
+     Picto, UNI, batterijen, convertors en vier DLC-noodarmaturen) en de hele Skyline-reeks:
+     250 regels uit de lijst van de binnendienst, waarvan 248 nieuw. Een DLC-code mag spaties
+     hebben ("DLC Track Noodarmatuur Wit"); een spatie achter de code in de lijst telt niet. */
+  is('noodverlichting en Skyline: de code geeft de naam uit de lijst',
+    [r.catalogusNaam('1005195', CAT), r.catalogusNaam('1005195-ST3', CAT), r.catalogusNaam('dlc track noodarmatuur wit', CAT),
+     r.catalogusNaam('DLC-VTVA-MH4', CAT), r.catalogusNaam('1027838-TO-PH-SR-NA', CAT), r.catalogusNaam('1036557', CAT)],
+    ['Pragmalux DOTXL opbouw noodarmatuur, niet-continu, 3 Watt 230-270lumen, LifePO4 1h, open ruimte en gang lens, ø155x46mm, wit, zelf test',
+     'Pragmalux DOTXL opbouw noodarmatuur, niet-continu, 3 Watt 230-270lumen, LifePO4 1h, open ruimte en gang lens, ø155x46mm, wit, zelf test – (SP) 3P-aansluitsnoer',
+     'DLC track noodarmatuur, (niet-)continu, 3,4 Watt 210lumen, 1h, open ruimte en gang lens, 142x142x39mm, wit, zelf test',
+     'DLC track noodarmatuur, (niet-)continu, 3,4 Watt 210lumen, 1h, open ruimte en gang lens, 142x142x39mm, zwart, zelf test',
+     'Pragmalux Skyline 1,5m 44W 6400lm 2CCT 3000-4000K opaal wit RAL9016 +Philips SR driver + track adaptor+noodmodule 1uur zelftest',
+     'TCI driver component MP 70/1400 SVM SLIM- Skyline']);
+  is('Skyline-artikelen in de catalogus: ondergrens 197', Object.values(CAT).filter(o => /\bSkyline\b/.test(o)).length >= 197, true);
   is('Dura-artikelen in de catalogus: ondergrens 208', Object.values(CAT).filter(o => /\bDura-[SM]\b/.test(o)).length >= 208, true);
   const K = {'A1':'Armatuur een', 'B2':'Armatuur twee'};
   is('lege naam: invullen', r.armNaamUitCode({name:''}, 'a1', K), {soort:'gevuld', naam:'Armatuur een'});
