@@ -2004,11 +2004,11 @@ function is(wat, gekregen, verwacht){
     'MM_3F','feedForEdge','visibleArmaturen','ARMATUREN','overigLijst','ADAPTERS_OVERIG','normalizeMountState','montageKeuzes',
     'computeMounts','montageVan','sheetEdges','nieuweMontage','pendelKabelkleur','MOUNTS','montageTekst','railStand','railNaam',
     'RAIL_SOORTEN','railSoort','projectRail','railVan','inbouw','railsInGebruik','heeft3F','heeft1F','railTag','metRail','railKleuren',
-    'railVlakUit','materialenKop','PCODES_1F','KKT_1F','LCODES_1F','MM_1F','T_1F_NAAM','ADAPTERS_OVERIG_1F',
+    'railVlakUit','materialenKop','kleurBijRails','PCODES_1F','KKT_1F','LCODES_1F','MM_1F','T_1F_NAAM','ADAPTERS_OVERIG_1F',
     'eAxis','rotCCW','dot','compMap','feedComp','feedNodeMag','validateFeeds','mergeCoincident','normalizeNode','normalizeAll',
     'RICHTINGEN','vrijeRichtingen','addSegFromNode','addTFromEnd','addStub','removeEdge','plusKeuzesPunt','plusKeuzesSegment'];
   const r = await laadUit('index.html', namen,
-    'let st; let hist=[], hIdx=-1; function snap(){} function refresh(){} function zetSt(s){ st=s; } function huidig(){ return st; }\n'
+    'let st; let hist=[], hIdx=-1; let startKlaar=false; function snap(){} function refresh(){} function bouwKeuzeRijen(){} function zetSt(s){ st=s; } function huidig(){ return st; }\n'
     + snijUit(readFileSync(join(root, 'armatuur-rij.js'), 'utf8'), 'armAccessoires'), ['zetSt', 'huidig']);
   /* een tekening: punten [x,y] in cm, lijnen tussen punt-indexen; alles op tekenvlak s1 tenzij anders */
   const leeg = () => ({color:'wit', dali:false, rail:'3fase', profiel:'opbouw', use4m:false, nodes:[], edges:[], feeds:[], angles:{},
@@ -2147,6 +2147,25 @@ function is(wat, gekregen, verwacht){
   is('alleen 1-fase: geen "1-fase" in de namen (zoals het was), geen buiggereedschap, de kop zoals hij was',
     [regels(alleen1).filter(x => /Rail 3m|buig/.test(x)), r.materialenKop(), r.railNaam()],
     [['2037229 Rail 3m Wit x2'], 'Materialen PRX 1 fase rails', 'PRX 1-Fase Rail']);
+  /* een nieuw, leeg tekenvlak dat stap 1 volgt telt niet mee: anders zei de stuklijst
+     "1-fase" en kwamen de 3-fase onderdelen erbij, terwijl de PDF terecht zei dat het
+     project alleen 1-fase rails heeft */
+  const metLeeg = tweeVlakken(); metLeeg.edges = metLeeg.edges.filter(e => e.a === 'n1'); metLeeg.nodes = metLeeg.nodes.filter(n => n.s === 's1');
+  metLeeg.feeds = [{kind:'node', node:'n1', side:'R'}]; metLeeg.railVlak = {s1:'1fase'};
+  is('1-fase getekend, een leeg tekenvlak volgt stap 1 (3-fase): geen "1-fase" in de namen, geen 3-fase onderdelen',
+    [regels(metLeeg).filter(x => /Rail 3m/.test(x)), r.overigLijst().some(a => a.id === 'ao01'), r.materialenKop()],
+    [['2037229 Rail 3m Wit x1'], false, 'Materialen PRX 1 fase rails']);
+  metLeeg.railVlak.s2 = '3fase-dali';
+  is('een leeg tekenvlak met een eigen keuze telt wel (de kleur past zich meteen aan), de namen volgen de tekeningen',
+    [r.overigLijst().some(a => a.id === 'ao01'), regels(metLeeg).filter(x => /Rail 3m/.test(x))], [true, ['2037229 Rail 3m Wit x1']]);
+  /* de kleur: een tekenvlak dat stap 1 volgt (1-fase inbouw) krijgt een tekening terwijl de
+     kleur grijs is (van het 3-fase tekenvlak) - grijs bestaat daar niet, en zonder aanpassing
+     vond de stuklijst geen nummer meer */
+  const grijs = tweeVlakken(); grijs.rail = '1fase'; grijs.profiel = 'inbouw'; grijs.color = 'grijs'; grijs.railVlak = {s1:'3fase'};
+  r.zetSt(grijs); r.kleurBijRails();
+  is('kleur die bij een rail in het project niet bestaat: de eerste die overal bestaat', [r.huidig().color, regels(grijs).filter(x => /[Rr]ail 3m/.test(x))],
+    ['zwart', ['2000810 Rail 3m Zwart x1', '2037205 Inbouwrail 3m 1-fase Zwart x1']]);
+
   /* een opgeslagen project: de rail per tekenvlak, of de DALI-keuze van daarvoor */
   is('opgeslagen: rail per tekenvlak, DALI per tekenvlak omgezet, onzin weg', [
     r.railVlakUit({railVlak:{s2:'1fase', s3:'onzin'}}), r.railVlakUit({daliVlak:{s1:false, s2:true}}),

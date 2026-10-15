@@ -1645,15 +1645,23 @@ const daliVan = shId => railVan(shId)==='3fase-dali';
 function activeP(shId){ return eenFase(shId) ? metRail(PCODES_1F, shId) : daliVan(shId) ? PCODES_DALI : PCODES; }
 function activeL(shId){ return eenFase(shId) ? metRail(LCODES_1F, shId) : daliVan(shId) ? LCODES_DALI : LCODES; }
 function metRail(t, shId){ return Object.assign({}, t, {rail: t.rail[inbouw(shId) ? 'inbouw' : 'opbouw']}); }
-/* Welke rails er in het project zitten: die van elk tekenvlak. Bepaalt de kleuren die er
-   te kiezen zijn, de losse onderdelen, de 4 m-keuze en de tips. */
-const railsInGebruik = () => Array.from(new Set(st.sheets.map(sh=>railVan(sh.id))));
+/* Welke rails er in het project zitten: die van de tekenvlakken met een tekening, en van een
+   tekenvlak waarvoor zelf een rail is gekozen (ook als er nog niets op staat - dan past de
+   kleur zich meteen aan). Een nieuw, leeg tekenvlak dat stap 1 volgt telt niet: anders zette
+   het de 3-fase onderdelen bij een project dat alleen 1-fase tekeningen heeft. Zonder
+   tekening is het de rail van het project. Bepaalt de kleuren die er te kiezen zijn, de losse
+   onderdelen, de 4 m-keuze en de tips. */
+function railsInGebruik(){
+  const telt = st.sheets.filter(sh=>(st.railVlak && st.railVlak[sh.id]) || st.nodes.some(n=>n.s===sh.id));
+  return telt.length ? Array.from(new Set(telt.map(sh=>railVan(sh.id)))) : [projectRail()];
+}
 const heeft3F = () => railsInGebruik().some(k=>k.indexOf('3fase')===0);
 const heeft1F = () => railsInGebruik().some(k=>k.indexOf('1fase')===0);
 /* Achter de naam van een onderdeel dat er in een andere rail met een ander nummer is: " DALI"
-   (altijd - zonder stond DALI nergens op papier), en " 1-fase" als het project ook 3-fase
-   tekenvlakken heeft; dan staan dezelfde namen anders als twee regels onder elkaar. */
-const railTag = shId => daliVan(shId) ? ' DALI' : (eenFase(shId) && heeft3F()) ? ' 1-fase' : '';
+   (altijd - zonder stond DALI nergens op papier), en " 1-fase" als er ook 3-fase rails
+   getekend zijn; dan staan dezelfde namen anders als twee regels onder elkaar. Getekend, net
+   als de kop van de PDF (railStand()), zodat namen en kop hetzelfde zeggen. */
+const railTag = shId => daliVan(shId) ? ' DALI' : (eenFase(shId) && railStand().soorten.some(k=>k.indexOf('3fase')===0)) ? ' 1-fase' : '';
 /* De tekenvlakken met een tekening, en welke rails daarop liggen. */
 function railStand(){
   const vlakken = st.sheets.filter(sh=>st.nodes.some(n=>n.s===sh.id));
@@ -3119,6 +3127,7 @@ function refresh(){
   zorgVoorLegeSlot();
   briefingBijwerken();
   if(kolomKeuze) kolomKeuze.verf();
+  kleurBijRails();
   const B=computeBOM(); lastBOM=B;
   renderSheetsBar();
   /* stepper */
@@ -4091,14 +4100,22 @@ function railVlakUit(s){
 /* Een andere rail of uitvoering: een kleur die er niet is, vervalt (grijs bij de 1-fase
    rail, wit bij inbouw), net als een montagewijze die er niet bij hoort; de armaturen
    wisselen tussen de gewone en de DALI-code, en de losse onderdelen zijn die van de rail. */
+/* Een kleur die er bij een van de rails in het project niet is, wordt de eerste die er bij
+   alle wel is, en de tool zegt het - de kleur geldt voor het hele project. Niet alleen na een
+   railkeuze: ook als een tekenvlak dat stap 1 volgt zijn eerste tekening krijgt, kan er een
+   rail bij komen die de kleur niet heeft (een 3-fase tekenvlak in grijs, dan een tekening op
+   een tekenvlak met de 1-fase inbouwrail). Zonder dit vond computeBOM() geen nummer en
+   rekende de stuklijst niet meer door. Daarom ook vanuit refresh(). */
+function kleurBijRails(){
+  const kan=railKleuren();
+  if(!kan.length || kan.includes(st.color)) return;
+  const was=st.color; st.color=kan[0];
+  if(startKlaar) Melding.letop('De kleur is nu '+st.color+': '+was+' bestaat niet bij '
+    +railsInGebruik().filter(r=>!railSoort(r).kleuren.includes(was)).map(r=>'de '+railSoort(r).l).join(' en ')+'.');
+  bouwKeuzeRijen();
+}
 function railGewijzigd(){
-  /* een kleur die er bij een van de rails niet is: de eerste die er bij alle wel is, en
-     zeggen - de kleur geldt voor het hele project */
-  if(!railKleuren().includes(st.color)){
-    const was=st.color; st.color=railKleuren()[0];
-    if(startKlaar) Melding.letop('De kleur is nu '+st.color+': '+was+' bestaat niet bij '
-      +railsInGebruik().filter(r=>!railSoort(r).kleuren.includes(was)).map(r=>'de '+railSoort(r).l).join(' en ')+'.');
-  }
+  kleurBijRails();
   normalizeMountState();
   bouwKeuzeRijen();
   buildArmList();
