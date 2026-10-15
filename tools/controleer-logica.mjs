@@ -1742,6 +1742,99 @@ function is(wat, gekregen, verwacht){
   }
 }
 
+/* ================= DLC: naam, omschrijving, EAN en maten ================= */
+{
+  /* De lezer met de echte VELDMAP van de DLC-tool. LEZER zelf wordt pas na spec-lezer.js
+     neergezet, want zijn waarde komt daarvandaan. */
+  const bron = readFileSync(join(root, 'dlc.html'), 'utf8');
+  const m = await laadUit('dlc.html',
+    ['SCHEMA', 'VELDMAP', 'SECTIE', 'GETAL', 'JAREN', 'VRIJE_TEKST', 'hoofdletter', 'zetVeld',
+     'MAAT_EENHEID', 'maatInMm', 'getalNl', 'MAAT_VELD', 'leesMaten', 'plat', 'klasseTekst',
+     'eenheidTekst', 'kelvinTekst', 'ugrTekst', 'afmetingTekst', 'autoOmschrijving',
+     'leegBlad', 'BEELDVAKKEN', 'beeldenNaarVakken', 'herstelSpecial', 'S',
+     'leesIn', 'kortSpanning', 'eersteZin'],
+    'const window = {};\n' + readFileSync(join(root, 'spec-lezer.js'), 'utf8') + '\n'
+    + 'const SpecLezer = window.SpecLezer;\n' + snijUit(bron, 'LEZER'), ['LEZER']);
+  console.log('DLC: naam, omschrijving, EAN en maten');
+  const vers = () => m.leegBlad();
+  const lees = (tekst, S = vers()) => ({S, r: m.leesIn(S, tekst)});
+  const maten = S => ['lengte', 'breedte', 'hoogte', 'diameter'].map(k => S.velden[k].w);
+
+  is('een nieuw blad: geen naam, de omschrijving gaat vanzelf', [vers().titelDun, vers().omschrijvingAuto], ['', true]);
+  is('de groep Afmetingen, in mm', m.SCHEMA.find(g => g.kop === 'Afmetingen').velden.map(v => v.l),
+    ['Lengte (mm)', 'Breedte (mm)', 'Hoogte (mm)', 'Diameter (mm)']);
+
+  /* De EAN van de leverancier komt nooit op een DLC-blad - ook niet als "vul zelf aan". */
+  {
+    const {S, r} = lees('Merk: Voorbeeld\nEAN code: 8718699673659\nEAN-13\t8718699673666\nGTIN: 08718699673659\nWattage: 15 W');
+    is('EAN wordt nooit ingevuld', [S.velden.ean.w, S.velden.merk.w, S.velden.wattage.w], ['', 'Voorbeeld', '15 W']);
+    /* de lezer meldt per veld de eerste; de rest van die regels is net zo goed opgeslokt */
+    is('wel gemeld als bewust overgeslagen, niet als vul zelf aan',
+      [r.genegeerd, r.onbekend, r.herkend.some(h => /ean|gtin/i.test(h.label))], [['EAN code'], [], false]);
+    is('elke schrijfwijze apart ook', ['EAN-13\t8718699673666', 'GTIN: 08718699673659', 'EAN-code: 871869967365', 'Barcode: 871869967365']
+      .map(x => { const {S, r} = lees(x); return [S.velden.ean.w, r.genegeerd.length, r.onbekend.length]; }),
+      [['', 1, 0], ['', 1, 0], ['', 1, 0], ['', 1, 0]]);
+  }
+
+  /* Maten in mm, alleen met een eenheid erbij */
+  is('label met eenheid, waarde eronder', maten(lees('Afmetingen\nLengte (mm) L\n300\nBreedte (mm) W\n600\nHoogte (mm) H\n45').S),
+    ['300', '600', '45', '']);
+  is('eenheid in de waarde, omgerekend', maten(lees('Lengte: 1.200 mm\nBreedte: 6 cm\nHoogte: 0,05 m').S), ['1200', '60', '50', '']);
+  {
+    const {S, r} = lees('Hoogte: 80\nDiameter: Ø200 mm\nInbouwdiameter: 190 mm');
+    is('zonder eenheid niet ingevuld maar gemeld; de zaagmaat is geen diameter',
+      [maten(S), r.onbekend], [['', '', '', '200'], ['Inbouwdiameter: 190 mm', 'Hoogte: 80']]);
+  }
+  is('Ø als label', lees('Ø: 226 mm').S.velden.diameter.w, '226');
+  is('afmetingen met de volgorde erbij gaan uit elkaar', maten(lees('Afmetingen (LxBxH): 600x300x45 mm').S), ['600', '300', '45', '']);
+  {
+    const {S, r} = lees('Afmetingen: 600x600x45 mm');
+    is('zonder volgorde niet geraden', [maten(S), r.onbekend], [['', '', '', ''], ['Afmetingen: 600x600x45 mm']]);
+  }
+  is('Ø maal een getal is diameter x hoogte', maten(lees('Afmetingen: Ø200x80 mm').S), ['', '', '80', '200']);
+  {
+    const S = vers(); S.velden.hoogte.w = '50';
+    is('wat er al stond blijft staan', maten(lees('Hoogte: 45 mm\nLengte: 300 mm', S).S), ['300', '', '50', '']);
+  }
+
+  /* De omschrijving: DLC - naam IP IK wattage lumen kleurtemperatuur UGR afmetingen */
+  {
+    const blad = (naam, velden) => { const S = vers(); S.titelDun = naam; Object.entries(velden).forEach(([k, w]) => { S.velden[k].w = w; }); return S; };
+    const vol = {ip: 'IP 20', ik: '02', wattage: '15 W', lumen: '1500 lm', kelvin: '3000 K', ugr: '<19', lengte: '300', breedte: '600', hoogte: '600'};
+    is('zonder naam geen omschrijving', m.autoOmschrijving(blad('', vol)), '');
+    is('het voorbeeld van inside sales', m.autoOmschrijving(blad('Norma Track', vol)),
+      'DLC - Norma Track IP20 IK02 15W 1500lm 3000K UGR<19 30x60x60cm');
+    is('rond: Ø in mm, de hoogte niet in de omschrijving',
+      m.autoOmschrijving(blad('Kayo', {wattage: '9W', diameter: '200', hoogte: '80'})), 'DLC - Kayo 9W Ø200');
+    is('wat er niet is valt weg, decimalen met een komma',
+      m.autoOmschrijving(blad('Lijn', {ugr: 'UGR 22', lengte: '1500', hoogte: '45'})), 'DLC - Lijn UGR22 150x4,5cm');
+    is('wat niet in het patroon past blijft zoals het is',
+      m.autoOmschrijving(blad('X', {wattage: '8W/17W', kelvin: '2700-3000 / 4000k', ip: 'IP20/44'})), 'DLC - X IP20/44 8W/17W 2700K-3000K/4000K');
+    is('een maat zonder getal komt er niet in', m.autoOmschrijving(blad('X', {lengte: 'ca. 300', diameter: ''})), 'DLC - X');
+  }
+
+  /* Plakken met de omschrijving op automatisch: de omschrijving van de leverancier
+     (zijn merk en type) wordt niet overgenomen. Staat hij op zelf, dan als vanouds. */
+  {
+    const tekst = 'Inbouwdownlight met microprismatische afdekking voor kantoren\nWattage: 15 W';
+    const auto = lees(tekst).S, zelf = vers(); zelf.omschrijvingAuto = false;
+    m.leesIn(zelf, tekst);
+    is('leveranciersomschrijving alleen als de automatische uit staat', [auto.omschrijving, zelf.omschrijving],
+      ['', 'Inbouwdownlight met microprismatische afdekking voor kantoren']);
+  }
+
+  /* Een special van voor de automatische omschrijving houdt bij het herstellen zijn
+     eigen tekst; een nieuwe houdt zijn keuze. */
+  {
+    m.herstelSpecial({S: {titelDun: 'LED Noodverlichting', omschrijving: 'Oude tekst'}});
+    const oud = [m.S.titelDun, m.S.omschrijving, m.S.omschrijvingAuto];
+    m.herstelSpecial({S: {titelDun: 'Norma', omschrijving: 'DLC - Norma', omschrijvingAuto: true}});
+    is('oud blijft zoals het was, nieuw blijft automatisch', [oud, m.S.omschrijvingAuto],
+      [['LED Noodverlichting', 'Oude tekst', false], true]);
+    is('een oud blad krijgt de maten erbij, leeg', maten(m.S), ['', '', '', '']);
+  }
+}
+
 /* ======================= railtool: de codeparen ======================= */
 {
   /* In het installatieoverzicht, onder "Onderdelen in de tekening", staan per onderdeel

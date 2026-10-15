@@ -59,6 +59,11 @@
     border:1px solid var(--border); border-radius:8px; padding:7px 9px; background:var(--white);
   }
   textarea{min-height:150px; resize:vertical; line-height:1.5; font-size:12px;}
+  textarea.kort{min-height:58px;}
+  /* de naam is verplicht: zolang hij leeg is valt het veld op */
+  label.veld.verplicht > input{border-color:var(--amber); background:var(--amber-light);}
+  label.veld.verplicht > span::after{content:' - vul eerst in'; color:var(--amber); font-weight:700;}
+  .oms-stand{font-size:11px; color:var(--slate); line-height:1.45; margin:-3px 0 2px;}
   input[type=text]:focus, textarea:focus{outline:2px solid var(--blue); outline-offset:1px; border-color:var(--blue);}
 
   .knoppen{display:flex; gap:8px; flex-wrap:wrap;}
@@ -312,12 +317,22 @@ const SCHEMA = [
     {id:'matAfdekking', l:'Materiaal afdekking'},
     {id:'matOptisch',   l:'Optisch-/Lens-/Reflectormateriaal'},
   ]},
+  /* In mm, zoals de leveranciersbladen ze geven: dan neem je het getal zo over. De
+     omschrijving maakt er "Ø200" of "30x60x60cm" van (zie afmetingTekst). */
+  {kop:'Afmetingen', velden:[
+    {id:'lengte',   l:'Lengte (mm)'},
+    {id:'breedte',  l:'Breedte (mm)'},
+    {id:'hoogte',   l:'Hoogte (mm)'},
+    {id:'diameter', l:'Diameter (mm)'},
+  ]},
 ];
 const VELDMAP = [
   {v:'artikelcode', l:/^(artikelcode|artikelnummer|bestelnummer|productcode|sku|item ?(no|number|code)|article ?(code|number))$/i},
   {v:'merk',      l:/^(merk|fabrikant|brand|manufacturer)$/i},
   {v:'categorie', l:/^(categorie|productgroep|serie|category|productfamilie)$/i},
-  {v:'ean',       l:/^(ean ?(code|nummer)?|gtin|barcode)$/i},
+  /* Een EAN van de leverancier hoort niet op een DLC-blad: herkend, zodat hij niet als
+     "vul zelf aan" in beeld komt, maar nooit ingevuld (zie verwerk). */
+  {v:'_negeer',   l:/^(ean[- ]?(code|nummer)?|ean-?13|gtin(-?1[34])?|barcode)$/i},
   {v:'verpakking',l:/^(verpakking|verpakkingseenheid|packaging|colli)$/i},
   {v:'lamphouder',l:/^(lamphouder|fitting|lampvoet|bulb ?base|socket)$/i},
 
@@ -377,6 +392,15 @@ const VELDMAP = [
   /* Let op: geen kaal "reflector" of "lens" - dat zijn WAARDEN bij het label
      Optiek, en als ze ook als label gelden slikt de lezer ze op. */
   {v:'matOptisch',   l:/^(optisch[\w\-\/]*|optiek|lens ?materiaal|reflector ?materiaal|afscherming|diffuser)$/i},
+
+  /* Maten: alleen het label zelf, dus niet "inbouwdiameter" (dat is het gat om te zagen)
+     of "lengte kabel". Ze gaan niet rechtstreeks in een veld: leesMaten() rekent ze om
+     naar mm, en alleen als er een eenheid bij staat. */
+  {v:'_lengte',   l:/^(lengte|length)$/i},
+  {v:'_breedte',  l:/^(breedte|width)$/i},
+  {v:'_hoogte',   l:/^(hoogte|height)$/i},
+  {v:'_diameter', l:/^((buiten|uitwendig|outer|overall)\s?)?diameter$|^doorsnede$|^[\u00d8\u00f8]$/i},
+  {v:'_afmetingen', l:/^((nominale?|nominal)\s)?(afmetingen|afmeting|maten|buitenmaat|buitenafmeting|dimensions|overall dimensions|outer dimensions|size)$/i},
 ];
 const SECTIE = /^(elektrisch|licht ?techniek|certificat|norm|kleuren|materiaal en|algemeen|afmeting|verpakking|overig|bescherming|energie en|controle|noodverlichting|montage\/)/i;
 
@@ -458,16 +482,129 @@ function zetVeld(veld, waarde, doorParserBijgezet){
   veld.w=w;
 }
 
+/* ======================= maten =======================
+   Een maat in mm, uit een waarde en het label dat erbij staat. Alleen met een eenheid
+   - in de waarde ("45 mm", "4,5 cm") of in het label ("Hoogte (mm)") - want een kaal
+   getal kan net zo goed cm zijn, en dan staat er een maat op het blad die tien keer te
+   groot of te klein is. Een Ø ervoor mag. "1.200 mm" is twaalfhonderd: een punt met drie
+   cijfers erachter is bij millimeters een duizendtal, geen komma. */
+const MAAT_EENHEID = {mm:1, cm:10, m:1000};
+function maatInMm(waarde, label){
+  const m = String(waarde == null ? '' : waarde).trim().replace(/^[\u00d8\u00f8]\s*/, '')
+    .match(/^(\d+(?:[.,]\d+)*)\s*(mm|cm|m)?$/i);
+  if(!m) return null;
+  const eenheid = (m[2] || (String(label || '').match(/\((mm|cm|m)\)/i) || [])[1] || '').toLowerCase();
+  if(!eenheid) return null;
+  let getal = m[1];
+  if(eenheid !== 'm' && /^\d{1,3}(\.\d{3})+$/.test(getal)) getal = getal.replace(/\./g, '');
+  if(!/^\d+([.,]\d+)?$/.test(getal)) return null;
+  const mm = Math.round(parseFloat(getal.replace(',', '.')) * MAAT_EENHEID[eenheid] * 100) / 100;
+  return mm > 0 ? mm : null;
+}
+/* Een getal op z'n Nederlands, op hoogstens een decimaal: 4.5 -> "4,5", 30 -> "30". */
+function getalNl(n){ return String(Math.round(n * 10) / 10).replace('.', ','); }
+
+/* De maten uit wat de lezer herkende ({label, waarde, veld}), in mm per veld. Wat niet
+   eenduidig is gaat naar mis, zodat het paneel het laat zien om zelf in te vullen:
+   - een losse maat zonder eenheid;
+   - "Afmetingen: 600x600x45 mm" zonder volgorde erbij - is dat LxBxH of BxLxH? Staat
+     de volgorde er wel ("Afmetingen (LxBxH)"), dan gaat hij uit elkaar;
+   - Ø met een tweede getal is diameter x hoogte, zo schrijft elke catalogus het. */
+const MAAT_VELD = {_lengte:'lengte', _breedte:'breedte', _hoogte:'hoogte', _diameter:'diameter'};
+function leesMaten(herkend){
+  const maten = {}, mis = [];
+  (herkend || []).forEach(r=>{
+    const veld = MAAT_VELD[r.veld];
+    if(!veld) return;
+    const mm = maatInMm(r.waarde, r.label);
+    if(mm != null) maten[veld] = mm; else mis.push(r.label + ': ' + r.waarde);
+  });
+  const samen = (herkend || []).find(r=>r.veld === '_afmetingen');
+  if(samen){
+    const w = String(samen.waarde).trim(), getal = '(\\d+(?:[.,]\\d+)?)', x = '\\s*[x\u00d7*]\\s*';
+    const labelEenheid = (String(samen.label).match(/\((?:[^)]*?\b)?(mm|cm|m)\)/i) || [])[1] || '';
+    const rond = w.match(new RegExp('^[\u00d8\u00f8]\\s*' + getal + '(?:' + x + getal + ')?\\s*(mm|cm|m)?$', 'i'));
+    const recht = w.match(new RegExp('^' + getal + x + getal + '(?:' + x + getal + ')?\\s*(mm|cm|m)?$', 'i'));
+    const uit = {};
+    if(rond){
+      const eh = rond[3] || labelEenheid;
+      if(eh){ uit.diameter = maatInMm(rond[1], '(' + eh + ')'); if(rond[2]) uit.hoogte = maatInMm(rond[2], '(' + eh + ')'); }
+    } else if(recht){
+      const eh = recht[4] || labelEenheid;
+      const volgorde = (String(samen.label).match(/\b([LBWH])\s*[x\u00d7*]\s*([LBWH])(?:\s*[x\u00d7*]\s*([LBWH]))?\b/i) || []).slice(1).filter(Boolean);
+      const getallen = [recht[1], recht[2], recht[3]].filter(Boolean);
+      const naar = {L:'lengte', B:'breedte', W:'breedte', H:'hoogte'};
+      const velden = volgorde.map(l=>naar[l.toUpperCase()]);
+      if(eh && velden.length === getallen.length && new Set(velden).size === velden.length)
+        velden.forEach((v, i)=>{ uit[v] = maatInMm(getallen[i], '(' + eh + ')'); });
+    }
+    const goed = Object.keys(uit).length && Object.values(uit).every(v=>v != null);
+    /* een losse maat met een eigen label weet het preciezer dan de samengevatte */
+    if(goed) Object.keys(uit).forEach(v=>{ if(maten[v] == null) maten[v] = uit[v]; });
+    else if(!['lengte', 'breedte', 'hoogte', 'diameter'].some(v=>maten[v] != null)) mis.push(samen.label + ': ' + w);
+  }
+  return {maten, mis};
+}
+
+/* ======================= de omschrijving =======================
+   Zoals inside sales hem schrijft (oktober 2026):
+     DLC - naam IP IK wattage lumen kleurtemperatuur UGR afmetingen
+   bijvoorbeeld "DLC - Norma Track IP20 IK02 15W 1500lm 3000K UGR<19 30x60x5cm". De naam
+   is de bovenregel; zonder naam blijft de omschrijving leeg. Wat er niet is valt weg,
+   en een waarde wordt alleen in vorm gebracht ("15 W" -> "15W", "IP 65" -> "IP65"),
+   nooit aangevuld: past hij niet in het gewone patroon, dan komt hij er zoals hij is. */
+function plat(v){ return String(v == null ? '' : v).replace(/\s+/g, ' ').trim(); }
+function klasseTekst(v, voor){
+  v = plat(v);
+  if(!v) return '';
+  if(new RegExp('^\\d{2}(\\s*\\/\\s*\\d{2})*$').test(v)) return voor + v.replace(/\s+/g, '');
+  return v.replace(new RegExp('\\b' + voor + '\\s+(?=\\d)', 'gi'), voor.toUpperCase());
+}
+function eenheidTekst(v, eenheid, woorden){
+  v = plat(v);
+  const m = v.match(new RegExp('^(\\d+(?:[.,]\\d+)?(?:\\s*[-\u2013\\/]\\s*\\d+(?:[.,]\\d+)?)*)\\s*(?:' + woorden + ')?$', 'i'));
+  return m ? m[1].replace(/\s+/g, '') + eenheid : v;
+}
+function kelvinTekst(v){
+  v = plat(v);
+  if(!/^\d{4}\s*K?(\s*[-\u2013\/|,]\s*\d{4}\s*K?)*$/i.test(v)) return v;
+  return v.replace(/\s+/g, '').replace(/k/g, 'K').replace(/(\d{4})(?!K)/g, '$1K');
+}
+function ugrTekst(v){
+  v = plat(v).replace(/^ugr\s*/i, '');
+  if(!v) return '';
+  return /^[<>\u2264\u2265=]?\s*\d{1,2}([.,]\d)?(\s*\/\s*\d{1,2}([.,]\d)?)*$/.test(v) ? 'UGR' + v.replace(/\s+/g, '') : 'UGR ' + v;
+}
+/* Rond: "Ø200" (mm, zo schrijft de catalogus het); anders lengte x breedte x hoogte in
+   cm, wat er van die drie is: "30x60x60cm". */
+function afmetingTekst(velden){
+  const mm = id => velden[id] ? maatInMm(velden[id].w, velden[id].l) : null;
+  if(mm('diameter') != null) return '\u00d8' + getalNl(mm('diameter'));
+  const lbh = ['lengte', 'breedte', 'hoogte'].map(mm).filter(v=>v != null);
+  return lbh.length ? lbh.map(v=>getalNl(v / 10)).join('x') + 'cm' : '';
+}
+function autoOmschrijving(S){
+  const naam = plat(S.titelDun);
+  if(!naam) return '';
+  const velden = S.velden || {}, w = id => (velden[id] || {}).w || '';
+  return ['DLC -', naam,
+    klasseTekst(w('ip'), 'IP'), klasseTekst(w('ik'), 'IK'),
+    eenheidTekst(w('wattage'), 'W', 'w|watt'), eenheidTekst(w('lumen'), 'lm', 'lm|lumen'),
+    kelvinTekst(w('kelvin')), ugrTekst(w('ugr')), afmetingTekst(velden)]
+    .filter(Boolean).join(' ');
+}
+
 /* ======================= de staat ======================= */
 
 function leegBlad(){
   const velden={};
   SCHEMA.forEach(g=>g.velden.forEach(v=>{ velden[v.id]={l:v.l, w:''}; }));
   return {
-    titelDun:'LED Noodverlichting',
+    titelDun:'',            /* de naam van het armatuur: vult de gebruiker zelf in */
     titelVet:'Special',
     artikelcode:'Special',
     omschrijving:'',
+    omschrijvingAuto:true,  /* omschrijving volgt naam en gegevens (zie autoOmschrijving) tot je er zelf in typt */
     velden,                 /* id -> {l:label, w:waarde} */
     extra:[],               /* [{kop, l, w}] handmatig bijgezette regels */
     /* de vijf fotovakken van het blad, zie BEELDVAKKEN */
@@ -608,6 +745,9 @@ function herstelSpecial(bron){
     S = beeldenNaarVakken(Object.assign(leegBlad(), bron.S));
     SCHEMA.forEach(gr=>gr.velden.forEach(v=>{ if(!S.velden[v.id]) S.velden[v.id]={l:v.l, w:''}; }));
     if(!S.uitsnede || typeof S.uitsnede !== 'object' || Array.isArray(S.uitsnede)) S.uitsnede = {};
+    /* Een special van vóór de automatische omschrijving houdt zijn eigen tekst: openen
+       mag niets aan een blad veranderen. "Weer automatisch" bij de omschrijving kan altijd. */
+    if(!bron.S || !Object.prototype.hasOwnProperty.call(bron.S, 'omschrijvingAuto')) S.omschrijvingAuto = false;
 }
 if(OPGESLAGEN_SPECIAL){
   try{
@@ -682,6 +822,22 @@ function tekenPaneel(){
   const p=$('paneel');
   p.innerHTML='';
 
+  /* --- kop: hier begin je, met de naam van het armatuur --- */
+  const kKop=kaart('Kop');
+  kKop.append(el('p','hint',
+    'Begin met de naam van het armatuur: die staat dun bovenaan het blad, en daarmee vult '+
+    'de omschrijving zich vanzelf zodra je hieronder de specificaties plakt. De regel '+
+    'eronder staat vet.'));
+  const naam=tekstveld('Naam van het armatuur (bovenregel, dun)', S.titelDun, w=>{
+    S.titelDun=w; naam.classList.toggle('verplicht', !w.trim()); plan();
+  });
+  naam.classList.toggle('verplicht', !S.titelDun.trim());
+  const naamVeld=naam.querySelector('input');
+  naamVeld.id='titelDun'; naamVeld.placeholder='bijv. Norma Track';
+  kKop.append(naam);
+  kKop.append(tekstveld('Titel (vet)', S.titelVet, w=>{ S.titelVet=w; plan(); }));
+  p.append(kKop);
+
   /* --- plakken --- */
   const kPlak=kaart('Specificaties plakken');
   kPlak.append(el('p','hint',
@@ -719,24 +875,29 @@ function tekenPaneel(){
       if(S.uitslag.onbekend.length>18) o.append(document.createTextNode(' …'));
       u.append(o);
     }
+    if((S.uitslag.genegeerd||[]).length)
+      u.append(el('div','herkend','Bewust niet overgenomen: '+S.uitslag.genegeerd.join(' · ')+
+        ' - een EAN van de leverancier hoort niet op een DLC-blad.'));
     kPlak.append(u);
   }
   p.append(kPlak);
 
-  /* --- kop --- */
-  const kKop=kaart('Kop');
-  kKop.append(el('p','hint',
-    'De titel staat in twee gewichten, zoals in het ontwerp: de bovenste regel dun, '+
-    'de onderste vet.'));
-  kKop.append(tekstveld('Bovenregel (dun)', S.titelDun, w=>{ S.titelDun=w; plan(); }));
-  kKop.append(tekstveld('Titel (vet)', S.titelVet, w=>{ S.titelVet=w; plan(); }));
-  p.append(kKop);
-
   /* --- bestelgegevens --- */
   const kBest=kaart('Bestelgegevens');
   kBest.append(tekstveld('Artikelcode', S.artikelcode, w=>{ S.artikelcode=w; plan(); }));
-  kBest.append(tekstveld('Omschrijving', S.omschrijving, w=>{ S.omschrijving=w; plan(); }, true));
+  const oms=tekstveld('Omschrijving', S.omschrijving, w=>{
+    S.omschrijving=w;
+    if(S.omschrijvingAuto){ S.omschrijvingAuto=false; tekenOmschrijvingStand(); }   /* jouw tekst blijft staan */
+    plan();
+  }, true);
+  const omsVeld=oms.querySelector('textarea');
+  omsVeld.id='omschrijving'; omsVeld.classList.add('kort');
+  omsVeld.placeholder='Vul eerst de naam van het armatuur in; dan vult de omschrijving zich vanzelf.';
+  kBest.append(oms);
+  const omsStand=el('div','oms-stand'); omsStand.id='omschrijvingStand';
+  kBest.append(omsStand);
   p.append(kBest);
+  tekenOmschrijvingStand();
 
   /* --- productgegevens --- */
   const gevuld=Object.values(S.velden).filter(v=>v.w.trim()).length + S.extra.filter(e=>e.w.trim()).length;
@@ -792,6 +953,22 @@ function tekenPaneel(){
   }
   p.append(kBeeld);
   if(bewerker) bewerker.ververs();   /* pas nu staat hij op het scherm en is zijn breedte bekend */
+}
+
+/* Onder de omschrijving: of hij zichzelf vult of zelf getypt is, met de weg terug. */
+function tekenOmschrijvingStand(){
+  const s=$('omschrijvingStand');
+  if(!s) return;
+  s.innerHTML='';
+  if(S.omschrijvingAuto){
+    s.append(el('span',null,'Vult zichzelf: DLC - naam, IP, IK, wattage, lumen, kleurtemperatuur, '+
+      'UGR en afmetingen. Typ je erin, dan blijft jouw tekst staan.'));
+    return;
+  }
+  s.append(el('span',null,'Zelf ingevuld. '));
+  const terug=el('button','mini','Weer automatisch'); terug.type='button';
+  terug.onclick=()=>{ S.omschrijvingAuto=true; plan(); tekenOmschrijvingStand(); };
+  s.append(terug);
 }
 
 function veldRij(veld, verwijder){
@@ -1091,17 +1268,35 @@ document.addEventListener('paste', e=>{
    je hebt het misschien met de hand gecorrigeerd, en dan is het zuur als een
    tweede plakronde dat overschrijft. */
 function verwerk(){
-  const res=LEZER.lees(S.plaktekst);
-  S.uitslag=res;
+  S.uitslag=leesIn(S, S.plaktekst);
+  tekenPaneel(); plan();
+}
+/* Het werk van verwerk() zonder het paneel, zodat controleer-logica.mjs het op de echte
+   code kan nalopen: de velden van S vullen en teruggeven wat het paneel laat zien. */
+function leesIn(S, tekst){
+  const res=LEZER.lees(tekst);
   const u=res.uit;
+  /* De EAN van de leverancier: herkend, nooit overgenomen. De maten gaan via
+     leesMaten() (omgerekend naar mm); wat daar niet eenduidig is, komt bij "vul zelf aan". */
+  const {maten, mis} = leesMaten(res.herkend);
+  const naarMis = r => (MAAT_VELD[r.veld] || r.veld==='_afmetingen') && mis.includes(r.label+': '+r.waarde);
+  const uitslag = Object.assign({}, res, {
+    herkend: res.herkend.filter(r=>r.veld!=='_negeer' && !naarMis(r)),
+    onbekend: res.onbekend.concat(mis),
+    genegeerd: res.herkend.filter(r=>r.veld==='_negeer').map(r=>r.label),
+  });
 
   Object.keys(u).forEach(sleutel=>{
-    if(sleutel==='omschrijving'){ if(!S.omschrijving.trim()) S.omschrijving=eersteZin(u[sleutel]); return; }
+    /* De omschrijving van de leverancier alleen als je de automatische hebt uitgezet:
+       die noemt zijn eigen merk en type, en hoort dus niet op een DLC-blad. */
+    if(sleutel==='omschrijving'){ if(!S.omschrijvingAuto && !S.omschrijving.trim()) S.omschrijving=eersteZin(u[sleutel]); return; }
     if(sleutel==='artikelcode'){ if(!S.artikelcode.trim() || S.artikelcode==='Special') S.artikelcode=u[sleutel]; return; }
+    if(sleutel.charAt(0)==='_') return;   /* _negeer en de maten: nooit rechtstreeks in een veld */
     zetVeld(S.velden[sleutel], sleutel==='volt' ? kortSpanning(u[sleutel]) : u[sleutel],
             (res.bijgezet||[]).indexOf(sleutel)>=0);
   });
-  tekenPaneel(); plan();
+  Object.keys(maten).forEach(id=>zetVeld(S.velden[id], getalNl(maten[id]), false));
+  return uitslag;
 }
 /* Een verkooptekst is over meerdere regels afgebroken, dus de eerste REGEL is
    vaak een halve zin. De eerste zin is een bruikbare omschrijving; de rest is
@@ -1453,9 +1648,19 @@ let voorbeeldUrl=null, bezigNu=false, opnieuw=false, wachter=null;
    gebruiker, en hoeft er niets bewaard of gewaarschuwd te worden. */
 let startKlaar = false;
 function plan(){
+  werkOmschrijvingBij();
   if(startKlaar) ProjectOpslag.gewijzigd();
   clearTimeout(wachter);
   wachter=setTimeout(ververs, 300);
+}
+/* Staat de omschrijving op automatisch, dan volgt hij de naam en de gegevens - ook in het
+   paneel, zonder dat te herbouwen (dan zou je focus kwijtraken midden in het typen). */
+function werkOmschrijvingBij(){
+  if(!S.omschrijvingAuto) return;
+  const nieuw = autoOmschrijving(S);
+  if(nieuw !== S.omschrijving) S.omschrijving = nieuw;
+  const veld = $('omschrijving');
+  if(veld && veld.value !== nieuw) veld.value = nieuw;
 }
 async function ververs(){
   if(bezigNu){ opnieuw=true; return; }
@@ -1494,6 +1699,10 @@ function bestandsnaam(){
     .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'dlc-productblad');
 }
 $('btnPdf').onclick=async()=>{
+  if(!String(S.titelDun||'').trim()){
+    Melding.letop('Vul eerst de naam van het armatuur in: die staat bovenaan het blad en in de omschrijving.', {bij:$('titelDun')});
+    return;
+  }
   const knop=$('btnPdf'), oud=knop.textContent;
   knop.disabled=true; knop.textContent='bezig…';
   try{
