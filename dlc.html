@@ -428,7 +428,8 @@ const VRIJE_TEKST = [
   {v:'ip',      l:'IP-classificatie', p:/\bIP\s?(\d{2})\b/i, uit:m=>'IP'+m[1]},
   {v:'ik',      l:'IK-classificatie', p:/\bIK\s?(\d{2})\b/i, uit:m=>'IK'+m[1]},
   {v:'cri',     l:'Weergave-index', p:/\b(?:cri|ra)\s*[>≥]?\s*(\d{2})\b/i, uit:m=>'Ra >'+m[1]},
-  {v:'ugr',     l:'Verblindingsbegrenzing', p:/\bugr\s*[<≤]?\s*(\d{2})\b/i, uit:m=>'<'+m[1]},
+  /* Het teken alleen als de leverancier het schreef: "UGR 19" is geen "<19". */
+  {v:'ugr',     l:'Verblindingsbegrenzing', p:/\bugr\s*([<≤]?)\s*(\d{2})\b/i, uit:m=>m[1]+m[2]},
   {v:'bundel',  l:'Lichtbundel', p:/(?<![\w.,])(\d{2,3})\s*°/, uit:m=>m[1]+'°'},
   /* "levensduurverwachting (50.000 uur L80B10)" - alles tot de sluitende haak. */
   {v:'levensduur', l:'Nom. levensduur',
@@ -575,11 +576,13 @@ function ugrTekst(v){
   if(!v) return '';
   return /^[<>\u2264\u2265=]?\s*\d{1,2}([.,]\d)?(\s*\/\s*\d{1,2}([.,]\d)?)*$/.test(v) ? 'UGR' + v.replace(/\s+/g, '') : 'UGR ' + v;
 }
-/* Rond: "Ø200" (mm, zo schrijft de catalogus het); anders lengte x breedte x hoogte in
-   cm, wat er van die drie is: "30x60x60cm". */
+/* Rond: de diameter in mm zoals de catalogus hem schrijft, met de hoogte erachter in cm:
+   "Ø200x8cm", of zonder hoogte "Ø200". Anders lengte x breedte x hoogte in cm, wat er van
+   die drie is: "30x60x60cm". */
 function afmetingTekst(velden){
   const mm = id => velden[id] ? maatInMm(velden[id].w, velden[id].l) : null;
-  if(mm('diameter') != null) return '\u00d8' + getalNl(mm('diameter'));
+  if(mm('diameter') != null)
+    return '\u00d8' + getalNl(mm('diameter')) + (mm('hoogte') != null ? 'x' + getalNl(mm('hoogte') / 10) + 'cm' : '');
   const lbh = ['lengte', 'breedte', 'hoogte'].map(mm).filter(v=>v != null);
   return lbh.length ? lbh.map(v=>getalNl(v / 10)).join('x') + 'cm' : '';
 }

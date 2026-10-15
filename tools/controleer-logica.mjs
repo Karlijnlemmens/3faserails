@@ -1804,13 +1804,22 @@ function is(wat, gekregen, verwacht){
     is('zonder naam geen omschrijving', m.autoOmschrijving(blad('', vol)), '');
     is('het voorbeeld van inside sales', m.autoOmschrijving(blad('Norma Track', vol)),
       'DLC - Norma Track IP20 IK02 15W 1500lm 3000K UGR<19 30x60x60cm');
-    is('rond: Ø in mm, de hoogte niet in de omschrijving',
-      m.autoOmschrijving(blad('Kayo', {wattage: '9W', diameter: '200', hoogte: '80'})), 'DLC - Kayo 9W Ø200');
+    is('rond: Ø in mm, de hoogte erachter in cm',
+      [m.autoOmschrijving(blad('Kayo', {wattage: '9W', diameter: '200', hoogte: '80'})),
+       m.autoOmschrijving(blad('Kayo', {diameter: '200', hoogte: '45'})), m.autoOmschrijving(blad('Kayo', {diameter: '200'}))],
+      ['DLC - Kayo 9W Ø200x8cm', 'DLC - Kayo Ø200x4,5cm', 'DLC - Kayo Ø200']);
     is('wat er niet is valt weg, decimalen met een komma',
       m.autoOmschrijving(blad('Lijn', {ugr: 'UGR 22', lengte: '1500', hoogte: '45'})), 'DLC - Lijn UGR22 150x4,5cm');
     is('wat niet in het patroon past blijft zoals het is',
       m.autoOmschrijving(blad('X', {wattage: '8W/17W', kelvin: '2700-3000 / 4000k', ip: 'IP20/44'})), 'DLC - X IP20/44 8W/17W 2700K-3000K/4000K');
     is('een maat zonder getal komt er niet in', m.autoOmschrijving(blad('X', {lengte: 'ca. 300', diameter: ''})), 'DLC - X');
+    /* UGR: het teken alleen als de specificaties het geven - ook uit een verkooptekst */
+    is('UGR met en zonder teken, zoals de leverancier het schreef',
+      [m.autoOmschrijving(blad('X', {ugr: '19'})), m.autoOmschrijving(blad('X', {ugr: '< 19'})), m.autoOmschrijving(blad('X', {ugr: '≤19'}))],
+      ['DLC - X UGR19', 'DLC - X UGR<19', 'DLC - X UGR≤19']);
+    is('uit een verkooptekst: geen teken erbij verzonnen',
+      ['Strak paneel met UGR 19 en 4000K licht.', 'Strak paneel, UGR<19, 4000K.']
+        .map(x => lees(x).S.velden.ugr.w), ['19', '<19']);
   }
 
   /* Plakken met de omschrijving op automatisch: de omschrijving van de leverancier
