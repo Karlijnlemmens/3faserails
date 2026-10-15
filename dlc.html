@@ -126,10 +126,36 @@
   .vak-toepassing{grid-area:toep;} .vak-toepassing .beeldvak{min-height:150px;}
   .vak-detail1{grid-area:det1;} .vak-detail2{grid-area:det2;}
   .vak-afmetingen{grid-area:afm;}
-  .beeldvak .weg{
+  .beeldvak .weg, .beeldvak .knip{
     position:absolute; top:3px; right:3px; border:none; background:rgba(28,37,52,.72); color:#fff;
     border-radius:50%; width:19px; height:19px; font-size:12px; line-height:1; cursor:pointer; padding:0;
   }
+  /* uitsnede kiezen: links boven, blauw als het vak een eigen uitsnede heeft */
+  .beeldvak .knip{right:auto; left:3px; font-size:11px;}
+  .beeldvak .knip.aan{background:var(--blue);}
+  .beeldvak .knip.open{box-shadow:0 0 0 2px var(--white), 0 0 0 4px var(--blue);}
+
+  /* de uitsnede van één vak (zie uitsnedeBewerker) */
+  .uitsnede{margin-top:12px; border-top:1px solid var(--border); padding-top:10px;}
+  .uitsnede-kop{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;
+    font-size:12px; color:var(--navy-900);}
+  .uitsnede-buiten{position:relative; overflow:hidden; display:flex; justify-content:center; align-items:center;
+    padding:34px 0; background:#E9EDF2; border-radius:10px; touch-action:none; user-select:none;}
+  .uitsnede-buiten.beweegt{cursor:grab;}
+  .uitsnede-buiten.sleept{cursor:grabbing;}
+  .uitsnede-veld{position:relative; flex:none;}
+  .uitsnede-veld img{position:absolute; max-width:none; pointer-events:none;}
+  .uitsnede-raam{position:absolute; inset:0; outline:2px solid var(--blue);
+    box-shadow:0 0 0 999px rgba(233,237,242,.8); pointer-events:none;}
+  .uitsnede-rij{display:flex; align-items:center; gap:8px 12px; flex-wrap:wrap; margin-top:10px; font-size:12px;}
+  .uitsnede-zoom{display:flex; align-items:center; gap:6px;}
+  .uitsnede-zoom input{width:100px;}
+  .uitsnede-pct{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--slate); min-width:3.2em;}
+  .uitsnede-heel{display:flex; align-items:center; gap:5px; cursor:pointer;}
+  .uitsnede-heel.uit{color:var(--slate-light); cursor:default;}
+  .uitsnede-dpi{font-size:11px; color:var(--slate); margin-top:6px;}
+  .uitsnede-dpi.laag{color:var(--red); font-weight:700;}
+  .uitsnede .hint{margin:6px 0 0;}
 
   /* het blad */
   .bladzij{position:sticky; top:150px;}
@@ -446,6 +472,7 @@ function leegBlad(){
     extra:[],               /* [{kop, l, w}] handmatig bijgezette regels */
     /* de vijf fotovakken van het blad, zie BEELDVAKKEN */
     hoofdfoto:'', afmetingen:'', toepassing:'', detail1:'', detail2:'',
+    uitsnede:{},            /* vak -> {x, y, zoom, heel}, alleen waar de gebruiker zelf koos (zie uitsnedeNorm) */
     beelden:[],             /* alleen nog beelden uit een oude special die niet in een vak pasten */
     plaktekst:'',
     uitslag:null,
@@ -487,16 +514,84 @@ function schrijfBeeld(S, sleutel, uri){
   if(BEELDVAKKEN.some(v=>v.id===sleutel)) S[sleutel] = uri;
   else { const m = /^rest(\d+)$/.exec(sleutel); if(m) S.beelden[+m[1]] = uri; }
 }
+/* Een ander beeld in een vak, of het vak leeg: de uitsnede hoorde bij het vorige beeld
+   en vervalt. */
+function plaatsBeeld(S, sleutel, uri){
+  schrijfBeeld(S, sleutel, uri);
+  if(S.uitsnede) delete S.uitsnede[sleutel];
+}
 /* Een beeld naar een ander vak slepen verwisselt de twee: zo zet je een beeld dat de
    omzetting hierboven in het verkeerde vak zette recht, zonder het opnieuw te zoeken.
-   Sleep je een niet-geplaatst beeld naar een leeg vak, dan valt het uit die rij. */
+   Sleep je een niet-geplaatst beeld naar een leeg vak, dan valt het uit die rij.
+   De uitsnede hoort bij de foto en verhuist mee; een niet-geplaatst beeld heeft er
+   geen, en een foto die uit een vak naar die rij gaat raakt de zijne kwijt. */
 function wisselBeelden(S, van, naar){
-  const plek = k => BEELDVAKKEN.some(v=>v.id===k) || /^rest\d+$/.test(k);
+  const vak = k => BEELDVAKKEN.some(v=>v.id===k);
+  const plek = k => vak(k) || /^rest\d+$/.test(k);
   if(van===naar || !plek(van) || !plek(naar)) return S;
   const a = beeldOp(S, van), b = beeldOp(S, naar);
   schrijfBeeld(S, van, b); schrijfBeeld(S, naar, a);
   S.beelden = S.beelden.filter(Boolean);
+  if(S.uitsnede){
+    const ua = vak(van) && S.uitsnede[van], ub = vak(naar) && S.uitsnede[naar];
+    delete S.uitsnede[van]; delete S.uitsnede[naar];
+    if(ub && vak(van)) S.uitsnede[van] = ub;
+    if(ua && vak(naar)) S.uitsnede[naar] = ua;
+  }
   return S;
+}
+
+/* ======================= de uitsnede per vak =======================
+   Welk deel van een foto in zijn vak valt, rekent de tool zelf uit (zie FOTO). Met de
+   bediening onder de vakken stuurt de gebruiker dat per vak bij - maar alleen de
+   INHOUD van een vak: waar een vak staat en hoe groot het is blijft van de tool, dus
+   het blad blijft uitgelijnd wat er ook gekozen wordt. S.uitsnede[vak]:
+   - x, y: welk deel van de foto in het vak blijft als hij groter is dan het vak, van 0
+     (links, boven) via ½ (het midden, wat de tool zelf doet) tot 1 (rechts, onder),
+     zoals object-position in CSS: punt x van de foto valt op punt x van het vak;
+   - zoom: van 1 (de foto vult het vak precies) tot UITSNEDE_ZOOM;
+   - heel: de hele foto tonen, er valt niets af. Dan neemt het vak de vorm van de foto
+     aan (zie hoofdfotoPlek en onderzone), en doen x, y en zoom niet mee.
+   Een vak zonder eigen keuze staat er niet in: een special die het niet gebruikt blijft
+   precies wat hij was. */
+const UITSNEDE_ZOOM = 3;
+function uitsnedeNorm(u){
+  u = u || {};
+  if(u.heel === true) return {x:.5, y:.5, zoom:1, heel:true};
+  /* op 1/10000: fijner dan een twintigste pt op het blad, en geen 1.2000000000000002 in het bestand */
+  const getal = (w, min, max, std) => typeof w === 'number' && isFinite(w)
+    ? Math.round(Math.min(max, Math.max(min, w)) * 1e4) / 1e4 : std;
+  return {x:getal(u.x, 0, 1, .5), y:getal(u.y, 0, 1, .5), zoom:getal(u.zoom, 1, UITSNEDE_ZOOM, 1), heel:false};
+}
+function uitsnedeAutomatisch(u){ return !u.heel && u.zoom === 1 && u.x === .5 && u.y === .5; }
+function uitsnedeVan(S, id){
+  const alle = S.uitsnede && typeof S.uitsnede === 'object' ? S.uitsnede : {};
+  return uitsnedeNorm(Object.prototype.hasOwnProperty.call(alle, id) ? alle[id] : null);
+}
+function zetUitsnede(S, id, u){
+  if(!S.uitsnede || typeof S.uitsnede !== 'object' || Array.isArray(S.uitsnede)) S.uitsnede = {};
+  const n = uitsnedeNorm(u);
+  if(uitsnedeAutomatisch(n)) delete S.uitsnede[id]; else S.uitsnede[id] = n;
+}
+/* De uitsneden zoals het blad ze gebruikt, voor elk vak met een foto. 4 en 5 staan als
+   paar in één rij: de hele foto bij de een geldt dan ook voor de ander (zie onderzone). */
+const PAAR = ['detail1', 'detail2'];
+function uitsneden(S){
+  const u = {};
+  BEELDVAKKEN.forEach(v=>{ if(S[v.id]) u[v.id] = uitsnedeVan(S, v.id); });
+  const paar = PAAR.filter(id=>u[id]);
+  if(paar.some(id=>u[id].heel)) paar.forEach(id=>{ u[id] = uitsnedeNorm({heel:true}); });
+  return u;
+}
+/* Waar een foto van iw x ih beeldpunten komt in een vak van b x h bij uitsnede u: zo
+   groot dat hij het vak vult, maal de zoom, en zo verschoven dat punt (x, y) van de foto
+   op punt (x, y) van het vak valt. x en y zijn hier de plek van de linkerbovenhoek van
+   de foto ten opzichte van die van het vak (dus 0 of negatief), s de schaal in pt per
+   beeldpunt. Het vak is altijd helemaal bedekt: de foto is minstens zo groot als het vak
+   en x, y van de uitsnede blijven tussen 0 en 1. */
+function uitsnedeMaat(iw, ih, b, h, u){
+  const s = Math.max(b / iw, h / ih) * (u.heel ? 1 : u.zoom), fb = iw * s, fh = ih * s;
+  return {x: -(fb - b) * u.x, y: -(fh - h) * u.y, b: fb, h: fh, s};
 }
 
 /* Wordt bij "Special opslaan" (zie slaSpecialOp()) volgeschreven met de huidige
@@ -512,6 +607,7 @@ const SPECIAL_VERSIE = 1;
 function herstelSpecial(bron){
     S = beeldenNaarVakken(Object.assign(leegBlad(), bron.S));
     SCHEMA.forEach(gr=>gr.velden.forEach(v=>{ if(!S.velden[v.id]) S.velden[v.id]={l:v.l, w:''}; }));
+    if(!S.uitsnede || typeof S.uitsnede !== 'object' || Array.isArray(S.uitsnede)) S.uitsnede = {};
 }
 if(OPGESLAGEN_SPECIAL){
   try{
@@ -671,16 +767,21 @@ function tekenPaneel(){
   kBeeld.append(el('p','hint',
     'Vijf vakken, op de plek waar ze op het blad komen. Klik een vak om een bestand te '+
     'kiezen, klik en plak met Ctrl+V, of sleep een bestand erop. Sleep een beeld naar een '+
-    'ander vak om de twee te wisselen. Een leeg vak blijft op het blad gewoon wit.'));
+    'ander vak om de twee te wisselen. Een leeg vak blijft op het blad gewoon wit. '+
+    'Valt er iets van een foto af dat je wilt laten zien? Klik op \u2702\uFE0E in het vak.'));
   const blad=el('div','beeldblad');
   blad.append(el('div','beeldblad-tabel','gegevens'));
   BEELDVAKKEN.forEach(v=>{
     const vak=el('div','beeldblad-vak vak-'+v.id);
     vak.append(el('span','beeldblad-label', v.nr+' · '+v.label));
-    vak.append(beeldVak(S[v.id], v.id, ()=>{ S[v.id]=''; tekenPaneel(); plan(); }, v.label.toLowerCase()));
+    vak.append(beeldVak(S[v.id], v.id, ()=>{ plaatsBeeld(S, v.id, ''); tekenPaneel(); plan(); }, v.label.toLowerCase()));
     blad.append(vak);
   });
   kBeeld.append(blad);
+  /* de uitsnede van het vak waarvan op ✂ geklikt is */
+  if(uitsnedeVak && !S[uitsnedeVak]) uitsnedeVak = null;
+  bewerker = uitsnedeVak ? uitsnedeBewerker(uitsnedeVak) : null;
+  if(bewerker) kBeeld.append(bewerker.el);
   /* beelden uit een oude special die niet meer in een vak pasten */
   if(S.beelden.length){
     kBeeld.append(el('p','hint','Nog niet geplaatst (uit een eerder opgeslagen special) - '+
@@ -690,6 +791,7 @@ function tekenPaneel(){
     kBeeld.append(r);
   }
   p.append(kBeeld);
+  if(bewerker) bewerker.ververs();   /* pas nu staat hij op het scherm en is zijn breedte bekend */
 }
 
 function veldRij(veld, verwijder){
@@ -712,12 +814,27 @@ const SLEEP_TYPE='application/x-dlc-beeld';
 function beeldVak(uri, sleutel, verwijder, leegTekst){
   const b=el('button','beeldvak'+(plakDoel===sleutel?' gekozen':''));
   b.type='button';
+  const isVak = BEELDVAKKEN.some(v=>v.id===sleutel);
+  if(isVak) b.dataset.vak = sleutel;
   if(uri){
-    const i=document.createElement('img'); i.src=uri; i.alt=''; i.draggable=false; b.append(i);
+    /* in een vak: zoals de foto op het blad staat (zie werkMiniaturenBij), zolang dat
+       nog niet getekend is de hele foto */
+    const mini = isVak && miniatuurVan(sleutel);
+    const i=document.createElement('img'); i.src=mini || uri; i.alt=''; i.draggable=false; b.append(i);
     if(verwijder){
       const x=el('button','weg','×');
       x.onclick=e=>{ e.stopPropagation(); verwijder(); };
       b.append(x);
+    }
+    if(isVak){
+      const u = uitsneden(S)[sleutel];
+      const k=el('button','knip'+(u && !uitsnedeAutomatisch(u)?' aan':'')+(uitsnedeVak===sleutel?' open':''),'\u2702\uFE0E');
+      k.type='button';
+      k.title='Uitsnede: kies welk deel van de foto in het vak valt, zoom in, of toon de hele foto';
+      k.setAttribute('aria-label', 'Uitsnede van '+BEELDVAKKEN.find(v=>v.id===sleutel).label.toLowerCase());
+      k.setAttribute('aria-expanded', String(uitsnedeVak===sleutel));
+      k.onclick=e=>{ e.stopPropagation(); uitsnedeVak = uitsnedeVak===sleutel ? null : sleutel; tekenPaneel(); };
+      b.append(k);
     }
     b.draggable=true;
     b.title='Klik voor een ander beeld, of sleep naar een ander vak om te wisselen';
@@ -740,9 +857,216 @@ function beeldVak(uri, sleutel, verwijder, leegTekst){
   return b;
 }
 function zetBeeld(sleutel, uri){
-  schrijfBeeld(S, sleutel, uri);
+  plaatsBeeld(S, sleutel, uri);
   tekenPaneel(); plan();
 }
+
+/* ======================= de uitsnede kiezen =======================
+   Onder de vijf vakken, voor het vak waarvan op ✂ geklikt is: het vak in zijn echte vorm
+   (die van de laatste tekening, zie kaders), met de foto erin zoals hij op het blad
+   komt; wat buiten het vak valt staat er grijs omheen. Slepen of de pijltjestoetsen
+   verschuiven de foto, de schuif zoomt in, "Hele foto tonen" laat niets weg en
+   "Automatisch" zet het vak terug op wat de tool zelf doet. Alles gaat via
+   zetUitsnede(), dus wat hier kan blijft binnen de grenzen: het vak is altijd gevuld. */
+let uitsnedeVak = null, bewerker = null;
+const UITSNEDE_RAND = 34;      /* zoveel px van de foto buiten het vak blijft zichtbaar */
+const DPI_LAAG = 150;          /* daaronder wordt de foto in print zichtbaar onscherp */
+const UITSNEDE_UITLEG = {
+  hoofdfoto: 'Met hele foto tonen wordt een foto die hoger is dan het vak smaller, midden in de kolom.',
+  afmetingen: 'Een maattekening staat altijd heel op het blad. Met inzoomen haal je een witte '+
+              'rand of een aanzicht weg dat je niet nodig hebt.',
+  toepassing: 'Met hele foto tonen wordt een staande foto smaller, links onder de tabel; zijn '+
+              'onderkant valt dan op die van de foto\'s rechts als dat kan.',
+  detail1: 'Hele foto tonen geldt voor 4 en 5 samen: ze komen in één rij, even hoog en samen '+
+           'precies zo breed als de kolom.',
+};
+UITSNEDE_UITLEG.detail2 = UITSNEDE_UITLEG.detail1;
+
+function uitsnedeBewerker(id){
+  const vak = BEELDVAKKEN.find(v=>v.id===id), uri = S[id];
+  const doos = el('div','uitsnede');
+  const kop = el('div','uitsnede-kop');
+  kop.append(el('b', null, vak.nr+' · '+vak.label+': uitsnede'));
+  const klaar = el('button','mini','Klaar'); klaar.type='button';
+  klaar.onclick = ()=>{ uitsnedeVak = null; tekenPaneel(); };
+  kop.append(klaar);
+
+  const buiten = el('div','uitsnede-buiten');
+  buiten.tabIndex = 0;
+  buiten.setAttribute('aria-label', 'Uitsnede van '+vak.label.toLowerCase()+
+    ': sleep de foto of schuif hem met de pijltjestoetsen, + en - zoomen');
+  const veld = el('div','uitsnede-veld');
+  const foto = document.createElement('img'); foto.alt=''; foto.draggable=false;
+  const raam = el('div','uitsnede-raam');
+  veld.append(foto, raam); buiten.append(veld);
+
+  const rij = el('div','uitsnede-rij');
+  const zoomLab = el('label','uitsnede-zoom');
+  const zoom = document.createElement('input');
+  zoom.type='range'; zoom.min=100; zoom.max=UITSNEDE_ZOOM*100; zoom.step=5;
+  const pct = el('span','uitsnede-pct');
+  zoomLab.append(el('span',null,'Inzoomen'), zoom, pct);
+  const heelLab = el('label','uitsnede-heel');
+  const heelBox = document.createElement('input'); heelBox.type='checkbox';
+  heelLab.append(heelBox, document.createTextNode('Hele foto tonen'));
+  const auto = el('button','mini','Automatisch'); auto.type='button';
+  auto.title = 'Terug naar wat de tool zelf doet: het vak gevuld, de foto in het midden';
+  rij.append(zoomLab);
+  if(id !== 'afmetingen') rij.append(heelLab);
+  rij.append(auto);
+  const scherp = el('div','uitsnede-dpi');
+  const uitleg = el('p','hint');
+  doos.append(kop, buiten, rij, scherp, uitleg);
+
+  /* iw x ih: de foto in beeldpunten; k: px op het scherm per pt op het blad */
+  let iw = 0, ih = 0, kader = null, k = 1, sleep = null;
+  const nu = ()=> uitsneden(S)[id] || uitsnedeNorm();
+  function maat(u){ return uitsnedeMaat(iw, ih, kader.b, kader.h, u); }
+  function zet(u){
+    if(!iw || !kader) return;
+    const m = maat(u);
+    veld.style.width = (kader.b*k)+'px'; veld.style.height = (kader.h*k)+'px';
+    foto.style.left = (m.x*k)+'px'; foto.style.top = (m.y*k)+'px';
+    foto.style.width = (m.b*k)+'px'; foto.style.height = (m.h*k)+'px';
+    const beweegt = !u.heel && (m.b - kader.b > .01 || m.h - kader.h > .01);
+    buiten.classList.toggle('beweegt', beweegt);
+    zoom.value = Math.round(u.zoom*100); zoom.disabled = u.heel;
+    pct.textContent = Math.round(u.zoom*100)+'%';
+    heelBox.checked = u.heel;
+    auto.disabled = uitsnedeAutomatisch(u);
+    uitleg.textContent = (u.heel ? 'Er valt niets af: het vak heeft de vorm van de foto. '
+      : beweegt ? 'Sleep de foto of schuif hem met de pijltjestoetsen; wat grijs is valt weg. '
+      : id === 'afmetingen' ? '' : 'De hele foto past in het vak; zoom in om een deel te kiezen. ') + UITSNEDE_UITLEG[id];
+    const dpi = 72 / m.s;
+    scherp.className = 'uitsnede-dpi'+(dpi < DPI_LAAG ? ' laag' : '');
+    scherp.textContent = 'Scherpte op het blad: ongeveer '+Math.round(dpi)+' dpi'+
+      (dpi >= DPI_LAAG ? '' : u.zoom > 1 ? ' - onscherp bij afdrukken, zoom minder ver in'
+                                          : ' - onscherp bij afdrukken, zoek een grotere foto');
+  }
+  /* Het vak van de laatste tekening. Zonder tekening, of na "hele foto" (het vak krijgt
+     dan de vorm van de foto), alvast de vorm van de foto zelf. */
+  function ververs(){
+    if(!iw) return;
+    const u = nu(), getekend = kaders[id];
+    kader = getekend && (!u.heel || Math.abs(getekend.b/getekend.h - iw/ih) < .01)
+      ? getekend : {b:FOTO.rechtsB, h:FOTO.rechtsB*ih/iw, snijden:false};
+    const ruimte = Math.max(120, buiten.clientWidth - 2*UITSNEDE_RAND);
+    k = Math.min(ruimte/kader.b, 260/kader.h);
+    zet(u);
+  }
+  foto.onload = ()=>{ iw = foto.naturalWidth; ih = foto.naturalHeight; ververs(); };
+  foto.src = uri;
+
+  /* bewaren gaat altijd via zetUitsnede (binnen de grenzen); 4 en 5 delen "hele foto" */
+  function bewaar(u, ookPaar){
+    zetUitsnede(S, id, u);
+    if(ookPaar && PAAR.includes(id)) PAAR.filter(p=>p!==id && S[p]).forEach(p=>zetUitsnede(S, p, u.heel ? {heel:true} : {}));
+    zet(nu()); werkKnipBij(); plan();
+  }
+  function schuif(dx, dy, u){
+    const m = maat(u), vrijB = (m.b - kader.b)*k, vrijH = (m.h - kader.h)*k;
+    return Object.assign({}, u, {
+      x: vrijB > .5 ? u.x - dx/vrijB : u.x,
+      y: vrijH > .5 ? u.y - dy/vrijH : u.y,
+    });
+  }
+  buiten.onpointerdown = e=>{
+    const u = nu();
+    if(u.heel || !kader || e.button > 0) return;
+    sleep = {x:e.clientX, y:e.clientY, u};
+    buiten.setPointerCapture(e.pointerId); buiten.classList.add('sleept'); buiten.focus();
+    e.preventDefault();
+  };
+  buiten.onpointermove = e=>{
+    if(!sleep) return;
+    zetUitsnede(S, id, schuif(e.clientX - sleep.x, e.clientY - sleep.y, sleep.u));
+    zet(nu());
+  };
+  buiten.onpointerup = buiten.onpointercancel = ()=>{
+    if(!sleep) return;
+    sleep = null; buiten.classList.remove('sleept');
+    werkKnipBij(); plan();
+  };
+  buiten.onkeydown = e=>{
+    const u = nu();
+    if(!kader || u.heel) return;
+    const stap = e.shiftKey ? 20 : 4;
+    const pijl = {ArrowLeft:[-stap,0], ArrowRight:[stap,0], ArrowUp:[0,-stap], ArrowDown:[0,stap]}[e.key];
+    if(pijl){ e.preventDefault(); bewaar(schuif(pijl[0], pijl[1], u)); return; }
+    if(e.key==='+' || e.key==='='){ e.preventDefault(); bewaar(Object.assign({}, u, {zoom:u.zoom+.1})); }
+    if(e.key==='-' || e.key==='_'){ e.preventDefault(); bewaar(Object.assign({}, u, {zoom:u.zoom-.1})); }
+  };
+  zoom.oninput = ()=>{ zetUitsnede(S, id, Object.assign({}, nu(), {zoom:zoom.value/100})); zet(nu()); };
+  zoom.onchange = ()=>{ werkKnipBij(); plan(); };
+  heelBox.onchange = ()=>{ bewaar(heelBox.checked ? {heel:true} : {}, true); ververs(); };
+  auto.onclick = ()=>{
+    /* bij 4 of 5 ook de hele foto van de ander, anders blijft het paar heel staan */
+    bewaar({}, nu().heel); ververs();
+    buiten.focus();   /* de knop zelf gaat nu uit en zou de focus laten vallen */
+  };
+  /* het blauwe ✂ in het vak bijwerken zonder het hele paneel opnieuw op te bouwen */
+  function werkKnipBij(){
+    BEELDVAKKEN.forEach(v=>{
+      const knop = document.querySelector('.beeldvak[data-vak="'+v.id+'"] .knip');
+      const u = uitsneden(S)[v.id];
+      if(knop) knop.classList.toggle('aan', !!u && !uitsnedeAutomatisch(u));
+    });
+  }
+  return {el:doos, ververs, sleept:()=>!!sleep};
+}
+
+/* ======================= de kleine beelden =======================
+   Een gevuld vak in het paneel toont de foto zoals hij op het blad staat: in de vorm van
+   zijn vak op de laatste tekening, met de uitsnede erin. Zo zie je zonder het blad af te
+   zoeken waar iets van een foto afvalt. Het beeldje is een kleine JPEG (15-25 kB). */
+const MINI_PX = 360;
+const miniaturen = {};         /* vak -> {uri, sleutel, src} */
+const fotoGeladen = new Map(); /* uri -> belofte van een geladen Image */
+function laadFoto(uri){
+  if(!fotoGeladen.has(uri)){
+    fotoGeladen.set(uri, new Promise((klaar, mis)=>{
+      const i = new Image(); i.onload = ()=>klaar(i); i.onerror = mis; i.src = uri;
+    }));
+    /* alleen de foto's van nu bewaren */
+    const inGebruik = new Set(BEELDVAKKEN.map(v=>S[v.id]).filter(Boolean));
+    [...fotoGeladen.keys()].forEach(u=>{ if(u !== uri && !inGebruik.has(u)) fotoGeladen.delete(u); });
+  }
+  return fotoGeladen.get(uri);
+}
+function miniSleutel(id){
+  const k = kaders[id], u = uitsneden(S)[id];
+  return k && u ? [k.b, k.h, u.x, u.y, u.zoom, u.heel].join('|') : '';
+}
+function miniatuurVan(id){
+  const m = miniaturen[id];
+  return m && m.uri === S[id] && m.sleutel === miniSleutel(id) ? m.src : '';
+}
+function tekenMini(img, kader, u){
+  const k = MINI_PX / Math.max(kader.b, kader.h);
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(kader.b*k)); c.height = Math.max(1, Math.round(kader.h*k));
+  const g = c.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+  const m = uitsnedeMaat(img.naturalWidth, img.naturalHeight, kader.b, kader.h, u);
+  g.drawImage(img, m.x*k, m.y*k, m.b*k, m.h*k);
+  return c.toDataURL('image/jpeg', .85);
+}
+async function werkMiniaturenBij(){
+  for(const v of BEELDVAKKEN){
+    const uri = S[v.id], sleutel = miniSleutel(v.id);
+    if(!uri || !sleutel || miniatuurVan(v.id)) continue;
+    try{
+      const img = await laadFoto(uri);
+      if(S[v.id] !== uri || miniSleutel(v.id) !== sleutel) continue;   /* intussen veranderd */
+      miniaturen[v.id] = {uri, sleutel, src:tekenMini(img, kaders[v.id], uitsneden(S)[v.id])};
+    }catch(err){ continue; }
+  }
+  BEELDVAKKEN.forEach(v=>{
+    const i = document.querySelector('.beeldvak[data-vak="'+v.id+'"] img'), src = miniatuurVan(v.id);
+    if(i && src && i.src !== src) i.src = src;
+  });
+}
+window.addEventListener('resize', ()=>{ if(bewerker && !bewerker.sleept()) bewerker.ververs(); });
 /* Een bestand dat naast een vak valt, zou de browser openen - en daarmee de special
    wegzetten. Een vak dat het aanneemt heeft de gebeurtenis dan al voor zich gehouden. */
 ['dragover','drop'].forEach(soort=>document.addEventListener(soort, e=>{
@@ -849,7 +1173,14 @@ const M = {
      onderzone als één blok af.
    - Past de onderzone niet meer op de pagina (de afmetingen mogen tot een kwart
      krimpen), dan gaat hij in zijn geheel naar een nieuwe pagina: liever een rustig
-     tweede blad dan een blok dat over de pagina gebroken is. */
+     tweede blad dan een blok dat over de pagina gebroken is.
+   - Zet de gebruiker bij een vak "hele foto tonen" aan (zie uitsnedeNorm), dan valt er
+     niets af en neemt het vak de vorm van de foto aan - binnen hetzelfde raster, aan
+     dezelfde randen: 1 wordt zo nodig smaller en blijft gecentreerd; 3 houdt de
+     kolombreedte, of wordt als staande foto smaller onder de tabel (links), met zijn
+     onderkant op een onderkant rechts als dat met hoogstens een derde kleiner kan;
+     4 en 5 worden één rij, even hoog, samen precies de kolom breed (4 op de linkerrand,
+     5 op de rechterrand). 2 staat altijd al heel. */
 const FOTO = {
   links: 35.4,  linksB: 253,       /* de tabel: 35,4 - 288,4 */
   rechts: 323.8, rechtsB: 236.1,   /* 288,4 + 35,4 tot de logorand 559,9 */
@@ -866,12 +1197,13 @@ const FOTO = {
   snijMax: 1/3,                    /* zoveel mag er van de toepassing af om uit te lijnen: een
                                       liggende 3:2 naast 4|5 + 2 vraagt 26-30% */
 };
-/* Bovenzone: foto 1 naast de specificaties. v = breedte/hoogte van het beeld. */
-function hoofdfotoPlek(v){
+/* Bovenzone: foto 1 naast de specificaties. v = breedte/hoogte van het beeld; heel =
+   de hele foto, ook als hij maar net te hoog is (dan smaller in plaats van bijgesneden). */
+function hoofdfotoPlek(v, heel){
   const F = FOTO;
   if(!v) return null;
   let b = F.rechtsB, h = b / v;
-  const snijden = h > F.hoofdMaxH && 1 - F.hoofdMaxH / h <= F.hoofdSnijMax;
+  const snijden = !heel && h > F.hoofdMaxH && 1 - F.hoofdMaxH / h <= F.hoofdSnijMax;
   if(h > F.hoofdMaxH){ h = F.hoofdMaxH; if(!snijden) b = h * v; }
   return {x: F.rechts + (F.rechtsB - b) / 2, y: F.boven, b, h, snijden};
 }
@@ -882,13 +1214,27 @@ function onderzoneBoven(tabelOnder, hoofd){
   return Math.max(tabelOnder + FOTO.naTabel, hoofd ? hoofd.y + hoofd.h + FOTO.goot : 0);
 }
 /* Onderzone: 3 links, 4|5 en 2 rechts, vanaf lijn boven. v = verhoudingen per beeld
-   (0 = geen). Geeft {plek, onder}, of null als hij niet past; met moet=true (een verse
-   pagina) past hij altijd, desnoods kleiner. */
-function onderzone(v, boven, onderGrens, moet){
+   (0 = geen), heel = per vak of de hele foto er moet staan (zie uitsneden). Geeft
+   {plek, onder}, of null als hij niet past; met moet=true (een verse pagina) past hij
+   altijd, desnoods kleiner. */
+function onderzone(v, boven, onderGrens, moet, heel){
   const F = FOTO, plek = {}, rechtsOnder = [];
+  heel = heel || {};
   let y = boven;
   const tweeling = ['detail1', 'detail2'].filter(id => v[id]);
-  if(tweeling.length){
+  if(tweeling.some(id => heel[id])){
+    /* Hele foto: één rij, even hoog, elke foto zo breed als zijn vorm vraagt - samen
+       precies de kolom, of bij één foto zijn halve kolom. 4 begint op de linkerrand van
+       de kolom en 5 eindigt op de rechterrand, net als zonder. Hoogstens zo hoog als de
+       kolom breed is; twee heel smalle staande foto's houden dan een breder gat. */
+    const vrij = tweeling.length === 2 ? F.rechtsB - F.goot : (F.rechtsB - F.goot) / 2;
+    const h = Math.min(F.rechtsB, vrij / tweeling.reduce((s, id) => s + v[id], 0));
+    if(y + h > onderGrens && !moet) return null;
+    if(v.detail1) plek.detail1 = {x: F.rechts, y, b: h * v.detail1, h, snijden: false};
+    if(v.detail2) plek.detail2 = {x: F.rechts + F.rechtsB - h * v.detail2, y, b: h * v.detail2, h, snijden: false};
+    rechtsOnder.push(y + h);
+    y += h + F.goot;
+  } else if(tweeling.length){
     const b = (F.rechtsB - F.goot) / 2;
     const vorm = Math.exp(tweeling.reduce((s, id) => s + Math.log(v[id]), 0) / tweeling.length);
     const h = b * Math.min(F.tweeling[1], Math.max(F.tweeling[0], 1 / vorm));
@@ -915,20 +1261,36 @@ function onderzone(v, boven, onderGrens, moet){
     const eigen = F.linksB / v.toepassing, ruimte = onderGrens - boven;
     const max = Math.min(F.toepMaxH, ruimte);
     if(max < Math.min(eigen, F.toepMinH) && !moet) return null;
-    let h = Math.min(eigen, max), besteSnede = F.snijMax;
-    /* onderkant op een onderkant rechts, als dat weinig kost */
-    rechtsOnder.forEach(o => {
-      const H = o - boven;
-      if(H < F.toepMinH || H > max) return;
-      const snede = H < eigen ? 1 - H / eigen : 1 - eigen / H;
-      if(snede <= besteSnede){ besteSnede = snede; h = H; }
-    });
-    plek.toepassing = {x: F.links, y: boven, b: F.linksB, h, snijden: true};
+    let h = Math.min(eigen, max);
+    if(heel.toepassing){
+      /* Hele foto: een liggende houdt de volle kolombreedte. Een staande wordt toch al
+         smaller; zijn onderkant gaat dan op een onderkant rechts als hij daarvoor
+         hoogstens een derde kleiner hoeft. Breder dan de tabel wordt hij nooit. */
+      if(eigen > max){
+        const passend = rechtsOnder.map(o => o - boven)
+          .filter(H => H >= F.toepMinH && H <= max && H >= max * (1 - F.snijMax));
+        if(passend.length) h = Math.max(...passend);
+      }
+      plek.toepassing = {x: F.links, y: boven, b: Math.min(F.linksB, h * v.toepassing), h, snijden: false};
+    } else {
+      let besteSnede = F.snijMax;
+      /* onderkant op een onderkant rechts, als dat weinig kost */
+      rechtsOnder.forEach(o => {
+        const H = o - boven;
+        if(H < F.toepMinH || H > max) return;
+        const snede = H < eigen ? 1 - H / eigen : 1 - eigen / H;
+        if(snede <= besteSnede){ besteSnede = snede; h = H; }
+      });
+      plek.toepassing = {x: F.links, y: boven, b: F.linksB, h, snijden: true};
+    }
   }
   const onder = Math.max(boven, ...Object.values(plek).map(p => p.y + p.h));
   return {plek, onder};
 }
 
+/* De vakken van de laatste tekening, vak -> {b, h, snijden} in pt: de bediening van de
+   uitsnede en de kleine beelden in het paneel tonen de foto in die vorm. */
+const kaders = {};
 async function bouwBlad(){
   const doc=await PDFLib.PDFDocument.create();
   doc.setTitle('DLC productblad '+(S.titelVet||''));
@@ -1057,16 +1419,28 @@ async function bouwBlad(){
   const onderGrens = M.voetY - 20;
   const vorm = {};
   BEELDVAKKEN.forEach(b=>{ vorm[b.id] = beeld[b.id] ? beeld[b.id].width / beeld[b.id].height : 0; });
-  const teken = (img, p) => p.snijden
-    ? metUitsnede([[p.x,p.y],[p.x+p.b,p.y],[p.x+p.b,p.y+p.h],[p.x,p.y+p.h]], ()=>beeldVullend(img, p.x, p.y, p.b, p.h))
-    : beeldPassend(img, p.x, p.y, p.b, p.h);
-  const hoofd = hoofdfotoPlek(vorm.hoofdfoto);
+  /* De uitsnede per vak (zie uitsneden): de hele foto verandert het vak, verschuiven en
+     inzoomen alleen wat erin valt. Zonder eigen keuze precies de oude weg. */
+  const snede = uitsneden(S), heel = {};
+  Object.keys(snede).forEach(id=>{ heel[id] = snede[id].heel; });
+  Object.keys(kaders).forEach(id=>{ delete kaders[id]; });
+  const hoeken = p => [[p.x,p.y],[p.x+p.b,p.y],[p.x+p.b,p.y+p.h],[p.x,p.y+p.h]];
+  const teken = (img, p, id) => {
+    const u = snede[id];
+    kaders[id] = {b:p.b, h:p.h, snijden:p.snijden};
+    if(!u || u.zoom === 1 && (!p.snijden || u.x === .5 && u.y === .5))
+      return p.snijden ? metUitsnede(hoeken(p), ()=>beeldVullend(img, p.x, p.y, p.b, p.h))
+                       : beeldPassend(img, p.x, p.y, p.b, p.h);
+    const m = uitsnedeMaat(img.width, img.height, p.b, p.h, u);
+    metUitsnede(hoeken(p), ()=>pg.drawImage(img, {x:p.x+m.x, y:H-p.y-m.y-m.h, width:m.b, height:m.h}));
+  };
+  const hoofd = hoofdfotoPlek(vorm.hoofdfoto, heel.hoofdfoto);
   if(['toepassing','detail1','detail2','afmetingen'].some(id=>vorm[id])){
-    let zone = onderzone(vorm, onderzoneBoven(y - M.lijnBoven, paginas.length===1 ? hoofd : null), onderGrens, false);
-    if(!zone){ nieuwePagina(false); zone = onderzone(vorm, y, onderGrens, true); }
-    Object.entries(zone.plek).forEach(([id, p])=>teken(beeld[id], p));
+    let zone = onderzone(vorm, onderzoneBoven(y - M.lijnBoven, paginas.length===1 ? hoofd : null), onderGrens, false, heel);
+    if(!zone){ nieuwePagina(false); zone = onderzone(vorm, y, onderGrens, true, heel); }
+    Object.entries(zone.plek).forEach(([id, p])=>teken(beeld[id], p, id));
   }
-  if(hoofd){ pg = paginas[0]; teken(beeld.hoofdfoto, hoofd); }
+  if(hoofd){ pg = paginas[0]; teken(beeld.hoofdfoto, hoofd, 'hoofdfoto'); }
   pg = paginas[paginas.length-1];
 
   return {bytes: await doc.save(), paginas: paginas.length};
@@ -1096,6 +1470,9 @@ async function ververs(){
     $('stand').innerHTML='<b>'+((S.titelDun?S.titelDun+' ':'')+(S.titelVet||''))+'</b> — '+
       paginas+' pagina'+(paginas>1?'\'s':'')+' · '+gevuld+' gegevens · '+
       aantalBeelden()+' beelden';
+    /* de vakken kunnen veranderd zijn: de kleine beelden en de uitsnede volgen */
+    werkMiniaturenBij();
+    if(bewerker && !bewerker.sleept()) bewerker.ververs();
   }catch(err){
     console.error(err);
     $('stand').textContent='Het blad kon niet worden getekend: '+(err&&err.message);
@@ -1145,7 +1522,14 @@ function slaSpecialOp(){
 
   const dataMarker = /\/\*__PROJECT_DATA_START__\*\/[\s\S]*?\/\*__PROJECT_DATA_END__\*\//;
   const baseMarker = /<!--__BASE_HREF__-->|<base href="[^"]*">/;
-  let html = document.documentElement.outerHTML;
+  /* Het paneel en het voorbeeld bouwt de tool bij het openen zelf weer op uit S. In het
+     bestand waren ze alleen een tweede kopie van elke foto (met de uitsnede open zelfs
+     een derde) en een blob-adres dat vanaf schijf niet laadt. */
+  const kopie = document.documentElement.cloneNode(true);
+  const kopiePaneel = kopie.querySelector('#paneel'), kopieVoorbeeld = kopie.querySelector('#voorbeeld');
+  if(kopiePaneel) kopiePaneel.innerHTML = '';
+  if(kopieVoorbeeld) kopieVoorbeeld.removeAttribute('src');
+  let html = kopie.outerHTML;
   if(!dataMarker.test(html) || !baseMarker.test(html)){
     alert('Opslaan mislukt: de opslag-plekken zijn niet gevonden in de broncode.');
     return;
@@ -1190,7 +1574,7 @@ ProjectOpslag.koppel({
      niet meer in de opslag van de browser. In het opgeslagen bestand gaan ze wel mee. */
   licht: (payload)=>{
     const kaal = JSON.parse(JSON.stringify(payload));
-    if(kaal.S){ kaal.S.beelden = []; BEELDVAKKEN.forEach(v=>{ kaal.S[v.id] = ''; }); }
+    if(kaal.S){ kaal.S.beelden = []; kaal.S.uitsnede = {}; BEELDVAKKEN.forEach(v=>{ kaal.S[v.id] = ''; }); }
     return kaal;
   },
 });

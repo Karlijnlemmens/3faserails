@@ -1495,8 +1495,10 @@ function is(wat, gekregen, verwacht){
 
 /* ========================== DLC: de vijf fotovakken ========================== */
 {
-  const m = await laadUit('dlc.html', ['BEELDVAKKEN', 'beeldenNaarVakken', 'beeldOp', 'schrijfBeeld', 'wisselBeelden',
-                                      'FOTO', 'hoofdfotoPlek', 'onderzoneBoven', 'onderzone']);
+  const m = await laadUit('dlc.html', ['BEELDVAKKEN', 'beeldenNaarVakken', 'beeldOp', 'schrijfBeeld', 'plaatsBeeld',
+                                      'wisselBeelden', 'FOTO', 'hoofdfotoPlek', 'onderzoneBoven', 'onderzone',
+                                      'UITSNEDE_ZOOM', 'uitsnedeNorm', 'uitsnedeAutomatisch', 'uitsnedeVan',
+                                      'zetUitsnede', 'PAAR', 'uitsneden', 'uitsnedeMaat']);
   console.log('DLC: fotovakken');
   const vakken = S => m.BEELDVAKKEN.map(v => S[v.id] || '-').join('');
   is('de legenda van de schets', m.BEELDVAKKEN.map(v => v.nr + ' ' + v.label),
@@ -1592,6 +1594,152 @@ function is(wat, gekregen, verwacht){
     }
   }
   is('raster houdt over ' + proeven + ' combinaties', fout, []);
+
+  /* ---- de uitsnede per vak: de gebruiker stuurt de inhoud, de tool houdt het raster ---- */
+  console.log('DLC: uitsnede');
+  const AUTO = {x: .5, y: .5, zoom: 1, heel: false}, HEEL = {x: .5, y: .5, zoom: 1, heel: true};
+  is('niets gekozen: wat de tool zelf doet', [m.uitsnedeNorm(), m.uitsnedeAutomatisch(m.uitsnedeNorm({}))], [AUTO, true]);
+  is('altijd binnen de grenzen', [m.uitsnedeNorm({x: -1, y: 2, zoom: 9}), m.uitsnedeNorm({zoom: .2}).zoom],
+    [{x: 0, y: 1, zoom: m.UITSNEDE_ZOOM, heel: false}, 1]);
+  is('rommel uit een bestand telt niet', m.uitsnedeNorm({x: '0', y: null, zoom: NaN, heel: 'ja'}), AUTO);
+  is('afgerond, geen rekenruis in het bestand', m.uitsnedeNorm({zoom: 1 + .1 + .1, x: 1/3}), {x: .3333, y: .5, zoom: 1.2, heel: false});
+  is('hele foto: geen zoom, geen verschuiving', m.uitsnedeNorm({heel: true, x: 0, zoom: 2}), HEEL);
+  {
+    const T = {};
+    m.zetUitsnede(T, 'toepassing', {x: 0});
+    const gezet = JSON.stringify(T.uitsnede);
+    m.zetUitsnede(T, 'toepassing', {x: .5});
+    is('bewaard, en terug op automatisch weer weg', [gezet, T.uitsnede], ['{"toepassing":{"x":0,"y":0.5,"zoom":1,"heel":false}}', {}]);
+    const K = {uitsnede: 'kapot'};
+    m.zetUitsnede(K, 'detail1', {zoom: 2});
+    is('een kapotte uitsnede uit een bestand wordt hersteld', [K.uitsnede.detail1.zoom, m.uitsnedeVan({uitsnede: [1]}, 'detail1')], [2, AUTO]);
+  }
+  /* 4 en 5 staan als paar in één rij: hele foto bij de een geldt ook voor de ander */
+  {
+    const P = {hoofdfoto: 'a', detail1: 'b', detail2: 'c', uitsnede: {detail1: {zoom: 2}, detail2: {heel: true}}};
+    is('hele foto bij 5 geldt ook voor 4', [m.uitsneden(P).detail1, m.uitsneden(P).detail2, m.uitsneden(P).hoofdfoto], [HEEL, HEEL, AUTO]);
+    const E = {detail1: 'b', detail2: '', uitsnede: {detail2: {heel: true}}};
+    is('een leeg vak telt niet mee', [m.uitsneden(E).detail1, 'detail2' in m.uitsneden(E)], [AUTO, false]);
+  }
+
+  /* Waar de foto in zijn vak komt. Wat er ook gekozen is: het vak is helemaal bedekt, punt
+     x van de foto valt op punt x van het vak, en zonder keuze is het precies wat
+     beeldVullend() in pdf-huisstijl.js doet (gecentreerd). */
+  {
+    let n = 0; const mis = [];
+    const dicht = (a, b) => Math.abs(a - b) < 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
+    for(const [iw, ih] of [[1400, 700], [800, 1200], [1200, 1200], [1400, 788], [333, 1400]])
+      for(const [b, h] of [[236.1, 236.1], [112.05, 140], [253, 168.7], [61.1, 91.7], [253, 253]])
+        for(const x of [0, .25, .5, 1]) for(const y of [0, .5, 1]) for(const zoom of [1, 1.5, 3]) for(const heel of [false, true]){
+          const u = m.uitsnedeNorm({x, y, zoom, heel}), q = m.uitsnedeMaat(iw, ih, b, h, u);
+          n++;
+          const fout = [];
+          if(q.x > 1e-9 || q.y > 1e-9 || q.x + q.b < b - 1e-9 || q.y + q.h < h - 1e-9) fout.push('vak niet bedekt');
+          if(!dicht(q.s, Math.max(b / iw, h / ih) * u.zoom)) fout.push('schaal');
+          if(!dicht(q.x + u.x * q.b, u.x * b) || !dicht(q.y + u.y * q.h, u.y * h)) fout.push('punt x valt niet op punt x');
+          if(fout.length && mis.length < 5) mis.push(JSON.stringify({iw, ih, b, h, u}) + ': ' + fout.join(', '));
+        }
+    is('foto bedekt altijd zijn vak, over ' + n + ' gevallen', mis, []);
+    const c = m.uitsnedeMaat(1400, 700, 236.1, 236.1, AUTO);
+    is('zonder keuze gecentreerd als beeldVullend', [c.x, c.y], [-(c.b - 236.1) / 2, -(c.h - 236.1) / 2]);
+    const l = m.uitsnedeMaat(1400, 700, 236.1, 236.1, m.uitsnedeNorm({x: 0})), r = m.uitsnedeMaat(1400, 700, 236.1, 236.1, m.uitsnedeNorm({x: 1}));
+    is('x = 0 toont de linkerrand, x = 1 de rechterrand', [l.x, r1(r.x + r.b)], [0, 236.1]);
+  }
+
+  /* Hele foto: het vak neemt de vorm van de foto aan, binnen hetzelfde raster */
+  {
+    const vorm = p => p.b / p.h, gelijk = (a, b) => Math.abs(a - b) < 1e-6;
+    const hd = m.hoofdfotoPlek(3/4, true);
+    is('foto 1 heel: een staande 3:4 wordt smaller in plaats van bijgesneden',
+      [hd.snijden, gelijk(vorm(hd), 3/4), r1(hd.h), r1(hd.x - F.rechts) === r1(F.rechts + F.rechtsB - hd.x - hd.b)],
+      [false, true, F.hoofdMaxH, true]);
+    is('foto 1 zonder heel blijft zoals hij was', m.hoofdfotoPlek(3/4, false), m.hoofdfotoPlek(3/4));
+
+    const paar = m.onderzone({detail1: 16/9, detail2: 2/3}, 330, onder, false, {detail2: true}).plek;
+    is('4|5 heel: één rij, even hoog, elk in zijn eigen vorm',
+      [paar.detail1.snijden, paar.detail2.snijden, paar.detail1.h === paar.detail2.h,
+       gelijk(vorm(paar.detail1), 16/9), gelijk(vorm(paar.detail2), 2/3)], [false, false, true, true, true]);
+    is('4|5 heel: samen precies de kolom, met één goot ertussen',
+      [rand(paar.detail1)[0], rand(paar.detail2)[1], r1(paar.detail2.x - paar.detail1.x - paar.detail1.b)], [volle[0], volle[1], F.goot]);
+    const smal = m.onderzone({detail1: 1/3, detail2: 1/3}, 330, onder, false, {detail1: true}).plek;
+    is('twee heel smalle: hoogstens zo hoog als de kolom breed, randen blijven staan',
+      [r1(smal.detail1.h), rand(smal.detail1)[0], rand(smal.detail2)[1], smal.detail2.x - smal.detail1.x - smal.detail1.b > F.goot],
+      [r1(F.rechtsB), volle[0], volle[1], true]);
+    const een4 = m.onderzone({detail1: 2/3}, 330, onder, false, {detail1: true}).plek.detail1;
+    const een5 = m.onderzone({detail2: 2/3}, 330, onder, false, {detail2: true}).plek.detail2;
+    is('één detail heel: zijn halve kolom, aan zijn eigen rand',
+      [rand(een4)[0], r1(een4.b), rand(een5)[1], r1(een5.b), gelijk(vorm(een4), 2/3)],
+      [volle[0], r1((F.rechtsB - F.goot) / 2), volle[1], r1((F.rechtsB - F.goot) / 2), true]);
+
+    const ligt = m.onderzone({toepassing: 3/2, detail1: 1, detail2: 1, afmetingen: 2}, 330, onder, false, {toepassing: true}).plek.toepassing;
+    is('3 heel, liggend: de volle tabelbreedte, de eigen hoogte',
+      [ligt.snijden, rand(ligt), r1(ligt.h)], [false, tabel, r1(F.linksB / (3/2))]);
+    const staat = m.onderzone({toepassing: 2/3}, 330, onder, false, {toepassing: true}).plek.toepassing;
+    is('3 heel, staand: hoogstens vierkant, smaller, links onder de tabel',
+      [r1(staat.h), r1(staat.x), gelijk(vorm(staat), 2/3)], [F.toepMaxH, F.links, true]);
+    /* rechts 4|5 (vierkant, 112 hoog) + goot + 2 (2:1, 118 hoog) = onderkant op 242 */
+    const lijn = m.onderzone({toepassing: 2/3, detail1: 1, detail2: 1, afmetingen: 2}, 330, onder, false, {toepassing: true}).plek;
+    is('3 heel, staand: onderkant op die van 2 als dat met hoogstens een derde kleiner kan',
+      [r1(lijn.toepassing.y + lijn.toepassing.h), gelijk(vorm(lijn.toepassing), 2/3)],
+      [r1(lijn.afmetingen.y + lijn.afmetingen.h), true]);
+    const kort = m.onderzone({toepassing: 2/3, detail1: 2, detail2: 2}, 330, onder, false, {toepassing: true}).plek.toepassing;
+    is('maar niet als dat meer dan een derde kost', r1(kort.h), F.toepMaxH);
+
+    /* Zonder heel precies het oude raster, over de hele proef hierboven; met alles heel
+       nergens iets bijgesneden en elk vak in de vorm van zijn foto, binnen dezelfde
+       kolommen en randen. */
+    const niets = {hoofdfoto: false, afmetingen: false, toepassing: false, detail1: false, detail2: false};
+    const alles = {hoofdfoto: true, afmetingen: true, toepassing: true, detail1: true, detail2: true};
+    let gelijkOud = 0, heelProef = 0; const anders = [], heelFout = [];
+    for(const hf of [0, 2/3, 3/4, 1, 4/3, 16/9]) for(const tabelOnder of [150, 260, 330, 420, 520, 620, 700, 760]){
+      const hoofdH = m.hoofdfotoPlek(hf, true);
+      const boven = m.onderzoneBoven(tabelOnder, m.hoofdfotoPlek(hf));
+      const bovenH = m.onderzoneBoven(tabelOnder, hoofdH);
+      if(hoofdH && (hoofdH.snijden || !gelijk(vorm(hoofdH), hf) || hoofdH.x < F.rechts - 1e-9 || hoofdH.x + hoofdH.b > F.rechts + F.rechtsB + 1e-9))
+        heelFout.push('foto 1 ' + hf);
+      for(const a3 of vormen) for(const a4 of vormen) for(const a5 of [0, 2/3, 1.2]) for(const a2 of vormen){
+        const v = {toepassing: a3, detail1: a4, detail2: a5, afmetingen: a2};
+        if(JSON.stringify(m.onderzone(v, boven, onder, false)) !== JSON.stringify(m.onderzone(v, boven, onder, false, niets))
+           && anders.length < 5) anders.push(JSON.stringify(v));
+        gelijkOud++;
+        const z = m.onderzone(v, bovenH, onder, false, alles) || m.onderzone(v, 97.35, onder, true, alles);
+        const nieuw = !m.onderzone(v, bovenH, onder, false, alles), top = nieuw ? 97.35 : bovenH;
+        heelProef++;
+        const mis = [];
+        Object.entries(z.plek).forEach(([id, p]) => {
+          if(p.snijden) mis.push(id + ' bijgesneden');
+          if(!gelijk(vorm(p), v[id])) mis.push(id + ' niet in de vorm van zijn foto');
+          if(p.y + p.h > onder + 0.01) mis.push(id + ' over de voet');
+          if(p.y < top - 0.01) mis.push(id + ' boven de zonelijn');
+          const [k0, k1] = id === 'toepassing' ? [F.links, F.links + F.linksB] : [F.rechts, F.rechts + F.rechtsB];
+          if(p.x < k0 - 0.01 || p.x + p.b > k1 + 0.01) mis.push(id + ' buiten zijn kolom');
+        });
+        if(z.plek.toepassing && r1(z.plek.toepassing.x) !== tabel[0]) mis.push('3 niet links onder de tabel');
+        if(z.plek.detail1 && r1(z.plek.detail1.x) !== volle[0]) mis.push('4 niet op de linkerrand');
+        if(z.plek.detail2 && r1(z.plek.detail2.x + z.plek.detail2.b) !== volle[1]) mis.push('5 niet op de rechterrand');
+        if(z.plek.detail1 && z.plek.detail2 && z.plek.detail2.x - z.plek.detail1.x - z.plek.detail1.b < F.goot - 0.01) mis.push('4 en 5 te dicht op elkaar');
+        if(z.plek.toepassing && z.plek.detail1 && z.plek.toepassing.y !== z.plek.detail1.y) mis.push('3 en 4 niet op één lijn');
+        if(mis.length && heelFout.length < 5) heelFout.push(JSON.stringify({hf, tabelOnder, ...v}) + ': ' + mis.join(', '));
+      }
+    }
+    is('zonder heel precies het oude raster (' + gelijkOud + ' combinaties)', anders, []);
+    is('alles heel: niets bijgesneden, elk vak in de vorm van zijn foto (' + heelProef + ' combinaties)', heelFout, []);
+  }
+
+  /* De uitsnede hoort bij de foto: een nieuwe foto begint opnieuw, wisselen neemt hem mee */
+  {
+    const U = {hoofdfoto: '1', afmetingen: 'A', toepassing: 'B', detail1: '', detail2: 'D', beelden: ['E'],
+               uitsnede: {toepassing: {x: 0, y: .5, zoom: 2, heel: false}, detail2: {heel: true}}};
+    m.wisselBeelden(U, 'toepassing', 'afmetingen');
+    is('wisselen: de uitsnede verhuist mee', [U.afmetingen, U.uitsnede.afmetingen && U.uitsnede.afmetingen.zoom, 'toepassing' in U.uitsnede], ['B', 2, false]);
+    m.wisselBeelden(U, 'detail2', 'rest0');
+    is('naar de niet-geplaatste rij: de uitsnede vervalt', [U.detail2, 'detail2' in U.uitsnede, 'rest0' in U.uitsnede], ['E', false, false]);
+    m.plaatsBeeld(U, 'afmetingen', 'nieuw');
+    is('een andere foto in het vak: weer automatisch', [U.afmetingen, 'afmetingen' in U.uitsnede], ['nieuw', false]);
+    m.zetUitsnede(U, 'hoofdfoto', {zoom: 2});
+    m.plaatsBeeld(U, 'hoofdfoto', '');
+    is('vak leeg: de uitsnede ook weg', [U.hoofdfoto, U.uitsnede], ['', {}]);
+  }
 }
 
 /* ======================= railtool: de codeparen ======================= */
