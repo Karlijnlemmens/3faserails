@@ -92,6 +92,14 @@ function is(wat, gekregen, verwacht){
     ['Sigma IP65', 'sigma ip65', 'SIGMA IP 65', 'Sigma IP-65', 'IP65 Sigma', 'Sigma IP44', 'sigma ip 44', 'Sigma G2'].map(groep),
     ['ag82', 'ag82', 'ag82', 'ag82', 'ag82', 'ag34', 'ag34', 'ag34']);
   is('IP-klasse los getypt, ook bij andere types', ['Fora IP 65', 'Dot IP-65', 'Clean IP 69K'].map(groep), ['ag19', 'ag75', 'ag68']);
+  /* De Dot-reeks aaneen geschreven, zoals het blad van de Dot XL zelf doet ("De DOTXL is
+     ..."): eerst herkende de tool er niets in. En de Dot XL is zelf IP65. */
+  is('DOTXL, DOTPLUS en DOTIP65 aaneen geschreven',
+    ['Noodverlichting DOTXL', 'Pragmalux LED noodverlichting DOTXL wit 3W 3uur', 'DotXL autotest', 'Dotxl-SA',
+     'Noodverlichting DOTPLUS', 'Noodverlichting DOTIP65'].map(groep), ['ag77', 'ag77', 'ag77', 'ag77', 'ag76', 'ag75']);
+  is('los geschreven blijft het zoals het was, en Dot XL IP65 is de Dot XL',
+    ['Noodverlichting Dot XL', 'Dot-XL', 'Noodverlichting Dot', 'Dot Plus', 'Dot IP65', 'DOT XL IP65'].map(groep),
+    ['ag77', 'ag77', 'ag40', 'ag76', 'ag75', 'ag77']);
   /* De naam staat vóór het soortwoord: dan niet afknippen. */
   is('Mondial Opbouw Pendel zonder merknaam', groep('Mondial Opbouw Pendel wit 25,5W'), 'ag25');
   /* Ruis mag niet meetellen. */

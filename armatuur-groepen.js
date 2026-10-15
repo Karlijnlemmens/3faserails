@@ -97,9 +97,14 @@ const ARM_GROEPEN = [
   {id:'ag72', naam:'Lowbay Copa G2', zoektermen:['Copa']},
   {id:'ag73', naam:'Montagebalk Linea', zoektermen:['Linea']},
   {id:'ag74', naam:'Moon', zoektermen:[]},
-  {id:'ag75', naam:'Noodverlichting Dot IP65', zoektermen:['Dot IP65']},
-  {id:'ag76', naam:'Noodverlichting Dot Plus', zoektermen:['Dot Plus']},
-  {id:'ag77', naam:'Noodverlichting Dot XL', zoektermen:['Dot XL']},
+  /* De Dot-reeks wordt ook aaneen geschreven - het blad van de Dot XL zelf zegt "De DOTXL
+     is multifunctioneel" - en dan is het voor de herkenning één woord dat niemand kent:
+     "DOTXL" wees niets aan. Vandaar de aaneengeschreven vormen als zoekterm. De Dot XL is
+     zelf IP65 (zijn blad noemt het drie keer); "Dot XL IP65" werd de Dot IP65, omdat die
+     langere naam bij gelijke stand wint - met de drie woorden als zoekterm niet meer. */
+  {id:'ag75', naam:'Noodverlichting Dot IP65', zoektermen:['Dot IP65', 'DotIP65']},
+  {id:'ag76', naam:'Noodverlichting Dot Plus', zoektermen:['Dot Plus', 'DotPlus']},
+  {id:'ag77', naam:'Noodverlichting Dot XL', zoektermen:['Dot XL', 'DotXL', 'Dot XL IP65']},
   {id:'ag78', naam:'Noodverlichting Kit', zoektermen:['Kit']},
   {id:'ag79', naam:'Noodverlichting Maximus', zoektermen:['Maximus']},
   {id:'ag80', naam:'Noodverlichting Norma', zoektermen:['Norma']},
