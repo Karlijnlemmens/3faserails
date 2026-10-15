@@ -47,6 +47,36 @@ const BRIEF = {
   },
 };
 
+/* De tekst van de briefing op schaal t (1 = het ontwerp): letters, regelafstanden en het
+   grijze vlak met zijn aanhalingstekens krimpen mee. Wat op de pagina uitlijnt - de
+   linkerranden en breedtes, de kop "Briefing" - blijft staan. */
+function briefMaten(t){
+  if(t == null || t === 1) return BRIEF;
+  const B = BRIEF, m = Object.assign({}, B, {blok:Object.assign({}, B.blok, {h:B.blok.h*t}), gaten:{}});
+  ['pt','disclaimerPt','blokRegel','vraagTop','naVraag','blokOnder','quoteInX','quoteInY','quoteUitX','quoteUitY',
+   'quoteH','quoteBoven','quoteOnderL','quoteOnderR','quoteGat'].forEach(k=>{ m[k] = B[k]*t; });
+  Object.keys(B.gaten).forEach(k=>{ m.gaten[k] = B.gaten[k]*t; });
+  return m;
+}
+
+/* De introductiepagina met briefing is ALTIJD één pagina (oktober 2026: bij een lange
+   briefing verhuisde "Onze specialist" naar een eigen pagina). Voor het tekenen meet
+   introStand() de pagina droog op en kiest de eerste stand die past:
+     0  zoals het ontwerp;
+     1  minder wit boven "Onze specialist" (zo deed de tool het al);
+     2  ook minder wit boven "Contactgegevens";
+     -  dan het blauwe vlak stap voor stap kleiner, tot driekwart;
+     -  en pas dan de tekst van de briefing, tot 80%.
+   Past het dan nog niet - een eigen tekst van een hele pagina - dan wordt de tekst verder
+   verkleind tot het past, en zegt de tool dat (introStandMelding). */
+const INTRO_STANDEN = (()=>{
+  const s = [{krap:0, kaart:1, tekst:1}, {krap:1, kaart:1, tekst:1}, {krap:2, kaart:1, tekst:1}];
+  [.95, .9, .85, .8, .75].forEach(k=>s.push({krap:2, kaart:k, tekst:1}));
+  [.95, .9, .85, .8].forEach(tk=>s.push({krap:2, kaart:.75, tekst:tk}));
+  return s;
+})();
+const INTRO_TEKST_MIN = .3;      /* nooit kleiner dan dit (8,5 pt -> 2,6 pt): dan maar een tweede pagina */
+
 function briefRegels(tekst){
   return String(tekst||'').split(/\r?\n/).map(r=>r.trim()).filter(Boolean);
 }
@@ -425,8 +455,63 @@ function briefingStand(keuze){
    "Briefing" staat - de railtool zonder briefing. De sectienaam blijft daarna
    "Introductie"; een tool die verder gaat met een andere zet die zelf terug. */
 async function tekenIntroductie(HS, keuze, plek, metBriefing){
-  const {C, text, meet, rect, circle, poly, need, flush, beginPage, paginaKop, zetSectie} = HS;
-  const B = BRIEF, G = B.gaten;
+  const {flush, beginPage, paginaKop, zetSectie} = HS;
+  const proj = (keuze.proj||'').trim();
+  zetSectie('Introductie');
+  beginPage(true);
+  paginaKop('Introductie', proj + (proj ? '  —  ' : '') + PdfHuisstijl.datumNL(keuze.datum));
+
+  if(!metBriefing){
+    plek.zet(CONTACT.boven);
+    await tekenContactpersonen(HS, keuze, plek, 0);
+    flush();
+    return null;
+  }
+  const stand = await introStand(HS, keuze);
+  await tekenBriefing(HS, keuze, plek, stand);
+  flush();
+  introStandMelding(stand);
+  return stand;
+}
+
+/* Meet de pagina droog op in elke stand van INTRO_STANDEN en geeft de eerste die past.
+   Droog: dezelfde tekencode, maar met een tekenlaag die niets tekent en niets afbreekt;
+   need() onthoudt alleen hoe ver de pagina zou moeten doorlopen - precies de toets die
+   need() bij het echte tekenen doet, dus wat hier past breekt daar ook niet af. */
+async function introStand(HS, keuze){
+  const grens = HS.H - HS.MB;
+  const past = async (stand)=>{
+    let y = 0, eis = 0;
+    const plek = {haal:()=>y, zet:(v)=>{ y = v; }};
+    const niets = ()=>{};
+    const droog = Object.assign({}, HS, {droog:true,
+      text:(x, yt, pt, s, opt)=>HS.meet(String(s), pt, opt||{}),
+      rect:niets, circle:niets, poly:niets, line:niets, metUitsnede:niets, beeldVullend:niets, beeldPassend:niets,
+      need:(h)=>{ eis = Math.max(eis, y + h); }, flush:niets, beginPage:niets});
+    await tekenBriefing(droog, keuze, plek, stand);
+    return Math.max(eis, y) <= grens;
+  };
+  for(const stand of INTRO_STANDEN) if(await past(stand)) return stand;
+  const laatste = INTRO_STANDEN[INTRO_STANDEN.length-1];
+  for(let tk = Math.round((laatste.tekst - .05)*100)/100; tk >= INTRO_TEKST_MIN; tk = Math.round((tk - .05)*100)/100){
+    const stand = Object.assign({}, laatste, {tekst:tk});
+    if(await past(stand)) return stand;
+  }
+  return Object.assign({}, laatste, {tekst:INTRO_TEKST_MIN});
+}
+/* Een kleiner blauw vlak is gewoon de pagina; een kleinere briefingtekst meldt de tool,
+   want dan is de tekst eigenlijk te lang. */
+function introStandMelding(stand){
+  if(!stand || stand.tekst >= 1 || typeof Melding === 'undefined') return;
+  Melding.letop('De briefing is lang: om de introductie op één pagina te houden staat de tekst '+
+    'op '+Math.round(stand.tekst*100)+'% van de gewone grootte. Maak hem korter als dat niet de bedoeling is.');
+}
+
+/* De briefing zelf, met de contactpersonen eronder, in een stand van INTRO_STANDEN. HS kan
+   de echte tekenlaag zijn of de droge van introStand(). */
+async function tekenBriefing(HS, keuze, plek, stand){
+  const {C, text, meet, rect, circle, poly, need} = HS;
+  const B = briefMaten(stand.tekst), G = B.gaten;
   let y = plek.haal();
   const zet = (v)=>{ y = v; plek.zet(v); };
 
@@ -477,18 +562,6 @@ async function tekenIntroductie(HS, keuze, plek, metBriefing){
       poly([[x+dx, yy], [x+dx+B.quoteBoven, yy],
             [x+dx+B.quoteOnderR, yy+B.quoteH], [x+dx+B.quoteOnderL, yy+B.quoteH]], C.wit);
     });
-  }
-
-  const proj = (keuze.proj||'').trim();
-  zetSectie('Introductie');
-  beginPage(true);
-  paginaKop('Introductie', proj + (proj ? '  —  ' : '') + PdfHuisstijl.datumNL(keuze.datum));
-
-  if(!metBriefing){
-    zet(CONTACT.boven);
-    await tekenContactpersonen(HS, keuze, plek, 0);
-    flush();
-    return;
   }
 
   const inhoud = briefIntroInhoud(keuze);
@@ -543,8 +616,7 @@ async function tekenIntroductie(HS, keuze, plek, metBriefing){
   });
 
   /* --- Contactgegevens en Onze specialist: tekenContactpersonen() in contactpersonen.js --- */
-  await tekenContactpersonen(HS, keuze, plek, CONTACT.kopGat);
-  flush();
+  await tekenContactpersonen(HS, keuze, plek, stand.krap >= 2 ? CONTACT.kopGatKrap : CONTACT.kopGat, stand);
 }
 
 /* De opmaak van de keuze in het paneel, één keer, zodat hij in beide tools gelijk is:

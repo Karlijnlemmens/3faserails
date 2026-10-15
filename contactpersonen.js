@@ -35,6 +35,9 @@ const CONTACT = {
      tekort en verhuisde het naar een eigen, verder lege pagina. Dan liever de witruimte
      erboven wat kleiner; pas als het ook zo niet past gaat het naar de volgende pagina. */
   specialistGatKrap:34, naSpecKopKrap:23,
+  /* Nog krapper, voor als de introductiepagina anders niet op één pagina past (zie
+     INTRO_STANDEN in briefing.js): ook minder wit boven "Contactgegevens". */
+  kopGatKrap:32, specialistGatKrapst:26, naSpecKopKrapst:20,
   kaart:{
     kleur:'#0E7DC2', h:170,
     foto:{x:14, y:14, maat:102},
@@ -46,6 +49,19 @@ const CONTACT = {
     naCitaat:26, contactRegel:10.3, labelB:14.9, onder:13.3,
   },
 };
+
+/* Het blauwe vlak op schaal s (1 = het ontwerp): foto, letters en witruimte in het vlak
+   krimpen mee, zodat het er verkleind net zo uitziet. De breedte blijft die van de
+   pagina, zodat de randen gelijk blijven met de briefing erboven. Wanneer: zie
+   INTRO_STANDEN in briefing.js - de introductiepagina is altijd één pagina. */
+function kaartMaten(s){
+  const KK = CONTACT.kaart;
+  if(s == null || s === 1) return KK;
+  const m = {kleur:KK.kleur, foto:{x:KK.foto.x*s, y:KK.foto.y*s, maat:KK.foto.maat*s}};
+  ['h','tekstX','rechts','naamPt','naamTop','functiePt','functieTop','citaatPt','citaatTop',
+   'citaatRegel','alinea','naCitaat','contactRegel','labelB','onder'].forEach(k=>{ m[k] = KK[k]*s; });
+  return m;
+}
 
 /* Een medewerker uit medewerkers.js, per rol; null als er niets (geldigs) gekozen is -
    een id dat intussen uit het bestand is verdwenen telt als niet gekozen. */
@@ -130,10 +146,12 @@ function contactKeuze(vak, keuze, opWijziging, idVoorvoegsel){
    HS is de tekenlaag uit pdf-huisstijl.js; plek.haal()/plek.zet() lezen en zetten de
    y van de tool (need() in de tekenlaag kijkt naar diezelfde y). eersteGat is de
    afstand vanaf de regel erboven: onder de briefing CONTACT.kopGat, bovenaan een
-   eigen pagina 0. Geeft terug of er iets getekend is. */
-async function tekenContactpersonen(HS, keuze, plek, eersteGat){
+   eigen pagina 0. stand ({krap, kaart}, zie INTRO_STANDEN in briefing.js) zegt hoe
+   krap het wit boven "Onze specialist" is en op welke schaal het blauwe vlak staat;
+   zonder stand zoals het ontwerp. Geeft terug of er iets getekend is. */
+async function tekenContactpersonen(HS, keuze, plek, eersteGat, stand){
   const {C, text, rect, need, metUitsnede, beeldVullend, wrapBreedte} = HS;
-  const K = CONTACT, KK = K.kaart;
+  const K = CONTACT, st = stand || {krap:0, kaart:1}, KK = kaartMaten(st.kaart);
   let y = plek.haal();
   const zet = (v)=>{ y = v; plek.zet(v); };
 
@@ -163,7 +181,8 @@ async function tekenContactpersonen(HS, keuze, plek, eersteGat){
   }
 
   /* --- Onze specialist: alleen als de projectuitwerker een noot heeft. Het vlak
-         wordt nooit gebroken; past het niet, dan komt het op de volgende pagina. --- */
+         wordt nooit gebroken. Onder de briefing zorgt INTRO_STANDEN (briefing.js) dat
+         het op dezelfde pagina past; elders gaat het zo nodig naar de volgende. --- */
   const spec = specialist(keuze);
   if(spec){
     const tx = K.kaartX + KK.tekstX, breedte = K.kaartB - KK.tekstX - KK.rechts;
@@ -179,18 +198,18 @@ async function tekenContactpersonen(HS, keuze, plek, eersteGat){
     const telTop = hoogte + KK.naCitaat;
     const kaartH = Math.max(KK.h, telTop + KK.contactRegel + KK.citaatPt*0.78 + KK.onder);
 
-    const ruim = mensen.length ? K.specialistGat : eersteGat;
-    const krap = mensen.length
-              && y + ruim + K.naSpecKop + kaartH > HS.H - HS.MB
-              && y + K.specialistGatKrap + K.naSpecKopKrap + kaartH <= HS.H - HS.MB;
-    zet(y + (krap ? K.specialistGatKrap : ruim));
-    const naKop = krap ? K.naSpecKopKrap : K.naSpecKop;
+    /* Het wit erboven: zoals het ontwerp, of krap(per) als de stand dat zegt. Zonder
+       contactgegevens erboven geldt eersteGat, net als voor die gegevens. */
+    const krap = mensen.length ? st.krap : 0;
+    zet(y + (!mensen.length ? eersteGat : krap >= 2 ? K.specialistGatKrapst : krap ? K.specialistGatKrap : K.specialistGat));
+    const naKop = krap >= 2 ? K.naSpecKopKrapst : krap ? K.naSpecKopKrap : K.naSpecKop;
     need(naKop + kaartH); y = plek.haal();
     text(K.x, y, K.kopPt, 'Onze specialist', {bold:true, cond:true, color:C.hoofd});
     const kt = y + naKop, kx = K.kaartX;
     rect(kx, kt, K.kaartB, kaartH, KK.kleur);
 
-    const foto = (window.MEDEWERKER_FOTOS||{})[spec.id];
+    /* bij het droog opmeten (HS.droog, zie introStand in briefing.js) geen foto insluiten */
+    const foto = !HS.droog && (window.MEDEWERKER_FOTOS||{})[spec.id];
     if(foto){
       try{
         const img = await HS.sluitBeeldIn(PdfHuisstijl.b64Bytes(foto.split(',')[1]));

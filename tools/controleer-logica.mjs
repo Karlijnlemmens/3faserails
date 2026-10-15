@@ -539,6 +539,97 @@ function is(wat, gekregen, verwacht){
     'Hoofd Commerciële Binnendienst');
 }
 
+/* =============== de introductiepagina: altijd één pagina =============== */
+{
+  /* De echte keuze- en tekencode uit briefing.js en contactpersonen.js, met een tekenlaag
+     die niets tekent en tekst ruw opmeet (een halve punt per teken per pt). Dat is genoeg
+     om de keuze te toetsen; de echte maten liggen in de browserproef. Een zelfgemaakte
+     need() telt hoe vaak het echte tekenen een nieuwe pagina zou beginnen. */
+  const venster = {};
+  new Function('window', readFileSync(join(root, 'medewerkers.js'), 'utf8'))(venster);
+  const cp = readFileSync(join(root, 'contactpersonen.js'), 'utf8');
+  const b = await laadUit('briefing.js',
+    ['BRIEF', 'briefMaten', 'INTRO_STANDEN', 'INTRO_TEKST_MIN', 'introStand', 'tekenBriefing',
+     'briefRegels', 'briefOpsomming', 'BRIEF_VELDEN', 'briefingOpenVelden', 'briefNamen', 'briefGroepen',
+     'briefBronnen', 'briefVraagSlot', 'briefInhoud', 'briefSegTekst', 'briefTekstSeg', 'briefTekst', 'briefUitTekst',
+     'briefIntroInhoud'],
+    'const window = ' + JSON.stringify({MEDEWERKERS:venster.MEDEWERKERS, MEDEWERKER_ROLLEN:venster.MEDEWERKER_ROLLEN}) + ';\n'
+    + ['CONTACT', 'kaartMaten', 'medewerkerVan', 'contactPersonen', 'contactRegels', 'specialist', 'tekenContactpersonen']
+      .map(n => snijUit(cp, n)).join('\n'), ['CONTACT', 'kaartMaten']);
+  console.log('\nintroductiepagina');
+  const meet = (s, pt) => String(s).length * pt * 0.5;
+  const wrapBreedte = (s, maxB, pt) => { const r = []; let cur = '';
+    String(s).split(/\s+/).filter(Boolean).forEach(w => { const k = cur ? cur + ' ' + w : w;
+      if(cur && meet(k, pt) > maxB){ r.push(cur); cur = w; } else cur = k; });
+    if(cur) r.push(cur); return r; };
+  const grens = 842 - 64;
+  /* de echte tekening, met een need() die telt in plaats van een pagina te beginnen */
+  const echt = async (keuze, stand) => {
+    let y = 0, nieuw = 0, laagst = 0;
+    const plek = {haal:() => y, zet:(v) => { y = v; laagst = Math.max(laagst, v); }};
+    const niets = () => {};
+    const HS = {C:{}, H:842, MB:64, meet, wrapBreedte, text:(x, yt, pt, s) => meet(s, pt), rect:niets, circle:niets, poly:niets,
+      metUitsnede:niets, beeldVullend:niets, need:(h) => { if(y + h > grens) nieuw++; }};
+    await b.tekenBriefing(HS, keuze, plek, stand);
+    return {nieuw, laagst};
+  };
+  const HS = {C:{}, H:842, MB:64, meet, wrapBreedte, text:(x, yt, pt, s) => meet(s, pt), rect(){}, circle(){}, poly(){},
+    metUitsnede(){}, beeldVullend(){}, need(){}};
+  const basis = {proj:'1260307 Sportcomplex', soort:'vergelijking', projectuitwerker:'karlijn', accountmanager:'luuk-eerden', binnendienst:'christophe'};
+  const gevallen = {
+    kort: Object.assign({}, basis, {soort:'lichtberekening', bestek:'Bestek E-01'}),
+    sport: Object.assign({}, basis, {bestek:'Bijlage 3 - 251041_E-ruimtestaat_verlichtingseisen en lichtschakelingen',
+      armaturenboek:'Bijlage 5 - 251041_Armaturenboek', email:'Offerte aanvraag 1260307 Nieuwbouw Sportcomplex Schagen'}),
+    veel: Object.assign({}, basis, {bestek:Array.from({length:6}, (_, i) => 'Bijlage ' + i + ' - 251041_E-ruimtestaat verlichtingseisen deel ' + i).join('\n'),
+      tekeningen:Array.from({length:5}, (_, i) => 'E-0' + i + ' Plattegrond verdieping ' + i + ' verlichting en noodverlichting').join('\n'),
+      email:'Offerte aanvraag 1260307 Nieuwbouw Sportcomplex Schagen'}),
+    enorm: Object.assign({}, basis, {briefEigen:true, briefTekst:'**De vraag:**\n' + 'Een heel lange zin over het project. '.repeat(200)}),
+  };
+  /* alle standen in de volgorde waarin de tool ze probeert: INTRO_STANDEN, en daarna de
+     tekst in stappen van 5% kleiner tot INTRO_TEKST_MIN */
+  const laatste = b.INTRO_STANDEN[b.INTRO_STANDEN.length - 1], volgorde = b.INTRO_STANDEN.slice();
+  for(let tk = Math.round((laatste.tekst - .05) * 100) / 100; tk >= b.INTRO_TEKST_MIN; tk = Math.round((tk - .05) * 100) / 100)
+    volgorde.push(Object.assign({}, laatste, {tekst:tk}));
+  const gekozen = {};
+  for(const [naam, keuze] of Object.entries(gevallen)){
+    const stand = await b.introStand(HS, keuze);
+    gekozen[naam] = stand;
+    /* de eerste stand die past, en wat ervoor komt past niet */
+    const i = volgorde.findIndex(s => JSON.stringify(s) === JSON.stringify(stand));
+    const pastEerder = [];
+    for(const s of volgorde.slice(0, i)) if(!(await echt(keuze, s)).nieuw) pastEerder.push(JSON.stringify(s));
+    const r = await echt(keuze, stand);
+    is('introductie "' + naam + '": in de gekozen stand geen tweede pagina, en geen ruimere stand die ook past',
+      [i >= 0, r.nieuw, r.laagst <= grens, pastEerder], [true, 0, true, []]);
+  }
+  /* Elke lengte, van één zin tot een volle pagina, met en zonder blauw vlak: nooit een
+     tweede pagina. Zonder vlak eindigt de pagina op de contactgegevens, en dan kijkt
+     need() verder vooruit dan waar de laatste regel begint - dat moet het opmeten ook. */
+  const mis = [];
+  for(const wie of ['karlijn', 'olivia']) for(let n = 1; n <= 90; n++){
+    const keuze = Object.assign({}, basis, {projectuitwerker:wie, briefEigen:true,
+      briefTekst:'**De vraag:**\n' + 'Een zin over het project en wat er gevraagd wordt. '.repeat(n)});
+    const stand = await b.introStand(HS, keuze), r = await echt(keuze, stand);
+    if(r.nieuw && mis.length < 5) mis.push(wie + ' ' + n + ': ' + JSON.stringify(stand));
+  }
+  is('elke lengte van de briefing, met en zonder blauw vlak: één pagina (180 gevallen)', mis, []);
+  is('wat past blijft zoals het ontwerp', gekozen.kort, {krap:0, kaart:1, tekst:1});
+  is('het sportcomplex: alleen het blauwe vlak wat kleiner, de tekst blijft', [gekozen.sport.tekst, gekozen.sport.kaart < 1], [1, true]);
+  is('een lange briefing: pas na het kleinste vlak een kleinere tekst', [gekozen.veel.kaart, gekozen.veel.tekst < 1], [.75, true]);
+  is('ook een eigen tekst van pagina\'s lang blijft één pagina, zo klein als nodig', [gekozen.enorm.tekst < .8, gekozen.enorm.tekst >= b.INTRO_TEKST_MIN], [true, true]);
+  /* de standen lopen van ruim naar krap: het wit eerst, dan het vlak, dan de tekst */
+  is('standen van ruim naar krap', b.INTRO_STANDEN.every((s, i, a) => !i ||
+    (s.krap >= a[i-1].krap && s.kaart <= a[i-1].kaart && s.tekst <= a[i-1].tekst)), true);
+  is('de eerste stand is het ontwerp', b.INTRO_STANDEN[0], {krap:0, kaart:1, tekst:1});
+  /* verkleind houdt het vlak zijn breedte en de briefing zijn randen: alles blijft uitgelijnd */
+  const k = b.kaartMaten(.8), m = b.briefMaten(.8);
+  is('een kleiner vlak: alles in het vlak op schaal, de breedte van de pagina blijft',
+    [k.foto.maat, k.citaatPt, k.h, b.CONTACT.kaartB], [b.CONTACT.kaart.foto.maat * .8, b.CONTACT.kaart.citaatPt * .8, b.CONTACT.kaart.h * .8, 525]);
+  is('een kleinere tekst: de randen en breedtes van de briefing blijven', [m.pt, m.gaten.regel, m.x, m.breedte, m.blok.x, m.blok.b, m.kopPt],
+    [b.BRIEF.pt * .8, b.BRIEF.gaten.regel * .8, b.BRIEF.x, b.BRIEF.breedte, b.BRIEF.blok.x, b.BRIEF.blok.b, b.BRIEF.kopPt]);
+  is('op schaal 1 precies het ontwerp', [b.kaartMaten(1) === b.CONTACT.kaart, b.briefMaten(1) === b.BRIEF], [true, true]);
+}
+
 /* ========================== bandrasterberekening =========================== */
 {
   /* P.instellingen staat in de tool op het projectobject; hier zetten we alleen dat
