@@ -1617,6 +1617,51 @@ function is(wat, gekregen, verwacht){
   is('niets kwijt en elk stuk past', fout, []);
 }
 
+/* ================== voorblad: de projectnaam binnen de balk ================== */
+{
+  /* Oktober 2026, de gebruiker: "de titel moet ten alle tijden in het blauw vak staan in
+     titelblad, dus eerst afbreken en als hij dan nog niet red dan lettertype kleiner
+     maken". titelOpmaak() uit pdf-huisstijl.js met een breedtemaat zonder lettertype:
+     elk teken 0,6 keer de korpsgrootte, op 20 pt dus 21 tekens per regel van 260 pt.
+     wrapBreedte() is de oude regel, met dezelfde maat. */
+  const breedte = (t, maat) => String(t).length * maat * 0.6;
+  const m = await laadUit('pdf-huisstijl.js', ['TITEL', 'titelOpmaak', 'titelStukken', 'breekWoord', 'wrapBreedte'],
+    'const meet = (t, maat) => String(t).length * maat * 0.6;');
+  console.log('voorblad: projectnaam');
+  const op = naam => { const o = m.titelOpmaak(naam, breedte); return [o.maat].concat(o.regels); };
+  is('de naam van de gebruiker: afgebroken na de _ en blijft 20 pt', op('Bouwpartners_Kasteelpark-V3'), [20, 'Bouwpartners_', 'Kasteelpark-V3']);
+  is('met spaties ervoor: het lange woord breekt in stukken, de rest op spaties',
+    op('Nieuwbouw Bouwpartners_Kasteelpark-V3 fase 2'), [20, 'Nieuwbouw', 'Bouwpartners_', 'Kasteelpark-V3 fase 2']);
+  is('vóór een haakje', op('Kantoorgebouw(renovatie)'), [20, 'Kantoorgebouw', '(renovatie)']);
+  is('geen breekplek in het woord: kleiner, niet midden in het woord', op('Bouwpartnerskasteelparkversie3'), [14, 'Bouwpartnerskasteelparkversie3']);
+  is('vier regels op 20 pt passen niet: een halve punt kleiner is genoeg',
+    op('Renovatie kantoorpand Weena 120 te Rotterdam aan de Nieuwe Maas'), [19.5, 'Renovatie kantoorpand', 'Weena 120 te Rotterdam', 'aan de Nieuwe Maas']);
+  is('een lange naam: 15 pt, op vier regels, niets valt weg',
+    op('Nieuwbouw 48 appartementen Parkzicht fase 2 blok A en B met ondergrondse parkeergarage en bergingen'),
+    [15, 'Nieuwbouw 48 appartementen', 'Parkzicht fase 2 blok A en B', 'met ondergrondse', 'parkeergarage en bergingen']);
+  is('ook op 12 pt geen breekplek: dan pas midden in het woord', op('x'.repeat(80)), [12, 'x'.repeat(36), 'x'.repeat(36), 'x'.repeat(8)]);
+  is('op 20 pt de regels op 128, 164 en 200', (o => [o.boven, o.stap])(m.titelOpmaak('Renovatie kantoorpand', breedte)), [128, 36]);
+  /* wat op 20 pt al paste: dezelfde regels als de oude regel */
+  const pasten = ['Renovatie kantoorpand Weena 120 te Rotterdam', 'Projectnaam', 'Gemeentehuis Utrecht', 'A', 'Kantoor 1-12 en de gangen van blok B'];
+  is('wat al paste, precies zoals het was', pasten.map(n => op(n).slice(1)), pasten.map(n => m.wrapBreedte(n, 260, 20, {}).slice(0, 3)));
+  /* En altijd binnen de balk, zonder dat er iets wegvalt: honderden namen, van kort tot heel
+     lang. De balk zelf, zoals omslag() hem tekent: y 99 tot 226, rechts de schuine kant van
+     x 378 bovenaan naar 34 pt per 70 pt hoogte naar binnen; een regel loopt van y tot y + maat. */
+  const rechts = y => 378 - (y - 99) * 34 / 70;
+  const fout = [];
+  const woorden = ['Renovatie', 'kantoorpand', 'Bouwpartners_Kasteelpark-V3', 'P24-0815_Gemeente_Utrecht_Stadskantoor', 'te', 'Rotterdam', '(fase', '2)',
+    'Bouwpartnerskasteelparkversie3', 'verlichtingsplan/def', 'a', 'blok-A/B'];
+  for(let n = 1; n <= 300; n++){
+    const naam = Array.from({length: 1 + n % 23}, (_, i) => woorden[(n * 7 + i * 5) % woorden.length]).join(' ');
+    const o = m.titelOpmaak(naam, breedte);
+    o.regels.forEach((r, i) => { const y = o.boven + i * o.stap;
+      if(y < 99 || y + o.maat > 226) fout.push(naam + ': regel ' + (i + 1) + ' boven of onder de balk uit');
+      if(45 + breedte(r, o.maat) > rechts(y + o.maat)) fout.push(naam + ': regel ' + (i + 1) + ' de schuine kant uit'); });
+    if(o.regels.join('').replace(/\s/g, '') !== naam.replace(/\s/g, '')) fout.push(naam + ': tekst kwijt');
+  }
+  is('300 namen: altijd binnen de balk en niets kwijt', fout, []);
+}
+
 /* ========================== DLC: de vijf fotovakken ========================== */
 {
   const m = await laadUit('dlc.html', ['BEELDVAKKEN', 'beeldenNaarVakken', 'beeldOp', 'schrijfBeeld', 'plaatsBeeld',

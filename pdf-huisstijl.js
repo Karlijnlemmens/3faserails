@@ -485,6 +485,70 @@ async function tekenaar(doc, opt){
     zetY(BALK_H+38);
   }
 
+  /* De projectnaam in de schuine balk van het voorblad (oktober 2026, de gebruiker: "de
+     titel moet ten alle tijden in het blauw vak staan in titelblad, dus eerst afbreken en
+     als hij dan nog niet red dan lettertype kleiner maken"). Er werd alleen op spaties
+     afgebroken, dus een naam als "Bouwpartners_Kasteelpark-V3" liep de schuine kant uit,
+     en van een langere naam vielen de regels na de derde weg.
+     De balk loopt van y 99 tot 226 en versmalt naar onder; een regel van hoogstens 260 pt
+     vanaf x 45 blijft overal binnen de schuine kant (onderaan staat die op 316). Op 20 pt
+     staan de regels op 128, 164 en 200; kleiner schuift alles naar verhouding mee, en de
+     onderste regel blijft boven 220.
+     Volgorde: eerst afbreken - op spaties, en een woord dat zelf te breed is na _ - / of
+     vóór ( (titelStukken()); past het dan nog niet, telkens een halve punt kleiner, tot
+     12 pt. Pas daaronder ook midden in een woord (breekWoord()), tot 4 pt. Wat op 20 pt al
+     paste, blijft precies zoals het was. breedte(tekst, maat) meet; de rest is rekenwerk,
+     zodat controleer-logica.mjs het zonder lettertype kan nalopen. */
+  const TITEL = {x:45, breed:260, maat:20, klein:12, kleinst:4, balk:99, boven:29, regel:36, onder:220};
+  function titelOpmaak(naam, breedte){
+    const T=TITEL;
+    const opMaat=(maat, midden)=>{
+      const past=t=>breedte(t, maat)<=T.breed;
+      const regels=[]; let cur='';
+      for(const woord of String(naam).split(/\s+/).filter(Boolean)){
+        let stukken=[woord];
+        if(!past(woord)){
+          stukken=titelStukken(woord);
+          if(stukken.some(s=>!past(s))){
+            if(!midden) return null;
+            stukken=[].concat(...stukken.map(s=>past(s) ? [s] : breekWoord(s, past)));
+          }
+        }
+        /* de stukken van één woord sluiten zonder spatie op elkaar aan */
+        stukken.forEach((stuk,i)=>{
+          const kandidaat = cur ? cur+(i ? '' : ' ')+stuk : stuk;
+          if(cur && !past(kandidaat)){ regels.push(cur); cur=stuk; }
+          else cur=kandidaat;
+        });
+      }
+      if(cur) regels.push(cur);
+      return regels;
+    };
+    let laatste=null;
+    for(const midden of [false, true]){
+      for(let maat=midden ? T.klein : T.maat; maat>=(midden ? T.kleinst : T.klein); maat-=0.5){
+        const boven=T.balk+T.boven*maat/T.maat, stap=T.regel*maat/T.maat;
+        const max=Math.floor((T.onder-maat-boven)/stap)+1;
+        const regels=opMaat(maat, midden);
+        if(!regels) continue;
+        /* zelfs op 4 pt te lang (zo'n 1900 tekens): wat niet past valt weg, de balk uit loopt niets */
+        laatste={regels:regels.slice(0,max), maat, boven, stap};
+        if(regels.length<=max) return laatste;
+      }
+    }
+    return laatste;
+  }
+  /* Een woord in stukken na _ - / en vóór ( - waar een mens het ook zou afbreken. */
+  function titelStukken(woord){
+    const stukken=[]; let cur='';
+    for(const teken of woord){
+      if(teken==='(' && cur){ stukken.push(cur); cur=''; }
+      cur+=teken;
+      if('_-/'.includes(teken)){ stukken.push(cur); cur=''; }
+    }
+    if(cur) stukken.push(cur);
+    return stukken;
+  }
   /* Het voorblad. project = {naam, nr, inst, datum}, met datum als kant-en-klare
      tekst: de tools maken die verschillend op en dat blijft aan hen. */
   function omslag(project){
@@ -534,13 +598,10 @@ async function tekenaar(doc, opt){
       logo(W-logoBreedte(lh)-30, 716+(70-lh)/2, lh, true);
     }
 
-    /* projectnaam in de balk - maximaal 3 regels, anders loopt hij eruit. Breedte is
-       gebaseerd op de onderste (smalste) regel, want de balk versmalt door de schuine
-       kant hierboven - bij een bredere maat zou de laatste regel erover heen lopen. */
+    /* projectnaam in de balk, altijd erbinnen (titelOpmaak()) */
     const naam=(project.naam||'').trim() || 'Projectnaam';
-    const regels=wrapBreedte(naam, 260, 20, {bold:true,cond:true}).slice(0,3);
-    let ty=128;
-    regels.forEach(r=>{ text(45,ty,20,r,{bold:true,cond:true,color:C.wit}); ty+=36; });
+    const opmaak=titelOpmaak(naam, (t,maat)=>meet(t,maat,{bold:true,cond:true}));
+    opmaak.regels.forEach((r,i)=> text(TITEL.x, opmaak.boven+i*opmaak.stap, opmaak.maat, r, {bold:true,cond:true,color:C.wit}));
 
     /* projectgegevens linksonder */
     const veld=(label,waarde,dy)=>{
