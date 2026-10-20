@@ -2538,68 +2538,86 @@ function computeBOM(){
   overigLijst().forEach(a=>{ const s=st.overig[a.id]; if(!s||s.qty<=0) return;
     const c=a.codes[s.color] || a.codes[Object.keys(a.codes)[0]];
     add(c.p, c.l || '', a.name+(optieTekst(s.color)?' '+optieTekst(s.color):''), s.qty, null); });
-  /* De inbouwrail krijgt bij elk aansluitstuk een afdekplaat voor de eindvoeding en bij
-     elke middenvoeding, bocht, T en kruis een voor de tussenkoppeling, in de kleur van de
-     rail. Bij de verstelbare hoek zegt de handleiding het niet (zie warnings()). */
-  st.nodes.forEach(n=>{ const v=V[n.id]; if(!v||!v.art||!inbouw(n.s)) return;
-    if(v.cls==='aansluit') add(activeP(n.s).afdekEind[st.color], activeL(n.s).afdekEind[st.color], 'Afdekplaat inbouwrail eindvoeding '+CLRN(st.color), ruimteFactor(n.s), 'n:'+n.id);
-    if(['bocht','t','kruis'].includes(v.cls)) add(activeP(n.s).afdekTussen[st.color], activeL(n.s).afdekTussen[st.color], 'Afdekplaat inbouwrail tussenkoppeling '+CLRN(st.color), ruimteFactor(n.s), 'n:'+n.id); });
-  st.feeds.filter(f=>f.kind==='edge').forEach(f=>{ const sh=nodeSheet(edge(f.edge).a); if(!inbouw(sh)) return;
-    add(activeP(sh).afdekTussen[st.color], activeL(sh).afdekTussen[st.color], 'Afdekplaat inbouwrail tussenkoppeling '+CLRN(st.color), ruimteFactor(sh), 'e:'+f.edge); });
+  /* de afdekplaten van de inbouwrail (afdekplaat()) */
+  st.nodes.forEach(n=>{ const v=V[n.id], a=v&&v.art&&afdekplaat(n.s, v.cls);
+    if(a) add(a.art, a.artL, a.name, ruimteFactor(n.s), 'n:'+n.id); });
+  st.feeds.filter(f=>f.kind==='edge').forEach(f=>{ const sh=nodeSheet(edge(f.edge).a), a=afdekplaat(sh, 'midden');
+    if(a) add(a.art, a.artL, a.name, ruimteFactor(sh), 'e:'+f.edge); });
   /* buiggereedschap: alleen bij de 3-fase rail (bij de 1-fase rail niet besteld); in DALI
      hetzelfde artikel */
   if(railDetail.some(d=>!eenFase(nodeSheet(d.e.a)))) add(PCODES.buigtool, LCODES.buigtool, 'PRX 3-Fase Rail buiggereedschap',1,null);
   normalizeMountState();
   const mounts=computeMounts();
-  /* Per tekenvlak zijn eigen montagewijze, met zijn eigen montagepunten. Dezelfde
-     onderdelen uit meer tekenvlakken tellen samen op. Pendelsets gaan per 10, dus die
-     worden eerst per uitvoering over alle tekenvlakken samengeteld en dan pas
-     afgerond: twee vlakken met 6 punten zijn 2 pakken, geen 2 x 1. */
+  /* Per tekenvlak zijn eigen montagewijze, met zijn eigen montagepunten (montageArtikelen(),
+     maal de ruimtes). Dezelfde onderdelen uit meer tekenvlakken tellen samen op. Pendelsets
+     gaan per 10, dus die worden eerst per uitvoering over alle tekenvlakken samengeteld en
+     dan pas afgerond: twee vlakken met 6 punten zijn 2 pakken, geen 2 x 1. */
+  const perVlak=st.sheets.map(sh=>montageArtikelen(sh.id, computeMounts(sh.id).count*ruimteFactor(sh.id),
+    sheetNaden(sh.id)*ruimteFactor(sh.id)));
   const pendelPunten={};
-  st.sheets.forEach(sh=>{ const mt=montageVan(sh.id); if(mt.wijze!=='pendel') return;
-    const n=computeMounts(sh.id).count*ruimteFactor(sh.id); if(!n) return;
-    const kk=pendelKabelkleur(mt), len=mt.pendelKabelLen, code=activeP(sh.id).pendel[st.color][kk][len];
-    pendelPunten[code]=pendelPunten[code]||{codeL:activeL(sh.id).pendel[st.color][kk][len], kk, len, punten:0};
-    pendelPunten[code].punten+=n; });
-  st.sheets.forEach(sh=>{
-    const mt=montageVan(sh.id), n=computeMounts(sh.id).count*ruimteFactor(sh.id);
-    if(!n) return;
-    if(mt.wijze==='beugel'){
-      add(activeP(sh.id).montagebeugel[st.color], activeL(sh.id).montagebeugel[st.color], 'Plafond Montagebeugel '+CLRN(st.color), n, null);
-    }
-    if(mt.wijze==='sys'){
-      add(activeP(sh.id).systeembeugel[st.color], activeL(sh.id).systeembeugel[st.color], 'Systeemplafond beugel '+CLRN(st.color), n, null);
-      if(mt.sysOphang){
-        const len=mt.sysOphangLen;
-        add(activeP(sh.id).ophangsetsysteempl[st.color][len], activeL(sh.id).ophangsetsysteempl[st.color][len], 'ophangsetsysteempl verstelbaar '+len+'m '+CLRN(st.color), n, null);
-      }
-    }
-    /* 1-fase, pendel: per montagepunt een ophangset, en onder elke koppeling (elektrisch
-       koppelstuk) een lange ophangbeugel. Direct tegen het plafond en inbouw: niets - de
-       rail gaat met schroeven door de voorgeboorde gaten. */
-    if(mt.wijze==='pendel1f' || mt.wijze==='pendel1flos'){
-      /* een naad valt altijd op een hele meter vanaf het begin van het segment, dus op een
-         montagepunt: daar komt de lange beugel */
-      const naden = sheetEdges(sh.id).reduce((s,e)=>s+railFor(e).seams,0)*ruimteFactor(sh.id);
-      const P1=activeP(sh.id), L1=activeL(sh.id), len=mt.ophangLen;
-      if(mt.wijze==='pendel1f')
-        add(P1.ophangset[st.color][len], L1.ophangset[st.color][len], 'Ophangset verstelbaar '+len+'m incl. beugel en kap '+CLRN(st.color), n, null);
-      else {
-        add(P1.plafondklem[st.color], L1.plafondklem[st.color], 'Plafondklem + plafondkap excl. staalkabel '+CLRN(st.color), n, null);
-        add(P1.ophangkabel[len], L1.ophangkabel[len], 'Ophangkabel '+len+'m', n, null);
-        add(P1.snelspanner, L1.snelspanner, 'Snelspanner', n, null);
-        if(n-naden>0) add(P1.beugelKort, L1.beugelKort, 'Ophangbeugel kort', n-naden, null);
-      }
-      if(naden) add(P1.beugelLang, L1.beugelLang, 'Ophangbeugel lang (steun onder de koppeling)', naden, null);
-    }
-    if(mt.wijze==='pendel'){
-      const code=activeP(sh.id).pendel[st.color][pendelKabelkleur(mt)][mt.pendelKabelLen], pp=pendelPunten[code];
-      if(!items[code]) add(code, pp.codeL,
-        'Pendelset 10-pack (bus '+CLRN(st.color)+' / kabel '+CLRN(pp.kk)+' '+pp.len+'m)'+' (voor '+pp.punten+' punten)', Math.ceil(pp.punten/10), null);
-      add(activeP(sh.id).beugelsnel[st.color], activeL(sh.id).beugelsnel[st.color], 'PRX 3-Fase Rail beugel en snelspanner '+CLRN(st.color)+' (excl. staalkabel)', n, null);
-    }
-  });
+  perVlak.forEach(rij=>rij.filter(a=>a.pendel).forEach(a=>{
+    pendelPunten[a.art]=pendelPunten[a.art]||Object.assign({codeL:a.artL, punten:0}, a.pendel);
+    pendelPunten[a.art].punten+=a.aantal; }));
+  perVlak.forEach(rij=>rij.forEach(a=>{
+    if(!a.pendel) return add(a.art, a.artL, a.name, a.aantal, null);
+    const pp=pendelPunten[a.art];
+    if(!items[a.art]) add(a.art, pp.codeL,
+      'Pendelset 10-pack (bus '+CLRN(st.color)+' / kabel '+CLRN(pp.kk)+' '+pp.len+'m)'+' (voor '+pp.punten+' punten)', Math.ceil(pp.punten/10), null);
+  }));
   return {P,V,items,railDetail,errs,mounts};
+}
+/* Het montagemateriaal van een tekenvlak bij n montagepunten, waarvan er naden onder een
+   koppeling vallen. Voor Bestelgegevens (computeBOM(): maal de ruimtes, en de pendelsets
+   daarna in pakken van tien) en voor de tabel "Onderdelen in de tekening" van dat
+   tekenvlak (reportData(): per ruimte) - uit dezelfde regels, zodat die twee nooit uit
+   elkaar lopen. Een pendelset staat hier per stuk, met pendel:{kk,len} erbij. */
+function montageArtikelen(shId, n, naden){
+  const mt=montageVan(shId), P_=activeP(shId), L_=activeL(shId), c=st.color, uit=[];
+  const zet=(art, artL, name, aantal, extra)=>{ if(art && aantal>0) uit.push(Object.assign({art, artL, name, aantal}, extra)); };
+  if(!n) return uit;
+  if(mt.wijze==='beugel') zet(P_.montagebeugel[c], L_.montagebeugel[c], 'Plafond Montagebeugel '+CLRN(c), n);
+  if(mt.wijze==='sys'){
+    zet(P_.systeembeugel[c], L_.systeembeugel[c], 'Systeemplafond beugel '+CLRN(c), n);
+    if(mt.sysOphang){
+      const len=mt.sysOphangLen;
+      zet(P_.ophangsetsysteempl[c][len], L_.ophangsetsysteempl[c][len], 'ophangsetsysteempl verstelbaar '+len+'m '+CLRN(c), n);
+    }
+  }
+  /* 1-fase, pendel: per montagepunt een ophangset, en onder elke koppeling (elektrisch
+     koppelstuk) een lange ophangbeugel. Direct tegen het plafond en inbouw: niets - de
+     rail gaat met schroeven door de voorgeboorde gaten. */
+  if(mt.wijze==='pendel1f' || mt.wijze==='pendel1flos'){
+    const len=mt.ophangLen;
+    if(mt.wijze==='pendel1f')
+      zet(P_.ophangset[c][len], L_.ophangset[c][len], 'Ophangset verstelbaar '+len+'m incl. beugel en kap '+CLRN(c), n);
+    else {
+      zet(P_.plafondklem[c], L_.plafondklem[c], 'Plafondklem + plafondkap excl. staalkabel '+CLRN(c), n);
+      zet(P_.ophangkabel[len], L_.ophangkabel[len], 'Ophangkabel '+len+'m', n);
+      zet(P_.snelspanner, L_.snelspanner, 'Snelspanner', n);
+      zet(P_.beugelKort, L_.beugelKort, 'Ophangbeugel kort', n-naden);
+    }
+    zet(P_.beugelLang, L_.beugelLang, 'Ophangbeugel lang (steun onder de koppeling)', naden);
+  }
+  if(mt.wijze==='pendel'){
+    const kk=pendelKabelkleur(mt), len=mt.pendelKabelLen;
+    zet(P_.pendel[c][kk][len], L_.pendel[c][kk][len], 'Pendelset (bus '+CLRN(c)+' / kabel '+CLRN(kk)+' '+len+'m), losse sets uit het 10-pack', n, {pendel:{kk, len}});
+    zet(P_.beugelsnel[c], L_.beugelsnel[c], 'PRX 3-Fase Rail beugel en snelspanner '+CLRN(c)+' (excl. staalkabel)', n);
+  }
+  return uit;
+}
+/* De naden (elektrische koppelstukken) in de rails van een tekenvlak. Een naad valt altijd
+   op een hele meter vanaf het begin van het segment, dus op een montagepunt: daar komt bij
+   de 1-fase pendel de lange beugel. */
+function sheetNaden(shId){ return sheetEdges(shId).reduce((s,e)=>s+railFor(e).seams,0); }
+/* De afdekplaat die bij een onderdeel van de inbouwrail hoort, of null: bij het
+   aansluitstuk een voor de eindvoeding, bij de middenvoeding (cls 'midden'), bocht, T en
+   kruis een voor de tussenkoppeling, in de kleur van de rail. Bij de verstelbare hoek
+   zegt de handleiding het niet (zie warnings()). */
+function afdekplaat(shId, cls){
+  if(!inbouw(shId)) return null;
+  const k = cls==='aansluit' ? 'afdekEind' : ['midden','bocht','t','kruis'].includes(cls) ? 'afdekTussen' : null;
+  return k && {art:activeP(shId)[k][st.color], artL:activeL(shId)[k][st.color],
+    name:'Afdekplaat inbouwrail '+(k==='afdekEind' ? 'eindvoeding' : 'tussenkoppeling')+' '+CLRN(st.color)};
 }
 
 /* ---------- canvas ---------- */
@@ -3243,16 +3261,28 @@ function reportData(){
       trGlobal++;
       comps[c].slice().sort((p,q)=>(p.y-q.y)||(p.x-q.x)).forEach(n=>{
         const v=B.V[n.id];
-        if(v&&v.art){ nr++; numOf['n:'+n.id]=nr; legend.push({nr, tr:trGlobal, name:v.label+v.tag+' '+CLRN(st.color), art:v.art, verpakking:v.artL, aantal:1}); }
+        if(v&&v.art){ nr++; numOf['n:'+n.id]=nr; legend.push({nr, tr:trGlobal, name:v.label+v.tag+' '+CLRN(st.color), art:v.art, verpakking:v.artL, aantal:1});
+          afdekRegel(legend, afdekplaat(sh.id, v.cls)); }
       });
       st.feeds.filter(f=>f.kind==='edge' && m[edge(f.edge).a]===+c).forEach(f=>{
         nr++; numOf['f:'+f.edge]=nr; legend.push({nr, tr:trGlobal, name:'Middenvoeding'+railTag(sh.id)+' '+CLRN(st.color), art:activeP(sh.id).midden[st.color], verpakking:activeL(sh.id).midden[st.color], aantal:1});
+        afdekRegel(legend, afdekplaat(sh.id, 'midden'));
       });
       legend.push(...railRegels(st.edges.filter(e=>m[e.a]===+c), trGlobal, numOf, sh.id));
     });
+    /* Het montagemateriaal van het hele tekenvlak, onderaan: het hoort bij geen genummerd
+       onderdeel en bij geen traject in het bijzonder (zie ook de regel Montage boven de
+       tabel). Per ruimte, net als de rest van de tabel. */
+    montageArtikelen(sh.id, computeMounts(sh.id).count, sheetNaden(sh.id))
+      .forEach(a=>legend.push({nr:'', tr:'', name:a.name, art:a.art, verpakking:a.artL, aantal:a.aantal}));
     sheets.push({id:sh.id, name:sh.name, legend});
   });
   return {B,M,sheets,numOf,trCount:trGlobal};
+}
+/* De afdekplaat van een onderdeel van de inbouwrail (afdekplaat()) staat in de tabel direct
+   onder dat onderdeel, als vervolgregel: zonder eigen nummer, in dezelfde kleur. */
+function afdekRegel(legend, a){
+  if(a && a.art) legend.push({nr:'', tr:'', name:a.name, art:a.art, verpakking:a.artL, aantal:1, vervolg:true});
 }
 /* De rails en elektrische koppelstukken van een traject, voor de tabel "Onderdelen in de
    tekening" (oktober 2026, de gebruiker: "hij laat niet de rails meter zien en de
@@ -3508,12 +3538,15 @@ async function buildPdf(){
        geen verpakkingscodes (zie PCODES_1F): dan geen lege kolom, maar een bredere
        omschrijving. */
     /* Met de rails en koppelstukken erbij (railRegels()) een kolom Aantal: een genummerd
-       onderdeel is er één, een segment kan drie rails en twee koppelstukken hebben. */
+       onderdeel is er één, een segment kan drie rails en twee koppelstukken hebben. De
+       afdekplaat van een inbouwrail staat als vervolgregel onder zijn onderdeel, het
+       montagemateriaal onderaan (reportData()). */
     const metVerpakking = sh.legend.some(l=>l.verpakking);
     let TL=tableStart(metVerpakking
       ? [{w:40,h:'Nr'},{w:46,h:'Traject'},{w:204,h:'Onderdeel'},{w:45,h:'Aantal'},{w:85,h:'Artikelnummer'},{w:95,h:'Verpakkingscode'}]
       : [{w:40,h:'Nr'},{w:46,h:'Traject'},{w:299,h:'Onderdeel'},{w:45,h:'Aantal'},{w:85,h:'Artikelnummer'}]);
-    sh.legend.forEach(l=> tableRow(TL, [String(l.nr), String(l.tr), l.name, String(l.aantal), codeTekst(l.art, 'volgt')].concat(metVerpakking ? [l.verpakking||''] : [])));
+    sh.legend.forEach(l=> tableRow(TL, [String(l.nr), String(l.tr), l.name, String(l.aantal), codeTekst(l.art, 'volgt')].concat(metVerpakking ? [l.verpakking||''] : []),
+      {vervolg:l.vervolg}));
   });
   flush();
   /* Vanaf hier volgen alleen nog externe presenters, dus alle eigen pagina's staan

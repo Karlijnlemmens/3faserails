@@ -2381,7 +2381,7 @@ function is(wat, gekregen, verwacht){
     'railVlakUit','materialenKop','kleurBijRails','PCODES_1F','KKT_1F','LCODES_1F','MM_1F','T_1F_NAAM','ADAPTERS_OVERIG_1F',
     'eAxis','rotCCW','dot','compMap','feedComp','feedNodeMag','validateFeeds','mergeCoincident','normalizeNode','normalizeAll',
     'RICHTINGEN','vrijeRichtingen','addSegFromNode','addTFromEnd','addStub','removeEdge','plusKeuzesPunt','plusKeuzesSegment',
-    'reportData','railRegels','tStem'];
+    'reportData','railRegels','tStem','montageArtikelen','sheetNaden','afdekplaat','afdekRegel'];
   const r = await laadUit('index.html', namen,
     'let st; let hist=[], hIdx=-1; let startKlaar=false; function snap(){} function refresh(){} function bouwKeuzeRijen(){} function zetSt(s){ st=s; } function huidig(){ return st; }\n'
     + snijUit(readFileSync(join(root, 'armatuur-rij.js'), 'utf8'), 'armAccessoires'), ['zetSt', 'huidig']);
@@ -2429,29 +2429,68 @@ function is(wat, gekregen, verwacht){
       ['1 | 1 | Eindkap Wit | 1', '2 | 1 | Aansluitstuk R Wit | 1', '3 | 1 | Bocht Binnen Wit | 1', '4 | 1 | Bocht Binnen Wit | 1',
        '1\u20133 | 1 | Rail 2m Wit | 1', '2\u20134 | 1 | Rail 2m Wit | 1',
        '3\u20134 | 1 | Rail 3m Wit | 2', '3\u20134 | 1 | Rail 2m Wit | 1', '3\u20134 | 1 | Elektrisch Koppelstuk Wit | 2']);
+    /* Daarna de gebruiker: "ik wil dat het artikeloverzicht per tekenvlak compleet is". Het
+       montagemateriaal staat onderaan, zonder nummer en traject; per ruimte, zoals de rest. */
+    const mt = o => Object.assign({wijze:'geen', sysOphang:false, sysOphangLen:'3', pendelKabelkleur:'zilver', pendelKabelLen:'3', ophangLen:'3'}, o);
+    const onderaan = s => { r.zetSt(s); return r.reportData().sheets[0].legend.filter(l => l.nr === '').map(l => [l.name, l.aantal].join(' | ')); };
+    u.montage = {s1:mt({wijze:'beugel'})};
+    is('dezelfde U aan montagebeugels: 13 montagepunten, 13 beugels onderaan', onderaan(u), ['Plafond Montagebeugel Wit | 13']);
+    u.montage = {s1:mt({wijze:'pendel'})};
+    is('aan pendels: de losse sets (niet de pakken van tien) en de beugels met snelspanner', onderaan(u),
+      ['Pendelset (bus Wit / kabel Zilver 3m), losse sets uit het 10-pack | 13', 'PRX 3-Fase Rail beugel en snelspanner Wit (excl. staalkabel) | 13']);
+    const u1 = Object.assign(teken(leeg(), [[0,0],[0,200],[800,200],[800,0]], [[0,1],[1,2],[2,3]]), {rail:'1fase'});
+    u1.feeds = [{kind:'node', node:'n4', side:'R'}]; u1.montage = {s1:mt({wijze:'pendel1flos', ophangLen:'5'})};
+    is('1-fase U aan losse onderdelen: onder de twee koppelingen de lange beugel, verder de korte', onderaan(u1),
+      ['Plafondklem + plafondkap excl. staalkabel Wit | 13', 'Ophangkabel 5m | 13', 'Snelspanner | 13', 'Ophangbeugel kort | 11',
+       'Ophangbeugel lang (steun onder de koppeling) | 2']);
+    /* de afdekplaat van de inbouwrail direct onder zijn onderdeel, als vervolgregel */
+    const ui = Object.assign(teken(leeg(), [[0,0],[0,200],[800,200],[800,0]], [[0,1],[1,2],[2,3]]), {rail:'1fase', profiel:'inbouw', color:'zwart'});
+    ui.feeds = [{kind:'node', node:'n4', side:'R'}, {kind:'edge', edge:'e2', side:'R'}]; r.zetSt(ui);
+    is('1-fase inbouw: onder het aansluitstuk, de bochten en de middenvoeding hun afdekplaat',
+      r.reportData().sheets[0].legend.filter(l => !/^(Inbouwrail|Elektrisch Koppelstuk) /.test(l.name)).map(l => [l.nr, l.name, l.aantal].join(' | ') + (l.vervolg ? ' (vervolg)' : '')),
+      ['1 | Eindkap Zwart | 1', '2 | Aansluitstuk R Zwart | 1', ' | Afdekplaat inbouwrail eindvoeding Zwart | 1 (vervolg)',
+       '3 | Bocht Binnen Zwart | 1', ' | Afdekplaat inbouwrail tussenkoppeling Zwart | 1 (vervolg)',
+       '4 | Bocht Binnen Zwart | 1', ' | Afdekplaat inbouwrail tussenkoppeling Zwart | 1 (vervolg)',
+       '5 | Middenvoeding Zwart | 1', ' | Afdekplaat inbouwrail tussenkoppeling Zwart | 1 (vervolg)']);
     /* Wat per tekenvlak in de tabel staat, telt over alle tekenvlakken (maal hun ruimtes)
-       op tot wat er in Bestelgegevens staat: rails per lengte en koppelstukken. */
+       op tot wat er in Bestelgegevens staat - alles, behalve wat bij het hele project hoort:
+       het buiggereedschap, de armaturen met hun accessoires en de losse adapters. De
+       pendelsets staan per tekenvlak als losse sets; in Bestelgegevens zijn dat pakken van
+       tien voor alle tekenvlakken samen. */
     const mis = [];
+    const H = () => teken(leeg(), [[0,0],[0,200],[0,400],[300,0],[300,200],[300,400]], [[0,1],[1,2],[3,4],[4,5],[1,4]]);
     const tekeningen = {
-      'H': () => teken(leeg(), [[0,0],[0,200],[0,400],[300,0],[300,200],[300,400]], [[0,1],[1,2],[3,4],[4,5],[1,4]]),
-      'U met 4 m': () => Object.assign(teken(leeg(), [[0,0],[0,250],[1150,250],[1150,0]], [[0,1],[1,2],[2,3]]), {use4m:true}),
-      'twee vlakken, een voor drie ruimtes': () => {
+      'H aan montagebeugels': () => Object.assign(H(), {montage:{s1:mt({wijze:'beugel'})}}),
+      'U met 4 m, systeemplafond met ophangset': () => Object.assign(teken(leeg(), [[0,0],[0,250],[1150,250],[1150,0]], [[0,1],[1,2],[2,3]]),
+        {use4m:true, montage:{s1:mt({wijze:'sys', sysOphang:true, sysOphangLen:'6'})}}),
+      'twee vlakken aan dezelfde pendels, een voor drie ruimtes': () => {
         const s = teken(leeg(), [[0,0],[0,200],[800,200],[800,0]], [[0,1],[1,2],[2,3]]);
         s.sheets.push({id:'s2', name:'Tekenvlak 2'}); teken(s, [[0,0],[1730,0],[1730,300]], [[0,1],[1,2]], 's2');
-        s.ruimtes = {s2:['Kantoor 1', 'Kantoor 2', 'Kantoor 3']}; return s; },
-      'zwart DALI kruis': () => Object.assign(teken(leeg(), [[0,0],[500,0],[1000,0],[500,-450],[500,630]], [[0,1],[1,2],[1,3],[1,4]]), {color:'zwart', dali:true}),
+        s.ruimtes = {s2:['Kantoor 1', 'Kantoor 2', 'Kantoor 3']}; s.montage = {s1:mt({wijze:'pendel'}), s2:mt({wijze:'pendel'})}; return s; },
+      'zwart DALI kruis aan pendels met zwarte kabel': () => Object.assign(teken(leeg(), [[0,0],[500,0],[1000,0],[500,-450],[500,630]], [[0,1],[1,2],[1,3],[1,4]]),
+        {color:'zwart', dali:true, montage:{s1:mt({wijze:'pendel', pendelKabelkleur:'zwart', pendelKabelLen:'5'})}}),
+      '1-fase U aan losse onderdelen': () => Object.assign(teken(leeg(), [[0,0],[0,200],[1150,200],[1150,0]], [[0,1],[1,2],[2,3]]),
+        {rail:'1fase', montage:{s1:mt({wijze:'pendel1flos', ophangLen:'3'})}}),
+      '1-fase H aan ophangsets, voor twee ruimtes': () => Object.assign(H(), {rail:'1fase', color:'zwart', ruimtes:{s1:['A', 'B']}, montage:{s1:mt({wijze:'pendel1f', ophangLen:'1,5'})}}),
+      '1-fase inbouw H met middenvoeding, voor vier ruimtes': () => Object.assign(H(), {rail:'1fase', profiel:'inbouw', color:'zwart', ruimtes:{s1:['1', '2', '3', '4']},
+        feeds:[{kind:'node', node:'n1', side:'L'}, {kind:'edge', edge:'e5', side:'R'}]}),
     };
     for(const [naam, maak] of Object.entries(tekeningen)){
       r.zetSt(maak());
       const D = r.reportData(), opTekening = {};
-      D.sheets.forEach(sh => sh.legend.filter(l => typeof l.nr === 'string').forEach(l => {
+      D.sheets.forEach(sh => sh.legend.forEach(l => {
         opTekening[l.art] = (opTekening[l.art] || 0) + l.aantal * r.ruimteFactor(sh.id); }));
-      const inBestel = {};
-      Object.entries(D.B.items).filter(([c, it]) => /^(Inbouwrail |Rail |Elektrisch Koppelstuk)/.test(it.name)).forEach(([c, it]) => { inBestel[c] = it.qty; });
-      if(JSON.stringify(Object.entries(opTekening).sort()) !== JSON.stringify(Object.entries(inBestel).sort()) || !Object.keys(inBestel).length)
-        mis.push(naam + ': ' + JSON.stringify(opTekening) + ' tegen ' + JSON.stringify(inBestel));
+      const pak = c => /^Pendelset 10-pack .*\(voor (\d+) punten\)$/.exec((D.B.items[c] || {}).name || '');
+      const telTabel = {}, telBestel = {};
+      Object.entries(opTekening).forEach(([c, n]) => { telTabel[c] = pak(c) ? Math.ceil(n / 10) + ' pakken voor ' + n : n; });
+      Object.entries(D.B.items).filter(([c, it]) => !it.isArm && c !== r.PCODES.buigtool)
+        .forEach(([c, it]) => { telBestel[c] = pak(c) ? it.qty + ' pakken voor ' + pak(c)[1] : it.qty; });
+      if(JSON.stringify(Object.entries(telTabel).sort()) !== JSON.stringify(Object.entries(telBestel).sort()))
+        mis.push(naam + ': ' + JSON.stringify(telTabel) + ' tegen ' + JSON.stringify(telBestel));
+      /* en de tekening heeft ook echt iets onder de genummerde onderdelen */
+      if(!D.sheets.some(sh => sh.legend.some(l => l.nr === ''))) mis.push(naam + ': geen montagemateriaal of afdekplaat');
     }
-    is('per tekenvlak opgeteld = Bestelgegevens (rails en koppelstukken, vier tekeningen)', mis, []);
+    is('per tekenvlak opgeteld = Bestelgegevens (alles behalve buiggereedschap, armaturen en adapters, zeven tekeningen)', mis, []);
   }
 
   /* een H: de dwarsbalk weg geeft twee trajecten, en de middenvoeding op die balk vervalt */
