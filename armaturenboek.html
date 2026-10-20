@@ -547,19 +547,9 @@ async function assembleArmaturenboekPdf(){
   return eind;
 }
 
-function veiligBestandsdeel(s){
-  /* Filesystem-onveilige tekens eruit (als spatie, zodat woorden niet aan elkaar
-     plakken), spaties/hoofdletters verder intact - dit hoeft niet zo hard geslagen
-     te worden als een url-slug, het is voor eigen gebruik bij download. */
-  return String(s||'').replace(/[\\/:*?"<>|]/g,' ').replace(/\s+/g,' ').trim();
-}
-function pdfBestandsnaam(){
-  const nr = (st.projNr||'').trim().replace(/^p\.?\s*/i,''); // "P.11673LS" -> "11673LS"
-  const naam = veiligBestandsdeel(st.proj);
-  const inst = veiligBestandsdeel(st.installateur).split(/\s+/)[0] || ''; // alleen eerste woord
-  if(!nr && !naam && !inst) return 'armaturenboek.pdf';
-  return ['AB'+nr, inst, naam].filter(Boolean).join(' - ') + '.pdf';
-}
+/* AB met alleen armaturen, PB zodra er een lichtplan in het boek komt - dezelfde toets als
+   boekDelen() in maakPdfBytes(). De naam zelf: boekBestandsnaam() in armatuur-rij.js. */
+function pdfBestandsnaam(){ return boekBestandsnaam(st, Lichtplan.ingeladen()); }
 
 /* Hoe groot de gemaakte PDF is, en of dat nog te mailen valt. Boven de grens hieronder
    begint mail te weigeren; daarom maakt PdfVerkleinen (pdf-verkleinen.js) de foto's in

@@ -1538,7 +1538,17 @@ function is(wat, gekregen, verwacht){
   is('in meer bronnen: de catalogus wint', r0('2032491-WS'),
     'Pragmalux LED Plafonnière / Wandarmatuur Soladisc IP65 IK10 Ø370 7-14W 700-1600lm 3000-3500-4000K 3-CCT + draadloos sensor');
   is('uitgefaseerd niet meegenomen', ['9011482', '4309324', '70811800', '72139100'].map(c => r0(c)), [null, null, null, null]);
-  const r = await laadUit('armatuur-rij.js', ['catalogusNaam', 'armNaamUitCode']);
+  const r = await laadUit('armatuur-rij.js', ['catalogusNaam', 'armNaamUitCode', 'boekBestandsnaam']);
+  /* De naam van het projectenboek (oktober 2026): AB met alleen armaturen, PB met een
+     lichtplan erin - en in de railtool altijd PB. Verder dezelfde vorm als het armaturenboek
+     al had: nummer zonder "P.", het eerste woord van de installateur, de projectnaam. */
+  const project = {proj:'Nieuwbouw Sportcomplex Schagen', projNr:'P.11673LS', installateur:'Lemmens Elektro B.V.'};
+  is('alleen armaturen: AB, met een lichtplan of uit de railtool: PB',
+    [r.boekBestandsnaam(project, false), r.boekBestandsnaam(project, true)],
+    ['AB11673LS - Lemmens - Nieuwbouw Sportcomplex Schagen.pdf', 'PB11673LS - Lemmens - Nieuwbouw Sportcomplex Schagen.pdf']);
+  is('zonder gegevens een gewone naam, zonder nummer gewoon AB of PB vooraan',
+    [r.boekBestandsnaam({}, false), r.boekBestandsnaam({proj:''}, true), r.boekBestandsnaam({proj:'Hal 2/3: oost'}, true)],
+    ['armaturenboek.pdf', 'projectboek.pdf', 'PB - Hal 2 3 oost.pdf']);
   const dura = 'Pragmalux LED Plafonnière / Wandarmatuur Dura-M Wit Ø340 IP64 IK10 max.18W 1725-2075lm 2200K-2700K 2-CCT + Casambi driver';
   is('een code uit de catalogus geeft de omschrijving (dubbele spaties enkel)',
     [r.catalogusNaam('1084459-CA', CAT), r.catalogusNaam(' 1084459-ca ', CAT), r.catalogusNaam('1047515', CAT).startsWith('Pragmalux LED Inbouw')],

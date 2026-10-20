@@ -3651,10 +3651,9 @@ async function assembleFinalPdf(){
 }
 
 /* Bestandsnaam op basis van de projectnaam. */
-function pdfBestandsnaam(){
-  const nm=(st.proj||'installatieoverzicht').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'installatieoverzicht';
-  return nm+'-prx-rail.pdf';
-}
+/* Het boek van de railtool is altijd een projectboek: PB, in dezelfde vorm als het
+   armaturenboek (boekBestandsnaam() in armatuur-rij.js). */
+function pdfBestandsnaam(){ return boekBestandsnaam(st, true); }
 
 /* ---------- Project opslaan/openen ----------
    "Opslaan" maakt geen los databestand, maar een volledige kopie van deze tool met

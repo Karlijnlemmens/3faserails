@@ -145,7 +145,7 @@ PAGINAS.forEach(p => {
     for(const f of ['specialPresenterId','armGroepVanRij','armTypeOnbekend','armEigenPresenters','armWisselRijen',
                     'stempelZwart','armBoekGroepen','stempelPresenter','armLijstKolommen','armRijDelen','armVolgBijwerken',
                     'armSlotLeeg','armAccessoires','armAccessoireDelen','catalogusNaam','armNaamUitCode','armNaamVeldUitCode',
-                    'stempelOpmerkingRegels','armKolomKeuze'])
+                    'stempelOpmerkingRegels','armKolomKeuze','boekBestandsnaam'])
       if(new RegExp('function\\s+' + f + '\\s*\\(').test(t)) meld(p + ' heeft een eigen ' + f + '(); die hoort alleen in armatuur-rij.js');
     /* alleen de twee tools die een armaturenboek maken; bandrasters.html heeft een
        eigen stempelCode() voor de bestekcode op zijn productblad, en dat is iets anders */
@@ -177,7 +177,7 @@ PAGINAS.forEach(p => {
     ['zoeken.js',        /\b(zoekNormaal|zoekWoorden|tekstPast|bevatWoord|codeSleutel|lijktCode|besteSuggestie)\(/],
     /* armSuggestie() staat in armatuur-groepen.js maar rekent met bewerkAfstand() uit zoeken.js */
     ['zoeken.js',        /\barmSuggestie\(/],
-    ['armatuur-rij.js',  /\b(armGroepVanRij|armRijDelen|stempelPresenter|armLijstKolommen|armBoekGroepen|armWisselRijen|armEigenPresenters|specialPresenterId|armSlotLeeg|armAccessoires|armAccessoireDelen|armKolomKeuze)\(/],
+    ['armatuur-rij.js',  /\b(armGroepVanRij|armRijDelen|stempelPresenter|armLijstKolommen|armBoekGroepen|armWisselRijen|armEigenPresenters|specialPresenterId|armSlotLeeg|armAccessoires|armAccessoireDelen|armKolomKeuze|boekBestandsnaam)\(/],
     ['medewerkers.js',   /\b(MEDEWERKERS|MEDEWERKER_ROLLEN)\b/],
     ['medewerker-fotos.js', /\bMEDEWERKER_FOTOS\b/],
     ['contactpersonen.js', /\b(contactKeuze|tekenContactpersonen|contactPersonen|medewerkerVan)\(/],
