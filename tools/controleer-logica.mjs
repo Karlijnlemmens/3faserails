@@ -2380,7 +2380,8 @@ function is(wat, gekregen, verwacht){
     'RAIL_SOORTEN','railSoort','projectRail','railVan','inbouw','railsInGebruik','heeft3F','heeft1F','railTag','metRail','railKleuren',
     'railVlakUit','materialenKop','kleurBijRails','PCODES_1F','KKT_1F','LCODES_1F','MM_1F','T_1F_NAAM','ADAPTERS_OVERIG_1F',
     'eAxis','rotCCW','dot','compMap','feedComp','feedNodeMag','validateFeeds','mergeCoincident','normalizeNode','normalizeAll',
-    'RICHTINGEN','vrijeRichtingen','addSegFromNode','addTFromEnd','addStub','removeEdge','plusKeuzesPunt','plusKeuzesSegment'];
+    'RICHTINGEN','vrijeRichtingen','addSegFromNode','addTFromEnd','addStub','removeEdge','plusKeuzesPunt','plusKeuzesSegment',
+    'reportData','railRegels','tStem'];
   const r = await laadUit('index.html', namen,
     'let st; let hist=[], hIdx=-1; let startKlaar=false; function snap(){} function refresh(){} function bouwKeuzeRijen(){} function zetSt(s){ st=s; } function huidig(){ return st; }\n'
     + snijUit(readFileSync(join(root, 'armatuur-rij.js'), 'utf8'), 'armAccessoires'), ['zetSt', 'huidig']);
@@ -2415,6 +2416,43 @@ function is(wat, gekregen, verwacht){
   r.removeEdge(segTussen([0,0], [300,0]).id);
   is('een zijde van een vierkant weg: een U met twee uiteinden', [r.huidig().edges.length, soort(0,0), soort(300,0), soort(0,200), soort(300,200)],
     [3, 'end', 'end', 'corner', 'corner']);
+
+  /* Onderdelen in de tekening, per tekenvlak (oktober 2026, de gebruiker: "hij laat niet de
+     rails meter zien en de koppelstukken"): ook de rails per segment en de elektrische
+     koppelstukken, tussen de nummers aan de uiteinden. De U uit haar voorbeeld: 2 m, 8 m, 2 m. */
+  {
+    const u = teken(leeg(), [[0,0],[0,200],[800,200],[800,0]], [[0,1],[1,2],[2,3]]);
+    u.feeds = [{kind:'node', node:'n4', side:'R'}];
+    r.zetSt(u);
+    const regels = r.reportData().sheets[0].legend.map(l => [l.nr, l.tr, l.name, l.aantal].join(' | '));
+    is('U van 2 m, 8 m en 2 m: de onderdelen, dan per segment de rails en de koppelstukken', regels,
+      ['1 | 1 | Eindkap Wit | 1', '2 | 1 | Aansluitstuk R Wit | 1', '3 | 1 | Bocht Binnen Wit | 1', '4 | 1 | Bocht Binnen Wit | 1',
+       '1\u20133 | 1 | Rail 2m Wit | 1', '2\u20134 | 1 | Rail 2m Wit | 1',
+       '3\u20134 | 1 | Rail 3m Wit | 2', '3\u20134 | 1 | Rail 2m Wit | 1', '3\u20134 | 1 | Elektrisch Koppelstuk Wit | 2']);
+    /* Wat per tekenvlak in de tabel staat, telt over alle tekenvlakken (maal hun ruimtes)
+       op tot wat er in Bestelgegevens staat: rails per lengte en koppelstukken. */
+    const mis = [];
+    const tekeningen = {
+      'H': () => teken(leeg(), [[0,0],[0,200],[0,400],[300,0],[300,200],[300,400]], [[0,1],[1,2],[3,4],[4,5],[1,4]]),
+      'U met 4 m': () => Object.assign(teken(leeg(), [[0,0],[0,250],[1150,250],[1150,0]], [[0,1],[1,2],[2,3]]), {use4m:true}),
+      'twee vlakken, een voor drie ruimtes': () => {
+        const s = teken(leeg(), [[0,0],[0,200],[800,200],[800,0]], [[0,1],[1,2],[2,3]]);
+        s.sheets.push({id:'s2', name:'Tekenvlak 2'}); teken(s, [[0,0],[1730,0],[1730,300]], [[0,1],[1,2]], 's2');
+        s.ruimtes = {s2:['Kantoor 1', 'Kantoor 2', 'Kantoor 3']}; return s; },
+      'zwart DALI kruis': () => Object.assign(teken(leeg(), [[0,0],[500,0],[1000,0],[500,-450],[500,630]], [[0,1],[1,2],[1,3],[1,4]]), {color:'zwart', dali:true}),
+    };
+    for(const [naam, maak] of Object.entries(tekeningen)){
+      r.zetSt(maak());
+      const D = r.reportData(), opTekening = {};
+      D.sheets.forEach(sh => sh.legend.filter(l => typeof l.nr === 'string').forEach(l => {
+        opTekening[l.art] = (opTekening[l.art] || 0) + l.aantal * r.ruimteFactor(sh.id); }));
+      const inBestel = {};
+      Object.entries(D.B.items).filter(([c, it]) => /^(Inbouwrail |Rail |Elektrisch Koppelstuk)/.test(it.name)).forEach(([c, it]) => { inBestel[c] = it.qty; });
+      if(JSON.stringify(Object.entries(opTekening).sort()) !== JSON.stringify(Object.entries(inBestel).sort()) || !Object.keys(inBestel).length)
+        mis.push(naam + ': ' + JSON.stringify(opTekening) + ' tegen ' + JSON.stringify(inBestel));
+    }
+    is('per tekenvlak opgeteld = Bestelgegevens (rails en koppelstukken, vier tekeningen)', mis, []);
+  }
 
   /* een H: de dwarsbalk weg geeft twee trajecten, en de middenvoeding op die balk vervalt */
   const h = teken(leeg(), [[0,0],[0,200],[0,400],[300,0],[300,200],[300,400]], [[0,1],[1,2],[3,4],[4,5],[1,4]]);

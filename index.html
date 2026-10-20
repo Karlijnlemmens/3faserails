@@ -3243,15 +3243,41 @@ function reportData(){
       trGlobal++;
       comps[c].slice().sort((p,q)=>(p.y-q.y)||(p.x-q.x)).forEach(n=>{
         const v=B.V[n.id];
-        if(v&&v.art){ nr++; numOf['n:'+n.id]=nr; legend.push({nr, tr:trGlobal, name:v.label+v.tag+' '+CLRN(st.color), art:v.art, verpakking:v.artL}); }
+        if(v&&v.art){ nr++; numOf['n:'+n.id]=nr; legend.push({nr, tr:trGlobal, name:v.label+v.tag+' '+CLRN(st.color), art:v.art, verpakking:v.artL, aantal:1}); }
       });
       st.feeds.filter(f=>f.kind==='edge' && m[edge(f.edge).a]===+c).forEach(f=>{
-        nr++; numOf['f:'+f.edge]=nr; legend.push({nr, tr:trGlobal, name:'Middenvoeding'+railTag(sh.id)+' '+CLRN(st.color), art:activeP(sh.id).midden[st.color], verpakking:activeL(sh.id).midden[st.color]});
+        nr++; numOf['f:'+f.edge]=nr; legend.push({nr, tr:trGlobal, name:'Middenvoeding'+railTag(sh.id)+' '+CLRN(st.color), art:activeP(sh.id).midden[st.color], verpakking:activeL(sh.id).midden[st.color], aantal:1});
       });
+      legend.push(...railRegels(st.edges.filter(e=>m[e.a]===+c), trGlobal, numOf, sh.id));
     });
     sheets.push({id:sh.id, name:sh.name, legend});
   });
   return {B,M,sheets,numOf,trCount:trGlobal};
+}
+/* De rails en elektrische koppelstukken van een traject, voor de tabel "Onderdelen in de
+   tekening" (oktober 2026, de gebruiker: "hij laat niet de rails meter zien en de
+   koppelstukken. ik wil dat deze er wel inkomen"). Per segment, tussen de twee genummerde
+   onderdelen aan zijn uiteinden ("13-14"): welke raillengtes erin gaan en hoeveel
+   koppelstukken ertussen - dezelfde verdeling als in Bestelgegevens (railFor()), maar per
+   tekenvlak en per ruimte, zoals de rest van die tabel. Een uiteinde zonder nummer (een
+   onderdeel dat de tool niet kon bepalen) krijgt een streepje. */
+function railRegels(edges, tr, numOf, shId){
+  const P_=activeP(shId), L_=activeL(shId), nummer=id=>numOf['n:'+id]||'\u2014';
+  const uit=[];
+  edges.map(e=>({e, a:numOf['n:'+e.a]||Infinity, b:numOf['n:'+e.b]||Infinity}))
+    .map(x=>x.a<=x.b ? x : {e:x.e, a:x.b, b:x.a})
+    .sort((p,q)=>(p.a-q.a)||(p.b-q.b))
+    .forEach(({e})=>{
+      const r=railFor(e), [n1,n2]=[nummer(e.a),nummer(e.b)].sort((x,y)=>(+x||Infinity)-(+y||Infinity));
+      const tussen=n1+'\u2013'+n2, per={};
+      r.pieces.forEach(p=>{ per[p]=(per[p]||0)+1; });
+      Object.keys(per).map(Number).sort((x,y)=>y-x).forEach(p=>uit.push({nr:tussen, tr,
+        name:(inbouw(shId)?'Inbouwrail ':'Rail ')+p+'m'+railTag(shId)+' '+CLRN(st.color),
+        art:P_.rail[st.color][p], verpakking:L_.rail[st.color][p], aantal:per[p]}));
+      if(r.seams>0) uit.push({nr:tussen, tr, name:'Elektrisch Koppelstuk'+railTag(shId)+' '+CLRN(st.color),
+        art:P_.elkoppel[st.color], verpakking:L_.elkoppel[st.color], aantal:r.seams});
+    });
+  return uit;
 }
 /* De kop van de pagina Bestelgegevens, zoals hij altijd was; met 3-fase en 1-fase
    tekenvlakken allebei. */
@@ -3481,11 +3507,13 @@ async function buildPdf(){
        terugvindt. Even breed als de tabel van Bestelgegevens. Van de 1-fase rail hebben we
        geen verpakkingscodes (zie PCODES_1F): dan geen lege kolom, maar een bredere
        omschrijving. */
+    /* Met de rails en koppelstukken erbij (railRegels()) een kolom Aantal: een genummerd
+       onderdeel is er één, een segment kan drie rails en twee koppelstukken hebben. */
     const metVerpakking = sh.legend.some(l=>l.verpakking);
     let TL=tableStart(metVerpakking
-      ? [{w:34,h:'Nr'},{w:52,h:'Traject'},{w:249,h:'Onderdeel'},{w:85,h:'Artikelnummer'},{w:95,h:'Verpakkingscode'}]
-      : [{w:34,h:'Nr'},{w:52,h:'Traject'},{w:344,h:'Onderdeel'},{w:85,h:'Artikelnummer'}]);
-    sh.legend.forEach(l=> tableRow(TL, [String(l.nr), String(l.tr), l.name, codeTekst(l.art, 'volgt')].concat(metVerpakking ? [l.verpakking] : [])));
+      ? [{w:40,h:'Nr'},{w:46,h:'Traject'},{w:204,h:'Onderdeel'},{w:45,h:'Aantal'},{w:85,h:'Artikelnummer'},{w:95,h:'Verpakkingscode'}]
+      : [{w:40,h:'Nr'},{w:46,h:'Traject'},{w:299,h:'Onderdeel'},{w:45,h:'Aantal'},{w:85,h:'Artikelnummer'}]);
+    sh.legend.forEach(l=> tableRow(TL, [String(l.nr), String(l.tr), l.name, String(l.aantal), codeTekst(l.art, 'volgt')].concat(metVerpakking ? [l.verpakking||''] : [])));
   });
   flush();
   /* Vanaf hier volgen alleen nog externe presenters, dus alle eigen pagina's staan
