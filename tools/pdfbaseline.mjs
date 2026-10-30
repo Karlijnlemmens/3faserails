@@ -2,7 +2,7 @@
    maken, vangt de blob op en schrijft de bytes weg. Draai voor en na de refactor. */
 import { chromium } from '/opt/node22/lib/node_modules/playwright/index.mjs';
 /* Zie tools/LEESMIJ-pdf-controle.md voor het gebruik. */
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/\/$/, '');
@@ -73,7 +73,11 @@ const SCENARIOS = [
 ];
 
 const GEKOZEN = ALLEEN ? SCENARIOS.filter(s=>s.naam===ALLEEN) : SCENARIOS;
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+/* De Chromium van de werkomgeving: /opt/pw-browsers/chromium wijst naar de versie die er staat.
+   Hier stond chromium-1194 vast, en in een nieuwe omgeving (chromium-1243) startte er niets.
+   Zonder die verwijzing kiest Playwright zelf. */
+const CHROMIUM = '/opt/pw-browsers/chromium';
+const browser = await chromium.launch(existsSync(CHROMIUM) ? { executablePath: CHROMIUM } : {});
 const resultaten = [];
 for (const sc of GEKOZEN) {
   const page = await browser.newPage();

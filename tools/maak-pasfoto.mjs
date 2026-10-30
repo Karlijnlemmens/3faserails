@@ -16,7 +16,7 @@
  * Er is geen beeldbibliotheek zonder npm, dus het verkleinen gaat via Chromium
  * (Playwright), net als tools/pdfbaseline.mjs. Een hulpmiddel, nooit door de app geladen. */
 import { chromium } from '/opt/node22/lib/node_modules/playwright/index.mjs';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -29,7 +29,9 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const uit = join(root, 'docs', 'bronnen', 'medewerkers', id + '.jpg');
 const soort = /\.png$/i.test(bron) ? 'image/png' : 'image/jpeg';
 
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+/* de Chromium van de werkomgeving (zie tools/pdfbaseline.mjs); zonder die verwijzing kiest Playwright zelf */
+const CHROMIUM = '/opt/pw-browsers/chromium';
+const browser = await chromium.launch(existsSync(CHROMIUM) ? { executablePath: CHROMIUM } : {});
 const pagina = await browser.newPage();
 const r = await pagina.evaluate(async ([src, maat])=>{
   const img = new Image(); img.src = src; await img.decode();
