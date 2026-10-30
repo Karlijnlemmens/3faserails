@@ -1520,7 +1520,7 @@ function is(wat, gekregen, verwacht){
   const bronCodes = ['catalogus.csv', 'spots.csv', 'wandarmaturen.csv', 'opbouwarmaturen.csv', 'noodverlichting-skyline.csv', 'aanvullingen.csv'].flatMap(f => readFileSync(join(root, 'vergelijker/data/bron/' + f), 'utf8')
     .split(/\r?\n/).slice(1).filter(Boolean).map(r => r.split(',')[0].trim().toUpperCase()));
   is('elke artikelcode uit de bronnen staat erin, en niets anders', Object.keys(CAT).sort(), [...new Set(bronCodes)].sort());
-  is('codes: ondergrens 6146 (5283, 499 spots, 80 wandarmaturen, 35 Valento, 248 noodverlichting en Skyline, 1 aanvulling)', Object.keys(CAT).length >= 6146, true);
+  is('codes: ondergrens 6160 (5283, 499 spots, 80 wandarmaturen, 35 Valento, 248 noodverlichting en Skyline, 15 aanvullingen)', Object.keys(CAT).length >= 6160, true);
   const r0 = c => Object.prototype.hasOwnProperty.call(CAT, c) ? CAT[c] : null;
   /* De spots die in een echte projectlijst niets vonden (oktober 2026), en de uitgefaseerde
      die op verzoek van de binnendienst niet zijn meegenomen */
@@ -1543,11 +1543,17 @@ function is(wat, gekregen, verwacht){
     'Pragmalux LED Plafonnière / Wandarmatuur Soladisc IP65 IK10 Ø370 7-14W 700-1600lm 3000-3500-4000K 3-CCT + draadloos sensor');
   is('uitgefaseerd niet meegenomen', ['9011482', '4309324', '70811800', '72139100'].map(c => r0(c)), [null, null, null, null]);
   /* Eind oktober 2026, de gebruiker: "1065281-120D Storm G3 laad de volledige naam niet". Het
-     armatuur stond in geen van de lijsten (alleen de kap en de sensoren van de Storm G3);
-     de binnendienst gaf de volledige naam, die staat nu in aanvullingen.csv. Alleen die ene
-     code: een ander bundeltype of vermogen is een ander artikel. */
-  is('de Storm G3 1065281-120D gevonden, en alleen die', [r0('1065281-120D'), r0('1065281'), r0('1065281-90D')],
-    ['Pragmalux LED Highbay Storm G3 100-200W 3000K-5000K 3CCT 17000-34000lm 120D 0-10V Dimbaar Zwart (250-400W)', null, null]);
+     armatuur stond in geen van de lijsten (alleen de kap en de sensoren van de Storm G3).
+     Daarna gaf de binnendienst de hele Storm G3-reeks met de accessoires; wat nog ontbrak (15
+     codes) staat in aanvullingen.csv. De 90D heeft het kale nummer, 60D en 120D een uitgang;
+     een bundel die er niet is, vindt niets. De veiligheidskabel heeft een komma in de
+     omschrijving en staat daarom tussen aanhalingstekens. */
+  is('de Storm G3-reeks: elke bundel zijn eigen artikel, een die er niet is niets',
+    [r0('1065281-120D'), r0('1065281'), r0('1089102-60D'), r0('1065281-90D'), r0('1089102-30D')],
+    ['Pragmalux LED Highbay Storm G3 100-200W 3000K-5000K 3CCT 17000-34000lm 120D 0-10V Dimbaar Zwart (250-400W)',
+     'Pragmalux LED Highbay Storm G3 100-200W 3000K-5000K 3CCT 17000-34000lm 90D 0-10V Dimbaar Zwart (250-400W)',
+     'Pragmalux LED Highbay Storm G3 100-200W 3000K-5000K 3CCT 17000-34000lm 60D Zwart DALI2 (250-400W)', null, null]);
+  is('een komma in de omschrijving', r0('1065397'), 'Pragmalux LED Highbay Storm G3 veiligheidskabel 0,5 meter');
   const r = await laadUit('armatuur-rij.js', ['catalogusNaam', 'armNaamUitCode', 'boekBestandsnaam']);
   /* De naam van het projectenboek (oktober 2026): AB met alleen armaturen, PB met een
      lichtplan erin - en in de railtool altijd PB. Verder dezelfde vorm als het armaturenboek

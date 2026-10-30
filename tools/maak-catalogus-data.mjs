@@ -12,8 +12,9 @@
  * Dot Plus, DotXL, Dot IP65, Juno, Maximus, Norma, Picto, UNI, batterijen en convertors, en
  * de vier DLC-noodarmaturen) met de hele Skyline-reeks, accessoires en onderdelen erbij. En
  * aanvullingen.csv: losse artikelen die de binnendienst met hun volledige naam doorgeeft
- * omdat ze in geen van de lijsten staan - de eerste, eind oktober 2026, de Storm G3
- * 1065281-120D. Een nieuwe komt daar als een regel bij. Zonder die lijsten vonden de
+ * omdat ze in geen van de lijsten staan - eind oktober 2026 de Storm G3-reeks met zijn
+ * accessoires (15 codes; de kap en twee sensoren stonden al in de catalogus). Een nieuwe
+ * komt daar als een regel bij. Zonder die lijsten vonden de
  * Zena, de Ario 1-fase railspot, de Waldo, de Valento en honderden andere niets. In de vergelijker zouden ze 39 families
  * opleveren, waaronder losse lampen en spots zonder lichtstroom of maat in hun
  * omschrijving - die eisen eerst werk aan de productdata. Staat een code in meer dan één
