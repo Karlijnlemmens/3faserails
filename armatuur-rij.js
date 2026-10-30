@@ -353,15 +353,13 @@ function armKolomKeuze(o){
   return {el, verf};
 }
 
-/* ======================= de naam uit de catalogus ======================= */
+/* ======================= de bestandsnaam van het boek ======================= */
 
-/* De omschrijving van een artikelcode uit de catalogus (catalogus-data.js, gebouwd uit
-   vergelijker/data/bron/catalogus.csv), of null. Alleen een exacte code telt -
-   hoofdletters en spaties eromheen maken niet uit, maar een code die er bijna op lijkt is
-   een ander artikel. catalogus mag weg; dan window.CATALOGUS. */
 /* De bestandsnaam van het projectenboek: "AB11673LS - Installateur - Projectnaam.pdf" - het
-   projectnummer zonder "P.", het eerste woord van de installateur en de projectnaam, met wat
-   een bestandsnaam niet mag hebben eruit. AB is een armaturenboek (alleen armaturen), PB een
+   projectnummer zonder "P.", de installateur en de projectnaam, met wat een bestandsnaam
+   niet mag hebben eruit. De installateur voluit, zoals hij in de tool staat: eerst was het
+   alleen het eerste woord, en dan stond er "Klein" in plaats van "Klein Poelhuis" (eind
+   oktober 2026, de gebruiker). AB is een armaturenboek (alleen armaturen), PB een
    projectboek: het armaturenboek met een lichtplan erin, en het boek van de railtool altijd
    (oktober 2026, op vraag van de binnendienst). Staat er niets van de drie in, dan
    "armaturenboek.pdf" of "projectboek.pdf". */
@@ -369,10 +367,17 @@ function boekBestandsnaam(st, projectboek){
   const veilig = s => String(s || '').replace(/[\\/:*?"<>|]/g, ' ').replace(/\s+/g, ' ').trim();
   const nr = veilig(String(st.projNr || '').trim().replace(/^p\.?\s*/i, ''));   /* "P.11673LS" -> "11673LS" */
   const naam = veilig(st.proj);
-  const inst = veilig(st.installateur).split(' ')[0];                            /* alleen het eerste woord */
+  const inst = veilig(st.installateur);
   if(!nr && !naam && !inst) return (projectboek ? 'projectboek' : 'armaturenboek') + '.pdf';
   return [(projectboek ? 'PB' : 'AB') + nr, inst, naam].filter(Boolean).join(' - ') + '.pdf';
 }
+
+/* ======================= de naam uit de catalogus ======================= */
+
+/* De omschrijving van een artikelcode uit de catalogus (catalogus-data.js, gebouwd uit
+   vergelijker/data/bron/catalogus.csv), of null. Alleen een exacte code telt -
+   hoofdletters en spaties eromheen maken niet uit, maar een code die er bijna op lijkt is
+   een ander artikel. catalogus mag weg; dan window.CATALOGUS. */
 function catalogusNaam(code, catalogus){
   const c = String(code || '').trim().toUpperCase();
   const cat = catalogus || (typeof window !== 'undefined' && window.CATALOGUS) || {};

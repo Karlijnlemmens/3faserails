@@ -246,7 +246,8 @@ PAGINAS.forEach(p => {
     'catalogus-data.js': [['catalogus.csv', 'vergelijker/data/bron/catalogus.csv'], ['spots.csv', 'vergelijker/data/bron/spots.csv'],
                           ['wandarmaturen.csv', 'vergelijker/data/bron/wandarmaturen.csv'],
                           ['opbouwarmaturen.csv', 'vergelijker/data/bron/opbouwarmaturen.csv'],
-                          ['noodverlichting-skyline.csv', 'vergelijker/data/bron/noodverlichting-skyline.csv'], 'node tools/maak-catalogus-data.mjs'],
+                          ['noodverlichting-skyline.csv', 'vergelijker/data/bron/noodverlichting-skyline.csv'],
+                          ['aanvullingen.csv', 'vergelijker/data/bron/aanvullingen.csv'], 'node tools/maak-catalogus-data.mjs'],
   };
   for(const [bestand, lijst] of Object.entries(bronnen)){
     const kop = lees(bestand).slice(0, 2000);

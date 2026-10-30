@@ -78,6 +78,10 @@ function is(wat, gekregen, verwacht){
         + '3-CCT CRI>90 UGR<19 60D BØ226 - GØ200-210 +Philips DALI2 driver'), 'ag25');
   /* Het soortwoord telt mee als het onderscheidend is. */
   is('Pendelarmatuur Orion is niet Orion', groep('Pragmalux LED Pendelarmatuur Orion wit 30W'), 'ag109');
+  /* De Storm G3 uit aanvullingen.csv (oktober 2026): de naam die de catalogus nu invult,
+     krijgt de presenter van de Storm G3. */
+  is('Storm G3 1065281-120D: de Storm-presenter',
+    groep('Pragmalux LED Highbay Storm G3 100-200W 3000K-5000K 3CCT 17000-34000lm 120D 0-10V Dimbaar Zwart (250-400W)'), 'ag71');
   is('Gevelarmatuur Squalo is niet Squalo Mini', groep('Pragmalux LED Gevelarmatuur Squalo IP65 zwart 20W'), 'ag67');
   is('Squalo Mini blijft Squalo Mini', groep('Pragmalux LED Squalo Mini IP65 zwart 10W'), 'ag63');
   /* Sigma G2: IP44 (ag34) of IP65 (ag82), op de IP-klasse - de volledige naam zoals de
@@ -1511,12 +1515,12 @@ function is(wat, gekregen, verwacht){
   new Function('window', readFileSync(join(root, 'catalogus-data.js'), 'utf8'))(venster);
   const CAT = venster.CATALOGUS;
   /* uit catalogus.csv en de lijsten van de binnendienst - spots, wandarmaturen, de
-     Valento, noodverlichting met de Skyline - die alleen voor het opzoeken zijn (zie
-     tools/maak-catalogus-data.mjs) */
-  const bronCodes = ['catalogus.csv', 'spots.csv', 'wandarmaturen.csv', 'opbouwarmaturen.csv', 'noodverlichting-skyline.csv'].flatMap(f => readFileSync(join(root, 'vergelijker/data/bron/' + f), 'utf8')
+     Valento, noodverlichting met de Skyline, en losse aanvullingen - die alleen voor het
+     opzoeken zijn (zie tools/maak-catalogus-data.mjs) */
+  const bronCodes = ['catalogus.csv', 'spots.csv', 'wandarmaturen.csv', 'opbouwarmaturen.csv', 'noodverlichting-skyline.csv', 'aanvullingen.csv'].flatMap(f => readFileSync(join(root, 'vergelijker/data/bron/' + f), 'utf8')
     .split(/\r?\n/).slice(1).filter(Boolean).map(r => r.split(',')[0].trim().toUpperCase()));
   is('elke artikelcode uit de bronnen staat erin, en niets anders', Object.keys(CAT).sort(), [...new Set(bronCodes)].sort());
-  is('codes: ondergrens 6145 (5283, 499 spots, 80 wandarmaturen, 35 Valento, 248 noodverlichting en Skyline)', Object.keys(CAT).length >= 6145, true);
+  is('codes: ondergrens 6146 (5283, 499 spots, 80 wandarmaturen, 35 Valento, 248 noodverlichting en Skyline, 1 aanvulling)', Object.keys(CAT).length >= 6146, true);
   const r0 = c => Object.prototype.hasOwnProperty.call(CAT, c) ? CAT[c] : null;
   /* De spots die in een echte projectlijst niets vonden (oktober 2026), en de uitgefaseerde
      die op verzoek van de binnendienst niet zijn meegenomen */
@@ -1538,14 +1542,26 @@ function is(wat, gekregen, verwacht){
   is('in meer bronnen: de catalogus wint', r0('2032491-WS'),
     'Pragmalux LED Plafonnière / Wandarmatuur Soladisc IP65 IK10 Ø370 7-14W 700-1600lm 3000-3500-4000K 3-CCT + draadloos sensor');
   is('uitgefaseerd niet meegenomen', ['9011482', '4309324', '70811800', '72139100'].map(c => r0(c)), [null, null, null, null]);
+  /* Eind oktober 2026, de gebruiker: "1065281-120D Storm G3 laad de volledige naam niet". Het
+     armatuur stond in geen van de lijsten (alleen de kap en de sensoren van de Storm G3);
+     de binnendienst gaf de volledige naam, die staat nu in aanvullingen.csv. Alleen die ene
+     code: een ander bundeltype of vermogen is een ander artikel. */
+  is('de Storm G3 1065281-120D gevonden, en alleen die', [r0('1065281-120D'), r0('1065281'), r0('1065281-90D')],
+    ['Pragmalux LED Highbay Storm G3 100-200W 3000K-5000K 3CCT 17000-34000lm 120D 0-10V Dimbaar Zwart (250-400W)', null, null]);
   const r = await laadUit('armatuur-rij.js', ['catalogusNaam', 'armNaamUitCode', 'boekBestandsnaam']);
   /* De naam van het projectenboek (oktober 2026): AB met alleen armaturen, PB met een
      lichtplan erin - en in de railtool altijd PB. Verder dezelfde vorm als het armaturenboek
-     al had: nummer zonder "P.", het eerste woord van de installateur, de projectnaam. */
+     al had: nummer zonder "P.", de installateur, de projectnaam. De installateur voluit:
+     eerst alleen het eerste woord, en dan stond er "Klein" in plaats van "Klein Poelhuis"
+     (eind oktober 2026, de gebruiker). */
   const project = {proj:'Nieuwbouw Sportcomplex Schagen', projNr:'P.11673LS', installateur:'Lemmens Elektro B.V.'};
   is('alleen armaturen: AB, met een lichtplan of uit de railtool: PB',
     [r.boekBestandsnaam(project, false), r.boekBestandsnaam(project, true)],
-    ['AB11673LS - Lemmens - Nieuwbouw Sportcomplex Schagen.pdf', 'PB11673LS - Lemmens - Nieuwbouw Sportcomplex Schagen.pdf']);
+    ['AB11673LS - Lemmens Elektro B.V. - Nieuwbouw Sportcomplex Schagen.pdf', 'PB11673LS - Lemmens Elektro B.V. - Nieuwbouw Sportcomplex Schagen.pdf']);
+  is('de installateur voluit, met dubbele spaties enkel en zonder tekens die een bestandsnaam niet mag hebben',
+    [r.boekBestandsnaam({projNr:'P.12001', installateur:'Klein Poelhuis', proj:'Kantoor Hengelo'}, true),
+     r.boekBestandsnaam({installateur:'  Van der  Velden: Elektro/Techniek  '}, false)],
+    ['PB12001 - Klein Poelhuis - Kantoor Hengelo.pdf', 'AB - Van der Velden Elektro Techniek.pdf']);
   is('zonder gegevens een gewone naam, zonder nummer gewoon AB of PB vooraan',
     [r.boekBestandsnaam({}, false), r.boekBestandsnaam({proj:''}, true), r.boekBestandsnaam({proj:'Hal 2/3: oost'}, true)],
     ['armaturenboek.pdf', 'projectboek.pdf', 'PB - Hal 2 3 oost.pdf']);
