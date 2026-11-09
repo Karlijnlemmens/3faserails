@@ -691,7 +691,7 @@ function is(wat, gekregen, verwacht){
      'strookRuimte', 'RAND', 'leegLichtvlak', 'lichtvlakken', 'strookVlakken', 'lichtvlakTekst', 'lumenSleutel',
      'optiekFactor', 'lumenOud', 'wattNieuw', 'lumenNieuw', 'VERPLICHT_OUD', 'VERPLICHT_NIEUW', 'ANDERS_VELDEN',
      'ontbreektOud', 'ontbreektNieuw', 'vervolgLeeg', 'leegConcept', 'herstelConcept', 'herstelKeuzes',
-     'basisNaam', 'basisEn', 'ralNummer', 'rfqVelden', 'figuurVormen'],
+     'basisNaam', 'basisEn', 'ralNummer', 'rfqVelden', 'figuurVormen', 'strookTekst'],
     'const P = {instellingen:{efficacy:140, maxWatt:60}};');
   console.log('\nbandrasters: plafondtypes, stroken en vervolgvragen');
   /* een positie: leeg concept met wat er ingevuld is, links (oud) en rechts (nieuw) */
@@ -745,6 +745,17 @@ function is(wat, gekregen, verwacht){
   is('geen voorstel: niet in de tabel, EU Opaal (volgt), geen lamp',
     [v('TL8-36W', 3, 'Optic'), v('TL8-18W', 1, 'EU (Opaal/Microprismatisch)'), v('', 1, 'Optic')],
     ['3 × TL8-36W staat niet in de strooktabel', 'strookmaten van EU (Opaal/Microprismatisch) volgen via R&D', 'kies eerst de bestaande lamp']);
+  /* In de schets van de lijst is A de breedte van een strook (de korte kant) en B de lengte.
+     De tool noemt de lengte eerst, zoals overal (lengte x breedte), met de letters erbij -
+     "86 x 1068" las alsof ze waren omgedraaid (de gebruiker: "kijk ook goed wat A en B de
+     afmetingen betekenen"). En de lengte van de strook gaat langs de lengte van het armatuur. */
+  const vF = m.strookVoorstel(positie({lichtbron:'TL5-28W', aantalLb:'2'}, {basis:'Flexcore'}));
+  is('A is de breedte, B de lengte: 2 stroken, elk 1068 mm lang (B) en 86 mm breed (A)',
+    [m.strookTekst(vF), m.strookTekst(m.strookVoorstel(positie({lichtbron:'TL8-18W', aantalLb:'1'}, {basis:'Optic'})))],
+    ['2 stroken, elk 1068 mm lang (B) en 86 mm breed (A)', '1 strook, 560 mm lang (B) en 40 mm breed (A)']);
+  is('de lengte (B) van de strook ligt langs de lengte van het armatuur, de breedte (A) erdwars',
+    m.lichtvlakken(positie({lichtbron:'TL5-28W', aantalLb:'2', lengte:'1200', breedte:'300'}, {basis:'Flexcore'})).map(f => f.l + ' x ' + f.b),
+    ['1068 x 86', '1068 x 86']);
   /* "Kunnen 2/3/4 oude T8/T5 in een strook zijn": minder stroken mag, meer dan de tabel niet */
   is('aantal stroken: 1 gekozen bij 2 buizen, 5 bij 4 buizen telt niet', [v('TL5-28W', 2, 'Optic', '1'), v('TL8-18W', 4, 'Optic', '5')],
     ['1x 40x1120', '4x 40x560']);

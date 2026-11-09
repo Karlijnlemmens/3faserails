@@ -1546,7 +1546,9 @@ function tekenLichtvlakken(){
 
     const raster = el('div', 'lvraster');
     const velden = {};
-    [['l','lengte'], ['b','breedte'], ['x','vanaf links'], ['y','vanaf boven']].forEach(function(paar){
+    /* bij stroken uit de tabel de letters van de lijst erbij: B is de lengte, A de breedte */
+    [['l', strook.reden ? 'lengte' : 'lengte (B)'], ['b', strook.reden ? 'breedte' : 'breedte (A)'],
+     ['x','vanaf links'], ['y','vanaf boven']].forEach(function(paar){
       const naam = paar[0];
       raster.appendChild(el('label', null, paar[1]));
       const veld = tekstveld(vlak[naam], function(w){ vlak[naam] = w; ververs(); }, {getal:true});
@@ -1573,8 +1575,8 @@ function tekenLichtvlakken(){
 function lichtvlakNoot(c){
   const regels = [], v = strookVoorstel(c), fam = STROOK[c.nieuw.basis];
   if(!v.reden){
-    regels.push({t:'Strookmaten uit de tabel: ' + v.n + ' × ' + v.a + ' × ' + v.b + ' mm (' + v.buizen + ' × '
-      + c.oud.lichtbron + ', ' + v.klasse + ' cm).'});
+    regels.push({t:'Strookmaten uit de tabel (' + v.buizen + ' × ' + c.oud.lichtbron + ', ' + v.klasse + ' cm): '
+      + strookTekst(v) + '.'});
     if(c.nieuw.basis==='Flexcore' && v.klasse===90) regels.push({t:'815 mm staat in de lijst met "R&D check".'});
   } else if(fam) regels.push({t:v.reden.charAt(0).toUpperCase() + v.reden.slice(1) + '.'});
   if(fam && fam.module) regels.push({t:c.nieuw.basis + ': modules van ' + fam.module + ' mm (7 leds).'});
@@ -1658,8 +1660,13 @@ function tekenStroken(cel, c){
   s.value = getal(c.nieuw.stroken)!=null && getal(c.nieuw.stroken) <= v.nTabel ? String(Math.round(getal(c.nieuw.stroken))) : '';
   s.addEventListener('change', function(){ c.nieuw.stroken = s.value; tekenAlles(); });
   cel.appendChild(s);
-  cel.appendChild(el('div', 'eh', v.n + (v.n===1 ? ' strook' : ' stroken') + ' van ' + v.a + ' × ' + v.b + ' mm'
-    + (v.n < v.buizen ? ' — ' + v.buizen + ' oude buizen in ' + v.n : '')));
+  cel.appendChild(el('div', 'eh', strookTekst(v) + (v.n < v.buizen ? ' — ' + v.buizen + ' oude buizen in ' + v.n : '')));
+}
+/* De strookmaat in woorden, met de letters van de lijst erbij: daar is A de breedte van
+   een strook (de korte kant) en B de lengte. Eerst de lengte, zoals overal in de tool
+   (lengte x breedte); "86 x 1068" las alsof A en B waren omgedraaid. */
+function strookTekst(v){
+  return v.n + (v.n===1 ? ' strook, ' : ' stroken, elk ') + v.b + ' mm lang (B) en ' + v.a + ' mm breed (A)';
 }
 /* De foto bij een aansluiting: per keuze, bij een snoer per steker en bij een
    stekerbare oplossing per merk. */
@@ -2901,6 +2908,8 @@ InfoTeken.zet($('figuurkop'), {
     'Kent de strooktabel de basisarmatuur en de bestaande lamp, dan stelt de tool de ' +
       'stroken voor: hun maat, en naast elkaar in de breedte met gelijke tussenruimtes. ' +
       'Het aantal kies je bij "Aantal stroken".',
+    'In de tabel van de lijst is A de breedte van één strook (de korte kant) en B de ' +
+      'lengte; "2x40mm" zijn twee stroken van 40 mm breed naast elkaar.',
     'Anders betekent een leeg veld: de tool rekent het uit — 15 mm rand rondom, en bij ' +
       'meer vlakken de lengte gelijk verdeeld over de positie.',
     'Wat er dan uit komt staat grijs in het lege veld.',
