@@ -678,6 +678,152 @@ function is(wat, gekregen, verwacht){
     m.lumenOud(positie({...p7633.oud, cri:'90+'}, p7633.nieuw)), null);
 }
 
+/* ============ bandrasters: de nieuwe opzet uit de lijst van de binnendienst ============ */
+{
+  /* November 2026: de lijst van de binnendienst (docs/bronnen/bandraster_lijst.xlsx)
+     vervangt de keuzes van het oude werkboek - plafondtypes, vier basisarmaturen met een
+     tabel van strookmaten, en vervolgvragen bij aansluiting, sensor, nood en plenum. */
+  const m = await laadUit('bandrasters.html',
+    ['LICHTBRON', 'OPTIEK_OUD', 'OPTIEK_NIEUW', 'PLAFONDTYPE', 'BASIS', 'LENGTEKLASSE', 'STROOK_RIJEN', 'STROOK',
+     'MATEN_INDICATIEF', 'STURING', 'ANDERS', 'VERVOLG', 'MONTAGE', 'zoekEn', 'EN_KLEURTEMP', 'EN_CRI', 'getal',
+     'volgtLinks', 'rechts', 'lezerLinks', 'lezerRechts', 'zichtbareStappen', 'vervolgMist', 'stapEn', 'stap',
+     'aansluitTekst', 'sensorTekst', 'noodTekst', 'plenumTekst', 'sturingNaam', 'plafondTekst', 'strookVoorstel',
+     'strookRuimte', 'RAND', 'leegLichtvlak', 'lichtvlakken', 'strookVlakken', 'lichtvlakTekst', 'lumenSleutel',
+     'optiekFactor', 'lumenOud', 'wattNieuw', 'lumenNieuw', 'VERPLICHT_OUD', 'VERPLICHT_NIEUW', 'ANDERS_VELDEN',
+     'ontbreektOud', 'ontbreektNieuw', 'vervolgLeeg', 'leegConcept', 'herstelConcept', 'herstelKeuzes',
+     'basisNaam', 'basisEn', 'ralNummer', 'rfqVelden', 'figuurVormen'],
+    'const P = {instellingen:{efficacy:140, maxWatt:60}};');
+  console.log('\nbandrasters: plafondtypes, stroken en vervolgvragen');
+  /* een positie: leeg concept met wat er ingevuld is, links (oud) en rechts (nieuw) */
+  const positie = (oud, nieuw, volgt) => {
+    const c = m.leegConcept();
+    Object.assign(c.oud, oud); Object.assign(c.nieuw, nieuw); Object.assign(c.volgt, volgt || {});
+    return c;
+  };
+
+  /* De strooktabel tegen de lijst zelf, rij voor rij: kolom D het buistype (T8/T5, naar
+     beneden doorgetrokken), E het wattage ("2x18W", "14/24W"), F de lengte, en per
+     basisarmatuur A (strookbreedte, "2x40mm") en B (lengte, "560mm"; "1068mnm" is een
+     tikfout in de lijst). EU (Opaal/Microprismatisch) is daar leeg. */
+  const rijen = bladRijen(join(root, 'docs/bronnen/bandraster_lijst.xlsx'), 1);
+  const kolom = l => l.charCodeAt(0) - 65;
+  const families = {'EU (Ledil)':['I', 'J'], 'Flexcore':['K', 'L'], 'Optic':['M', 'N'], 'EU (Opaal/Microprismatisch)':['G', 'H']};
+  const mmVan = s => { const x = /(\d+)\s*m+n*m/.exec(String(s)); return x ? +x[1] : null; };
+  let type = '', getoetst = 0;
+  const fout = [], combis = {};
+  for(const rij of rijen){
+    if(/^T[58]$/.test((rij[kolom('D')] || '').trim())) type = rij[kolom('D')].trim();
+    const watt = (rij[kolom('E')] || '').trim(), lengte = /^(\d+)cm/.exec((rij[kolom('F')] || '').trim());
+    if(!type || !/W$/.test(watt) || !lengte) continue;
+    const buizen = /^(\d)x/.test(watt) ? +watt[0] : 1;
+    (combis[lengte[1]] = combis[lengte[1]] || []).push(buizen);
+    const lampen = watt.replace(/^\dx/, '').replace(/W$/, '').split('/').map(w => (type === 'T8' ? 'TL8-' : 'TL5-') + w + 'W');
+    for(const [fam, [kA, kB]] of Object.entries(families)){
+      const a = (rij[kolom(kA)] || '').trim(), b = (rij[kolom(kB)] || '').trim();
+      const stroken = /^(\d)x/.test(a) ? +a[0] : 1;
+      for(const lamp of lampen){
+        getoetst++;
+        const v = m.strookVoorstel(positie({lichtbron:lamp, aantalLb:String(buizen)}, {basis:fam}));
+        const verwacht = a ? {a:mmVan(a), b:mmVan(b), n:stroken} : null;
+        const kreeg = v.reden ? null : {a:v.a, b:v.b, n:v.n};
+        if(JSON.stringify(kreeg) !== JSON.stringify(verwacht))
+          fout.push(fam + ' ' + buizen + 'x' + lamp + ': ' + JSON.stringify(kreeg) + ' tegen ' + JSON.stringify(verwacht));
+      }
+    }
+  }
+  is('strooktabel = de lijst, elke buis x elke basisarmatuur', fout, []);
+  is('getoetst: ondergrens 96 (24 lamp-en-aantal-regels x 4 basisarmaturen)', getoetst >= 96, true);
+  is('alleen de combinaties uit de lijst', Object.fromEntries(Object.entries(m.STROOK_RIJEN).map(([k, v]) => [k, v.join(',')])),
+    Object.fromEntries(Object.entries(combis).map(([k, v]) => [k, Array.from(new Set(v)).sort().join(',')])));
+
+  const v = (lamp, n, fam, stroken) => {
+    const r = m.strookVoorstel(positie({lichtbron:lamp, aantalLb:String(n)}, {basis:fam, stroken:stroken || ''}));
+    return r.reden ? r.reden : r.n + 'x ' + r.a + 'x' + r.b;
+  };
+  is('voorbeelden: 2x TL8-18W Optic, 1x TL5-21W Flexcore, 4x TL8-18W Flexcore (2 stroken)',
+    [v('TL8-18W', 2, 'Optic'), v('TL5-21W', 1, 'Flexcore'), v('TL8-18W', 4, 'Flexcore')], ['2x 40x560', '1x 86x815', '2x 86x545']);
+  is('geen voorstel: niet in de tabel, EU Opaal (volgt), geen lamp',
+    [v('TL8-36W', 3, 'Optic'), v('TL8-18W', 1, 'EU (Opaal/Microprismatisch)'), v('', 1, 'Optic')],
+    ['3 × TL8-36W staat niet in de strooktabel', 'strookmaten van EU (Opaal/Microprismatisch) volgen via R&D', 'kies eerst de bestaande lamp']);
+  /* "Kunnen 2/3/4 oude T8/T5 in een strook zijn": minder stroken mag, meer dan de tabel niet */
+  is('aantal stroken: 1 gekozen bij 2 buizen, 5 bij 4 buizen telt niet', [v('TL5-28W', 2, 'Optic', '1'), v('TL8-18W', 4, 'Optic', '5')],
+    ['1x 40x1120', '4x 40x560']);
+
+  /* de stroken naast elkaar in de breedte, elk midden in de lengte, gelijke tussenruimtes */
+  const p2 = positie({lichtbron:'TL8-18W', aantalLb:'2', lengte:'600', breedte:'600'}, {basis:'Optic'});
+  const rond = vl => vl.map(f => [f.l, f.b, Math.round(f.x*10)/10, Math.round(f.y*10)/10].join(' '));
+  is('2 stroken in 600 x 600: 560 x 40, x 20, y met drie gelijke tussenruimtes', rond(m.lichtvlakken(p2)), ['560 40 20 173.3', '560 40 20 386.7']);
+  p2.nieuw.lichtvlakken = [{l:'', b:'', x:'', y:''}, {l:'', b:'60', x:'', y:''}, {l:'999', b:'', x:'', y:''}];
+  is('een getypte maat wint, een vlak voorbij het aantal stroken telt niet', rond(m.lichtvlakken(p2)), ['560 40 20 166.7', '560 60 20 373.3']);
+  is('als tekst voor blad en RFQ', m.lichtvlakTekst(positie({lichtbron:'TL5-28W', aantalLb:'2', lengte:'1200', breedte:'300'}, {basis:'Flexcore'}), 'x', ''),
+    '2x 1068 x 86');
+  /* zonder voorstel de oude afleiding, over de lengte */
+  is('Anders als basisarmatuur: de oude afleiding', rond(m.lichtvlakken(positie({lichtbron:'TL8-18W', aantalLb:'2', lengte:'600', breedte:'600'},
+    {basis:m.ANDERS}))), ['570 570 15 15']);
+
+  /* 30 mm rond elke strook (EU Opaal en Flexcore), bij Optic en EU Ledil geen regel */
+  const ruimte = (fam, breedte) => {
+    const r = m.strookRuimte(positie({lichtbron:'TL8-36W', aantalLb:'2', lengte:'1200', breedte:String(breedte)}, {basis:fam}));
+    return r ? (r.past ? 'past' : 'past niet, ' + r.nodig) : null;
+  };
+  is('Flexcore 2 x 86: 250 mm te smal (262 nodig), 270 mm past; Optic: geen controle',
+    [ruimte('Flexcore', 250), ruimte('Flexcore', 270), ruimte('Optic', 250)], ['past niet, 262', 'past', null]);
+
+  /* De tekening: stroken naast elkaar geven een maatketen over de breedte (rand, strook,
+     tussenruimte, strook, rand) in plaats van een maat per strook vanaf de bovenkant. */
+  const fig = m.figuurVormen(positie({lichtbron:'TL5-28W', aantalLb:'2', lengte:'1200', breedte:'300', hoogte:'80'}, {basis:'Flexcore'}), 340, 300, 10);
+  is('tekening: de breedteketen toont de twee strookbreedtes', fig.vormen.filter(x => x.t === 'tekst' && x.s === '86').length, 2);
+
+  /* vervolgvragen: tekst voor het blad en de RFQ */
+  const vol = positie({
+    sturing:'DALI', aansluiting:'Stekerbaar', aansluitMerk:'Wieland', aansluitAders:'5+2 (BST)', aansluitBrandklasse:'Cca',
+    sensor:'Ja', sensorPlaats:'Extern', sensorVerbinding:'Bedraad', sensorSoort:'Beweging + daglicht',
+    nood:'Centraal', noodTest:'Manueel', noodDuur:'1 uur', noodDali:'Nee', plenum:'Ja', plenumSoort:'Standaard',
+    plafondtype:'Hook-On Metal Ceiling'}, {});
+  const r = m.lezerRechts(vol);
+  is('vervolgvragen in het Nederlands (productblad)',
+    [m.aansluitTekst(r, false), m.sensorTekst(r, false), m.noodTekst(r, false), m.plenumTekst(r, false), m.plafondTekst(r, false, false)],
+    ['Stekerbaar, Wieland, 5+2 (BST) aders, brandklasse Cca', 'Ja, extern, bedraad, beweging + daglicht', 'Centraal, manueel, 1 uur',
+     'Ja, standaard', 'Hook-On Metal Ceiling']);
+  is('en in het Engels (RFQ), met (special) bij het plafondtype',
+    [m.aansluitTekst(r, true), m.sensorTekst(r, true), m.noodTekst(r, true), m.plenumTekst(r, true), m.plafondTekst(r, true, true)],
+    ['Plug-in, Wieland, 5+2-pole (BST), fire class Cca', 'Yes, external, wired, motion + daylight', 'Central battery, manual test, 1h',
+     'Yes, standard', 'Hook-On Metal Ceiling (special)']);
+  const snoer = m.lezerLinks(positie({aansluiting:'Snoer', aansluitSnoer:'Eurosnoer', aansluitLengte:'2.5', nood:'Geen', sensor:'Nee', plenum:'Nee'}));
+  is('snoer, en de nee-antwoorden', [m.aansluitTekst(snoer, false), m.aansluitTekst(snoer, true), m.noodTekst(snoer, false), m.sensorTekst(snoer, true), m.plenumTekst(snoer, false)],
+    ['Snoer, Eurosnoer, 2,5 m', 'Cord, Euro plug, 2.5 m', 'Geen', 'No', 'Nee']);
+  is('in de RFQ-kolommen', m.rfqVelden(vol).filter(x => ['Ceiling type', 'Dimming', 'Emergency', 'Connector', 'Plenum', 'Sensor'].includes(x[0])).map(x => x[1]),
+    ['Hook-On Metal Ceiling (special)', 'DALI', 'Central battery, manual test, 1h', 'Plug-in, Wieland, 5+2-pole (BST), fire class Cca', 'Yes, standard',
+     'Yes, external, wired, motion + daylight']);
+  /* Een verborgen stap telt niet als open, een zichtbare wel; "Anders:" vraagt zijn tekst. */
+  const half = positie({aansluiting:'Stekerbaar', aansluitMerk:m.ANDERS, sensor:'Nee', sensorPlaats:'', nood:'Decentraal', plenum:'Ja',
+    sturing:m.ANDERS});
+  is('wat er nog open staat: alleen zichtbare stappen',
+    m.ontbreektOud(half).filter(x => /^(aansluiting|sensor|nood|plenum|sturing)/.test(x)),
+    ['sturing: anders', 'aansluiting: merk', 'aansluiting: aders', 'aansluiting: brandklasse', 'nood: test', 'nood: duur', 'nood: dali',
+     'plenum: uitvoering']);
+
+  /* Een project van voor de nieuwe opzet: omzetten wat eenduidig is, de rest zichtbaar laten. */
+  const oudProject = {
+    oud:{plafondtype:'Systeemplafond', sturing:'Pushdim-Switchdim', aansluiting:'RA-steker snoer 2m', sensor:'Sensor Daglicht',
+         nood:'Ja, 3 uur DALI autotest', ventilatie:'Ja'},
+    nieuw:{basis:'Flexcore bandraster', sturing:'Aan-Uit+Dipswitch', aansluiting:'GST18-3 male chassis + splitter', nood:'Geen Nood',
+           sensor:'Geen Sensor', ventilatie:'Nee', lichtvlakken:[{l:'', b:'', x:'', y:''}]},
+    volgt:{sturing:false, aansluiting:false, nood:false, sensor:false, ventilatie:false},
+  };
+  const h = m.herstelConcept(oudProject), velden = ['plafondtype', 'plafondAnders', 'sturing', 'sturingAnders', 'aansluiting', 'aansluitSnoer',
+    'aansluitLengte', 'aansluitingWas', 'sensor', 'sensorSoort', 'nood', 'noodWas', 'noodTest', 'noodDuur', 'noodDali', 'plenum'];
+  const toon = z => velden.filter(k => z[k]).map(k => k + '=' + z[k]).join('; ');
+  is('oud project, links', toon(h.oud), 'plafondtype=Anders:; plafondAnders=Systeemplafond; sturing=PushDim; aansluiting=Snoer; aansluitSnoer=Schuko; '
+    + 'aansluitLengte=2; sensor=Ja; sensorSoort=Daglicht; noodWas=Ja, 3 uur DALI autotest; noodTest=Autotest; noodDuur=3 uur; noodDali=Ja; plenum=Ja');
+  is('oud project, rechts (losgeknipt)', [h.nieuw.basis, toon(h.nieuw)].join(' | '),
+    'Flexcore | sturing=Anders:; sturingAnders=Aan-Uit+Dipswitch; aansluitingWas=GST18-3 male chassis + splitter; sensor=Nee; nood=Geen; plenum=Nee');
+  is('geen ventilatie meer, en wat rechts los was blijft los', ['ventilatie' in h.oud, 'ventilatie' in h.volgt, h.volgt.plenum, h.volgt.noodTest, h.volgt.aansluitSnoer],
+    [false, false, false, false, false]);
+  is('de oude aansluiting die niet past telt als open, niet stil in de RFQ', m.ontbreektNieuw(h).includes('aansluiting'), true);
+  is('nog een keer herstellen verandert niets', JSON.stringify(m.herstelConcept(h)), JSON.stringify(h));
+}
+
 /* ======================= specificaties uitlezen ======================= */
 {
   /* spec-lezer.js is geen module maar een IIFE die zichzelf op window zet; hier

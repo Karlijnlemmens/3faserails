@@ -106,6 +106,8 @@
       color:var(--navy-900); margin-bottom:3px; line-height:1.25;}
     .intake .cel.rechts::before{visibility:hidden;}
     .intake .duo, .intake .duo.smal, .intake .tweeling{grid-template-columns:minmax(0,1fr);}
+    /* een vervolgstap: het label boven het veld, anders blijft er naast label en ↺ geen keuzeveld over */
+    .intake .stap{grid-template-columns:minmax(0,1fr); gap:1px;}
   }
   .rij-even{background:#F8FBFE;}
   .duo{display:grid; grid-template-columns:1fr 74px; gap:6px;}
@@ -141,6 +143,17 @@
   }
   .berekend.mist{color:#B4472F; border-color:#F0C8BC; background:#FDF6F4;}
   .eh{font-size:11px; color:var(--slate); align-self:center; padding-left:2px;}
+  /* --- vervolgvragen: elke stap op een eigen regel, met een klein label ervoor --- */
+  .stap{display:grid; grid-template-columns:72px minmax(0,1fr); gap:6px; align-items:center; margin-top:5px;}
+  .stap .stl{font-size:11px; color:var(--slate);}
+  .eh.was{display:block; margin-top:4px; color:#B4472F;}
+  .eh.indicatief{display:block; margin-top:3px;}
+  .special{display:inline-block; margin-top:4px; font-size:10px; font-weight:800; letter-spacing:.04em;
+    text-transform:uppercase; color:#8A5A00; background:#FFF4DC; border:1px solid #F1D79A;
+    border-radius:999px; padding:1px 8px;}
+  .lvnoot{font-size:11px; color:var(--slate); line-height:1.45;}
+  .lvnoot p{margin:0 0 4px;}
+  .lvnoot p.fout{color:#B4472F; font-weight:700;}
   .status{font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; display:inline-block;}
   .status.ok{background:#E7F6EC; color:#1F7A3D;}
   .status.mist{background:#FDF0EC; color:#B4472F;}
@@ -332,13 +345,19 @@
 <details class="kaart" id="fotoKaart">
   <summary class="fotokop">
     <span class="eyebrow">Foto's</span>
-    <h2><span>Foto's bij optiek en aansluiting</span><span class="status" id="fotoTeller"></span></h2>
+    <h2><span>Foto's bij de keuzes</span><span class="status" id="fotoTeller"></span></h2>
   </summary>
   <p class="leegmelding" id="fotoUitleg"></p>
+  <div class="fotogroep">Plafondtypes</div>
+  <div class="beeldrooster" id="fotoPlafond"></div>
+  <div class="fotogroep">Basisarmaturen</div>
+  <div class="beeldrooster" id="fotoBasis"></div>
   <div class="fotogroep">Optieken</div>
   <div class="beeldrooster" id="fotoOptiek"></div>
   <div class="fotogroep">Aansluitingen</div>
   <div class="beeldrooster" id="fotoAansluiting"></div>
+  <div class="fotogroep">Plenum</div>
+  <div class="beeldrooster" id="fotoPlenum"></div>
   <div class="balk" style="margin:16px 0 0">
     <button class="knop" id="knBeeldOpslaan">Beeldbestand opslaan</button>
     <span class="leegmelding" id="fotoWaarschuwing"></span>
@@ -440,48 +459,118 @@ const OPTIEK_NIEUW = [
   {naam:'Lens Optiek Zwart UGR<19',     f:0.90, en:'Lens Black'},
 ];
 
-/* Aansluitingen. Welke lijst geldt hangt af van de sturing: geschakeld en
-   pushdim lopen over drie aders, DALI en 1-10V hebben stuuraders erbij. */
-const AANSLUITING = {
-  aanuit:[
-    'Kaal',
-    'Eurosteker snoer 1m', 'Eurosteker snoer 2m', 'Eurosteker snoer 3m',
-    'RA-steker snoer 1m', 'RA-steker snoer 2m', 'RA-steker snoer 3m',
-    'GST18-3 male chassis', 'GST18-3 male chassis + splitter', 'GST18-3 male + female chassis',
-    'GST18-3 male snoer 1m', 'GST18-3 male snoer 2m', 'GST18-3 male snoer 3m',
-  ],
-  dali:[
-    'Kaal',
-    'Eurosteker snoer 1m + kaal', 'Eurosteker snoer 2m + kaal', 'Eurosteker snoer 3m + kaal',
-    'RA-steker snoer 1m + kaal', 'RA-steker snoer 2m + kaal', 'RA-steker snoer 3m + kaal',
-    'GST18-5 male chassis', 'GST18-5 male chassis + splitter', 'GST18-5 male + female chassis',
-    'GST18-5 male snoer 1m', 'GST18-5 male snoer 2m', 'GST18-5 male snoer 3m',
-    'GST18-3 male chassis + kaal', 'GST18-3 male chassis + splitter + kaal',
-    'GST18-3 male + female chassis + kaal',
-    'GST18-3 male snoer 1m + kaal', 'GST18-3 male snoer 2m + kaal', 'GST18-3 male snoer 3m + kaal',
-    'GST18-3 male + BST14 chassis',
-  ],
+/* ======================= de nieuwe opzet (november 2026) =======================
+   De binnendienst zette in een lijst wat er nog in de configurator moest
+   (docs/bronnen/bandraster_lijst.xlsx): andere plafondtypes, vier basisarmaturen met
+   een tabel van strookmaten, en bij sturing, aansluiting, sensor, nood en plenum een
+   reeks vervolgvragen. Die lijst vervangt de keuzes van het oude werkboek (de
+   gebruiker, 9 november: "vervangen"). Wat er nog niet in staat - de strookmaten van
+   EU (Opaal/Microprismatisch), wattage en lumen per familie, de foto's - volgt via
+   R&D, Quenn en Elise en Rob, en staat hier als "volgt", nooit als een gok. */
+
+/* Plafondtypes: Standaard of Special. Special staat in de tool en in de RFQ (de
+   fabrikant moet het weten), niet op het productblad voor de klant. "Gypsun" in de
+   lijst is Gypsum. */
+const PLAFONDTYPE = [
+  {naam:'Lay-On Ceiling',          soort:'Standaard', en:'Lay-On Ceiling'},
+  {naam:'Opbouw',                  soort:'Standaard', en:'Surface-Mounted'},
+  {naam:'Clip-In Metal Ceiling',   soort:'Special',   en:'Clip-In Metal Ceiling'},
+  {naam:'Hook-Over Metal Ceiling', soort:'Special',   en:'Hook-Over Metal Ceiling'},
+  {naam:'Hook-On Metal Ceiling',   soort:'Special',   en:'Hook-On Metal Ceiling'},
+  {naam:'Lay-In Ceiling',          soort:'Special',   en:'Lay-In Ceiling'},
+  {naam:'Gypsum Board Ceiling',    soort:'Special',   en:'Gypsum Board Ceiling'},
+];
+
+/* De vier basisarmaturen ("optiek" in de lijst). De optiekkeuze daaronder blijft
+   (OPTIEK_NIEUW): de lichtberekening rekent met haar rendement. */
+const BASIS = [
+  {naam:'EU (Opaal/Microprismatisch)', en:'EU (Opal/Microprismatic)'},
+  {naam:'EU (Ledil)',                  en:'EU (Ledil)'},
+  {naam:'Flexcore',                    en:'Flexcore'},
+  {naam:'Optic',                       en:'Optic'},
+];
+
+/* "Bestaande lamp met afmetingen nieuw raster": per oude buis de strookmaten van het
+   alternatief. A is de breedte van een strook, B de lengte; meer buizen zijn meer
+   stroken naast elkaar in de breedte ("2x40mm"). De tabel kent de buizen alleen per
+   lengte: 60 cm (T8 18W, T5 14/24W), 90 cm (T5 21/39W), 120 cm (T8 36W, T5 28/54W) en
+   150 cm (T8 58W, T5 35/49/80W), en alleen de aantallen hieronder - een combinatie die
+   er niet in staat (3 x 36W, 2 x 21W) krijgt geen voorstel.
+   - EU (Opaal/Microprismatisch): de lijst laat A en B leeg; volgt via R&D.
+   - Flexcore: bij 3 en 4 buizen blijft het 2 stroken van 86 mm. 815 mm (90 cm) heeft
+     in de lijst de opmerking "R&D check".
+   - Optic: modules van 280 mm (7 leds), dus B is een veelvoud van 280.
+   minRuimte: "Minimale ruimte A is 30mm per kant" (EU Opaal en Flexcore; bij EU Ledil
+   en Optic staat er "??"). Of dat rond elke strook geldt of alleen aan de buitenkanten
+   is nog een vraag aan Quenn en Elise; voorlopig rond elke strook (strookRuimte()). */
+const LENGTEKLASSE = {
+  'TL8-18W':60, 'TL5-14W':60, 'TL5-24W':60,
+  'TL5-21W':90, 'TL5-39W':90,
+  'TL8-36W':120, 'TL5-28W':120, 'TL5-54W':120,
+  'TL8-58W':150, 'TL5-35W':150, 'TL5-49W':150, 'TL5-80W':150,
+};
+const STROOK_RIJEN = {60:[1, 2, 3, 4], 90:[1], 120:[1, 2], 150:[1, 2]};
+const STROOK = {
+  'EU (Opaal/Microprismatisch)': {a:null, b:null, minRuimte:30},
+  'EU (Ledil)': {a:40, b:{60:560, 90:840, 120:1140, 150:1445}, stroken:[0, 1, 2, 3, 4], minRuimte:null},
+  'Flexcore':   {a:86, b:{60:545, 90:815, 120:1068, 150:1395}, stroken:[0, 1, 2, 2, 2], minRuimte:30},
+  'Optic':      {a:40, b:{60:560, 90:840, 120:1120, 150:1400}, stroken:[0, 1, 2, 3, 4], minRuimte:null, module:280},
 };
 
+const MATEN_INDICATIEF = 'Deze afmetingen zijn indicatief en niet definitief. Na opdracht worden de definitieve afmetingen vastgelegd.';
+
 const STURING = [
-  {naam:'Aan-Uit',            groep:'aanuit', en:'On-Off'},
-  {naam:'Aan-Uit+Dipswitch',  groep:'aanuit', en:'On-Off + Dipswitch'},
-  {naam:'Pushdim-Switchdim',  groep:'aanuit', en:'Pushdim-Switchdim'},
-  {naam:'DALI',               groep:'dali',   en:'DALI'},
-  {naam:'1-10V',              groep:'dali',   en:'1-10V'},
+  {naam:'Aan-Uit',              en:'On-Off'},
+  {naam:'DALI',                 en:'DALI'},
+  {naam:'1-10V',                en:'1-10V'},
+  {naam:'PushDim',              en:'Push-dim'},
+  {naam:'Fase dimbaar',         en:'Phase-cut dimmable'},
+  {naam:'Draadloos Casambi',    en:'Wireless Casambi'},
+  {naam:'Draadloos Philips',    en:'Wireless Philips'},
+  {naam:'Halfdraadloos Helvar', en:'Semi-wireless Helvar'},
 ];
 
-const NOOD = [
-  {naam:'Geen Nood',                    en:'No'},
-  {naam:'Ja, 1 uur autotest',           en:'Yes, 1h Automatic'},
-  {naam:'Ja, 1 uur DALI autotest',      en:'Yes, 1h DALI Automatic'},
-  {naam:'Ja, 1 uur manuele test',       en:'Yes, 1h Manual'},
-  {naam:'Ja, 1 uur DALI manuele test',  en:'Yes, 1h DALI Manual'},
-  {naam:'Ja, 3 uur autotest',           en:'Yes, 3h Automatic'},
-  {naam:'Ja, 3 uur DALI autotest',      en:'Yes, 3h DALI Automatic'},
-  {naam:'Ja, 3 uur manuele test',       en:'Yes, 3h Manual'},
-  {naam:'Ja, 3 uur DALI manuele test',  en:'Yes, 3h DALI Manual'},
-];
+/* Vervolgvragen: een keuze met vragen die pas verschijnen bij een bepaald antwoord
+   ("Nee/Ja? > Geintegreerd/Extern? > ..." in de lijst). Elke stap is een eigen veld
+   in oud/nieuw, zodat het spiegelen naar rechts per veld blijft werken (rechts(),
+   volgt, ↺). Een stap die niet in beeld is, telt nergens mee. opties: [naam, Engels];
+   een stap zonder opties is een tekst- of getalveld. */
+const ANDERS = 'Anders:';
+const VERVOLG = {
+  aansluiting: [
+    {id:'aansluiting', opties:[['Geen (direct driver)', 'None (direct to driver)'], ['GST18i3 chassis', 'GST18i3 chassis'],
+      ['GST18i4 chassis', 'GST18i4 chassis'], ['GST18i5 chassis', 'GST18i5 chassis'],
+      ['Stekerbaar', 'Plug-in'], ['Snoer', 'Cord']]},
+    {id:'aansluitMerk', label:'Merk', opties:[['InstalinQ', 'InstalinQ'], ['Adels', 'Adels'], ['Wieland', 'Wieland'], [ANDERS, '']],
+      als: w => w('aansluiting')==='Stekerbaar'},
+    {id:'aansluitMerkAnders', label:'Merk', soort:'tekst', als: w => w('aansluiting')==='Stekerbaar' && w('aansluitMerk')===ANDERS},
+    {id:'aansluitAders', label:'Aders', opties:[['2', '2-pole'], ['3', '3-pole'], ['4', '4-pole'], ['5', '5-pole'], ['5+2 (BST)', '5+2-pole (BST)']],
+      als: w => w('aansluiting')==='Stekerbaar'},
+    {id:'aansluitBrandklasse', label:'Brandklasse', opties:[['Eca', 'Eca'], ['Dca', 'Dca'], ['Cca', 'Cca'], ['B2ca', 'B2ca']],
+      als: w => w('aansluiting')==='Stekerbaar'},
+    {id:'aansluitSnoer', label:'Steker', opties:[['Schuko', 'Schuko plug'], ['Eurosnoer', 'Euro plug']],
+      als: w => w('aansluiting')==='Snoer'},
+    {id:'aansluitLengte', label:'Lengte', soort:'getal', eenheid:'m', als: w => w('aansluiting')==='Snoer'},
+  ],
+  sensor: [
+    {id:'sensor', opties:[['Nee', 'No'], ['Ja', 'Yes']]},
+    {id:'sensorPlaats', label:'Plaats', opties:[['Geïntegreerd', 'integrated'], ['Extern', 'external']], als: w => w('sensor')==='Ja'},
+    {id:'sensorVerbinding', label:'Verbinding', opties:[['Bedraad', 'wired'], ['Draadloos', 'wireless']], als: w => w('sensor')==='Ja'},
+    {id:'sensorSoort', label:'Soort', opties:[['Beweging', 'motion'], ['Daglicht', 'daylight'], ['Beweging + daglicht', 'motion + daylight']],
+      als: w => w('sensor')==='Ja'},
+  ],
+  nood: [
+    {id:'nood', opties:[['Geen', 'No'], ['Centraal', 'Central battery'], ['Decentraal', 'Self-contained']]},
+    {id:'noodTest', label:'Test', opties:[['Manueel', 'manual test'], ['Autotest', 'self-test']], als: w => /^(Centraal|Decentraal)$/.test(w('nood'))},
+    {id:'noodDuur', label:'Duur', opties:[['1 uur', '1h'], ['3 uur', '3h']], als: w => /^(Centraal|Decentraal)$/.test(w('nood'))},
+    {id:'noodDali', label:'DALI', opties:[['Nee', ''], ['Ja', 'DALI']], als: w => /^(Centraal|Decentraal)$/.test(w('nood'))},
+  ],
+  plenum: [
+    {id:'plenum', opties:[['Nee', 'No'], ['Ja', 'Yes']]},
+    {id:'plenumSoort', label:'Uitvoering', opties:[['Standaard', 'standard'], ['Special', 'special']], als: w => w('plenum')==='Ja'},
+    {id:'plenumSpecial', label:'Special', soort:'tekst', als: w => w('plenum')==='Ja' && w('plenumSoort')==='Special'},
+  ],
+};
 
 const MONTAGE = [
   {naam:'Inbouw', en:'Recessed'},
@@ -490,15 +579,9 @@ const MONTAGE = [
   {naam:'Pendel', en:'Pendant'},
 ];
 
-const SENSOR = [
-  {naam:'Geen Sensor',     en:'No'},
-  {naam:'Sensor Daglicht', en:'Daylight'},
-  {naam:'Sensor Beweging', en:'Movement'},
-];
-
 const LIJST = {
   projecttype:  ['Renovatie', 'Nieuwbouw'],
-  plafondtype:  ['Systeemplafond', 'Bandrasterplafond', 'Klimaatplafond', 'Baffle Plafond', 'Anders:'],
+  plafondtype:  PLAFONDTYPE.map(p=>p.naam).concat(ANDERS),
   montage:      MONTAGE.map(m=>m.naam),
   kleurtemp:    ['2700K', '3000K', '4000K', '6500K'],
   cri:          ['80+', '90+'],
@@ -507,11 +590,8 @@ const LIJST = {
   optiekOud:    OPTIEK_OUD.map(o=>o.naam),
   optiekNieuw:  OPTIEK_NIEUW.map(o=>o.naam),
   armatuurkleur:['Wit (RAL 9016)', 'Zwart (RAL 9005)', 'Anders (RAL)'],
-  sturing:      STURING.map(s=>s.naam),
-  nood:         NOOD.map(n=>n.naam),
-  sensor:       SENSOR.map(s=>s.naam),
-  ventilatie:   ['Nee', 'Ja'],
-  basis:        ['Optic bandraster', 'Flexcore bandraster', 'Anders:'],
+  sturing:      STURING.map(s=>s.naam).concat(ANDERS),
+  basis:        BASIS.map(b=>b.naam).concat(ANDERS),
 };
 
 /* Vertaaltabellen voor de RFQ; die gaat naar de fabrikant en is Engelstalig,
@@ -519,7 +599,6 @@ const LIJST = {
 const zoekEn = (tabel, naam) => { const r = tabel.find(x=>x.naam===naam); return r ? r.en : (naam||''); };
 const EN_KLEURTEMP = k => k || '';
 const EN_CRI = c => c==='80+' ? 'CRI 80' : c==='90+' ? 'CRI 90' : '';
-const EN_JANEE = v => v==='Ja' ? 'Yes' : v==='Nee' ? 'No' : '';
 
 /* ======================= foto's bij optiek en aansluiting =======================
    In de Excel stonden bij de optieken en bij de aansluitingen kleine renders in
@@ -534,10 +613,12 @@ const EN_JANEE = v => v==='Ja' ? 'Yes' : v==='Nee' ? 'No' : '';
    node tools/maak-bandraster-beelden.mjs. De kaart "Foto's" onderaan de pagina kan
    het ook schrijven, voor een foto die niet in het werkboek staat. Ontbreekt het
    bestand, dan werkt de tool gewoon door en blijven de vakken leeg. */
-const BEELDEN = {
-  optiek:      Object.assign({}, (window.BANDRASTER_BEELDEN || {}).optiek      || {}),
-  aansluiting: Object.assign({}, (window.BANDRASTER_BEELDEN || {}).aansluiting || {}),
-};
+/* Sinds november 2026 ook bij het plafondtype, de basisarmatuur en het plenum - voorlopig
+   de afbeeldingen uit de lijst van de binnendienst (docs/bronnen/bandraster_lijst.xlsx),
+   tot de foto's van Rob er zijn. */
+const BEELD_SOORTEN = ['plafond', 'basis', 'optiek', 'aansluiting', 'plenum'];
+const BEELDEN = {};
+BEELD_SOORTEN.forEach(s => { BEELDEN[s] = Object.assign({}, (window.BANDRASTER_BEELDEN || {})[s] || {}); });
 let beeldenGewijzigd = false;
 
 /* Gezocht wordt op de naam zelf. De DALI-lijst herhaalt de aansluitingen van de
@@ -568,9 +649,16 @@ function fotoNamen(namen){
   });
   return uit;
 }
+/* De foto bij een aansluiting hangt aan aansluitFotoNaam(): per keuze, per steker van
+   een snoer en per merk van een stekerbare oplossing. */
+const AANSLUIT_FOTOS = ['Geen (direct driver)', 'GST18i3 chassis', 'GST18i4 chassis', 'GST18i5 chassis',
+  'Stekerbaar InstalinQ', 'Stekerbaar Adels', 'Stekerbaar Wieland', 'Snoer Schuko', 'Snoer Eurosnoer'];
 const FOTO_GROEPEN = [
+  {soort:'plafond',     vak:'fotoPlafond',     namen: PLAFONDTYPE.map(p=>p.naam)},
+  {soort:'basis',       vak:'fotoBasis',       namen: BASIS.map(b=>b.naam)},
   {soort:'optiek',      vak:'fotoOptiek',      namen: fotoNamen(LIJST.optiekOud.concat(LIJST.optiekNieuw))},
-  {soort:'aansluiting', vak:'fotoAansluiting', namen: fotoNamen(AANSLUITING.aanuit.concat(AANSLUITING.dali))},
+  {soort:'aansluiting', vak:'fotoAansluiting', namen: AANSLUIT_FOTOS},
+  {soort:'plenum',      vak:'fotoPlenum',      namen: ['Standaard', 'Special']},
 ];
 
 /* Het duimnagelbeeld onder een keuzelijst in het intakeformulier. Is er geen
@@ -619,9 +707,11 @@ function tekenFotos(){
   teller.className = 'status ' + (gevuld === totaal ? 'ok' : 'mist');
   teller.textContent = gevuld + ' van ' + totaal;
   $('fotoUitleg').textContent = window.BANDRASTER_BEELDEN
-    ? 'Deze foto’s komen uit de celafbeeldingen van Bandraster_Intake_Nieuw_V3.xlsx ' +
-      '(node tools/maak-bandraster-beelden.mjs). Klik een vak om er een te vervangen of ' +
-      'toe te voegen, of klik het aan en plak met Ctrl+V, en sla het beeldbestand daarna op.'
+    ? 'De optieken komen uit Bandraster_Intake_Nieuw_V3.xlsx; plafondtypes, basisarmaturen, ' +
+      'plenum en een paar aansluitingen zijn voorlopig, uit de lijst van de binnendienst - de ' +
+      'echte foto’s volgen (node tools/maak-bandraster-beelden.mjs). Klik een vak om er ' +
+      'een te vervangen of toe te voegen, of klik het aan en plak met Ctrl+V, en sla het ' +
+      'beeldbestand daarna op.'
     : 'bandraster-beelden.js is niet geladen, dus er zijn nog geen foto’s. Draai ' +
       'node tools/maak-bandraster-beelden.mjs om ze uit het werkboek te halen, of vul de ' +
       'vakken hieronder en sla het beeldbestand op in de hoofdmap.';
@@ -714,19 +804,17 @@ function schrijfBeeldbestand(){
       .map(function(k){ return '      ' + JSON.stringify(k) + ': b.' + nummer(tabel[k]); })
       .join(',\n');
   };
-  const optiek = blok(BEELDEN.optiek), aansluiting = blok(BEELDEN.aansluiting);
+  const blokken = BEELD_SOORTEN.map(function(s){ return '    ' + s + ': {\n' + blok(BEELDEN[s]) + '\n    }'; });
   const inhoud =
-    "/* Foto's bij de optieken en de aansluitingen van bandrasters.html - geschreven\n" +
-    " * door de tool zelf (de kaart \"Foto's\" onderaan de pagina). Zet dit bestand in\n" +
-    " * de hoofdmap naast bandrasters.html. Losse beeldbestanden kunnen niet: vanaf\n" +
-    " * schijf mag de browser die niet uitlezen, en dan komen ze een PDF nooit in. */\n" +
+    "/* Foto's bij plafondtype, basisarmatuur, optiek, aansluiting en plenum van\n" +
+    " * bandrasters.html - geschreven door de tool zelf (de kaart \"Foto's\" onderaan de\n" +
+    " * pagina). Zet dit bestand in de hoofdmap naast bandrasters.html. Losse beeldbestanden\n" +
+    " * kunnen niet: vanaf schijf mag de browser die niet uitlezen, en dan komen ze een PDF\n" +
+    " * nooit in. */\n" +
     "(function(){\n  var b = {\n" +
     uris.map(function(uri, i){ return '    b' + (i+1) + ': ' + JSON.stringify(uri); }).join(',\n') +
     "\n  };\n" +
-    "  window.BANDRASTER_BEELDEN = {\n" +
-    "    optiek: {\n"      + optiek      + "\n    },\n" +
-    "    aansluiting: {\n" + aansluiting + "\n    }\n" +
-    "  };\n})();\n";
+    "  window.BANDRASTER_BEELDEN = {\n" + blokken.join(',\n') + "\n  };\n})();\n";
   download('bandraster-beelden.js', inhoud, 'text/javascript');
   beeldenGewijzigd = false;
   tekenFotos();
@@ -737,22 +825,28 @@ function schrijfBeeldbestand(){
    RFQ-regels). "Voeg toe aan RFQ-lijst" schuift het concept de lijst in; een
    regel terugklikken laadt hem weer in het formulier. */
 
+/* Elke stap van de vervolgvragen een leeg veld (aansluiting, aansluitMerk, ...). */
+function vervolgLeeg(){
+  const o = {};
+  Object.keys(VERVOLG).forEach(k => VERVOLG[k].forEach(s => { o[s.id] = ''; }));
+  return o;
+}
 function leegConcept(){
   return {
     omschrijving:'',
     bestekcode:'',
-    oud:{
+    oud: Object.assign({
       lengte:'', breedte:'', hoogte:'', plafondtype:'', plafondAnders:'', montage:'',
       kleurtemp:'', cri:'', lichtbron:'', aantalLb:'1', optiek:'', kleur:'', kleurRal:'',
-      sturing:'', aansluiting:'', nood:'', sensor:'', ventilatie:'', extras:'', aantal:'',
-    },
-    nieuw:{
+      sturing:'', sturingAnders:'', extras:'', aantal:'',
+    }, vervolgLeeg()),
+    nieuw: Object.assign({
       lengte:'', breedte:'', hoogte:'', plafondtype:'', plafondAnders:'', montage:'',
       kleurtemp:'', cri:'', optiek:'', kleur:'', kleurRal:'',
-      sturing:'', aansluiting:'', nood:'', sensor:'', ventilatie:'', extras:'', aantal:'',
-      basis:'Optic bandraster', basisAnders:'', lichtvlakken:[leegLichtvlak()],
+      sturing:'', sturingAnders:'', extras:'', aantal:'',
+      basis:'Optic', basisAnders:'', stroken:'', lichtvlakken:[leegLichtvlak()],
       productcode:'', prijs:'',
-    },
+    }, vervolgLeeg()),
     /* Per veld-id: staat false zodra de rechterkant bewust afwijkt van links.
        Ontbreekt de sleutel, dan volgt rechts links - zoals de Excel dat met
        =IF(ISBLANK(B14),"",B14) deed, maar hier te doorbreken. */
@@ -818,13 +912,58 @@ function herstelConcept(c){
   nieuw.lichtvlakken = (nieuw.lichtvlakken||[])
     .map(v => ({l:String(v&&v.l||''), b:String(v&&v.b||''), x:String(v&&v.x||''), y:String(v&&v.y||'')}));
   if(!nieuw.lichtvlakken.length) nieuw.lichtvlakken = [leegLichtvlak()];
+  const oud = Object.assign(leeg.oud, c.oud||{});
+  const volgt = Object.assign({}, c.volgt||{});
+  herstelKeuzes(oud); herstelKeuzes(nieuw);
+  /* Was de rechterkant van een oude keuze losgeknipt, dan hoort wat daaruit is omgezet
+     ook bij rechts: elke stap van die vervolgvraag wordt dan los. */
+  if('ventilatie' in volgt){ if(volgt.ventilatie===false) volgt.plenum = false; delete volgt.ventilatie; }
+  Object.keys(VERVOLG).forEach(k => {
+    if(volgt[k]===false) VERVOLG[k].forEach(s => { volgt[s.id] = false; });
+  });
   return {
     omschrijving: c.omschrijving||'',
     bestekcode:   c.bestekcode||'',
-    oud:   Object.assign(leeg.oud,   c.oud||{}),
+    oud:   oud,
     nieuw: nieuw,
-    volgt: Object.assign({},         c.volgt||{}),
+    volgt: volgt,
   };
+}
+/* Een project van voor de nieuwe opzet (november 2026) heeft de keuzes van het oude
+   werkboek. Omgezet wordt wat eenduidig is; de rest blijft zichtbaar - als "Anders:"
+   met de oude naam, of als "was: ..." bij de vervolgvraag (<id>Was), die dan als niet
+   ingevuld telt en dus niet stil de RFQ in gaat. Werkt op het oud- of nieuw-object
+   zelf, en laat een project in de nieuwe opzet ongemoeid. */
+function herstelKeuzes(z){
+  let m;
+  if(z.basis==='Optic bandraster') z.basis = 'Optic';
+  if(z.basis==='Flexcore bandraster') z.basis = 'Flexcore';
+  if(['Systeemplafond', 'Bandrasterplafond', 'Klimaatplafond', 'Baffle Plafond'].indexOf(z.plafondtype) >= 0){
+    z.plafondAnders = z.plafondtype; z.plafondtype = ANDERS;
+  }
+  if(z.sturing==='Pushdim-Switchdim') z.sturing = 'PushDim';
+  if(z.sturing==='Aan-Uit+Dipswitch'){ z.sturingAnders = z.sturing; z.sturing = ANDERS; }
+  const a = z.aansluiting;
+  if(a && !VERVOLG.aansluiting[0].opties.some(o => o[0]===a)){
+    if(a==='Kaal') z.aansluiting = 'Geen (direct driver)';
+    else if((m = /^GST18-([35]) male chassis$/.exec(a))) z.aansluiting = 'GST18i' + m[1] + ' chassis';
+    else if((m = /^(Eurosteker|RA-steker) snoer (\d+)m$/.exec(a))){
+      z.aansluiting = 'Snoer'; z.aansluitSnoer = m[1]==='RA-steker' ? 'Schuko' : 'Eurosnoer'; z.aansluitLengte = m[2];
+    }
+    else { z.aansluitingWas = a; z.aansluiting = ''; }
+  }
+  if(z.sensor==='Geen Sensor') z.sensor = 'Nee';
+  else if((m = /^Sensor (Daglicht|Beweging)$/.exec(z.sensor||''))){ z.sensor = 'Ja'; z.sensorSoort = m[1]; }
+  if(z.nood==='Geen Nood') z.nood = 'Geen';
+  else if((m = /^Ja, ([13]) uur (DALI )?(autotest|manuele test)$/.exec(z.nood||''))){
+    /* centraal of decentraal zei de oude lijst niet: die blijft open */
+    z.noodWas = z.nood; z.nood = '';
+    z.noodTest = m[3]==='autotest' ? 'Autotest' : 'Manueel'; z.noodDuur = m[1] + ' uur'; z.noodDali = m[2] ? 'Ja' : 'Nee';
+  }
+  if('ventilatie' in z){
+    if(!z.plenum && (z.ventilatie==='Ja' || z.ventilatie==='Nee')) z.plenum = z.ventilatie;
+    delete z.ventilatie;
+  }
 }
 
 /* ======================= lezen en rekenen ======================= */
@@ -853,6 +992,8 @@ const RAND = 15;
 function leegLichtvlak(){ return {l:'', b:'', x:'', y:''}; }
 
 function lichtvlakken(c){
+  const v = strookVoorstel(c);
+  if(!v.reden) return strookVlakken(c, v);
   const L = getal(rechts(c,'lengte')), B = getal(rechts(c,'breedte'));
   const lijst = (c.nieuw.lichtvlakken && c.nieuw.lichtvlakken.length)
     ? c.nieuw.lichtvlakken : [leegLichtvlak()];
@@ -879,6 +1020,34 @@ function lichtvlakken(c){
     });
     if(loop!=null) loop += (m.l||0) + gat;
   }
+  return uit;
+}
+
+/* Stroken uit de strooktabel (strookVoorstel()): n vlakken van A x B, naast elkaar in
+   de breedte, elk midden in de lengte, met gelijke tussenruimtes - zo liggen de oude
+   buizen ook. Wat getypt of gesleept is wint, net als hierboven; vlakken in de lijst
+   voorbij n tellen niet mee. */
+function strookVlakken(c, v){
+  const L = getal(rechts(c,'lengte')), B = getal(rechts(c,'breedte'));
+  const lijst = c.nieuw.lichtvlakken || [];
+  const maten = [];
+  for(let i = 0; i < v.n; i++){
+    const e = lijst[i] || {};
+    maten.push({l: getal(e.l)!=null ? getal(e.l) : v.b, b: getal(e.b)!=null ? getal(e.b) : v.a, e: e});
+  }
+  const som = maten.reduce((t,m) => t + m.b, 0);
+  const gat = B==null ? null : (B - som) / (v.n + 1);
+  const uit = [];
+  let loop = gat;
+  maten.forEach(function(m){
+    const eigenX = getal(m.e.x), eigenY = getal(m.e.y);
+    uit.push({
+      l: m.l, b: m.b,
+      x: eigenX!=null ? eigenX : (L==null ? null : (L - m.l) / 2),
+      y: eigenY!=null ? eigenY : loop,
+    });
+    if(loop!=null) loop += m.b + gat;
+  });
   return uit;
 }
 
@@ -934,53 +1103,161 @@ function lumenNieuw(c){
   return Math.round(w*eff*f/10)*10;
 }
 
-/* Welke aansluitlijst hoort bij de gekozen sturing. */
-function aansluitGroep(sturing){ const s = STURING.find(x=>x.naam===sturing); return s ? s.groep : null; }
-function aansluitLijst(sturing){ const g = aansluitGroep(sturing); return g ? AANSLUITING[g] : []; }
+/* ---- vervolgvragen lezen ----
+   w is een lezer, id -> waarde: links c.oud[id], rechts rechts(c, id). */
+const lezerLinks  = c => id => c.oud[id];
+const lezerRechts = c => id => rechts(c, id);
+function zichtbareStappen(stappen, w){ return stappen.filter(s => !s.als || s.als(w)); }
+/* Wat er van een vervolgvraag nog open staat: alleen de stappen die in beeld zijn. */
+function vervolgMist(rijId, w){
+  return zichtbareStappen(VERVOLG[rijId], w)
+    .filter(s => String(w(s.id)==null ? '' : w(s.id)).trim()==='')
+    .map(s => s.label ? rijId + ': ' + s.label.toLowerCase() : rijId);
+}
+/* De naam bij een keuze, in het Engels voor de RFQ (opties: [naam, Engels]). */
+function stapEn(stap, waarde){
+  const o = (stap.opties || []).find(x => x[0]===waarde);
+  return o ? o[1] : String(waarde || '');
+}
+const stap = (rijId, id) => VERVOLG[rijId].find(s => s.id===id);
+
+/* Leesbare tekst voor het productblad (Nederlands) en de RFQ (Engels). Wat nog niet
+   is ingevuld valt weg; niets ingevuld geeft ''. */
+function aansluitTekst(w, engels){
+  const a = w('aansluiting');
+  if(!a) return '';
+  if(a==='Stekerbaar'){
+    const merk = w('aansluitMerk')===ANDERS ? String(w('aansluitMerkAnders')||'').trim() : (w('aansluitMerk')||'');
+    const aders = w('aansluitAders'), bk = w('aansluitBrandklasse');
+    const delen = [engels ? 'Plug-in' : 'Stekerbaar'];
+    if(merk) delen.push(merk);
+    if(aders) delen.push(engels ? stapEn(stap('aansluiting','aansluitAders'), aders) : aders + ' aders');
+    if(bk) delen.push((engels ? 'fire class ' : 'brandklasse ') + bk);
+    return delen.join(', ');
+  }
+  if(a==='Snoer'){
+    const s = w('aansluitSnoer'), l = getal(w('aansluitLengte'));
+    const delen = [engels ? 'Cord' : 'Snoer'];
+    if(s) delen.push(engels ? stapEn(stap('aansluiting','aansluitSnoer'), s) : s);
+    if(l!=null) delen.push((engels ? String(l) : String(l).replace('.', ',')) + ' m');
+    return delen.join(', ');
+  }
+  return engels ? stapEn(VERVOLG.aansluiting[0], a) : a;
+}
+function sensorTekst(w, engels){
+  const s = w('sensor');
+  if(!s) return '';
+  if(s==='Nee') return engels ? 'No' : 'Geen';
+  const delen = [engels ? 'Yes' : 'Ja'];
+  ['sensorPlaats', 'sensorVerbinding', 'sensorSoort'].forEach(id => {
+    const v = w(id);
+    if(v) delen.push(engels ? stapEn(stap('sensor', id), v) : v.toLowerCase());
+  });
+  return delen.join(', ');
+}
+function noodTekst(w, engels){
+  const n = w('nood');
+  if(!n) return '';
+  if(n==='Geen') return engels ? 'No' : 'Geen';
+  const delen = [engels ? stapEn(VERVOLG.nood[0], n) : n];
+  ['noodTest', 'noodDuur'].forEach(id => {
+    const v = w(id);
+    if(v) delen.push(engels ? stapEn(stap('nood', id), v) : v.toLowerCase());
+  });
+  if(w('noodDali')==='Ja') delen.push('DALI');
+  return delen.join(', ');
+}
+function plenumTekst(w, engels){
+  const p = w('plenum');
+  if(!p) return '';
+  if(p==='Nee') return engels ? 'No' : 'Nee';
+  const soort = w('plenumSoort'), wat = String(w('plenumSpecial')||'').trim();
+  let tekst = engels ? 'Yes' : 'Ja';
+  if(soort) tekst += ', ' + (engels ? stapEn(stap('plenum','plenumSoort'), soort) : soort.toLowerCase());
+  if(soort==='Special' && wat) tekst += ': ' + wat;
+  return tekst;
+}
+function sturingNaam(w, engels){
+  const s = w('sturing');
+  if(s===ANDERS) return String(w('sturingAnders')||'').trim();
+  return engels ? zoekEn(STURING, s) : (s || '');
+}
+/* Het plafondtype; metSoort zet er "(special)" achter, voor de tool en de RFQ. */
+function plafondTekst(w, engels, metSoort){
+  const p = w('plafondtype');
+  if(p===ANDERS) return String(w('plafondAnders')||'').trim();
+  const r = PLAFONDTYPE.find(x => x.naam===p);
+  if(!r) return p || '';
+  return (engels ? r.en : r.naam) + (metSoort && r.soort==='Special' ? ' (special)' : '');
+}
+
+/* ---- stroken ----
+   Wat de tabel voorstelt voor het alternatief: de basisarmatuur (rechts) bij de
+   bestaande lamp (links). {a, b, n, nTabel} of, als er geen voorstel is, {reden}. Het
+   aantal stroken mag kleiner dan wat de tabel zegt: "Kunnen 2/3/4 oude T8/T5 in een
+   strook zijn" (c.nieuw.stroken; leeg = volgens de tabel). */
+function strookVoorstel(c){
+  const basis = c.nieuw.basis, fam = STROOK[basis];
+  if(!fam) return {reden: basis ? 'geen strooktabel voor deze basisarmatuur' : 'kies een basisarmatuur'};
+  if(fam.a==null) return {reden:'strookmaten van ' + basis + ' volgen via R&D'};
+  const klasse = LENGTEKLASSE[c.oud.lichtbron], buizen = getal(c.oud.aantalLb);
+  if(!klasse || !buizen) return {reden:'kies eerst de bestaande lamp'};
+  if((STROOK_RIJEN[klasse] || []).indexOf(buizen) < 0)
+    return {reden: buizen + ' × ' + c.oud.lichtbron + ' staat niet in de strooktabel'};
+  const nTabel = fam.stroken[buizen], gekozen = getal(c.nieuw.stroken);
+  const n = (gekozen!=null && gekozen >= 1 && gekozen <= nTabel) ? Math.round(gekozen) : nTabel;
+  return {a:fam.a, b:fam.b[klasse], n:n, nTabel:nTabel, klasse:klasse, buizen:buizen};
+}
+/* Passen de stroken in de breedte, met de minimale ruimte rond elke strook (30 mm bij
+   EU Opaal en Flexcore)? null als er niets te controleren valt: geen voorstel, geen
+   breedte, of geen regel voor deze basisarmatuur (EU Ledil en Optic: "??"). */
+function strookRuimte(c){
+  const fam = STROOK[c.nieuw.basis], B = getal(rechts(c,'breedte'));
+  if(!fam || !fam.minRuimte || B==null || strookVoorstel(c).reden) return null;
+  const vlakken = lichtvlakken(c);
+  const nodig = vlakken.reduce((t,f) => t + (f.b || 0), 0) + (vlakken.length + 1) * fam.minRuimte;
+  return {past: B >= nodig, nodig: nodig, breedte: B, ruimte: fam.minRuimte, n: vlakken.length};
+}
 
 const VERPLICHT_OUD   = ['lengte','breedte','hoogte','plafondtype','montage','kleurtemp','cri',
-                         'lichtbron','aantalLb','optiek','kleur','sturing','aansluiting',
-                         'nood','sensor','ventilatie','aantal'];
+                         'lichtbron','aantalLb','optiek','kleur','sturing','aantal'];
 const VERPLICHT_NIEUW = ['lengte','breedte','hoogte','plafondtype','montage','kleurtemp','cri',
-                         'optiek','kleur','sturing','aansluiting','nood','sensor','ventilatie',
-                         'aantal','basis'];
+                         'optiek','kleur','sturing','aantal','basis'];
+/* Velden met een "Anders:" waarvan de tekst dan ook ingevuld moet zijn. */
+const ANDERS_VELDEN = [['plafondtype', 'plafondAnders'], ['sturing', 'sturingAnders']];
 
-/* De aansluitlijst hangt van de sturing af. Een aansluiting die niet in de lijst
-   van de gekozen sturing staat kan de fabrikant niet leveren; die telt daarom als
-   niet ingevuld, ook al staat er iets. Zo glipt hij niet stil de RFQ in nadat de
-   sturing is gewijzigd of een ouder project is heropend. */
-function aansluitingKlopt(sturing, aansluiting){
-  if(!aansluiting) return true;
-  return aansluitLijst(sturing).indexOf(aansluiting) >= 0;
-}
 function ontbreektOud(c){
+  const w = lezerLinks(c);
   const mist = VERPLICHT_OUD.filter(id => String(c.oud[id]||'').trim()==='');
+  ANDERS_VELDEN.forEach(([id, tekst]) => { if(w(id)===ANDERS && !String(w(tekst)||'').trim()) mist.push(id + ': anders'); });
+  Object.keys(VERVOLG).forEach(id => mist.push(...vervolgMist(id, w)));
   if(lumenOud(c)==null) mist.push('lichtopbrengst');
-  if(!aansluitingKlopt(c.oud.sturing, c.oud.aansluiting)) mist.push('aansluiting past niet bij de sturing');
   return mist;
 }
 function ontbreektNieuw(c){
+  const w = lezerRechts(c);
   const mist = VERPLICHT_NIEUW.filter(id => {
     const v = (id==='basis' || id==='optiek') ? c.nieuw[id] : rechts(c, id);
     return String(v||'').trim()==='';
   });
+  ANDERS_VELDEN.forEach(([id, tekst]) => { if(w(id)===ANDERS && !String(w(tekst)||'').trim()) mist.push(id + ': anders'); });
+  Object.keys(VERVOLG).forEach(id => mist.push(...vervolgMist(id, w)));
   if(lumenNieuw(c)==null) mist.push('lichtopbrengst');
-  if(!aansluitingKlopt(rechts(c,'sturing'), rechts(c,'aansluiting'))) mist.push('aansluiting past niet bij de sturing');
   return mist;
 }
 function compleet(c){ return ontbreektOud(c).length===0 && ontbreektNieuw(c).length===0; }
 
 /* De naam van het alternatief zoals hij op het productblad en in de RFQ staat. */
 function basisNaam(c){
-  return c.nieuw.basis==='Anders:' ? (c.nieuw.basisAnders||'Bandrasterarmatuur') : (c.nieuw.basis||'Bandrasterarmatuur');
+  return c.nieuw.basis===ANDERS ? (c.nieuw.basisAnders||'Bandrasterarmatuur') : (c.nieuw.basis||'Bandrasterarmatuur');
 }
+function basisEn(c){ return c.nieuw.basis===ANDERS ? basisNaam(c) : zoekEn(BASIS, basisNaam(c)); }
 function kleurNaam(k, ral){ return k==='Anders (RAL)' ? ('RAL '+(ral||'').replace(/^RAL\s*/i,'')) : (k||''); }
 function ralNummer(k, ral){
   if(k==='Wit (RAL 9016)') return '9016';
   if(k==='Zwart (RAL 9005)') return '9005';
   return String(ral||'').replace(/^RAL\s*/i,'').trim();
 }
-function plafondNaam(p, anders){ return p==='Anders:' ? (anders||'') : (p||''); }
 
 /* Eén regel die het alternatief samenvat; gebruikt als omschrijving in de RFQ en
    als ondertitel op het productblad. */
@@ -994,7 +1271,8 @@ function omschrijving(c){
   if(rechts(c,'kleurtemp')) delen.push(rechts(c,'kleurtemp'));
   if(rechts(c,'cri')) delen.push('CRI '+rechts(c,'cri'));
   if(c.nieuw.optiek) delen.push(c.nieuw.optiek);
-  if(rechts(c,'sturing')) delen.push(rechts(c,'sturing'));
+  const st = sturingNaam(lezerRechts(c), false);
+  if(st) delen.push(st);
   const kl=kleurNaam(rechts(c,'kleur'), rechts(c,'kleurRal'));
   if(kl) delen.push(kl);
   return delen.join(' | ');
@@ -1008,22 +1286,24 @@ const RIJEN = [
   {id:'lengte',      label:'Lengte',          soort:'maat'},
   {id:'breedte',     label:'Breedte',         soort:'maat'},
   {id:'hoogte',      label:'Hoogte',          soort:'maat'},
-  {id:'plafondtype', label:'Plafondtype',     soort:'keuze', lijst:'plafondtype',   anders:'plafondAnders', andersBij:'Anders:'},
+  {id:'plafondtype', label:'Plafondtype',     soort:'keuze', lijst:'plafondtype',   anders:'plafondAnders', andersBij:ANDERS, foto:'plafond'},
   {id:'montage',     label:'Installatie',     soort:'keuze', lijst:'montage'},
   {id:'kleurtemp',   label:'Lichtkleur',      soort:'keuze', lijst:'kleurtemp'},
   {id:'cri',         label:'CRI',             soort:'keuze', lijst:'cri'},
+  /* De basisarmatuur staat boven de lamp: samen bepalen ze de stroken uit de tabel. */
+  {id:'basis',       label:'Basisarmatuur',   soort:'rechtsKeuze', lijst:'basis', anders:'basisAnders', andersBij:ANDERS, foto:'basis'},
   {id:'lamp',        label:'Bestaande lamp',  soort:'lamp'},
+  {id:'stroken',     label:'Aantal stroken',  soort:'stroken'},
   {id:'optiek',      label:'Optiek',          soort:'optiek'},
   {id:'lumen',       label:'Lichtopbrengst',  soort:'lumen'},
   {id:'kleur',       label:'Kleur armatuur',  soort:'keuze', lijst:'armatuurkleur', anders:'kleurRal',      andersBij:'Anders (RAL)'},
-  {id:'sturing',     label:'Sturing',         soort:'keuze', lijst:'sturing'},
-  {id:'aansluiting', label:'Aansluiting',     soort:'aansluiting'},
-  {id:'nood',        label:'Nood',            soort:'keuze', lijst:'nood'},
-  {id:'sensor',      label:'Sensor',          soort:'keuze', lijst:'sensor'},
-  {id:'ventilatie',  label:'Plenumafzuiging', soort:'keuze', lijst:'ventilatie'},
+  {id:'sturing',     label:'Sturing',         soort:'keuze', lijst:'sturing',       anders:'sturingAnders', andersBij:ANDERS},
+  {id:'aansluiting', label:'Aansluiting',     soort:'vervolg'},
+  {id:'nood',        label:'Nood',            soort:'vervolg'},
+  {id:'sensor',      label:'Sensor',          soort:'vervolg'},
+  {id:'plenum',      label:'Plenum',          soort:'vervolg'},
   {id:'extras',      label:"Extra's",         soort:'tekst'},
   {id:'aantal',      label:'Aantallen',       soort:'aantal'},
-  {id:'basis',       label:'Basisarmatuur',   soort:'rechtsKeuze', lijst:'basis', anders:'basisAnders', andersBij:'Anders:'},
   {id:'productcode', label:'Product code',    soort:'rechtsTekst', plaats:'wordt door de fabrikant bevestigd'},
   {id:'prijs',       label:'Unit price',      soort:'rechtsTekst', plaats:'leeg laten = fabrikant vult in'},
 ];
@@ -1039,11 +1319,10 @@ function keuzeveld(opties, waarde, bij){
   s.appendChild(new Option('—', ''));
   opties.forEach(o => s.appendChild(new Option(o, o)));
   s.value = waarde==null ? '' : waarde;
-  /* Staat er een waarde in die niet (meer) in de lijst voorkomt - bijvoorbeeld
-     een aansluiting die bij de nieuwe sturing niet bestaat - dan laten we hem
+  /* Staat er een waarde in die niet (meer) in de lijst voorkomt, dan laten we hem
      zien in plaats van hem stilletjes leeg te maken. */
   if(waarde && s.value!==waarde){
-    s.appendChild(new Option(waarde+'  (past niet bij de sturing)', waarde));
+    s.appendChild(new Option(waarde+'  (staat niet meer in de lijst)', waarde));
     s.value = waarde;
   }
   s.addEventListener('change', ()=>bij(s.value));
@@ -1123,6 +1402,8 @@ function tekenIntake(){
         if(rij.anders && c.oud[rij.id]===rij.andersBij){
           links.appendChild(tekstveld(c.oud[rij.anders], v=>zetLinks({id:rij.anders}, v), {plaats:'Anders…'}));
         }
+        if(rij.id==='plafondtype') specialLabel(links, c.oud.plafondtype);
+        if(rij.foto) fotoBij(links, rij.foto, c.oud[rij.id]);
         break;
       }
       case 'lamp': {
@@ -1140,11 +1421,8 @@ function tekenIntake(){
         AFGELEID.lumenOud = berekendVak(lumenOud(c), '', 'Gegevens ontbreken');
         links.appendChild(metEenheid(AFGELEID.lumenOud, 'lm'));
         break;
-      case 'aansluiting':
-        links.appendChild(keuzeveld(aansluitLijst(c.oud.sturing), c.oud.aansluiting,
-          v=>zetLinks({id:'aansluiting'}, v, true)));
-        if(!c.oud.sturing) links.appendChild(el('div', 'eh', 'kies eerst een sturing'));
-        fotoBij(links, 'aansluiting', c.oud.aansluiting);
+      case 'vervolg':
+        tekenVervolg(links, rij, 'links', c);
         break;
       case 'tekst':
         links.appendChild(tekstveld(c.oud[rij.id], v=>zetLinks(rij, v)));
@@ -1165,17 +1443,23 @@ function tekenIntake(){
         break;
       case 'keuze': {
         rechtsCel.appendChild(metReset(spiegel(rij.id,
-          keuzeveld(LIJST[rij.lijst], rechts(c, rij.id), v=>{ zetRechts(c, rij.id, v); naSturing(rij); tekenAlles(); })),
+          keuzeveld(LIJST[rij.lijst], rechts(c, rij.id), v=>{ zetRechts(c, rij.id, v); tekenAlles(); })),
           c, rij.id));
         if(rij.anders && rechts(c, rij.id)===rij.andersBij){
           rechtsCel.appendChild(spiegel(rij.anders, tekstveld(rechts(c, rij.anders),
             v=>{ zetRechts(c, rij.anders, v); ververs(); }, {plaats:'Anders…'})));
         }
+        if(rij.id==='plafondtype') specialLabel(rechtsCel, rechts(c, 'plafondtype'));
+        if(rij.foto) fotoBij(rechtsCel, rij.foto, rechts(c, rij.id));
         break;
       }
       case 'lamp':
         AFGELEID.watt = berekendVak(wattNieuw(c), '', 'Gegevens ontbreken');
         rechtsCel.appendChild(metEenheid(AFGELEID.watt, 'W'));
+        rechtsCel.appendChild(el('div', 'eh indicatief', 'indicatief — wattage en lumen per basisarmatuur volgen via R&D'));
+        break;
+      case 'stroken':
+        tekenStroken(rechtsCel, c);
         break;
       case 'optiek':
         rechtsCel.appendChild(keuzeveld(LIJST.optiekNieuw, c.nieuw.optiek, v=>{ c.nieuw.optiek=v; tekenAlles(); }));
@@ -1185,12 +1469,8 @@ function tekenIntake(){
         AFGELEID.lumenNieuw = berekendVak(lumenNieuw(c), '', 'Gegevens ontbreken');
         rechtsCel.appendChild(metEenheid(AFGELEID.lumenNieuw, 'lm'));
         break;
-      case 'aansluiting':
-        rechtsCel.appendChild(metReset(
-          keuzeveld(aansluitLijst(rechts(c,'sturing')), rechts(c,'aansluiting'),
-            v=>{ zetRechts(c, 'aansluiting', v); tekenAlles(); }),
-          c, 'aansluiting'));
-        fotoBij(rechtsCel, 'aansluiting', rechts(c, 'aansluiting'));
+      case 'vervolg':
+        tekenVervolg(rechtsCel, rij, 'rechts', c);
         break;
       case 'tekst':
         rechtsCel.appendChild(metReset(
@@ -1201,6 +1481,7 @@ function tekenIntake(){
         if(rij.anders && c.nieuw[rij.id]===rij.andersBij){
           rechtsCel.appendChild(tekstveld(c.nieuw[rij.anders], v=>{ c.nieuw[rij.anders]=v; ververs(); }, {plaats:'Anders…'}));
         }
+        if(rij.foto) fotoBij(rechtsCel, rij.foto, c.nieuw[rij.id]);
         break;
       }
       case 'rechtsTekst':
@@ -1238,17 +1519,22 @@ function tekenLichtvlakken(){
   vak.textContent = '';
   vak.className = 'lv';
   AFGELEID.lichtvlakken = [];
-  lijst.forEach((vlak, i) => {
+  /* Stroken uit de tabel: het aantal komt uit "Aantal stroken", dus hier geen knoppen om
+     er een bij te zetten of weg te halen. */
+  const strook = strookVoorstel(c);
+  if(!strook.reden) while(lijst.length < strook.n) lijst.push(leegLichtvlak());
+  const getoond = strook.reden ? lijst : lijst.slice(0, strook.n);
+  getoond.forEach((vlak, i) => {
     const blok = el('div', 'lvblok');
     const kop = el('div', 'lvkop');
-    kop.appendChild(el('span', null, 'Lichtvlak ' + (i+1)));
+    kop.appendChild(el('span', null, (strook.reden ? 'Lichtvlak ' : 'Strook ') + (i+1)));
     const knoppen = el('div', 'lvknoppen');
     const midden = el('button', 'mini', 'centreren');
     midden.type = 'button';
     midden.title = 'Terug naar de plek die de tool zelf uitrekent';
     midden.addEventListener('click', function(){ vlak.x = ''; vlak.y = ''; tekenAlles(); });
     knoppen.appendChild(midden);
-    if(lijst.length > 1){
+    if(strook.reden && lijst.length > 1){
       const weg = el('button', 'mini', '×');
       weg.type = 'button';
       weg.title = 'Dit lichtvlak weghalen';
@@ -1272,10 +1558,41 @@ function tekenLichtvlakken(){
     vak.appendChild(blok);
   });
 
-  const bij = el('button', 'mini', '+ lichtvlak');
-  bij.type = 'button';
-  bij.addEventListener('click', function(){ lijst.push(leegLichtvlak()); tekenAlles(); });
-  vak.appendChild(bij);
+  if(strook.reden){
+    const bij = el('button', 'mini', '+ lichtvlak');
+    bij.type = 'button';
+    bij.addEventListener('click', function(){ lijst.push(leegLichtvlak()); tekenAlles(); });
+    vak.appendChild(bij);
+  }
+  /* Wat de lijst van de binnendienst bij de maten zegt, en de controle op de ruimte
+     rond de stroken. De tekst wordt in ververs() bijgewerkt (de breedte kan veranderen
+     zonder dat het raster opnieuw wordt opgebouwd). */
+  vak.appendChild(el('div', 'lvnoot', ''));
+}
+/* De regels onder de lichtvlakvelden. */
+function lichtvlakNoot(c){
+  const regels = [], v = strookVoorstel(c), fam = STROOK[c.nieuw.basis];
+  if(!v.reden){
+    regels.push({t:'Strookmaten uit de tabel: ' + v.n + ' × ' + v.a + ' × ' + v.b + ' mm (' + v.buizen + ' × '
+      + c.oud.lichtbron + ', ' + v.klasse + ' cm).'});
+    if(c.nieuw.basis==='Flexcore' && v.klasse===90) regels.push({t:'815 mm staat in de lijst met "R&D check".'});
+  } else if(fam) regels.push({t:v.reden.charAt(0).toUpperCase() + v.reden.slice(1) + '.'});
+  if(fam && fam.module) regels.push({t:c.nieuw.basis + ': modules van ' + fam.module + ' mm (7 leds).'});
+  if(fam && !v.reden){
+    const r = strookRuimte(c);
+    if(r && !r.past) regels.push({t:r.n + (r.n===1 ? ' strook vraagt' : ' stroken vragen') + ' met ' + r.ruimte
+      + ' mm rond elke strook minstens ' + Math.ceil(r.nodig) + ' mm breedte; het armatuur is ' + r.breedte + ' mm.', fout:true});
+    else if(fam.minRuimte) regels.push({t:'Minimaal ' + fam.minRuimte + ' mm rond elke strook (voorlopig, nog te bevestigen).'});
+    else regels.push({t:'De minimale ruimte rond de stroken volgt via R&D.'});
+  }
+  regels.push({t:MATEN_INDICATIEF});
+  return regels;
+}
+function vulLichtvlakNoot(c){
+  const vak = document.querySelector('#lichtvlakvelden .lvnoot');
+  if(!vak) return;
+  vak.textContent = '';
+  lichtvlakNoot(c).forEach(r => vak.appendChild(el('p', r.fout ? 'fout' : null, r.t)));
 }
 
 /* Links wijzigen; de rechterkant die nog meeloopt volgt vanzelf omdat rechts()
@@ -1284,23 +1601,73 @@ function tekenLichtvlakken(){
 function zetLinks(rij, waarde, hertekenen){
   const c = P.concept;
   c.oud[rij.id] = waarde;
-  if(rij.id==='sturing') naSturingLinks();
-  if(hertekenen || rij.id==='sturing') tekenAlles();
+  if(hertekenen) tekenAlles();
   else { spiegelNaarRechts(rij.id); ververs(); }
 }
 
-/* Wisselt de sturing van groep, dan bestaat de gekozen aansluiting misschien niet
-   meer. Hem laten staan zou een aansluiting de RFQ in sturen die de fabrikant
-   niet kan leveren, dus die maken we leeg. */
-function naSturingLinks(){
-  const c = P.concept;
-  if(c.oud.aansluiting && aansluitLijst(c.oud.sturing).indexOf(c.oud.aansluiting) < 0) c.oud.aansluiting = '';
+/* Een vervolgvraag in een cel: de eerste keuze, en daaronder alleen de stappen die bij
+   het antwoord horen, elk met een klein label ervoor. Links schrijft in c.oud; rechts
+   kan elke stap los van links, met zijn eigen ↺. Een keuze tekent het raster opnieuw
+   (er kunnen stappen bij komen of weg gaan), tikken in een tekstveld niet - dan raak je
+   de cursor kwijt. Staat de eerste keuze nog open en had een oud project hier iets dat
+   niet in de nieuwe lijst past, dan staat dat eronder ("was: ..."). */
+function tekenVervolg(cel, rij, kant, c){
+  const stappen = VERVOLG[rij.id], w = kant==='links' ? lezerLinks(c) : lezerRechts(c);
+  const zet = function(id, v, opnieuw){
+    if(kant==='links') c.oud[id] = v; else zetRechts(c, id, v);
+    if(opnieuw) tekenAlles();
+    else { if(kant==='links') spiegelNaarRechts(id); ververs(); }
+  };
+  zichtbareStappen(stappen, w).forEach(function(s, i){
+    let veld;
+    if(s.opties) veld = keuzeveld(s.opties.map(o => o[0]), w(s.id), v => zet(s.id, v, true));
+    else {
+      veld = tekstveld(w(s.id), v => zet(s.id, v, false),
+        {getal: s.soort==='getal', step: s.soort==='getal' ? '0.5' : undefined, plaats: s.label + '…'});
+      if(kant==='rechts') spiegel(s.id, veld);
+    }
+    let blok = s.eenheid ? metEenheid(veld, s.eenheid) : veld;
+    if(kant==='rechts') blok = metReset(blok, c, s.id);
+    if(i===0){ cel.appendChild(blok); return; }
+    const regel = el('div', 'stap');
+    regel.appendChild(el('span', 'stl', s.label));
+    regel.appendChild(blok);
+    cel.appendChild(regel);
+  });
+  const eerste = stappen[0].id;
+  if(!w(eerste)){
+    const was = kant==='links' || volgtLinks(c, eerste) ? c.oud[eerste + 'Was'] : c.nieuw[eerste + 'Was'];
+    if(was) cel.appendChild(el('div', 'eh was', 'was: ' + was + ' — kies opnieuw'));
+  }
+  if(rij.id==='aansluiting') fotoBij(cel, 'aansluiting', aansluitFotoNaam(w));
+  if(rij.id==='plenum' && w('plenum')==='Ja') fotoBij(cel, 'plenum', w('plenumSoort'));
 }
-function naSturing(rij){
-  if(rij.id!=='sturing') return;
-  const c = P.concept;
-  const huidig = rechts(c, 'aansluiting');
-  if(huidig && aansluitLijst(rechts(c,'sturing')).indexOf(huidig) < 0) zetRechts(c, 'aansluiting', '');
+/* Een plafondtype dat de lijst Special noemt, krijgt dat label naast de keuze. */
+function specialLabel(cel, naam){
+  const r = PLAFONDTYPE.find(p => p.naam===naam);
+  if(r && r.soort==='Special') cel.appendChild(el('span', 'special', 'Special'));
+}
+/* Het aantal stroken: standaard wat de tabel zegt, kleiner mag (meer oude buizen in
+   één strook). Zonder voorstel staat er waarom. */
+function tekenStroken(cel, c){
+  const v = strookVoorstel(c);
+  if(v.reden){ cel.className += ' leeg'; cel.appendChild(el('div', 'eh', v.reden)); return; }
+  const s = el('select');
+  s.appendChild(new Option('volgens de tabel (' + v.nTabel + ')', ''));
+  for(let n = 1; n <= v.nTabel; n++) s.appendChild(new Option(String(n), String(n)));
+  s.value = getal(c.nieuw.stroken)!=null && getal(c.nieuw.stroken) <= v.nTabel ? String(Math.round(getal(c.nieuw.stroken))) : '';
+  s.addEventListener('change', function(){ c.nieuw.stroken = s.value; tekenAlles(); });
+  cel.appendChild(s);
+  cel.appendChild(el('div', 'eh', v.n + (v.n===1 ? ' strook' : ' stroken') + ' van ' + v.a + ' × ' + v.b + ' mm'
+    + (v.n < v.buizen ? ' — ' + v.buizen + ' oude buizen in ' + v.n : '')));
+}
+/* De foto bij een aansluiting: per keuze, bij een snoer per steker en bij een
+   stekerbare oplossing per merk. */
+function aansluitFotoNaam(w){
+  const a = w('aansluiting');
+  if(a==='Snoer') return w('aansluitSnoer') ? 'Snoer ' + w('aansluitSnoer') : '';
+  if(a==='Stekerbaar') return w('aansluitMerk') && w('aansluitMerk')!==ANDERS ? 'Stekerbaar ' + w('aansluitMerk') : '';
+  return a || '';
 }
 /* Bij tikken in een links tekstveld hoeft het hele raster niet opnieuw; alleen het
    rechterveld dat meeloopt krijgt de nieuwe waarde. */
@@ -1342,12 +1709,18 @@ function figuurVormen(c, bx, by, korps){
      het een maatketen, en die heeft een strook extra nodig. */
   const middenIn = v => Math.abs(v.x - (L-v.l)/2) < 0.5 && Math.abs(v.y - (B-v.b)/2) < 0.5;
   const simpel = vlakken.length === 1 && middenIn(vlakken[0]);
+  /* Stroken naast elkaar in de breedte (de strooktabel): ze overlappen elkaar allemaal in
+     de lengte. Dan komt er rechts van het bovenaanzicht een maatketen over de breedte
+     (rand, strook, tussenruimte, strook, rand) en schuift de totale breedte een kolom op;
+     de losse maten vanaf de bovenkant vervallen, want die staan dan in de keten. */
+  const naastElkaar = vlakken.length > 1 &&
+    vlakken.every(f => vlakken.every(g => f.x < g.x + g.l - 0.5 && g.x < f.x + f.l - 0.5));
 
   /* Boven het bovenaanzicht staat de aanzichtnaam, tussen de twee aanzichten de
      maatlijn van het lichtvlak plus de naam van het zijaanzicht, en onderaan de
      lengtemaat. Die drie stroken tellen mee in de hoogte, anders lopen tekst en
      maatlijnen door elkaar bij een plat armatuur. */
-  const padL=10, padR=58, padT=16, padB=8, gat=(simpel?44:58), onderMaat=30, pijl=3.4;
+  const padL=10, padR=(naastElkaar?92:58), padT=16, padB=8, gat=(simpel?44:58), onderMaat=30, pijl=3.4;
   const breed = bx - padL - padR;
   const hoog  = by - padT - padB - gat - onderMaat;
   const s  = Math.min(breed/L, hoog/(B+Hg));
@@ -1409,9 +1782,12 @@ function figuurVormen(c, bx, by, korps){
        Zo staan de maten en de plekken in één lijn en telt alles op tot de lengte.
        Een segment dat te smal is voor zijn getal krijgt alleen de pijlen - beter
        geen getal dan twee getallen over elkaar. */
-    const grenzen = [0];
-    vlakken.slice().sort((a,b)=>a.x-b.x).forEach(f => grenzen.push(f.x, f.x+f.l));
-    grenzen.push(L);
+    /* De grenzen op volgorde en elk één keer: zo geeft een rij stroken die op dezelfde
+       plek in de lengte liggen één keten, en blijft het voor vlakken achter elkaar
+       hetzelfde als altijd. */
+    const uniek = lijst => lijst.slice().sort((a,b)=>a-b)
+      .reduce((u, g) => { if(!u.length || g - u[u.length-1] > 0.5) u.push(g); return u; }, []);
+    const grenzen = uniek([0, L].concat(...vlakken.map(f => [f.x, f.x+f.l])));
     for(let i=0; i+1<grenzen.length; i++){
       const a = grenzen[i], b = grenzen[i+1];
       if(b - a < 0.01) continue;
@@ -1426,7 +1802,15 @@ function figuurVormen(c, bx, by, korps){
     /* De plek vanaf de bovenkant: een korte maatlijn binnen het bovenaanzicht, bij
        het vlak zelf. Elk vlak staat op zijn eigen x, dus die lijnen komen elkaar
        niet tegen. Ligt een vlak tegen de bovenrand, dan valt er niets te maten. */
-    vlakken.forEach(function(f){
+    if(naastElkaar){
+      const yGrenzen = uniek([0, B].concat(...vlakken.map(f => [f.y, f.y+f.b])));
+      for(let i=0; i+1<yGrenzen.length; i++){
+        const a = yGrenzen[i], b = yGrenzen[i+1];
+        if(b - a < 0.01) continue;
+        /* het getal alleen als er een regel tekst in het segment past */
+        vertikaal(y0+a*s, y0+b*s, x0+bw+13, x0+bw, (b-a)*s >= 1.1*(korps||10) ? maat(b-a) : '');
+      }
+    } else vlakken.forEach(function(f){
       if(f.y < 0.5) return;
       const xv = x0 + f.x*s + 7;
       vertikaal(y0, y0 + f.y*s, xv, xv, maat(f.y), {binnen:true});
@@ -1436,7 +1820,7 @@ function figuurVormen(c, bx, by, korps){
   }
   horizontaal(x0, x0+bw, y1+zh+16, y1+zh, maat(L)+' mm');
   const xM = x0 + bw + 13;
-  vertikaal(y0, y0+bh, xM, x0+bw, maat(B)+' mm');
+  vertikaal(y0, y0+bh, xM + (naastElkaar ? 34 : 0), x0+bw, maat(B)+' mm');
   vertikaal(y1, y1+zh, xM, x0+bw, maat(Hg)+' mm');
 
   /* aanzichtnamen */
@@ -1589,6 +1973,8 @@ function ververs(){
       if(velden[naam].value !== (opgeslagen[naam]||'')) velden[naam].value = opgeslagen[naam]||'';
     });
   });
+
+  vulLichtvlakNoot(c);
 
   const mistO = ontbreektOud(c), mistN = ontbreektNieuw(c);
   zetStatus($('statusOud'),   mistO, 'Bestaand');
@@ -1797,20 +2183,24 @@ function uriBytes(uri){
 /* De groepen van het blad. Volgorde en indeling zijn het beginpunt; welke velden
    er uiteindelijk op horen te staan wordt per specificatie nog doorgenomen. */
 function bladGroepen(c){
-  const w = wattNieuw(c), lmN = lumenNieuw(c);
+  const w = wattNieuw(c), lmN = lumenNieuw(c), r = lezerRechts(c);
+  const maten = [rechts(c,'lengte'), rechts(c,'breedte'), rechts(c,'hoogte')].some(v => String(v||'').trim());
   return [
     {kop:'Algemeen', rijen:[
       ['Uitvoering',       basisNaam(c)],
-      ['Plafondtype',      plafondNaam(rechts(c,'plafondtype'), rechts(c,'plafondAnders'))],
+      ['Plafondtype',      plafondTekst(r, false, false)],
       ['Installatie',      rechts(c,'montage')],
       ['Kleur behuizing',  kleurNaam(rechts(c,'kleur'), rechts(c,'kleurRal'))],
-      ['Plenumafzuiging',  rechts(c,'ventilatie')],
+      ['Plenum',           plenumTekst(r, false)],
     ]},
     {kop:'Afmetingen', rijen:[
       ['Lengte',    mm(rechts(c,'lengte'))],
       ['Breedte',   mm(rechts(c,'breedte'))],
       ['Hoogte',    mm(rechts(c,'hoogte'))],
       ['Lichtvlak', lichtvlakTekst(c, '×', ' mm')],
+      /* "Deze afmetingen zijn indicatief en niet definitief" - zo staat het in de lijst
+         van de binnendienst, bij de strookmaten */
+      ['Opmerking', maten ? MATEN_INDICATIEF : ''],
     ]},
     {kop:'Lichttechniek', rijen:[
       ['Lichtkleur',            rechts(c,'kleurtemp')],
@@ -1820,10 +2210,10 @@ function bladGroepen(c){
       ['Vermogen',              w==null ? '' : w+' W'],
     ]},
     {kop:'Elektrisch', rijen:[
-      ['Sturing',          rechts(c,'sturing')],
-      ['Aansluiting',      rechts(c,'aansluiting')],
-      ['Noodverlichting',  rechts(c,'nood')],
-      ['Sensor',           rechts(c,'sensor')],
+      ['Sturing',          sturingNaam(r, false)],
+      ['Aansluiting',      aansluitTekst(r, false)],
+      ['Noodverlichting',  noodTekst(r, false)],
+      ['Sensor',           sensorTekst(r, false)],
       ["Extra's",          rechts(c,'extras')],
     ]},
   ];
@@ -1942,8 +2332,8 @@ async function bouwProductblad(c){
      komt er een pagina bij - liever een lege onderkant dan een foto over de
      gegevens heen. */
   const fotos = [
-    ['Optiek',      c.nieuw.optiek,           beeldVoor('optiek', c.nieuw.optiek)],
-    ['Aansluiting', rechts(c, 'aansluiting'), beeldVoor('aansluiting', rechts(c, 'aansluiting'))],
+    ['Optiek',      c.nieuw.optiek,                       beeldVoor('optiek', c.nieuw.optiek)],
+    ['Aansluiting', aansluitTekst(lezerRechts(c), false), beeldVoor('aansluiting', aansluitFotoNaam(lezerRechts(c)))],
   ].filter(f => f[2]);
   if(fotos.length){
     const blokH = M.foto.h + M.foto.naBeeld + M.rij;
@@ -1982,9 +2372,11 @@ async function bouwProductblad(c){
    connectorbenaming is in elke taal hetzelfde). */
 
 function rfqVelden(c){
+  const r = lezerRechts(c);
   return [
     ['Type',                zoekEn(MONTAGE, rechts(c,'montage'))],
-    ['Base',                basisNaam(c)],
+    ['Base',                basisEn(c)],
+    ['Ceiling type',        plafondTekst(r, true, true)],
     ['Length (mm)',         rechts(c,'lengte')],
     ['Width (mm)',          rechts(c,'breedte')],
     ['Height (mm)',         rechts(c,'hoogte')],
@@ -1994,12 +2386,12 @@ function rfqVelden(c){
     ['Optics',              zoekEn(OPTIEK_NIEUW, c.nieuw.optiek)],
     ['Kelvin colortemp',    EN_KLEURTEMP(rechts(c,'kleurtemp'))],
     ['CRI (Ra)',            EN_CRI(rechts(c,'cri'))],
-    ['Dimming',             zoekEn(STURING, rechts(c,'sturing'))],
-    ['Emergency',           zoekEn(NOOD, rechts(c,'nood'))],
-    ['Connector',           rechts(c,'aansluiting')],
+    ['Dimming',             sturingNaam(r, true)],
+    ['Emergency',           noodTekst(r, true)],
+    ['Connector',           aansluitTekst(r, true)],
     ['RAL color housing',   ralNummer(rechts(c,'kleur'), rechts(c,'kleurRal'))],
-    ['Air slot',            EN_JANEE(rechts(c,'ventilatie'))],
-    ['Sensor',              zoekEn(SENSOR, rechts(c,'sensor'))],
+    ['Plenum',              plenumTekst(r, true)],
+    ['Sensor',              sensorTekst(r, true)],
     ['Remarks',             rechts(c,'extras')],
   ];
 }
@@ -2161,10 +2553,10 @@ function cel(kol, rij, waarde, stijl){
   return '<c r="' + r + '"' + s + ' t="inlineStr"><is><t xml:space="preserve">' + xmlTekst(waarde) + '</t></is></c>';
 }
 
-const XLSX_KOLOMMEN = ['Quantity', 'Product Code', 'Unit Price', 'Description', 'Type', 'Base',
+const XLSX_KOLOMMEN = ['Quantity', 'Product Code', 'Unit Price', 'Description', 'Type', 'Base', 'Ceiling type',
   'Length (mm)', 'Width (mm)', 'Height (mm)', 'Light aperture (mm)', 'Watt', 'Lumens', 'Optics',
   'Kelvin colortemp', 'CRI (Ra)', 'Dimming', 'Emergency', 'Connector', 'RAL color housing',
-  'Air slot', 'Sensor', 'Remarks'];
+  'Plenum', 'Sensor', 'Remarks'];
 
 function rfqXlsx(){
   const kop = rfqKop();
@@ -2190,17 +2582,17 @@ function rfqXlsx(){
       T(c.nieuw.productcode || ''),
       T(c.nieuw.prijs || ''),
       T(c.omschrijving || omschrijving(c)),
-      T(zoek('Type')), T(zoek('Base')),
+      T(zoek('Type')), T(zoek('Base')), T(zoek('Ceiling type')),
       T(num(zoek('Length (mm)'))), T(num(zoek('Width (mm)'))), T(num(zoek('Height (mm)'))),
       T(zoek('Light aperture (mm)')),
       T(num(zoek('Watt'))), T(num(zoek('Lumens'))),
       T(zoek('Optics')), T(zoek('Kelvin colortemp')), T(zoek('CRI (Ra)')), T(zoek('Dimming')),
       T(zoek('Emergency')), T(zoek('Connector')), T(zoek('RAL color housing')),
-      T(zoek('Air slot')), T(zoek('Sensor')), T(zoek('Remarks')),
+      T(zoek('Plenum')), T(zoek('Sensor')), T(zoek('Remarks')),
     ]);
   });
 
-  const breedtes = [10, 18, 12, 52, 14, 20, 12, 12, 12, 18, 8, 10, 26, 16, 10, 20, 22, 30, 18, 10, 16, 30];
+  const breedtes = [10, 18, 12, 52, 14, 24, 26, 12, 12, 12, 18, 8, 10, 26, 16, 10, 20, 30, 34, 18, 22, 30, 30];
   const cols = '<cols>' + breedtes.map(function(w, i){
     return '<col min="' + (i+1) + '" max="' + (i+1) + '" width="' + w + '" customWidth="1"/>';
   }).join('') + '</cols>';
@@ -2447,7 +2839,10 @@ $('figuur').addEventListener('pointerdown', function(e){
   const doel = e.target.closest ? e.target.closest('[data-vlak]') : null;
   if(!doel || !figuurKader) return;
   const i = +doel.getAttribute('data-vlak');
-  const vlak = P.concept.nieuw.lichtvlakken[i];
+  /* bij stroken uit de tabel kan de lijst korter zijn dan wat er getekend is */
+  const lijst = P.concept.nieuw.lichtvlakken;
+  while(lijst.length <= i && i < lichtvlakken(P.concept).length) lijst.push(leegLichtvlak());
+  const vlak = lijst[i];
   const nu = lichtvlakken(P.concept)[i];
   const punt = svgPunt(e);
   if(!vlak || !nu || !punt) return;
@@ -2503,7 +2898,10 @@ InfoTeken.zet($('figuurkop'), {
   tekst: 'Het lichtvlak is de uitsnede waar het licht uit komt. Een positie kan er ' +
          'meer dan een hebben, en ze hoeven niet in het midden te liggen.',
   lijst: [
-    'Een veld leeg laten betekent: de tool rekent het uit — 15 mm rand rondom, en bij ' +
+    'Kent de strooktabel de basisarmatuur en de bestaande lamp, dan stelt de tool de ' +
+      'stroken voor: hun maat, en naast elkaar in de breedte met gelijke tussenruimtes. ' +
+      'Het aantal kies je bij "Aantal stroken".',
+    'Anders betekent een leeg veld: de tool rekent het uit — 15 mm rand rondom, en bij ' +
       'meer vlakken de lengte gelijk verdeeld over de positie.',
     'Wat er dan uit komt staat grijs in het lege veld.',
     'In de tekening versleep je een vlak aan zijn pijlen: de horizontale verplaatst ' +
