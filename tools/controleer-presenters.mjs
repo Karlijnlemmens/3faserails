@@ -95,9 +95,9 @@ await pagina.evaluate((w)=>{ window.pdfjsLib.GlobalWorkerOptions.workerSrc = w; 
 
 /* Twee presenters met dezelfde inhoud die al bekend zijn en op het juiste blad wachten.
    Mag alleen korter worden: zodra het juiste blad er is, gaat het tweetal hier weg. */
-const BEKEND_DUBBEL = [
-  ['ag06', 'ag07'],   /* Orion (ag07) is een kopie van het Arda-blad (ag06), september 2026 */
-];
+/* Orion (ag07) was tot november 2026 een kopie van het Arda-blad (ag06); de gebruiker
+   leverde toen het echte Orion-blad aan, en het tweetal ging hier weg. */
+const BEKEND_DUBBEL = [];
 const inhoud = new Map();   /* sha1 van de presenterdata -> ids */
 
 const regels = [];
