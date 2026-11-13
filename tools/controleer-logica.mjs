@@ -18,6 +18,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { deflateRawSync } from 'node:zlib';
+import { runInNewContext } from 'node:vm';
 import { bladRijen } from './werkboek.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -833,6 +834,81 @@ function is(wat, gekregen, verwacht){
     [false, false, false, false, false]);
   is('de oude aansluiting die niet past telt als open, niet stil in de RFQ', m.ontbreektNieuw(h).includes('aansluiting'), true);
   is('nog een keer herstellen verandert niets', JSON.stringify(m.herstelConcept(h)), JSON.stringify(h));
+}
+
+/* ===================== bandrasters: de foto's bij de keuzes ===================== */
+{
+  /* Sinds 13 november 2026 staat de definitieve set foto's in bandraster-beelden.js, en is
+     de kaart "Foto's" uit de tool weg - en daarmee de teller die liet zien welke keuze nog
+     geen foto had. Dit neemt het over: elke naam waar het formulier een foto bij kan
+     tonen, tegen het beeldbestand, met de echte beeldVoor() van de tool. Wordt een keuze
+     hernoemd, dan is ze anders stil haar foto kwijt, en blijft de oude naam als wees in
+     het bestand staan. */
+  const venster = {};
+  runInNewContext(readFileSync(join(root, 'bandraster-beelden.js'), 'utf8'), {window: venster});
+  const beelden = venster.BANDRASTER_BEELDEN || {};
+  globalThis.__bandrasterBeelden = beelden;
+  const m = await laadUit('bandrasters.html',
+    ['ANDERS', 'VERVOLG', 'PLAFONDTYPE', 'BASIS', 'OPTIEK_OUD', 'OPTIEK_NIEUW', 'aansluitFotoNaam',
+     'fotoNaam', 'fotoSleutel', 'beeldVoor'],
+    'const BEELDEN = globalThis.__bandrasterBeelden;');
+  delete globalThis.__bandrasterBeelden;
+  console.log('\nbandrasters: de foto\'s bij de keuzes');
+
+  /* Waar het formulier om een foto vraagt (fotoBij): plafondtype, basisarmatuur, optiek
+     (oud en nieuw), aansluiting - de naam bouwt de tool zelf, per steker en per merk - en
+     de uitvoering van het plenum. */
+  const stap = (vraag, id) => m.VERVOLG[vraag].find(s => s.id === id).opties.map(o => o[0]).filter(o => o !== m.ANDERS);
+  const aansluiting = [];
+  for(const a of stap('aansluiting', 'aansluiting')){
+    const extra = a === 'Stekerbaar' ? stap('aansluiting', 'aansluitMerk').map(x => ({aansluitMerk:x}))
+                : a === 'Snoer'      ? stap('aansluiting', 'aansluitSnoer').map(x => ({aansluitSnoer:x})) : [{}];
+    extra.forEach(e => { const w = Object.assign({aansluiting:a}, e); aansluiting.push(m.aansluitFotoNaam(k => w[k])); });
+  }
+  const uniek = namen => namen.filter((n, i) => namen.findIndex(x => m.fotoSleutel(x) === m.fotoSleutel(n)) === i);
+  const vragen = {
+    plafond:     m.PLAFONDTYPE.map(p => p.naam),
+    basis:       m.BASIS.map(b => b.naam),
+    optiek:      uniek(m.OPTIEK_OUD.concat(m.OPTIEK_NIEUW).map(o => o.naam)),
+    aansluiting: uniek(aansluiting),
+    plenum:      stap('plenum', 'plenumSoort'),
+  };
+  const met = [], zonder = [];
+  for(const [soort, namen] of Object.entries(vragen))
+    for(const n of namen) (m.beeldVoor(soort, n) ? met : zonder).push(soort + ': ' + n);
+  /* Twee keuzes hebben geen foto, en zo is de set aangeleverd ("dit zijn de foto's zoals
+     ze zijn"): A-symmetrisch had er in het oude werkboek ook geen, en bij geen aansluiting
+     valt niets te zien. Deze lijst mag alleen korter worden, de ondergrens alleen omhoog. */
+  const ZONDER_FOTO = ['optiek: A-symmetrisch', 'aansluiting: Geen (direct driver)'];
+  is('elke keuze heeft een foto, op de twee bekende na', zonder.filter(n => !ZONDER_FOTO.includes(n)), []);
+  is('ten minste 31 van de ' + (met.length + zonder.length) + ' keuzes hebben een foto', met.length >= 31, true);
+  /* Andersom: elke foto hoort bij een keuze. */
+  const wezen = [];
+  for(const [soort, tabel] of Object.entries(beelden))
+    for(const k of Object.keys(tabel))
+      if(!(vragen[soort] || []).some(n => m.fotoSleutel(n) === m.fotoSleutel(k))) wezen.push(soort + ': ' + k);
+  is('elke foto in het beeldbestand hoort bij een keuze', wezen, []);
+  /* De PDF-laag sluit alleen jpeg en png in (sluitBeeldIn() in pdf-huisstijl.js; iets
+     anders valt stil van het productblad), en de set is op hoogstens 900 px gemaakt. */
+  const maat = buf => {
+    if(buf.length > 24 && buf.readUInt32BE(0) === 0x89504E47) return [buf.readUInt32BE(16), buf.readUInt32BE(20)];
+    if(buf[0] !== 0xFF || buf[1] !== 0xD8) return null;
+    for(let i = 2; i + 9 < buf.length;){
+      if(buf[i] !== 0xFF) return null;
+      const mk = buf[i + 1];
+      if(mk >= 0xC0 && mk <= 0xCF && ![0xC4, 0xC8, 0xCC].includes(mk)) return [buf.readUInt16BE(i + 7), buf.readUInt16BE(i + 5)];
+      i += 2 + buf.readUInt16BE(i + 2);
+    }
+    return null;
+  };
+  const vreemd = [];
+  for(const [soort, tabel] of Object.entries(beelden))
+    for(const [k, uri] of Object.entries(tabel)){
+      const x = /^data:image\/(jpeg|png);base64,([A-Za-z0-9+/=]+)$/.exec(uri);
+      const bw = x ? maat(Buffer.from(x[2], 'base64')) : null;
+      if(!bw || Math.max(...bw) > 900) vreemd.push(soort + ': ' + k + (bw ? ' ' + bw.join('x') : ' (geen jpeg of png)'));
+    }
+  is('elke foto is een jpeg of png van hoogstens 900 px', vreemd, []);
 }
 
 /* ======================= specificaties uitlezen ======================= */

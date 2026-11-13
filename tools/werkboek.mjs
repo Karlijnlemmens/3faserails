@@ -3,9 +3,10 @@
  *
  * Een xlsx is een zip met XML erin. Node heeft geen zipreader, maar meer dan de
  * centrale inhoudsopgave aflopen en per onderdeel inflateRaw draaien is het niet.
- * Gebruikt door maak-bandraster-beelden.mjs (de celafbeeldingen van de
- * bandraster-intake) en controleer-logica.mjs (de codeparen van de railtool tegen
- * docs/bronnen/PCODES LCODES.xlsx).
+ * Gebruikt door controleer-logica.mjs: de codeparen van de railtool tegen
+ * docs/bronnen/PCODES LCODES.xlsx en de strooktabel van de bandrastertool tegen
+ * docs/bronnen/bandraster_lijst.xlsx. (Tot november 2026 ook door
+ * maak-bandraster-beelden.mjs, dat de voorlopige foto's uit de werkboeken haalde.)
  */
 import { readFileSync } from 'node:fs';
 import { inflateRawSync } from 'node:zlib';
